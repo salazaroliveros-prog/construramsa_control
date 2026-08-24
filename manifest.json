@@ -1,0 +1,22 @@
+{
+  "name": "CONSTRURAMSA Control de Obra",
+  "short_name": "CONSTRURAMSA",
+  "description": "Sistema de control de gastos y gestión de obra para CONSTRURAMSA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090a0f",
+  "theme_color": "#090a0f",
+  "orientation": "portrait",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "finance"],
+  "lang": "es",
+  "dir": "ltr"
+}

@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONSTRURAMSA - Control de Obra</title>
+    <meta name="description" content="Sistema de control de gastos y gestión de obra para CONSTRURAMSA">
+    <meta name="theme-color" content="#090a0f">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            /* Paleta Construramsa */
+            --bg-principal: #090a0f;
+            --glass-bg: rgba(20, 24, 35, 0.45);
+            --glass-border: rgba(0, 164, 228, 0.15);
+            --glass-glow: rgba(111, 45, 189, 0.1);
+            
+            /* Colores de Acento */
+            --acento-cian: #00A4E4;
+            --acento-azul: #004B93;
+            --acento-purpura: #6F2DBD;
+            --texto-principal: #f3f4f6;
+            --texto-secundario: #9ca3af;
+            --exito: #10b981;
+            --alerta: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 75, 147, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(111, 45, 189, 0.15) 0px, transparent 50%);
+            color: var(--texto-principal);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .tarjeta-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: inset 0 0 12px var(--glass-glow);
+            transition: all 0.3s ease;
+        }
+
+        .tarjeta-glass:hover {
+            border-color: rgba(0, 164, 228, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 164, 228, 0.1);
+        }
+
+        input, select, textarea {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            padding: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--acento-cian);
+            outline: none;
+            box-shadow: 0 0 8px rgba(0, 164, 228, 0.4);
+        }
+
+        .btn-primario {
+            background: linear-gradient(135deg, var(--acento-azul), var(--acento-cian));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-primario:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secundario {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-secundario:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            max-height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--acento-cian);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .slogan {
+            font-size: 12px;
+            color: var(--acento-purpura);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--texto-secundario);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--acento-azul), var(--acento-cian));
+            color: white;
+            border-color: var(--acento-cian);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .module {
+            display: none;
+        }
+
+        .module.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: rgba(0, 164, 228, 0.1);
+            color: var(--acento-cian);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .saldo-positivo {
+            color: var(--exito);
+            font-weight: bold;
+        }
+
+        .saldo-negativo {
+            color: var(--alerta);
+            font-weight: bold;
+        }
+
+        /* Estilos específicos para impresión */
+        #plantilla-reporte-impresion {
+            display: none;
+            font-family: 'Arial', sans-serif;
+            color: #111827;
+            padding: 30px;
+            background: #ffffff;
+        }
+
+        #plantilla-reporte-impresion table.tabla-pdf {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        #plantilla-reporte-impresion table.tabla-pdf th {
+            background-color: #f3f4f6;
+            color: #111827;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 8px 10px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        #plantilla-reporte-impresion table.tabla-pdf td {
+            font-size: 11px;
+            padding: 8px 10px;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        #plantilla-reporte-impresion table.tabla-pdf tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .total-destacado {
+            font-weight: bold;
+            color: #004B93;
+            text-align: right;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-tabs {
+                justify-content: center;
+            }
+
+            .company-name {
+                font-size: 18px;
+            }
+        }
+
+        .config-section {
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .file-label:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header tarjeta-glass">
+            <div class="logo-container">
+                <img id="header-logo" class="logo-img" src="" alt="CONSTRURAMSA" style="display: none;">
+                <div>
+                    <h1 class="company-name">CONSTRURAMSA</h1>
+                    <p class="slogan">Soluciones en Ingeniería y Arquitectura</p>
+                </div>
+            </div>
+            <div class="config-section">
+                <label class="file-label">
+                    📷 Cargar Logo
+                    <input type="file" id="logo-input" class="file-input" accept="image/*">
+                </label>
+            </div>
+        </header>
+
+        <!-- Navegación -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-module="caja-chica">💰 Caja Chica</button>
+            <button class="nav-tab" data-module="maquinaria">🚜 Maquinaria</button>
+            <button class="nav-tab" data-module="personal">👷 Personal</button>
+            <button class="nav-tab" data-module="adquisiciones">📋 Adquisiciones</button>
+            <button class="nav-tab" data-module="reportes">📊 Reportes</button>
+            <button class="nav-tab" data-module="configuracion">⚙️ Configuración</button>
+        </nav>
+
+        <!-- Módulo Caja Chica -->
+        <div id="caja-chica" class="module active tarjeta-glass">
+            <h2 style="color: var(--acento-cian); margin-top: 0;">💰 Caja Chica e Insumos</h2>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background: rgba(0, 164, 228, 0.1); border-radius: 8px; border: 1px solid var(--acento-cian);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 14px;">Saldo Disponible:</span>
+                    <span id="saldo-caja-chica" class="saldo-positivo" style="font-size: 24px; font-weight: bold;">Q0.00</span>
+                </div>
+            </div>
+
+            <form id="form-caja-chica" style="margin-bottom: 25px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Tipo de Movimiento</label>
+                        <select id="caja-tipo" required>
+                            <option value="ingreso">Ingreso (Apertura/Fondo)</option>
+                            <option value="egreso">Egreso (Gasto)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Categoría</label>
+                        <select id="caja-categoria" required>
+                            <option value="apertura">Apertura de Caja</option>
+                            <option value="comida">Comida</option>
+                            <option value="ferreteria">Ferretería</option>
+                            <option value="imprevistos">Imprevistos</option>
+                            <option value="combustible">Combustible</option>
+                            <option value="materiales">Materiales</option>
+                            <option value="repuestos">Repuestos</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Descripción</label>
+                    <input type="text" id="caja-descripcion" placeholder="Descripción del movimiento" required>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Monto (Q)</label>
+                    <input type="number" step="0.01" id="caja-monto" required>
+                </div>
+                <button type="submit" class="btn-primario" style="width: 100%;">💾 Registrar Movimiento</button>
+            </form>
+
+            <h3 style="color: var(--texto-principal); font-size: 16px;">📜 Historial de Movimientos</h3>
+            <div style="overflow-x: auto;">
+                <table id="tabla-caja-chica">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Categoría</th>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-caja-chica-cuerpo">
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Módulo Maquinaria -->
+        <div id="maquinaria" class="module tarjeta-glass">
+            <h2 style="color: var(--acento-cian); margin-top: 0;">🚜 Control de Maquinaria y Flota</h2>
+            <p style="color: var(--texto-secundario); font-size: 13px;">Registra el uso, consumo de combustible y mantenimiento de las unidades.</p>
+            
+            <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Tipo de Unidad</label>
+                        <select id="maq-tipo" required>
+                            <option value="retroexcavadora">Retroexcavadora (Horas)</option>
+                            <option value="camion">Camión de Volteo (Km)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Código/Placa</label>
+                        <input type="text" id="maq-codigo" placeholder="Ej: RETRO-01" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label id="lbl-inicial">Horómetro/Odómetro Inicial</label>
+                        <input type="number" step="0.1" id="maq-val-inicial" required>
+                    </div>
+                    <div>
+                        <label id="lbl-final">Horómetro/Odómetro Final</label>
+                        <input type="number" step="0.1" id="maq-val-final" required>
+                    </div>
+                </div>
+                <span id="maq-error-uso" style="color: var(--alerta); font-size: 12px; display: block; margin-top: -10px; margin-bottom: 10px;"></span>
+
+                <h3 style="color: var(--acento-purpura); font-size: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">⛽ Combustible y Suministros</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Galones Suministrados</label>
+                        <input type="number" step="0.01" id="maq-galones" value="0">
+                    </div>
+                    <div>
+                        <label>Precio por Galón</label>
+                        <input type="number" step="0.01" id="maq-precio-galon" value="0">
+                    </div>
+                </div>
+
+                <h3 style="color: var(--acento-purpura); font-size: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">🔧 Mantenimiento y Repuestos</h3>
+                <div style="margin-bottom: 15px;">
+                    <label>Detalles del Mantenimiento / Piezas Cambiadas</label>
+                    <textarea id="maq-mantenimiento-detalles" rows="2" placeholder="Ej: Cambio de aceite hidráulico, filtro de motor..."></textarea>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label>Costo del Mantenimiento (Q)</label>
+                    <input type="number" step="0.01" id="maq-costo-mantenimiento" value="0">
+                </div>
+
+                <!-- PANEL DE CÁLCULO EN TIEMPO REAL -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--acento-cian); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px;">
+                    <div>Trabajado: <strong id="lbl-uso-total" style="color: var(--acento-cian);">0.00</strong></div>
+                    <div>Costo Combustible: <strong id="lbl-costo-combustible">Q0.00</strong></div>
+                    <div>Rendimiento: <strong id="lbl-rendimiento" style="color: var(--exito);">0.00</strong></div>
+                    <div>Gasto Total: <strong id="lbl-gasto-total" style="color: #fff; font-size: 14px;">Q0.00</strong></div>
+                </div>
+
+                <button type="submit" class="btn-primario" style="width: 100%;">💾 Guardar Registro de Maquinaria</button>
+            </form>
+
+            <h3 style="color: var(--texto-principal); font-size: 16px; margin-top: 25px;">📜 Historial de Maquinaria</h3>
+            <div style="overflow-x: auto;">
+                <table id="tabla-maquinaria">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Unidad</th>
+                            <th>Código</th>
+                            <th>Trabajado</th>
+                            <th>Combustible</th>
+                            <th>Rendimiento</th>
+                            <th>Gasto Total</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-maquinaria-cuerpo">
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Módulo Personal -->
+        <div id="personal" class="module tarjeta-glass">
+            <h2 style="color: var(--acento-cian); margin-top: 0;">👷 Control de Asistencia y Nómina</h2>
+            
+            <!-- Sección de Catálogo de Trabajadores -->
+            <div style="margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid var(--glass-border);">
+                <h3 style="color: var(--acento-purpura); font-size: 14px; margin-top: 0;">📝 Catálogo de Trabajadores</h3>
+                <form id="form-trabajador" style="margin-bottom: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="trab-nombre" placeholder="Nombre completo" required>
+                        <input type="text" id="trab-puesto" placeholder="Puesto" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <input type="number" step="0.01" id="trab-pago-normal" placeholder="Pago hora normal (Q/h)" required>
+                        <input type="number" step="0.01" id="trab-pago-extra" placeholder="Pago hora extra (Q/h)" required>
+                    </div>
+                    <button type="submit" class="btn-secundario" style="width: 100%; font-size: 12px;">➕ Agregar Trabajador</button>
+                </form>
+            </div>
+
+            <!-- Sección de Asistencia Diaria -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="color: var(--texto-principal); font-size: 16px; margin: 0;">📋 Pase de Lista</h3>
+                <input type="date" id="fecha-asistencia" style="width: auto; padding: 6px 12px;" value="2026-08-24">
+            </div>
+
+            <div id="lista-asistencia-dinamica" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <!-- Tarjetas de trabajadores dinámicas -->
+            </div>
+
+            <button onclick="guardarAsistenciaDiaria(document.getElementById('fecha-asistencia').value)" class="btn-primario" style="width: 100%;">
+                ✅ Cerrar y Guardar Planilla del Día
+            </button>
+
+            <h3 style="color: var(--texto-principal); font-size: 16px; margin-top: 25px;">📜 Historial de Asistencia</h3>
+            <div style="overflow-x: auto;">
+                <table id="tabla-asistencia">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Trabajador</th>
+                            <th>Estado</th>
+                            <th>Horas Extra</th>
+                            <th>Sueldo Diario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-asistencia-cuerpo">
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Módulo Adquisiciones -->
+        <div id="adquisiciones" class="module tarjeta-glass">
+            <h2 style="color: var(--acento-cian); margin-top: 0;">📋 Adquisiciones y Cotizaciones</h2>
+            
+            <!-- Directorio de Proveedores -->
+            <div style="margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid var(--glass-border);">
+                <h3 style="color: var(--acento-purpura); font-size: 14px; margin-top: 0;">🏢 Directorio de Proveedores</h3>
+                <form id="form-proveedor" style="margin-bottom: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="prov-nombre" placeholder="Nombre del proveedor" required>
+                        <input type="text" id="prov-telefono" placeholder="Teléfono" required>
+                    </div>
+                    <input type="text" id="prov-especialidad" placeholder="Especialidad" required style="margin-bottom: 10px;">
+                    <button type="submit" class="btn-secundario" style="width: 100%; font-size: 12px;">➕ Agregar Proveedor</button>
+                </form>
+            </div>
+
+            <!-- Tabla de Proveedores -->
+            <h3 style="color: var(--texto-principal); font-size: 16px; margin-top: 15px;">📋 Lista de Proveedores</h3>
+            <div style="overflow-x: auto;">
+                <table id="tabla-proveedores">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Especialidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-proveedores-cuerpo">
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Formulario de Cotización -->
+            <form id="form-cotizacion" style="margin-bottom: 25px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Proveedor</label>
+                        <select id="cot-proveedor" required>
+                            <option value="">Seleccionar proveedor...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Material / Insumo</label>
+                        <input type="text" id="cot-material" placeholder="Ej: 50 sacos de Cemento" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Precio Unitario (Q)</label>
+                        <input type="number" step="0.01" id="cot-precio" required>
+                    </div>
+                    <div>
+                        <label>Cantidad</label>
+                        <input type="number" id="cot-cantidad" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primario" style="width: 100%;">📊 Registrar Cotización</button>
+            </form>
+
+            <!-- Cuadro Comparativo -->
+            <h3 style="color: var(--texto-principal); font-size: 16px;">🔍 Cuadro Comparativo de Ofertas</h3>
+            <div style="overflow-x: auto;">
+                <table id="tabla-cotizaciones">
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>Proveedor</th>
+                            <th>Total (Q)</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cotizaciones-cuerpo">
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Módulo Reportes -->
+        <div id="reportes" class="module tarjeta-glass">
+            <h2 style="color: var(--acento-cian); margin-top: 0;">📊 Generación de Reportes</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px;">
+                <div>
+                    <label>Tipo de Reporte</label>
+                    <select id="reporte-tipo">
+                        <option value="diario">Reporte Diario de Gastos</option>
+                        <option value="semanal">Informe Semanal Consolidado</option>
+                        <option value="asistencia">Reporte de Asistencia y Horas Extra</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Fecha</label>
+                    <input type="date" id="reporte-fecha" value="2026-08-24">
+                </div>
+            </div>
+
+            <button onclick="generarYCompartirReporte()" class="btn-primario" style="width: 100%; margin-bottom: 15px;">
+                📱 Enviar Reporte por WhatsApp / Correo
+            </button>
+
+            <button onclick="generarReporteLocal()" class="btn-secundario" style="width: 100%;">
+                📥 Descargar Reporte Localmente
+            </button>
+        </div>
+
+        <!-- Módulo Configuración -->
+        <div id="configuracion" class="module tarjeta-glass">
+            <h2 style="color: var(--acento-cian); margin-top: 0;">⚙️ Configuración y Respaldo</h2>
+            
+            <div style="margin-bottom: 25px;">
+                <h3 style="color: var(--texto-principal); font-size: 16px;">Presupuesto Inicial de Caja Chica</h3>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="number" step="0.01" id="config-presupuesto" placeholder="Monto inicial">
+                    <button onclick="guardarPresupuesto()" class="btn-primario">Guardar</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <h3 style="color: var(--texto-principal); font-size: 16px;">Respaldo de Datos</h3>
+                <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                    <button onclick="exportarBaseDatos()" class="btn-primario">📤 Exportar JSON</button>
+                    <label class="file-label">
+                        📥 Importar JSON
+                        <input type="file" id="import-json" class="file-input" accept=".json">
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <h3 style="color: var(--texto-principal); font-size: 16px;">Gestión de Logo</h3>
+                <div style="margin-top: 10px;">
+                    <label class="file-label">
+                        📷 Cambiar Logo
+                        <input type="file" id="logo-input-config" class="file-input" accept="image/*">
+                    </label>
+                    <button onclick="eliminarLogo()" class="btn-secundario" style="margin-left: 10px;">🗑️ Eliminar Logo</button>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="color: var(--texto-principal); font-size: 16px;">Información de la Aplicación</h3>
+                <p style="color: var(--texto-secundario); font-size: 13px; margin-top: 10px;">
+                    Versión: 1.0.0<br>
+                    Desarrollado para: CONSTRURAMSA<br>
+                    Modo: Offline (LocalStorage)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plantilla de Impresión Oculta -->
+    <div id="plantilla-reporte-impresion">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 3px solid #004B93;">
+            <tr>
+                <td style="width: 25%; padding-bottom: 15px; vertical-align: middle;">
+                    <img id="pdf-logo-membrete" src="" alt="CONSTRURAMSA LOGO" style="max-height: 85px; width: auto; object-fit: contain;" />
+                </td>
+                <td style="width: 50%; text-align: center; padding-bottom: 15px; vertical-align: middle;">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px; color: #004B93; text-transform: uppercase;">CONSTRURAMSA</h1>
+                    <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 600; color: #6F2DBD; text-transform: uppercase; letter-spacing: 0.5px;">Soluciones en Ingeniería y Arquitectura</p>
+                </td>
+                <td style="width: 25%; text-align: right; padding-bottom: 15px; vertical-align: middle; font-size: 11px; line-height: 1.4; color: #4B5563;">
+                    <strong>TIPO:</strong> <span id="pdf-tipo-reporte" style="color: #00A4E4; font-weight: bold;">DIARIO DE GASTOS</span><br>
+                    <strong>FECHA:</strong> <span id="pdf-fecha-emision">24/08/2026</span><br>
+                    <strong>PROYECTO:</strong> Control de Obra Activa
+                </td>
+            </tr>
+        </table>
+
+        <div id="pdf-contenido-dinamico"></div>
+
+        <div style="margin-top: 50px; page-break-inside: avoid;">
+            <table style="width: 100%; margin-top: 40px;">
+                <tr>
+                    <td style="width: 45%; text-align: center;">
+                        <div style="margin-bottom: 10px;">
+                            <img id="pdf-firma-jefe-proyectos" src="wilson.png" alt="Firma Jefe de Proyectos" style="max-height: 60px; width: auto; object-fit: contain;" />
+                        </div>
+                        <div style="border-top: 1px solid #9CA3AF; width: 80%; margin: 0 auto; padding-top: 15px; font-size: 12px; font-weight: bold; color: #374151;">
+                            Arq. Wilson Dario Salazar Oliveros
+                        </div>
+                        <div style="font-size: 10px; color: #6B7280; margin-top: 2px;">
+                            Jefe de Proyectos
+                        </div>
+                    </td>
+                    <td style="width: 10%;"></td>
+                    <td style="width: 45%; text-align: center;">
+                        <div style="margin-bottom: 10px;">
+                            <img id="pdf-firma-gerente-comercial" src="juan.png" alt="Firma Gerente Comercial" style="max-height: 60px; width: auto; object-fit: contain;" />
+                        </div>
+                        <div style="border-top: 1px solid #9CA3AF; width: 80%; margin: 0 auto; padding-top: 15px; font-size: 12px; font-weight: bold; color: #374151;">
+                            Ing. Juan LLuis Ramirez Jimenez
+                        </div>
+                        <div style="font-size: 10px; color: #6B7280; margin-top: 2px;">
+                            Gerente Comercial
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <div style="text-align: center; margin-top: 30px; font-size: 9px; color: #9CA3AF;">
+                Documento generado digitalmente desde la App Oficial de CONSTRURAMSA.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SISTEMA DE GESTIÓN DE DATOS (LocalStorage)
+        // ============================================
+        
+        const DB_KEY = 'construramsa_db';
+        
+        function getDB() {
+            const db = localStorage.getItem(DB_KEY);
+            if (!db) {
+                return inicializarDB();
+            }
+            const parsedDB = JSON.parse(db);
+            // Migración automática para asegurar compatibilidad con estructura existente
+            return migrarDB(parsedDB);
+        }
+        
+        function migrarDB(db) {
+            // Asegurar que todos los campos necesarios existan
+            if (!db.configuracion) {
+                db.configuracion = {
+                    nombre_empresa: "CONSTRURAMSA",
+                    eslogan: "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
+                    logo_base64: "",
+                    presupuesto_inicial_caja: 0
+                };
+            }
+            
+            if (!db.configuracion.nombre_empresa) {
+                db.configuracion.nombre_empresa = "CONSTRURAMSA";
+            }
+            
+            if (!db.configuracion.eslogan) {
+                db.configuracion.eslogan = "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA";
+            }
+            
+            if (!db.caja_chica) {
+                db.caja_chica = [];
+            }
+            
+            if (!db.maquinaria_flota) {
+                db.maquinaria_flota = { vehiculos: [], registros: [] };
+            }
+            
+            if (!db.maquinaria_flota.vehiculos) {
+                db.maquinaria_flota.vehiculos = [];
+            }
+            
+            if (!db.maquinaria_flota.registros) {
+                db.maquinaria_flota.registros = [];
+            }
+            
+            if (!db.personal) {
+                db.personal = { trabajadores: [], asistencia: [] };
+            }
+            
+            if (!db.personal.trabajadores) {
+                db.personal.trabajadores = [];
+            }
+            
+            if (!db.personal.asistencia) {
+                db.personal.asistencia = [];
+            }
+            
+            if (!db.adquisiciones) {
+                db.adquisiciones = { proveedores: [], cotizaciones_compras: [] };
+            }
+            
+            if (!db.adquisiciones.proveedores) {
+                db.adquisiciones.proveedores = [];
+            }
+            
+            // Migrar cotizaciones si están en el formato antiguo
+            if (db.adquisiciones.cotizaciones && !db.adquisiciones.cotizaciones_compras) {
+                db.adquisiciones.cotizaciones_compras = db.adquisiciones.cotizaciones;
+                delete db.adquisiciones.cotizaciones;
+            }
+            
+            if (!db.adquisiciones.cotizaciones_compras) {
+                db.adquisiciones.cotizaciones_compras = [];
+            }
+            
+            return db;
+        }
+        
+        function saveDB(db) {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+        }
+        
+        function inicializarDB() {
+            const db = {
+                configuracion: {
+                    nombre_empresa: "CONSTRURAMSA",
+                    eslogan: "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
+                    logo_base64: "",
+                    presupuesto_inicial_caja: 0
+                },
+                caja_chica: [],
+                maquinaria_flota: {
+                    vehiculos: [],
+                    registros: []
+                },
+                personal: {
+                    trabajadores: [],
+                    asistencia: []
+                },
+                adquisiciones: {
+                    proveedores: [],
+                    cotizaciones_compras: []
+                }
+            };
+            saveDB(db);
+            return db;
+        }
+
+        // ============================================
+        // FUNCIONES DE UTILIDAD
+        // ============================================
+        
+        function formatearMoneda(monto) {
+            return 'Q' + parseFloat(monto).toFixed(2);
+        }
+        
+        function generarId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // ============================================
+        // GESTIÓN DE LOGO
+        // ============================================
+        
+        function cargarLogo() {
+            const db = getDB();
+            const logoBase64 = db.configuracion?.logo_base64;
+            
+            if (logoBase64 && logoBase64.length > 20 && logoBase64.startsWith('data:image')) {
+                try {
+                    const headerLogo = document.getElementById('header-logo');
+                    headerLogo.src = logoBase64;
+                    headerLogo.style.display = 'block';
+                    
+                    // Manejar error de carga
+                    headerLogo.onerror = function() {
+                        console.error('Error al cargar el logo base64');
+                        headerLogo.style.display = 'none';
+                    };
+                } catch (error) {
+                    console.error('Error al asignar logo base64:', error);
+                }
+            }
+        }
+        
+        function guardarLogo(base64) {
+            const db = getDB();
+            if (!db.configuracion) db.configuracion = {};
+            db.configuracion.logo_base64 = base64;
+            saveDB(db);
+            cargarLogo();
+        }
+        
+        function eliminarLogo() {
+            const db = getDB();
+            if (db.configuracion) {
+                db.configuracion.logo_base64 = "";
+                saveDB(db);
+            }
+            document.getElementById('header-logo').style.display = 'none';
+            document.getElementById('header-logo').src = "";
+        }
+
+        // Event Listeners para carga de logo
+        document.getElementById('logo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    guardarLogo(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('logo-input-config').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    guardarLogo(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ============================================
+        // NAVEGACIÓN ENTRE MÓDULOS
+        // ============================================
+        
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+                
+                this.classList.add('active');
+                const moduleId = this.getAttribute('data-module');
+                document.getElementById(moduleId).classList.add('active');
+                
+                // Cargar datos específicos del módulo
+                if (moduleId === 'personal') cargarListaAsistencia();
+                if (moduleId === 'adquisiciones') cargarProveedores();
+            });
+        });
+
+        // ============================================
+        // MÓDULO DE CAJA CHICA
+        // ============================================
+        
+        function actualizarSaldoCajaChica() {
+            const db = getDB();
+            let saldo = db.configuracion?.presupuesto_inicial_caja || 0;
+            
+            db.caja_chica.forEach(movimiento => {
+                if (movimiento.tipo === 'ingreso') {
+                    saldo += movimiento.monto;
+                } else if (movimiento.tipo === 'egreso') {
+                    saldo -= movimiento.monto;
+                }
+            });
+            
+            const saldoElement = document.getElementById('saldo-caja-chica');
+            saldoElement.textContent = formatearMoneda(saldo);
+            saldoElement.className = saldo >= 0 ? 'saldo-positivo' : 'saldo-negativo';
+            
+            return saldo;
+        }
+        
+        function procesarGastoCajaChica(monto, categoria, descripcion) {
+            const db = getDB();
+            const saldoActual = actualizarSaldoCajaChica();
+            
+            if (monto > saldoActual) {
+                alert(`❌ Fondos insuficientes en Caja Chica. Saldo disponible: ${formatearMoneda(saldoActual)}. El gasto de ${formatearMoneda(monto)} no puede procesarse.`);
+                return false;
+            }
+            
+            db.caja_chica.push({
+                id: generarId(),
+                fecha: new Date().toISOString().split('T')[0],
+                tipo: "egreso",
+                categoria: categoria,
+                descripcion: descripcion,
+                monto: monto,
+                responsable: "Sistema Automático"
+            });
+            
+            saveDB(db);
+            actualizarSaldoCajaChica();
+            return true;
+        }
+        
+        document.getElementById('form-caja-chica').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const tipo = document.getElementById('caja-tipo').value;
+            const categoria = document.getElementById('caja-categoria').value;
+            const descripcion = document.getElementById('caja-descripcion').value;
+            const monto = parseFloat(document.getElementById('caja-monto').value);
+            
+            const db = getDB();
+            
+            if (tipo === 'egreso') {
+                const saldoActual = actualizarSaldoCajaChica();
+                if (monto > saldoActual) {
+                    alert(`❌ Fondos insuficientes en Caja Chica. Saldo disponible: ${formatearMoneda(saldoActual)}`);
+                    return;
+                }
+            }
+            
+            db.caja_chica.push({
+                id: generarId(),
+                fecha: new Date().toISOString().split('T')[0],
+                tipo: tipo,
+                categoria: categoria,
+                descripcion: descripcion,
+                monto: monto,
+                responsable: "Usuario"
+            });
+            
+            saveDB(db);
+            actualizarSaldoCajaChica();
+            cargarTablaCajaChica();
+            
+            this.reset();
+            alert('✅ Movimiento registrado exitosamente');
+        });
+        
+        function cargarTablaCajaChica() {
+            const db = getDB();
+            const tbody = document.getElementById('tabla-caja-chica-cuerpo');
+            tbody.innerHTML = '';
+            
+            const movimientosOrdenados = [...db.caja_chica].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            movimientosOrdenados.forEach(mov => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${mov.fecha}</td>
+                    <td style="color: ${mov.tipo === 'ingreso' ? 'var(--exito)' : 'var(--alerta)'}">${mov.tipo.toUpperCase()}</td>
+                    <td>${mov.categoria}</td>
+                    <td>${mov.descripcion}</td>
+                    <td style="font-weight: bold; color: ${mov.tipo === 'ingreso' ? 'var(--exito)' : 'var(--alerta)'}">
+                        ${mov.tipo === 'ingreso' ? '+' : '-'}${formatearMoneda(mov.monto)}
+                    </td>
+                    <td>
+                        <button onclick="editarMovimientoCaja('${mov.id}')" class="btn-secundario" style="padding: 4px 8px; font-size: 11px;">✏️ Editar</button>
+                        <button onclick="eliminarMovimientoCaja('${mov.id}')" class="btn-primario" style="padding: 4px 8px; font-size: 11px; background: var(--alerta);">🗑️ Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function editarMovimientoCaja(id) {
+            const db = getDB();
+            const movimiento = db.caja_chica.find(m => m.id === id);
+            if (!movimiento) return;
+            
+            // Cargar datos en formulario
+            document.getElementById('caja-tipo').value = movimiento.tipo;
+            document.getElementById('caja-categoria').value = movimiento.categoria;
+            document.getElementById('caja-descripcion').value = movimiento.descripcion;
+            document.getElementById('caja-monto').value = movimiento.monto;
+            
+            // Cambiar modo a edición
+            document.getElementById('form-caja-chica').dataset.editando = id;
+            document.querySelector('#form-caja-chica button[type="submit"]').textContent = '💾 Actualizar Movimiento';
+            
+            // Scroll suave al formulario
+            document.getElementById('form-caja-chica').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function eliminarMovimientoCaja(id) {
+            if (!confirm('⚠️ ¿Está seguro de eliminar este movimiento de caja chica? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            const db = getDB();
+            const movimiento = db.caja_chica.find(m => m.id === id);
+            
+            // Si es un egreso, revertir el saldo de caja chica
+            if (movimiento && movimiento.tipo === 'egreso') {
+                db.caja_chica.push({
+                    id: generarId(),
+                    fecha: new Date().toISOString().split('T')[0],
+                    tipo: 'ingreso',
+                    categoria: 'Reembolso',
+                    descripcion: `Reembolso por eliminación de movimiento: ${movimiento.descripcion}`,
+                    monto: movimiento.monto,
+                    responsable: 'Sistema Automático'
+                });
+            }
+            
+            db.caja_chica = db.caja_chica.filter(m => m.id !== id);
+            saveDB(db);
+            actualizarSaldoCajaChica();
+            cargarTablaCajaChica();
+            alert('✅ Movimiento eliminado exitosamente');
+        }
+
+        // ============================================
+        // MÓDULO DE MAQUINARIA
+        // ============================================
+        
+        function calcularMetricasMaquinaria() {
+            const tipoVehiculo = document.getElementById('maq-tipo').value;
+            const valInicial = parseFloat(document.getElementById('maq-val-inicial').value) || 0;
+            const valFinal = parseFloat(document.getElementById('maq-val-final').value) || 0;
+            const galones = parseFloat(document.getElementById('maq-galones').value) || 0;
+            const precioGalon = parseFloat(document.getElementById('maq-precio-galon').value) || 0;
+            const costoMantenimiento = parseFloat(document.getElementById('maq-costo-mantenimiento').value) || 0;
+            
+            const usoTotal = valFinal - valInicial;
+            if (usoTotal < 0) {
+                document.getElementById('maq-error-uso').innerText = "El valor final no puede ser menor al inicial";
+                return;
+            } else {
+                document.getElementById('maq-error-uso').innerText = "";
+            }
+            
+            const costoCombustibleTotal = galones * precioGalon;
+            
+            let rendimiento = 0;
+            if (galones > 0) {
+                rendimiento = usoTotal / galones;
+            }
+            
+            const gastoTotalRegistro = costoCombustibleTotal + costoMantenimiento;
+            
+            document.getElementById('lbl-uso-total').innerText = usoTotal.toFixed(2) + (tipoVehiculo === 'retroexcavadora' ? ' Hrs' : ' Km');
+            document.getElementById('lbl-costo-combustible').innerText = formatearMoneda(costoCombustibleTotal);
+            document.getElementById('lbl-rendimiento').innerText = rendimiento.toFixed(2) + (tipoVehiculo === 'retroexcavadora' ? ' Hrs/Gal' : ' Km/Gal');
+            document.getElementById('lbl-gasto-total').innerText = formatearMoneda(gastoTotalRegistro);
+        }
+        
+        document.getElementById('form-maquinaria').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const tipo = document.getElementById('maq-tipo').value;
+            const codigo = document.getElementById('maq-codigo').value;
+            const valInicial = parseFloat(document.getElementById('maq-val-inicial').value);
+            const valFinal = parseFloat(document.getElementById('maq-val-final').value);
+            const galones = parseFloat(document.getElementById('maq-galones').value) || 0;
+            const precioGalon = parseFloat(document.getElementById('maq-precio-galon').value) || 0;
+            const mantenimientoDetalles = document.getElementById('maq-mantenimiento-detalles').value;
+            const costoMantenimiento = parseFloat(document.getElementById('maq-costo-mantenimiento').value) || 0;
+            
+            const usoTotal = valFinal - valInicial;
+            if (usoTotal < 0) {
+                alert("El valor final no puede ser menor al inicial");
+                return;
+            }
+            
+            const costoCombustibleTotal = galones * precioGalon;
+            const gastoTotal = costoCombustibleTotal + costoMantenimiento;
+            
+            // Procesar gasto a través de caja chica
+            if (!procesarGastoCajaChica(gastoTotal, 'Combustible/Mantenimiento', `Maquinaria ${codigo} - ${mantenimientoDetalles || 'Combustible'}`)) {
+                return;
+            }
+            
+            const db = getDB();
+            
+            // Verificar si estamos en modo edición
+            const editandoId = this.dataset.editando;
+            if (editandoId) {
+                // Modo edición
+                const index = db.maquinaria_flota.registros.findIndex(r => r.id === editandoId);
+                if (index !== -1) {
+                    if (!confirm('💾 ¿Desea guardar los cambios en este registro de maquinaria?')) {
+                        return;
+                    }
+                    
+                    db.maquinaria_flota.registros[index] = {
+                        ...db.maquinaria_flota.registros[index],
+                        odometro_inicial: valInicial,
+                        odometro_final: valFinal,
+                        horas_trabajadas: tipo === 'retroexcavadora' ? usoTotal : 0,
+                        combustible_galones: galones,
+                        combustible_costo: costoCombustibleTotal,
+                        mantenimiento_detalles: mantenimientoDetalles,
+                        mantenimiento_costo: costoMantenimiento
+                    };
+                    
+                    delete this.dataset.editando;
+                    document.querySelector('#form-maquinaria button[type="submit"]').textContent = '💾 Guardar Registro de Maquinaria';
+                    
+                    saveDB(db);
+                    cargarTablaMaquinaria();
+                    
+                    alert('✅ Registro de maquinaria actualizado exitosamente');
+                    this.reset();
+                    document.getElementById('lbl-uso-total').innerText = '0.00';
+                    document.getElementById('lbl-costo-combustible').innerText = formatearMoneda(0);
+                    document.getElementById('lbl-rendimiento').innerText = '0.00';
+                    document.getElementById('lbl-gasto-total').innerText = formatearMoneda(0);
+                    return;
+                }
+            }
+            
+            // Buscar o crear vehículo en el catálogo
+            let vehiculo = db.maquinaria_flota.vehiculos.find(v => v.codigo === codigo);
+            if (!vehiculo) {
+                vehiculo = {
+                    id: generarId(),
+                    tipo: tipo === 'retroexcavadora' ? 'Retroexcavadora' : 'Camión de Volteo',
+                    codigo: codigo,
+                    marca_modelo: tipo === 'retroexcavadora' ? 'Retroexcavadora' : 'Camión de Volteo'
+                };
+                db.maquinaria_flota.vehiculos.push(vehiculo);
+            }
+            
+            db.maquinaria_flota.registros.push({
+                id: generarId(),
+                vehiculo_id: vehiculo.id,
+                fecha: new Date().toISOString().split('T')[0],
+                odometro_inicial: valInicial,
+                odometro_final: valFinal,
+                horas_trabajadas: tipo === 'retroexcavadora' ? usoTotal : 0,
+                combustible_galones: galones,
+                combustible_costo: costoCombustibleTotal,
+                mantenimiento_detalles: mantenimientoDetalles,
+                mantenimiento_costo: costoMantenimiento
+            });
+            
+            saveDB(db);
+            cargarTablaMaquinaria();
+            
+            this.reset();
+            document.getElementById('lbl-uso-total').innerText = '0.00';
+            document.getElementById('lbl-costo-combustible').innerText = formatearMoneda(0);
+            document.getElementById('lbl-rendimiento').innerText = '0.00';
+            document.getElementById('lbl-gasto-total').innerText = formatearMoneda(0);
+            
+            alert('✅ Registro de maquinaria guardado exitosamente');
+        });
+        
+        function cargarTablaMaquinaria() {
+            const db = getDB();
+            const tbody = document.getElementById('tabla-maquinaria-cuerpo');
+            tbody.innerHTML = '';
+            
+            const registrosOrdenados = [...db.maquinaria_flota.registros].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            registrosOrdenados.forEach(reg => {
+                const vehiculo = db.maquinaria_flota.vehiculos.find(v => v.id === reg.vehiculo_id);
+                const tipoVehiculo = vehiculo ? vehiculo.tipo : 'Desconocido';
+                const codigo = vehiculo ? vehiculo.codigo : 'N/A';
+                const usoTotal = reg.odometro_final - reg.odometro_inicial;
+                const rendimiento = reg.combustible_galones > 0 ? (usoTotal / reg.combustible_galones) : 0;
+                const gastoTotal = reg.combustible_costo + (reg.mantenimiento_costo || 0);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${reg.fecha}</td>
+                    <td>${tipoVehiculo}</td>
+                    <td>${codigo}</td>
+                    <td>${usoTotal.toFixed(2)} ${tipoVehiculo.includes('Retro') ? 'Hrs' : 'Km'}</td>
+                    <td>${reg.combustible_galones} gal</td>
+                    <td>${rendimiento.toFixed(2)} ${tipoVehiculo.includes('Retro') ? 'Hrs/Gal' : 'Km/Gal'}</td>
+                    <td style="font-weight: bold; color: var(--alerta);">${formatearMoneda(gastoTotal)}</td>
+                    <td>
+                        <button onclick="editarRegistroMaquinaria('${reg.id}')" class="btn-secundario" style="padding: 4px 8px; font-size: 11px;">✏️ Editar</button>
+                        <button onclick="eliminarRegistroMaquinaria('${reg.id}')" class="btn-primario" style="padding: 4px 8px; font-size: 11px; background: var(--alerta);">🗑️ Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function editarRegistroMaquinaria(id) {
+            const db = getDB();
+            const registro = db.maquinaria_flota.registros.find(r => r.id === id);
+            if (!registro) return;
+            
+            const vehiculo = db.maquinaria_flota.vehiculos.find(v => v.id === registro.vehiculo_id);
+            
+            // Cargar datos en formulario
+            document.getElementById('maq-tipo').value = vehiculo?.tipo?.includes('Retro') ? 'retroexcavadora' : 'camion';
+            document.getElementById('maq-codigo').value = vehiculo?.codigo || '';
+            document.getElementById('maq-val-inicial').value = registro.odometro_inicial;
+            document.getElementById('maq-val-final').value = registro.odometro_final;
+            document.getElementById('maq-galones').value = registro.combustible_galones;
+            document.getElementById('maq-precio-galon').value = registro.combustible_galones > 0 ? (registro.combustible_costo / registro.combustible_galones) : 0;
+            document.getElementById('maq-mantenimiento-detalles').value = registro.mantenimiento_detalles || '';
+            document.getElementById('maq-costo-mantenimiento').value = registro.mantenimiento_costo || 0;
+            
+            // Calcular métricas
+            calcularMetricasMaquinaria();
+            
+            // Cambiar modo a edición
+            document.getElementById('form-maquinaria').dataset.editando = id;
+            document.querySelector('#form-maquinaria button[type="submit"]').textContent = '💾 Actualizar Registro';
+            
+            // Scroll suave al formulario
+            document.getElementById('form-maquinaria').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function eliminarRegistroMaquinaria(id) {
+            if (!confirm('⚠️ ¿Está seguro de eliminar este registro de maquinaria? Esta acción generará un reembolso automático en caja chica. ¿Desea continuar?')) {
+                return;
+            }
+            
+            const db = getDB();
+            const registro = db.maquinaria_flota.registros.find(r => r.id === id);
+            const vehiculo = db.maquinaria_flota.vehiculos.find(v => v.id === registro?.vehiculo_id);
+            
+            // Revertir gasto de caja chica
+            if (registro) {
+                const gastoTotal = registro.combustible_costo + (registro.mantenimiento_costo || 0);
+                db.caja_chica.push({
+                    id: generarId(),
+                    fecha: new Date().toISOString().split('T')[0],
+                    tipo: 'ingreso',
+                    categoria: 'Reembolso',
+                    descripcion: `Reembolso por eliminación de registro maquinaria: ${vehiculo?.codigo || 'N/A'}`,
+                    monto: gastoTotal,
+                    responsable: 'Sistema Automático'
+                });
+            }
+            
+            db.maquinaria_flota.registros = db.maquinaria_flota.registros.filter(r => r.id !== id);
+            saveDB(db);
+            actualizarSaldoCajaChica();
+            cargarTablaMaquinaria();
+            alert('✅ Registro de maquinaria eliminado exitosamente');
+        }
+
+        // ============================================
+        // MÓDULO DE PERSONAL Y ASISTENCIA
+        // ============================================
+        
+        document.getElementById('form-trabajador').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('trab-nombre').value;
+            const puesto = document.getElementById('trab-puesto').value;
+            const pagoNormal = parseFloat(document.getElementById('trab-pago-normal').value);
+            const pagoExtra = parseFloat(document.getElementById('trab-pago-extra').value);
+            
+            const db = getDB();
+            
+            // Verificar si estamos en modo edición
+            const editandoId = this.dataset.editando;
+            if (editandoId) {
+                // Modo edición
+                const index = db.personal.trabajadores.findIndex(t => t.id === editandoId);
+                if (index !== -1) {
+                    if (!confirm('💾 ¿Desea guardar los cambios en este trabajador?')) {
+                        return;
+                    }
+                    
+                    db.personal.trabajadores[index] = {
+                        ...db.personal.trabajadores[index],
+                        nombre: nombre,
+                        puesto: puesto,
+                        pago_hora_normal: pagoNormal,
+                        pago_hora_extra: pagoExtra
+                    };
+                    
+                    delete this.dataset.editando;
+                    document.querySelector('#form-trabajador button[type="submit"]').textContent = '➕ Agregar Trabajador';
+                    
+                    saveDB(db);
+                    cargarListaAsistencia();
+                    
+                    alert('✅ Trabajador actualizado exitosamente');
+                    this.reset();
+                    return;
+                }
+            }
+            
+            db.personal.trabajadores.push({
+                id: generarId(),
+                nombre: nombre,
+                puesto: puesto,
+                pago_hora_normal: pagoNormal,
+                pago_hora_extra: pagoExtra
+            });
+            
+            saveDB(db);
+            cargarListaAsistencia();
+            
+            this.reset();
+            alert('✅ Trabajador agregado exitosamente');
+        });
+        
+        function editarTrabajador(id) {
+            const db = getDB();
+            const trabajador = db.personal.trabajadores.find(t => t.id === id);
+            if (!trabajador) return;
+            
+            // Cargar datos en formulario
+            document.getElementById('trab-nombre').value = trabajador.nombre;
+            document.getElementById('trab-puesto').value = trabajador.puesto;
+            document.getElementById('trab-pago-normal').value = trabajador.pago_hora_normal;
+            document.getElementById('trab-pago-extra').value = trabajador.pago_hora_extra;
+            
+            // Cambiar modo a edición
+            document.getElementById('form-trabajador').dataset.editando = id;
+            document.querySelector('#form-trabajador button[type="submit"]').textContent = '💾 Actualizar Trabajador';
+            
+            // Scroll suave al formulario
+            document.getElementById('form-trabajador').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function eliminarTrabajador(id) {
+            if (!confirm('⚠️ ¿Está seguro de eliminar este trabajador? Esta acción también eliminará su historial de asistencia. No se puede deshacer. ¿Desea continuar?')) {
+                return;
+            }
+            
+            const db = getDB();
+            db.personal.trabajadores = db.personal.trabajadores.filter(t => t.id !== id);
+            
+            // Eliminar registros de asistencia relacionados
+            db.personal.asistencia = db.personal.asistencia.map(dia => ({
+                ...dia,
+                registros: dia.registros.filter(r => r.trabajador_id !== id)
+            })).filter(dia => dia.registros.length > 0);
+            
+            saveDB(db);
+            cargarListaAsistencia();
+            cargarTablaAsistencia();
+            alert('✅ Trabajador eliminado exitosamente');
+        }
+        
+        function cargarListaAsistencia() {
+            const db = getDB();
+            const container = document.getElementById('lista-asistencia-dinamica');
+            container.innerHTML = '';
+            
+            db.personal.trabajadores.forEach(trabajador => {
+                const tarjeta = document.createElement('div');
+                tarjeta.style.cssText = 'background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px;';
+                tarjeta.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div>
+                            <h4 style="margin: 0; font-size: 15px; color: #fff;">${trabajador.nombre}</h4>
+                            <span style="font-size: 11px; color: var(--texto-secundario);">${trabajador.puesto}</span>
+                        </div>
+                        <div style="text-align: right; font-size: 11px; color: var(--acento-cian);">
+                            Normal: Q${trabajador.pago_hora_normal}/h | Extra: Q${trabajador.pago_hora_extra}/h
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                        <label style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--exito); border-radius: 6px; padding: 8px; text-align: center; font-size: 12px; cursor: pointer; display: block;">
+                            <input type="radio" name="asistencia-${trabajador.id}" value="asistio" checked style="width: auto; margin-right: 5px;"> Asistió
+                        </label>
+                        <label style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--alerta); border-radius: 6px; padding: 8px; text-align: center; font-size: 12px; cursor: pointer; display: block;">
+                            <input type="radio" name="asistencia-${trabajador.id}" value="falto" style="width: auto; margin-right: 5px;"> Faltó
+                        </label>
+                        <label style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--texto-secundario); border-radius: 6px; padding: 8px; text-align: center; font-size: 12px; cursor: pointer; display: block;">
+                            <input type="radio" name="asistencia-${trabajador.id}" value="justificado" style="width: auto; margin-right: 5px;"> Justif.
+                        </label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="font-size: 12px; white-space: nowrap; color: var(--texto-secundario);">Horas Extra:</label>
+                        <input type="number" id="horas-extra-${trabajador.id}" min="0" max="8" value="0" style="padding: 6px; text-align: center;">
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <button onclick="editarTrabajador('${trabajador.id}')" class="btn-secundario" style="padding: 6px 8px; font-size: 11px; flex: 1;">✏️ Editar</button>
+                        <button onclick="eliminarTrabajador('${trabajador.id}')" class="btn-primario" style="padding: 6px 8px; font-size: 11px; background: var(--alerta); flex: 1;">🗑️ Eliminar</button>
+                    </div>
+                `;
+                container.appendChild(tarjeta);
+            });
+        }
+        
+        function guardarAsistenciaDiaria(fechaSeleccionada) {
+            const db = getDB();
+            const listaTrabajadores = db.personal?.trabajadores || [];
+            
+            if (listaTrabajadores.length === 0) {
+                alert('❌ No hay trabajadores registrados. Agregue trabajadores primero.');
+                return;
+            }
+            
+            const registroDia = {
+                fecha: fechaSeleccionada,
+                registros: []
+            };
+            
+            listaTrabajadores.forEach(trabajador => {
+                const estadoInput = document.querySelector(`input[name="asistencia-${trabajador.id}"]:checked`).value;
+                const horasExtraInput = parseFloat(document.getElementById(`horas-extra-${trabajador.id}`).value) || 0;
+                
+                let pagoNormal = 0;
+                let pagoExtra = 0;
+                
+                if (estadoInput === "asistio") {
+                    pagoNormal = 8 * (parseFloat(trabajador.pago_hora_normal) || 0);
+                    pagoExtra = horasExtraInput * (parseFloat(trabajador.pago_hora_extra) || 0);
+                }
+                
+                const totalSueldoDiario = pagoNormal + pagoExtra;
+                
+                // Compatibilidad con formato antiguo y nuevo
+                const registroTrabajador = {
+                    trabajador_id: trabajador.id,
+                    estado: estadoInput,
+                    horas_extras: horasExtraInput, // Formato antiguo
+                    horas_extras_cantidad: horasExtraInput // Formato nuevo
+                };
+                
+                // Agregar cálculos solo si asistió
+                if (estadoInput === "asistio") {
+                    registroTrabajador.calculos = {
+                        pago_normal: pagoNormal,
+                        pago_extra: pagoExtra,
+                        total_diario: totalSueldoDiario
+                    };
+                }
+                
+                registroDia.registros.push(registroTrabajador);
+            });
+            
+            if (!db.personal.asistencia) db.personal.asistencia = [];
+            
+            db.personal.asistencia = db.personal.asistencia.filter(a => a.fecha !== fechaSeleccionada);
+            db.personal.asistencia.push(registroDia);
+            
+            saveDB(db);
+            cargarTablaAsistencia();
+            
+            alert(`✅ Asistencia del día ${fechaSeleccionada} guardada y calculada con éxito.`);
+        }
+        
+        function cargarTablaAsistencia() {
+            const db = getDB();
+            const tbody = document.getElementById('tabla-asistencia-cuerpo');
+            tbody.innerHTML = '';
+            
+            const asistenciaOrdenada = [...db.personal.asistencia].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            asistenciaOrdenada.forEach(dia => {
+                dia.registros.forEach(reg => {
+                    const trabajador = db.personal.trabajadores.find(t => t.id === reg.trabajador_id);
+                    const nombre = trabajador ? trabajador.nombre : 'Desconocido';
+                    const puesto = trabajador ? trabajador.puesto : 'N/A';
+                    
+                    // Calcular sueldo si no existe en el registro antiguo
+                    let sueldoDiario = 0;
+                    if (reg.calculos) {
+                        sueldoDiario = reg.calculos.total_diario;
+                    } else {
+                        // Cálculo para registros antiguos
+                        if (reg.estado === 'asistio' && trabajador) {
+                            const pagoNormal = 8 * (parseFloat(trabajador.pago_hora_normal) || 0);
+                            const pagoExtra = (reg.horas_extras || 0) * (parseFloat(trabajador.pago_hora_extra) || 0);
+                            sueldoDiario = pagoNormal + pagoExtra;
+                        }
+                    }
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${dia.fecha}</td>
+                        <td>${nombre}</td>
+                        <td style="color: ${reg.estado === 'asistio' ? 'var(--exito)' : reg.estado === 'falto' ? 'var(--alerta)' : 'var(--texto-secundario)'}">${reg.estado.toUpperCase()}</td>
+                        <td>${reg.horas_extras || reg.horas_extras_cantidad || 0}h</td>
+                        <td style="font-weight: bold; color: var(--acento-cian);">${formatearMoneda(sueldoDiario)}</td>
+                        <td>
+                            <button onclick="eliminarRegistroAsistencia('${dia.fecha}', '${reg.trabajador_id}')" class="btn-primario" style="padding: 4px 8px; font-size: 11px; background: var(--alerta);">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            });
+        }
+        
+        function eliminarRegistroAsistencia(fecha, trabajadorId) {
+            if (!confirm('⚠️ ¿Está seguro de eliminar este registro de asistencia? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            const db = getDB();
+            const diaIndex = db.personal.asistencia.findIndex(a => a.fecha === fecha);
+            
+            if (diaIndex !== -1) {
+                db.personal.asistencia[diaIndex].registros = db.personal.asistencia[diaIndex].registros.filter(r => r.trabajador_id !== trabajadorId);
+                
+                // Si no quedan registros en ese día, eliminar el día
+                if (db.personal.asistencia[diaIndex].registros.length === 0) {
+                    db.personal.asistencia.splice(diaIndex, 1);
+                }
+            }
+            
+            saveDB(db);
+            cargarTablaAsistencia();
+            alert('✅ Registro de asistencia eliminado exitosamente');
+        }
+
+        // ============================================
+        // MÓDULO DE ADQUISICIONES Y PROVEEDORES
+        // ============================================
+        
+        document.getElementById('form-proveedor').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('prov-nombre').value;
+            const telefono = document.getElementById('prov-telefono').value;
+            const especialidad = document.getElementById('prov-especialidad').value;
+            
+            const db = getDB();
+            
+            // Verificar si estamos en modo edición
+            const editandoId = this.dataset.editando;
+            if (editandoId) {
+                // Modo edición
+                const index = db.adquisiciones.proveedores.findIndex(p => p.id === editandoId);
+                if (index !== -1) {
+                    if (!confirm('💾 ¿Desea guardar los cambios en este proveedor?')) {
+                        return;
+                    }
+                    
+                    db.adquisiciones.proveedores[index] = {
+                        ...db.adquisiciones.proveedores[index],
+                        nombre: nombre,
+                        contacto: nombre,
+                        telefono: telefono,
+                        especialidad: especialidad
+                    };
+                    
+                    delete this.dataset.editando;
+                    document.querySelector('#form-proveedor button[type="submit"]').textContent = '➕ Agregar Proveedor';
+                    
+                    saveDB(db);
+                    cargarProveedores();
+                    cargarTablaProveedores();
+                    
+                    alert('✅ Proveedor actualizado exitosamente');
+                    this.reset();
+                    return;
+                }
+            }
+            
+            db.adquisiciones.proveedores.push({
+                id: generarId(),
+                nombre: nombre,
+                contacto: nombre, // Mantener compatibilidad con estructura existente
+                telefono: telefono,
+                especialidad: especialidad
+            });
+            
+            saveDB(db);
+            cargarProveedores();
+            cargarTablaProveedores();
+            
+            this.reset();
+            alert('✅ Proveedor agregado exitosamente');
+        });
+        
+        function editarProveedor(id) {
+            const db = getDB();
+            const proveedor = db.adquisiciones.proveedores.find(p => p.id === id);
+            if (!proveedor) return;
+            
+            // Cargar datos en formulario
+            document.getElementById('prov-nombre').value = proveedor.nombre;
+            document.getElementById('prov-telefono').value = proveedor.telefono;
+            document.getElementById('prov-especialidad').value = proveedor.especialidad;
+            
+            // Cambiar modo a edición
+            document.getElementById('form-proveedor').dataset.editando = id;
+            document.querySelector('#form-proveedor button[type="submit"]').textContent = '💾 Actualizar Proveedor';
+            
+            // Scroll suave al formulario
+            document.getElementById('form-proveedor').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function eliminarProveedor(id) {
+            if (!confirm('⚠️ ¿Está seguro de eliminar este proveedor? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            const db = getDB();
+            db.adquisiciones.proveedores = db.adquisiciones.proveedores.filter(p => p.id !== id);
+            saveDB(db);
+            cargarProveedores();
+            cargarTablaProveedores();
+            alert('✅ Proveedor eliminado exitosamente');
+        }
+        
+        function cargarTablaProveedores() {
+            const db = getDB();
+            const tbody = document.getElementById('tabla-proveedores-cuerpo');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            db.adquisiciones.proveedores.forEach(prov => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${prov.nombre}</td>
+                    <td>${prov.telefono}</td>
+                    <td>${prov.especialidad}</td>
+                    <td>
+                        <button onclick="editarProveedor('${prov.id}')" class="btn-secundario" style="padding: 4px 8px; font-size: 11px;">✏️</button>
+                        <button onclick="eliminarProveedor('${prov.id}')" class="btn-primario" style="padding: 4px 8px; font-size: 11px; background: var(--alerta);">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function cargarProveedores() {
+            const db = getDB();
+            const select = document.getElementById('cot-proveedor');
+            select.innerHTML = '<option value="">Seleccionar proveedor...</option>';
+            
+            db.adquisiciones.proveedores.forEach(prov => {
+                const option = document.createElement('option');
+                option.value = prov.id;
+                option.textContent = prov.nombre;
+                select.appendChild(option);
+            });
+        }
+        
+        document.getElementById('form-cotizacion').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const proveedorId = document.getElementById('cot-proveedor').value;
+            const material = document.getElementById('cot-material').value;
+            const precio = parseFloat(document.getElementById('cot-precio').value);
+            const cantidad = parseInt(document.getElementById('cot-cantidad').value);
+            
+            const db = getDB();
+            const proveedor = db.adquisiciones.proveedores.find(p => p.id === proveedorId);
+            
+            const total = precio * cantidad;
+            
+            // Verificar si estamos en modo edición
+            const editandoId = this.dataset.editando;
+            if (editandoId) {
+                // Modo edición
+                const index = db.adquisiciones.cotizaciones_compras.findIndex(c => c.id === editandoId);
+                if (index !== -1) {
+                    if (!confirm('💾 ¿Desea guardar los cambios en esta cotización?')) {
+                        return;
+                    }
+                    
+                    db.adquisiciones.cotizaciones_compras[index] = {
+                        ...db.adquisiciones.cotizaciones_compras[index],
+                        proveedor_id: proveedorId,
+                        material_descripcion: material,
+                        precio_unitario: precio,
+                        cantidad: cantidad,
+                        total: total
+                    };
+                    
+                    delete this.dataset.editando;
+                    document.querySelector('#form-cotizacion button[type="submit"]').textContent = '📊 Registrar Cotización';
+                    
+                    saveDB(db);
+                    cargarTablaCotizaciones();
+                    
+                    alert('✅ Cotización actualizada exitosamente');
+                    this.reset();
+                    return;
+                }
+            }
+            
+            db.adquisiciones.cotizaciones_compras.push({
+                id: generarId(),
+                fecha: new Date().toISOString().split('T')[0],
+                proveedor_id: proveedorId,
+                material_descripcion: material,
+                precio_unitario: precio,
+                cantidad: cantidad,
+                total: total,
+                estado: 'pendiente'
+            });
+            
+            saveDB(db);
+            cargarTablaCotizaciones();
+            
+            this.reset();
+            alert('✅ Cotización registrada exitosamente');
+        });
+        
+        function cargarTablaCotizaciones() {
+            const db = getDB();
+            const tbody = document.getElementById('tabla-cotizaciones-cuerpo');
+            tbody.innerHTML = '';
+            
+            const cotizacionesOrdenadas = [...db.adquisiciones.cotizaciones_compras].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            cotizacionesOrdenadas.forEach(cot => {
+                const proveedor = db.adquisiciones.proveedores.find(p => p.id === cot.proveedor_id);
+                const proveedorNombre = proveedor ? proveedor.nombre : 'Desconocido';
+                const estadoColor = cot.estado === 'aprobada' ? 'var(--exito)' : cot.estado === 'rechazada' ? 'var(--alerta)' : '#f59e0b';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${cot.material_descripcion}</td>
+                    <td style="color: var(--texto-secundario);">${proveedorNombre}</td>
+                    <td style="text-align: right; font-weight: bold;">${formatearMoneda(cot.total)}</td>
+                    <td style="text-align: center;"><span style="color: ${estadoColor};">${cot.estado.toUpperCase()}</span></td>
+                    <td style="text-align: center;">
+                        ${cot.estado === 'pendiente' ? `
+                            <button onclick="editarCotizacion('${cot.id}')" class="btn-secundario" style="padding: 4px 8px; font-size: 11px;">✏️ Editar</button>
+                            <button onclick="aprobarCotizacion('${cot.id}')" class="btn-primario" style="padding: 4px 8px; font-size: 11px; background: var(--exito);">Aprobar</button>
+                            <button onclick="rechazarCotizacion('${cot.id}')" class="btn-primario" style="padding: 4px 8px; font-size: 11px; background: var(--alerta);">Rechazar</button>
+                        ` : `
+                            <button onclick="eliminarCotizacion('${cot.id}')" class="btn-primario" style="padding: 4px 8px; font-size: 11px; background: var(--alerta);">🗑️ Eliminar</button>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function aprobarCotizacion(cotizacionId) {
+            const db = getDB();
+            const cotizacion = db.adquisiciones.cotizaciones_compras.find(c => c.id === cotizacionId);
+            const proveedor = db.adquisiciones.proveedores.find(p => p.id === cotizacion.proveedor_id);
+            
+            if (cotizacion) {
+                if (!procesarGastoCajaChica(cotizacion.total, 'Materiales', `Compra: ${cotizacion.material_descripcion} - ${proveedor ? proveedor.nombre : 'Desconocido'}`)) {
+                    return;
+                }
+                
+                cotizacion.estado = 'aprobada';
+                saveDB(db);
+                cargarTablaCotizaciones();
+                alert('✅ Cotización aprobada y compra procesada');
+            }
+        }
+        
+        function rechazarCotizacion(cotizacionId) {
+            const db = getDB();
+            const cotizacion = db.adquisiciones.cotizaciones_compras.find(c => c.id === cotizacionId);
+            
+            if (cotizacion) {
+                cotizacion.estado = 'rechazada';
+                saveDB(db);
+                cargarTablaCotizaciones();
+                alert('❌ Cotización rechazada');
+            }
+        }
+        
+        function editarCotizacion(id) {
+            const db = getDB();
+            const cotizacion = db.adquisiciones.cotizaciones_compras.find(c => c.id === id);
+            if (!cotizacion) return;
+            
+            // Cargar datos en formulario
+            document.getElementById('cot-proveedor').value = cotizacion.proveedor_id;
+            document.getElementById('cot-material').value = cotizacion.material_descripcion;
+            document.getElementById('cot-precio').value = cotizacion.precio_unitario;
+            document.getElementById('cot-cantidad').value = cotizacion.cantidad;
+            
+            // Cambiar modo a edición
+            document.getElementById('form-cotizacion').dataset.editando = id;
+            document.querySelector('#form-cotizacion button[type="submit"]').textContent = '💾 Actualizar Cotización';
+            
+            // Scroll suave al formulario
+            document.getElementById('form-cotizacion').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function eliminarCotizacion(id) {
+            const db = getDB();
+            const cotizacion = db.adquisiciones.cotizaciones_compras.find(c => c.id === id);
+            
+            if (cotizacion && cotizacion.estado === 'aprobada') {
+                if (!confirm('⚠️ Esta cotización ya fue aprobada y generó un gasto en caja chica. Al eliminarla, se generará un reembolso automático. ¿Desea continuar?')) {
+                    return;
+                }
+                // Revertir gasto de caja chica
+                db.caja_chica.push({
+                    id: generarId(),
+                    fecha: new Date().toISOString().split('T')[0],
+                    tipo: 'ingreso',
+                    categoria: 'Reembolso',
+                    descripcion: `Reembolso por eliminación de cotización: ${cotizacion.material_descripcion}`,
+                    monto: cotizacion.total,
+                    responsable: 'Sistema Automático'
+                });
+            } else {
+                if (!confirm('⚠️ ¿Está seguro de eliminar esta cotización? Esta acción no se puede deshacer.')) {
+                    return;
+                }
+            }
+            
+            db.adquisiciones.cotizaciones_compras = db.adquisiciones.cotizaciones_compras.filter(c => c.id !== id);
+            saveDB(db);
+            actualizarSaldoCajaChica();
+            cargarTablaCotizaciones();
+            alert('✅ Cotización eliminada exitosamente');
+        }
+
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        
+        function guardarPresupuesto() {
+            const presupuesto = parseFloat(document.getElementById('config-presupuesto').value);
+            if (isNaN(presupuesto) || presupuesto < 0) {
+                alert('Ingrese un monto válido');
+                return;
+            }
+            
+            const db = getDB();
+            if (!db.configuracion) db.configuracion = {};
+            db.configuracion.presupuesto_inicial_caja = presupuesto;
+            saveDB(db);
+            
+            actualizarSaldoCajaChica();
+            alert('✅ Presupuesto guardado exitosamente');
+        }
+        
+        function exportarBaseDatos() {
+            const db = getDB();
+            const dataStr = JSON.stringify(db, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'construramsa_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+        
+        function importarBaseDatosConFusion(dbImportado) {
+            const dbExistente = getDB();
+            
+            // Función auxiliar para fusionar arrays sin duplicados
+            function fusionarArrays(arrayExistente, arrayImportado, claveId) {
+                const mapaExistente = new Map(arrayExistente.map(item => [item[claveId], item]));
+                
+                arrayImportado.forEach(item => {
+                    const id = item[claveId];
+                    if (mapaExistente.has(id)) {
+                        // Actualizar registro existente
+                        mapaExistente.set(id, { ...mapaExistente.get(id), ...item });
+                    } else {
+                        // Agregar nuevo registro
+                        mapaExistente.set(id, item);
+                    }
+                });
+                
+                return Array.from(mapaExistente.values());
+            }
+            
+            // Fusionar configuración (usar la más reciente)
+            dbExistente.configuracion = {
+                ...dbExistente.configuracion,
+                ...dbImportado.configuracion
+            };
+            
+            // Fusionar caja chica
+            dbExistente.caja_chica = fusionarArrays(dbExistente.caja_chica || [], dbImportado.caja_chica || [], 'id');
+            
+            // Fusionar catálogo de vehículos
+            dbExistente.maquinaria_flota.vehiculos = fusionarArrays(
+                dbExistente.maquinaria_flota.vehiculos || [],
+                dbImportado.maquinaria_flota?.vehiculos || [],
+                'id'
+            );
+            
+            // Fusionar registros de maquinaria
+            dbExistente.maquinaria_flota.registros = fusionarArrays(
+                dbExistente.maquinaria_flota.registros || [],
+                dbImportado.maquinaria_flota?.registros || [],
+                'id'
+            );
+            
+            // Fusionar catálogo de trabajadores
+            dbExistente.personal.trabajadores = fusionarArrays(
+                dbExistente.personal.trabajadores || [],
+                dbImportado.personal?.trabajadores || [],
+                'id'
+            );
+            
+            // Fusionar asistencia (combinar por fecha y trabajador_id)
+            const asistenciaExistente = dbExistente.personal.asistencia || [];
+            const asistenciaImportada = dbImportado.personal?.asistencia || [];
+            
+            // Crear mapa de asistencia existente
+            const mapaAsistencia = new Map();
+            asistenciaExistente.forEach(dia => {
+                dia.registros.forEach(reg => {
+                    const clave = `${dia.fecha}_${reg.trabajador_id}`;
+                    mapaAsistencia.set(clave, { fecha: dia.fecha, registro: reg });
+                });
+            });
+            
+            // Agregar o actualizar asistencia importada
+            asistenciaImportada.forEach(dia => {
+                dia.registros.forEach(reg => {
+                    const clave = `${dia.fecha}_${reg.trabajador_id}`;
+                    mapaAsistencia.set(clave, { fecha: dia.fecha, registro: reg });
+                });
+            });
+            
+            // Reconstruir array de asistencia
+            const mapaDias = new Map();
+            mapaAsistencia.forEach(({ fecha, registro }) => {
+                if (!mapaDias.has(fecha)) {
+                    mapaDias.set(fecha, { fecha, registros: [] });
+                }
+                mapaDias.get(fecha).registros.push(registro);
+            });
+            
+            dbExistente.personal.asistencia = Array.from(mapaDias.values());
+            
+            // Fusionar catálogo de proveedores
+            dbExistente.adquisiciones.proveedores = fusionarArrays(
+                dbExistente.adquisiciones.proveedores || [],
+                dbImportado.adquisiciones?.proveedores || [],
+                'id'
+            );
+            
+            // Fusionar cotizaciones
+            dbExistente.adquisiciones.cotizaciones_compras = fusionarArrays(
+                dbExistente.adquisiciones.cotizaciones_compras || [],
+                dbImportado.adquisiciones?.cotizaciones_compras || [],
+                'id'
+            );
+            
+            return dbExistente;
+        }
+        
+        document.getElementById('import-json').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const dbImportado = JSON.parse(event.target.result);
+                        
+                        if (!confirm('📥 Importar base de datos:\n\n' +
+                            'Esta acción FUSIONARÁ los datos importados con los existentes.\n' +
+                            '- Los registros nuevos se agregarán\n' +
+                            '- Los registros existentes se actualizarán\n' +
+                            '- No se perderá información del día anterior\n\n' +
+                            '¿Desea continuar?')) {
+                            return;
+                        }
+                        
+                        const dbFusionado = importarBaseDatosConFusion(dbImportado);
+                        saveDB(dbFusionado);
+                        
+                        alert('✅ Base de datos importada y fusionada exitosamente.\nLos datos de días anteriores se han conservado.');
+                        location.reload();
+                    } catch (error) {
+                        console.error('Error al importar:', error);
+                        alert('❌ Error al importar el archivo JSON. Verifique que el formato sea correcto.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // ============================================
+        // REPORTES Y GENERACIÓN DE PDF/CSV
+        // ============================================
+        
+        function obtenerRangoSemana(fechaInput) {
+            const fecha = new Date(fechaInput + 'T00:00:00');
+            const diaSemana = fecha.getDay();
+            
+            const distanciaAlLunes = diaSemana === 0 ? -6 : 1 - diaSemana;
+            
+            const lunes = new Date(fecha);
+            lunes.setDate(fecha.getDate() + distanciaAlLunes);
+            
+            const domingo = new Date(lunes);
+            domingo.setDate(lunes.getDate() + 6);
+            
+            return {
+                inicio: lunes.toISOString().split('T')[0],
+                fin: domingo.toISOString().split('T')[0]
+            };
+        }
+        
+        function generarInformeSemanal(fechaCualquieraDeLaSemana) {
+            const rango = obtenerRangoSemana(fechaCualquieraDeLaSemana);
+            const db = getDB();
+            
+            const gastosSemanales = db.caja_chica.filter(g => g.fecha >= rango.inicio && g.fecha <= rango.fin);
+            const maquinasSemanales = db.maquinaria_flota.registros.filter(m => m.fecha >= rango.inicio && m.fecha <= rango.fin);
+            const asistenciaSemanal = db.personal.asistencia.filter(a => a.fecha >= rango.inicio && a.fecha <= rango.fin);
+            
+            return { gastosSemanales, maquinasSemanales, asistenciaSemanal, rango };
+        }
+        
+        function prepararContenedorImpresion(tituloReporte, tablaHTMLData) {
+            const db = getDB();
+            const logoBase64 = db.configuracion?.logo_base64 || "";
+            
+            const logoImg = document.getElementById('pdf-logo-membrete');
+            if (logoBase64 && logoBase64.length > 20 && logoBase64.startsWith('data:image')) {
+                try {
+                    logoImg.src = logoBase64;
+                    logoImg.style.display = 'block';
+                    
+                    // Manejar error de carga
+                    logoImg.onerror = function() {
+                        console.error('Error al cargar el logo en PDF');
+                        logoImg.style.display = 'none';
+                    };
+                } catch (error) {
+                    console.error('Error al asignar logo en PDF:', error);
+                    logoImg.style.display = 'none';
+                }
+            } else {
+                logoImg.style.display = 'none';
+            }
+            
+            // Configurar firmas autorizadas
+            const firmaJefe = document.getElementById('pdf-firma-jefe-proyectos');
+            const firmaGerente = document.getElementById('pdf-firma-gerente-comercial');
+            
+            // Las firmas ya están configuradas con src="wilson.png" y src="juan.png" en el HTML
+            // Aseguramos que sean visibles
+            if (firmaJefe) firmaJefe.style.display = 'block';
+            if (firmaGerente) firmaGerente.style.display = 'block';
+            
+            document.getElementById('pdf-tipo-reporte').innerText = tituloReporte.toUpperCase();
+            document.getElementById('pdf-fecha-emision').innerText = new Date().toLocaleDateString('es-ES');
+            
+            document.getElementById('pdf-contenido-dinamico').innerHTML = tablaHTMLData;
+            
+            return document.getElementById('plantilla-reporte-impresion');
+        }
+        
+        function generarCSVReporte(tipo, fecha) {
+            const db = getDB();
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            if (tipo === 'diario') {
+                csvContent += "Reporte Diario de Gastos - CONSTRURAMSA\n";
+                csvContent += "Fecha,Tipo,Categoría,Descripción,Monto (Q)\n";
+                
+                const gastosDelDia = db.caja_chica.filter(g => g.fecha === fecha);
+                gastosDelDia.forEach(g => {
+                    csvContent += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${g.monto}\n`;
+                });
+            } else if (tipo === 'semanal') {
+                const informe = generarInformeSemanal(fecha);
+                csvContent += `Informe Semanal (${informe.rango.inicio} - ${informe.rango.fin}) - CONSTRURAMSA\n`;
+                csvContent += "Fecha,Tipo,Categoría,Descripción,Monto (Q)\n";
+                
+                informe.gastosSemanales.forEach(g => {
+                    csvContent += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${g.monto}\n`;
+                });
+            } else if (tipo === 'asistencia') {
+                csvContent += "Reporte de Asistencia - CONSTRURAMSA\n";
+                csvContent += "Fecha,Trabajador,Puesto,Estado,Horas Extra,Sueldo Diario (Q)\n";
+                
+                db.personal.asistencia.forEach(dia => {
+                    dia.registros.forEach(reg => {
+                        const trabajador = db.personal.trabajadores.find(t => t.id === reg.trabajador_id);
+                        const nombre = trabajador ? trabajador.nombre : 'Desconocido';
+                        const puesto = trabajador ? trabajador.puesto : 'N/A';
+                        const sueldoDiario = reg.calculos ? reg.calculos.total_diario : 0;
+                        csvContent += `${dia.fecha},${nombre},${puesto},${reg.estado},${reg.horas_extras || reg.horas_extras_cantidad || 0},${sueldoDiario}\n`;
+                    });
+                });
+            }
+            
+            return csvContent;
+        }
+        
+        function generarHTMLReporte(tipo, fecha) {
+            const db = getDB();
+            let htmlContent = '';
+            
+            if (tipo === 'diario') {
+                htmlContent += '<h2 style="color: #004B93; border-bottom: 2px solid #004B93; padding-bottom: 10px;">Reporte Diario de Gastos</h2>';
+                htmlContent += `<p style="color: #6B7280; margin-bottom: 20px;">Fecha: ${fecha}</p>`;
+                
+                htmlContent += '<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th>Monto (Q)</th></tr></thead><tbody>';
+                
+                const gastosDelDia = db.caja_chica.filter(g => g.fecha === fecha);
+                let totalDia = 0;
+                
+                gastosDelDia.forEach(g => {
+                    htmlContent += `<tr><td>${g.fecha}</td><td>${g.tipo.toUpperCase()}</td><td>${g.categoria}</td><td>${g.descripcion}</td><td>${formatearMoneda(g.monto)}</td></tr>`;
+                    totalDia += g.monto;
+                });
+                
+                htmlContent += `<tr><td colspan="4" style="text-align: right; font-weight: bold;">TOTAL DEL DÍA:</td><td class="total-destacado">${formatearMoneda(totalDia)}</td></tr>`;
+                htmlContent += '</tbody></table>';
+                
+            } else if (tipo === 'semanal') {
+                const informe = generarInformeSemanal(fecha);
+                htmlContent += '<h2 style="color: #004B93; border-bottom: 2px solid #004B93; padding-bottom: 10px;">Informe Semanal Consolidado</h2>';
+                htmlContent += `<p style="color: #6B7280; margin-bottom: 20px;">Período: ${informe.rango.inicio} - ${informe.rango.fin}</p>`;
+                
+                htmlContent += '<h3 style="color: #004B93; font-size: 14px; margin-top: 20px;">Resumen de Gastos</h3>';
+                htmlContent += '<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th>Monto (Q)</th></tr></thead><tbody>';
+                
+                let totalSemana = 0;
+                informe.gastosSemanales.forEach(g => {
+                    htmlContent += `<tr><td>${g.fecha}</td><td>${g.tipo.toUpperCase()}</td><td>${g.categoria}</td><td>${g.descripcion}</td><td>${formatearMoneda(g.monto)}</td></tr>`;
+                    totalSemana += g.monto;
+                });
+                
+                htmlContent += `<tr><td colspan="4" style="text-align: right; font-weight: bold;">TOTAL SEMANAL:</td><td class="total-destacado">${formatearMoneda(totalSemana)}</td></tr>`;
+                htmlContent += '</tbody></table>';
+                
+            } else if (tipo === 'asistencia') {
+                htmlContent += '<h2 style="color: #004B93; border-bottom: 2px solid #004B93; padding-bottom: 10px;">Reporte de Asistencia y Horas Extra</h2>';
+                htmlContent += `<p style="color: #6B7280; margin-bottom: 20px;">Fecha de generación: ${new Date().toLocaleDateString('es-ES')}</p>`;
+                
+                htmlContent += '<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Trabajador</th><th>Puesto</th><th>Estado</th><th>Horas Extra</th><th>Sueldo Diario (Q)</th></tr></thead><tbody>';
+                
+                let totalNomina = 0;
+                db.personal.asistencia.forEach(dia => {
+                    dia.registros.forEach(reg => {
+                        const trabajador = db.personal.trabajadores.find(t => t.id === reg.trabajador_id);
+                        const nombre = trabajador ? trabajador.nombre : 'Desconocido';
+                        const puesto = trabajador ? trabajador.puesto : 'N/A';
+                        const sueldoDiario = reg.calculos ? reg.calculos.total_diario : 0;
+                        const horasExtras = reg.horas_extras || reg.horas_extras_cantidad || 0;
+                        
+                        htmlContent += `<tr><td>${dia.fecha}</td><td>${nombre}</td><td>${puesto}</td><td>${reg.estado.toUpperCase()}</td><td>${horasExtras}h</td><td>${formatearMoneda(sueldoDiario)}</td></tr>`;
+                        totalNomina += sueldoDiario;
+                    });
+                });
+                
+                htmlContent += `<tr><td colspan="5" style="text-align: right; font-weight: bold;">TOTAL NÓMINA:</td><td class="total-destacado">${formatearMoneda(totalNomina)}</td></tr>`;
+                htmlContent += '</tbody></table>';
+            }
+            
+            return htmlContent;
+        }
+        
+        async function compartirReporteWhatsApp() {
+            try {
+                const tipo = document.getElementById('reporte-tipo').value;
+                const fecha = document.getElementById('reporte-fecha').value;
+                const nombreReporte = `reporte_${tipo}_${fecha}`;
+                
+                const archivosParaCompartir = [];
+                
+                // Generar CSV
+                const csvContent = generarCSVReporte(tipo, fecha);
+                const blobCSV = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const archivoCSV = new File([blobCSV], `${nombreReporte}.csv`, { type: 'text/csv' });
+                archivosParaCompartir.push(archivoCSV);
+                
+                // Generar PDF
+                const htmlContent = generarHTMLReporte(tipo, fecha);
+                const contenedorImpresion = prepararContenedorImpresion(`Reporte ${tipo}`, htmlContent);
+                
+                const opciones = {
+                    margin: 10,
+                    filename: `${nombreReporte}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+                };
+                
+                const blobPDF = await html2pdf().set(opciones).from(contenedorImpresion).output('blob');
+                const archivoPDF = new File([blobPDF], `${nombreReporte}.pdf`, { type: 'application/pdf' });
+                archivosParaCompartir.push(archivoPDF);
+                
+                // Compartir archivos
+                if (navigator.canShare && navigator.canShare({ files: archivosParaCompartir })) {
+                    await navigator.share({
+                        files: archivosParaCompartir,
+                        title: `Reporte de Obra - ${nombreReporte}`,
+                        text: `Adjunto se envían los reportes de control de obra de CONSTRURAMSA.`
+                    });
+                } else {
+                    alert("Tu navegador no soporta compartir archivos directamente. Se procederá a descargarlos localmente.");
+                    descargarLocal(archivoCSV, archivoPDF);
+                }
+            } catch (error) {
+                console.error("Error al compartir en WhatsApp:", error);
+                alert("Error al compartir el reporte. Se descargarán los archivos localmente.");
+                generarReporteLocal();
+            }
+        }
+        
+        function descargarLocal(archivoCSV, archivoPDF) {
+            // Descargar CSV
+            const urlCSV = URL.createObjectURL(archivoCSV);
+            const aCSV = document.createElement('a');
+            aCSV.href = urlCSV;
+            aCSV.download = archivoCSV.name;
+            aCSV.click();
+            
+            // Descargar PDF
+            const urlPDF = URL.createObjectURL(archivoPDF);
+            const aPDF = document.createElement('a');
+            aPDF.href = urlPDF;
+            aPDF.download = archivoPDF.name;
+            aPDF.click();
+        }
+        
+        function generarReporteLocal() {
+            const tipo = document.getElementById('reporte-tipo').value;
+            const fecha = document.getElementById('reporte-fecha').value;
+            const nombreReporte = `reporte_${tipo}_${fecha}`;
+            
+            // Generar y descargar CSV
+            const csvContent = generarCSVReporte(tipo, fecha);
+            const blobCSV = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const urlCSV = URL.createObjectURL(blobCSV);
+            const aCSV = document.createElement('a');
+            aCSV.href = urlCSV;
+            aCSV.download = `${nombreReporte}.csv`;
+            aCSV.click();
+            
+            // Generar y descargar PDF
+            const htmlContent = generarHTMLReporte(tipo, fecha);
+            const contenedorImpresion = prepararContenedorImpresion(`Reporte ${tipo}`, htmlContent);
+            
+            const opciones = {
+                margin: 10,
+                filename: `${nombreReporte}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opciones).from(contenedorImpresion).save();
+        }
+        
+        function generarYCompartirReporte() {
+            compartirReporteWhatsApp();
+        }
+
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Intentar cargar datos del JSON existente si está disponible
+            cargarDatosDeArchivoExistente();
+            
+            // Inicializar base de datos si no existe
+            getDB();
+            
+            // Cargar datos iniciales
+            cargarLogo();
+            actualizarSaldoCajaChica();
+            cargarTablaCajaChica();
+            cargarTablaMaquinaria();
+            cargarListaAsistencia();
+            cargarTablaAsistencia();
+            cargarProveedores();
+            cargarTablaProveedores();
+            cargarTablaCotizaciones();
+            
+            // Establecer fecha actual en los campos de fecha
+            const fechaActual = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha-asistencia').value = fechaActual;
+            document.getElementById('reporte-fecha').value = fechaActual;
+            
+            // Actualizar valores iniciales con formato correcto
+            document.getElementById('saldo-caja-chica').textContent = formatearMoneda(0);
+            document.getElementById('lbl-costo-combustible').textContent = formatearMoneda(0);
+            document.getElementById('lbl-gasto-total').textContent = formatearMoneda(0);
+            
+            // Cargar presupuesto inicial si existe
+            const db = getDB();
+            if (db.configuracion?.presupuesto_inicial_caja) {
+                document.getElementById('config-presupuesto').value = db.configuracion.presupuesto_inicial_caja;
+            }
+        });
+        
+        function cargarDatosDeArchivoExistente() {
+            // Verificar si existe el archivo JSON y cargarlo si LocalStorage está vacío
+            if (!localStorage.getItem(DB_KEY)) {
+                fetch('construramsa_db.json')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Archivo no encontrado');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const dbMigrado = migrarDB(data);
+                        saveDB(dbMigrado);
+                        console.log('Datos cargados desde construramsa_db.json');
+                        location.reload(); // Recargar para aplicar los datos
+                    })
+                    .catch(error => {
+                        console.log('No se encontró archivo JSON existente, se iniciará con base de datos vacía');
+                    });
+            }
+        }
+
+        // ============================================
+        // SERVICE WORKER PARA PWA
+        // ============================================
+        
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').then(function(registration) {
+                    console.log('Service Worker registrado con éxito:', registration.scope);
+                }, function(error) {
+                    console.log('Error al registrar Service Worker:', error);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

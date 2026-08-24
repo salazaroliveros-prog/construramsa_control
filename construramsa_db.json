@@ -1,0 +1,89 @@
+{
+  "configuracion": {
+    "nombre_empresa": "CONSTRURAMSA",
+    "eslogan": "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
+    "logo_base64": "data:image/png;base64,iVBORw0KGgoAAAANSU...", 
+    "presupuesto_inicial_caja": 5000.00
+  },
+  "caja_chica": [
+    {
+      "id": "caja-1718234567",
+      "fecha": "2026-08-24",
+      "tipo": "egreso",
+      "categoria": "Ferretería",
+      "descripcion": "Compra de clavos de 3 pulgadas y alambre de amarre",
+      "monto": 150.50,
+      "responsable": "Ing. Carlos Mendoza"
+    }
+  ],
+  "maquinaria_flota": {
+    "vehiculos": [
+      {
+        "id": "maq-01",
+        "tipo": "Retroexcavadora",
+        "codigo": "RETRO-01",
+        "marca_modelo": "Caterpillar 420F"
+      }
+    ],
+    "registros": [
+      {
+        "id": "reg-maq-1718235000",
+        "vehiculo_id": "maq-01",
+        "fecha": "2026-08-24",
+        "odometro_inicial": 1250.0,
+        "odometro_final": 1258.5,
+        "horas_trabajadas": 8.5,
+        "combustible_galones": 12.0,
+        "combustible_costo": 48.00,
+        "mantenimiento_detalles": "Cambio de filtro de aire de cabina",
+        "mantenimiento_costo": 35.00
+      }
+    ]
+  },
+  "personal": {
+    "trabajadores": [
+      {
+        "id": "trab-01",
+        "nombre": "Juan Pérez",
+        "puesto": "Operador de Retroexcavadora",
+        "pago_hora_normal": 10.00,
+        "pago_hora_extra": 15.00
+      }
+    ],
+    "asistencia": [
+      {
+        "fecha": "2026-08-24",
+        "registros": [
+          {
+            "trabajador_id": "trab-01",
+            "estado": "asistio", 
+            "horas_extras": 2
+          }
+        ]
+      }
+    ]
+  },
+  "adquisiciones": {
+    "proveedores": [
+      {
+        "id": "prov-01",
+        "nombre": "Materiales El Progreso",
+        "contacto": "Luis Gómez",
+        "telefono": "+50255551234",
+        "especialidad": "Agregados y Cemento"
+      }
+    ],
+    "cotizaciones_compras": [
+      {
+        "id": "cot-1718236000",
+        "fecha": "2026-08-24",
+        "proveedor_id": "prov-01",
+        "material_descripcion": "50 sacos de Cemento UGC",
+        "precio_unitario": 11.50,
+        "cantidad": 50,
+        "total": 575.00,
+        "estado": "aprobada" 
+      }
+    ]
+  }
+}
