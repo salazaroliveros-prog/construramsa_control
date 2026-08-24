@@ -7,7 +7,8 @@
     <meta name="description" content="Sistema de control de gastos y gestión de obra para CONSTRURAMSA">
     <meta name="theme-color" content="#090a0f">
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" href="/wilson.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/icon.png" sizes="192x192">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -1659,22 +1660,37 @@
         function cargarLogo() {
             const db = getDB();
             const logoBase64 = db.configuracion?.logo_base64;
-            
+
             if (logoBase64 && logoBase64.length > 20 && logoBase64.startsWith('data:image')) {
                 try {
                     const headerLogo = document.getElementById('header-logo');
                     headerLogo.src = logoBase64;
                     headerLogo.style.display = 'block';
-                    
+
                     // Manejar error de carga
                     headerLogo.onerror = function() {
                         console.error('Error al cargar el logo base64');
-                        headerLogo.style.display = 'none';
+                        cargarLogoPorDefecto();
                     };
                 } catch (error) {
                     console.error('Error al asignar logo base64:', error);
+                    cargarLogoPorDefecto();
                 }
+            } else {
+                // Cargar logo por defecto
+                cargarLogoPorDefecto();
             }
+        }
+
+        function cargarLogoPorDefecto() {
+            const headerLogo = document.getElementById('header-logo');
+            headerLogo.src = 'icon.png';
+            headerLogo.style.display = 'block';
+
+            headerLogo.onerror = function() {
+                console.error('Error al cargar el logo por defecto');
+                headerLogo.style.display = 'none';
+            };
         }
         
         function guardarLogo(base64) {
@@ -1691,8 +1707,7 @@
                 db.configuracion.logo_base64 = "";
                 saveDB(db);
             }
-            document.getElementById('header-logo').style.display = 'none';
-            document.getElementById('header-logo').src = "";
+            cargarLogoPorDefecto();
         }
 
         // Event Listeners para carga de logo
@@ -3042,26 +3057,30 @@
         function prepararContenedorImpresion(tituloReporte, tablaHTMLData) {
             const db = getDB();
             const logoBase64 = db.configuracion?.logo_base64 || "";
-            
+
             const logoImg = document.getElementById('pdf-logo-membrete');
             if (logoBase64 && logoBase64.length > 20 && logoBase64.startsWith('data:image')) {
                 try {
                     logoImg.src = logoBase64;
                     logoImg.style.display = 'block';
-                    
+
                     // Manejar error de carga
                     logoImg.onerror = function() {
                         console.error('Error al cargar el logo en PDF');
-                        logoImg.style.display = 'none';
+                        logoImg.src = 'icon.png';
+                        logoImg.style.display = 'block';
                     };
                 } catch (error) {
                     console.error('Error al asignar logo en PDF:', error);
-                    logoImg.style.display = 'none';
+                    logoImg.src = 'icon.png';
+                    logoImg.style.display = 'block';
                 }
             } else {
-                logoImg.style.display = 'none';
+                // Usar logo por defecto
+                logoImg.src = 'icon.png';
+                logoImg.style.display = 'block';
             }
-            
+
             // Configurar firmas autorizadas
             const firmaJefe = document.getElementById('pdf-firma-jefe-proyectos');
             const firmaGerente = document.getElementById('pdf-firma-gerente-comercial');
