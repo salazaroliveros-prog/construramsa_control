@@ -2411,10 +2411,24 @@
         
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('sw.js').then(function(registration) {
+                navigator.serviceWorker.register('/sw.js', {
+                    scope: '/'
+                }).then(function(registration) {
                     console.log('Service Worker registrado con éxito:', registration.scope);
+                    // Notificar al usuario de actualización
+                    registration.addEventListener('updatefound', function() {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Nueva versión disponible
+                                if (confirm('Hay una nueva versión de la aplicación. ¿Desea actualizar?')) {
+                                    newWorker.postMessage({ action: 'skipWaiting' });
+                                }
+                            }
+                        });
+                    });
                 }, function(error) {
-                    console.log('Error al registrar Service Worker:', error);
+                    console.warn('Service Worker no soportado o error al registrar:', error);
                 });
             });
         }
