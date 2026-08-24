@@ -6,9 +6,9 @@
     <title>CONSTRURAMSA - Control de Obra</title>
     <meta name="description" content="Sistema de control de gastos y gestión de obra para CONSTRURAMSA">
     <meta name="theme-color" content="#090a0f">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" href="/icon.png" sizes="192x192">
-    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="./icon.png" sizes="192x192">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -1060,7 +1060,7 @@
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; border-bottom: 3px solid #004B93;">
             <tr>
                 <td style="width: 25%; padding-bottom: 15px; vertical-align: middle;">
-                    <img id="pdf-logo-membrete" src="" alt="CONSTRURAMSA LOGO" style="max-height: 85px; width: auto; object-fit: contain;" />
+                    <img id="pdf-logo-membrete" src="./icon.png" alt="CONSTRURAMSA LOGO" style="max-height: 85px; width: auto; object-fit: contain;" />
                 </td>
                 <td style="width: 50%; text-align: center; padding-bottom: 15px; vertical-align: middle;">
                     <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px; color: #004B93; text-transform: uppercase;">CONSTRURAMSA</h1>
@@ -1684,7 +1684,7 @@
 
         function cargarLogoPorDefecto() {
             const headerLogo = document.getElementById('header-logo');
-            headerLogo.src = 'icon.png';
+            headerLogo.src = './icon.png';
             headerLogo.style.display = 'block';
 
             headerLogo.onerror = function() {
@@ -3067,17 +3067,17 @@
                     // Manejar error de carga
                     logoImg.onerror = function() {
                         console.error('Error al cargar el logo en PDF');
-                        logoImg.src = 'icon.png';
+                        logoImg.src = './icon.png';
                         logoImg.style.display = 'block';
                     };
                 } catch (error) {
                     console.error('Error al asignar logo en PDF:', error);
-                    logoImg.src = 'icon.png';
+                    logoImg.src = './icon.png';
                     logoImg.style.display = 'block';
                 }
             } else {
                 // Usar logo por defecto
-                logoImg.src = 'icon.png';
+                logoImg.src = './icon.png';
                 logoImg.style.display = 'block';
             }
 
