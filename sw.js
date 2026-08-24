@@ -1,71 +1,104 @@
-const CACHE_NAME = 'construramsa-v1';
+// ============================================================
+// SERVICE WORKER — CONSTRURAMSA Control de Obra v1.1.0
+// Estrategia: Network First con fallback a Cache
+// ============================================================
+
+const CACHE_NAME = 'construramsa-v1.1.0';
+
 const urlsToCache = [
     './',
     './index.html',
     './manifest.json',
-    './wilson.png',
-    './juan.png',
+    './construramsa_db.json',
     './icon.png',
     './icon.svg',
+    './wilson.png',
+    './juan.png',
     'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
 ];
 
-// Instalación del Service Worker
-self.addEventListener('install', function(event) {
+// ── Instalación ───────────────────────────────────────────────
+self.addEventListener('install', function (event) {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(function(cache) {
-                console.log('Cache abierto');
-                return cache.addAll(urlsToCache);
+            .then(function (cache) {
+                console.log('[SW] Instalando cache:', CACHE_NAME);
+                const locales = urlsToCache.filter(u => !u.startsWith('http'));
+                const remotos = urlsToCache.filter(u => u.startsWith('http'));
+                return cache.addAll(locales)
+                    .then(() => Promise.allSettled(remotos.map(u => cache.add(u))));
             })
+            .then(() => self.skipWaiting())
     );
 });
 
-// Activación del Service Worker
-self.addEventListener('activate', function(event) {
+// ── Activación ───────────────────────────────────────────────
+self.addEventListener('activate', function (event) {
     event.waitUntil(
-        caches.keys().then(function(cacheNames) {
-            return Promise.all(
-                cacheNames.map(function(cacheName) {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Borrando cache antiguo:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
+        caches.keys()
+            .then(function (names) {
+                return Promise.all(
+                    names.filter(n => n !== CACHE_NAME)
+                         .map(n => { console.log('[SW] Eliminando cache obsoleto:', n); return caches.delete(n); })
+                );
+            })
+            .then(() => self.clients.claim())
     );
 });
 
-// Estrategia de Cache: Network First con fallback a Cache
-self.addEventListener('fetch', function(event) {
+// ── Fetch: Network First, fallback a Cache ────────────────────
+self.addEventListener('fetch', function (event) {
+    if (event.request.method !== 'GET') return;
+    if (event.request.url.startsWith('chrome-extension://')) return;
+
+    // Normalizar URLs con query params de shortcuts PWA al index.html cacheado
+    const url = new URL(event.request.url);
+    const esNavegacion = event.request.mode === 'navigate' ||
+                         event.request.destination === 'document';
+
+    // Si es navegación al index con ?module= o ?source=, servir index.html del cache
+    // (los parámetros los lee el JS en el cliente, no el servidor)
+    if (esNavegacion && url.pathname.endsWith('index.html')) {
+        event.respondWith(
+            fetch(event.request)
+                .then(function (response) {
+                    if (response && response.status === 200) {
+                        const clone = response.clone();
+                        caches.open(CACHE_NAME).then(c => c.put('./index.html', clone));
+                    }
+                    return response;
+                })
+                .catch(function () {
+                    return caches.match('./index.html');
+                })
+        );
+        return;
+    }
+
     event.respondWith(
         fetch(event.request)
-            .then(function(response) {
-                // Si la respuesta es válida, clonarla y cachearla
-                if (!response || response.status !== 200 || response.type !== 'basic') {
-                    return response;
-                }
+            .then(function (response) {
+                if (!response || response.status !== 200) return response;
+                if (response.type !== 'basic' && response.type !== 'opaque') return response;
 
-                const responseToCache = response.clone();
-
-                caches.open(CACHE_NAME)
-                    .then(function(cache) {
-                        cache.put(event.request, responseToCache);
-                    });
-
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
                 return response;
             })
-            .catch(function() {
-                // Si falla la red, intentar obtener del cache
-                return caches.match(event.request);
+            .catch(function () {
+                return caches.match(event.request)
+                    .then(function (cached) {
+                        if (cached) return cached;
+                        // Fallback: cualquier navegación sin red → index.html
+                        if (esNavegacion) return caches.match('./index.html');
+                    });
             })
     );
 });
 
-// Manejo de mensajes para sincronización en segundo plano
-self.addEventListener('message', function(event) {
-    if (event.data.action === 'skipWaiting') {
+// ── Mensajes ─────────────────────────────────────────────────
+self.addEventListener('message', function (event) {
+    if (event.data && event.data.action === 'skipWaiting') {
         self.skipWaiting();
     }
 });

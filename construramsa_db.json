@@ -2,9 +2,12 @@
   "configuracion": {
     "nombre_empresa": "CONSTRURAMSA",
     "eslogan": "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
-    "logo_base64": "data:image/png;base64,iVBORw0KGgoAAAANSU...", 
-    "presupuesto_inicial_caja": 5000.00
+    "logo_base64": "",
+    "presupuesto_inicial_caja": 5000.00,
+    "proyecto_actual": null
   },
+  "proyectos": [],
+  "proyectos_data": {},
   "caja_chica": [
     {
       "id": "caja-1718234567",
@@ -56,8 +59,14 @@
         "registros": [
           {
             "trabajador_id": "trab-01",
-            "estado": "asistio", 
-            "horas_extras": 2
+            "estado": "asistio",
+            "horas_extras": 2,
+            "horas_extras_cantidad": 2,
+            "calculos": {
+              "pago_normal": 80.00,
+              "pago_extra": 30.00,
+              "total_diario": 110.00
+            }
           }
         ]
       }
@@ -82,7 +91,7 @@
         "precio_unitario": 11.50,
         "cantidad": 50,
         "total": 575.00,
-        "estado": "aprobada" 
+        "estado": "aprobada"
       }
     ]
   }

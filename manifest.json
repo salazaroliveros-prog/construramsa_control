@@ -1,13 +1,20 @@
 {
   "name": "CONSTRURAMSA Control de Obra",
   "short_name": "CONSTRURAMSA",
-  "description": "Sistema de control de gastos y gestión de obra para CONSTRURAMSA",
-  "start_url": "./index.html",
+  "description": "Sistema de control de gastos y gestión de obra para CONSTRURAMSA. 100% offline.",
+  "start_url": "./index.html?source=pwa",
+  "id": "./index.html",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "background_color": "#090a0f",
   "theme_color": "#090a0f",
   "orientation": "any",
   "scope": "./",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "finance"],
+  "prefer_related_applications": false,
+
   "icons": [
     {
       "src": "./icon.png",
@@ -17,18 +24,51 @@
     },
     {
       "src": "./icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "./icon.png",
-      "sizes": "192x192",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
-  "categories": ["business", "productivity", "finance"],
-  "lang": "es",
-  "dir": "ltr"
+
+  "shortcuts": [
+    {
+      "name": "Caja Chica",
+      "short_name": "Caja",
+      "description": "Registrar movimientos de caja chica",
+      "url": "./index.html?module=caja-chica&source=shortcut",
+      "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Maquinaria",
+      "short_name": "Maquinaria",
+      "description": "Registrar uso de maquinaria y flota",
+      "url": "./index.html?module=maquinaria&source=shortcut",
+      "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Reportes",
+      "short_name": "Reportes",
+      "description": "Generar reportes PDF y CSV",
+      "url": "./index.html?module=reportes&source=shortcut",
+      "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
 }
