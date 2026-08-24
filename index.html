@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CONSTRURAMSA - Control de Obra</title>
     <meta name="description" content="Sistema de control de gastos y gestión de obra para CONSTRURAMSA">
     <meta name="theme-color" content="#090a0f">
@@ -91,6 +91,11 @@
             transform: scale(0.98);
         }
 
+        .btn-primario:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 164, 228, 0.3);
+        }
+
         .btn-secundario {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid var(--glass-border);
@@ -104,6 +109,11 @@
 
         .btn-secundario:hover {
             background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-secundario:active {
+            transform: scale(0.98);
         }
 
         .container {
@@ -176,10 +186,22 @@
 
         .module {
             display: none;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
         .module.active {
             display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         table {
@@ -276,6 +298,70 @@
             .company-name {
                 font-size: 18px;
             }
+
+            /* Responsividad de formularios - convertir grids de 2 columnas a 1 columna */
+            [style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Ajuste específico para el grid de 3 columnas en asistencia */
+            [style*="grid-template-columns: 1fr 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Mejorar espaciado en formularios móviles */
+            form {
+                gap: 10px;
+            }
+
+            /* Ajustar tamaño de fuentes en móviles */
+            .tarjeta-glass {
+                padding: 15px;
+            }
+
+            /* Botones más grandes en móvil para mejor toque */
+            button {
+                min-height: 44px;
+            }
+
+            /* Responsividad de tablas para móvil */
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 8px 4px;
+            }
+
+            /* Scroll horizontal controlado para tablas */
+            .overflow-x-auto {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -15px;
+                padding: 0 15px;
+            }
+
+            /* Ajustar anchos de columnas en móvil */
+            th:nth-child(1), td:nth-child(1) { /* Fecha */
+                min-width: 80px;
+            }
+            th:nth-child(2), td:nth-child(2) { /* Tipo/Nombre */
+                min-width: 100px;
+            }
+            th:nth-child(3), td:nth-child(3) { /* Categoría/Unidad */
+                min-width: 80px;
+            }
+            th:nth-child(4), td:nth-child(4) { /* Descripción/Código */
+                min-width: 120px;
+            }
+            th:nth-child(5), td:nth-child(5) { /* Monto/Trabajado */
+                min-width: 80px;
+                text-align: right;
+            }
+            th:nth-child(6), td:nth-child(6) { /* Acciones */
+                min-width: 120px;
+                text-align: center;
+            }
         }
 
         .config-section {
@@ -305,40 +391,300 @@
         .hidden {
             display: none !important;
         }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Spinner de carga */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--acento-cian);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 15px 20px;
+            color: var(--texto-principal);
+            font-size: 14px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--exito);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--alerta);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--acento-cian);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Tooltips de ayuda */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--texto-principal);
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Overlay de carga */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(9, 10, 15, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay .spinner {
+            width: 48px;
+            height: 48px;
+            border-width: 4px;
+        }
+
+        .loading-overlay .loading-text {
+            color: var(--texto-principal);
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        /* Modal de confirmación personalizado */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-title {
+            color: var(--acento-cian);
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .modal-message {
+            color: var(--texto-principal);
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
+    <!-- Contenedor de Toasts -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Overlay de Carga -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div style="text-align: center;">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loading-text">Procesando...</div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modal-title" class="modal-title">Confirmación</h3>
+            <p id="modal-message" class="modal-message">¿Está seguro de realizar esta acción?</p>
+            <div class="modal-buttons">
+                <button id="modal-cancel" class="btn-secundario">Cancelar</button>
+                <button id="modal-confirm" class="btn-primario">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Proyecto -->
+    <div id="modal-crear-proyecto" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="modal-title">📁 Crear Nuevo Proyecto</h3>
+            <div style="margin-bottom: 15px;">
+                <label for="proyecto-nombre" style="display: block; margin-bottom: 5px; color: var(--texto-principal);">Nombre del Proyecto *</label>
+                <input type="text" id="proyecto-nombre" placeholder="Ej: Residencial Los Pinos" maxlength="100" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--texto-principal);" required>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="proyecto-descripcion" style="display: block; margin-bottom: 5px; color: var(--texto-principal);">Descripción</label>
+                <textarea id="proyecto-descripcion" placeholder="Descripción breve del proyecto" rows="3" maxlength="500" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--texto-principal);"></textarea>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label for="proyecto-presupuesto" style="display: block; margin-bottom: 5px; color: var(--texto-principal);">Presupuesto Inicial (Q)</label>
+                <input type="number" id="proyecto-presupuesto" placeholder="0.00" step="0.01" min="0" max="99999999" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--texto-principal);">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="cerrarModalCrearProyecto()" class="btn-secundario">Cancelar</button>
+                <button onclick="crearProyectoDesdeModal()" class="btn-primario">Crear Proyecto</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Header -->
-        <header class="header tarjeta-glass">
+        <header class="header tarjeta-glass" role="banner">
             <div class="logo-container">
-                <img id="header-logo" class="logo-img" src="" alt="CONSTRURAMSA" style="display: none;">
+                <img id="header-logo" class="logo-img" src="" alt="Logo CONSTRURAMSA" style="display: none;">
                 <div>
                     <h1 class="company-name">CONSTRURAMSA</h1>
                     <p class="slogan">Soluciones en Ingeniería y Arquitectura</p>
+                    <p id="nombre-proyecto-actual" style="margin: 5px 0 0 0; font-size: 13px; color: var(--acento-purpura); font-weight: 600;">Sin proyecto seleccionado</p>
                 </div>
             </div>
-            <div class="config-section">
-                <label class="file-label">
+            <div class="config-section" style="display: flex; gap: 10px; align-items: center;">
+                <select id="selector-proyectos" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--texto-principal); min-width: 200px;" aria-label="Seleccionar proyecto">
+                    <option value="">-- Seleccionar Proyecto --</option>
+                </select>
+                <button onclick="mostrarModalCrearProyecto()" class="btn-secundario" style="padding: 8px 16px;" data-tooltip="Crear nuevo proyecto">➕</button>
+                <label class="file-label" for="logo-input">
                     📷 Cargar Logo
-                    <input type="file" id="logo-input" class="file-input" accept="image/*">
+                    <input type="file" id="logo-input" class="file-input" accept="image/*" aria-label="Cargar logo de la empresa">
                 </label>
             </div>
         </header>
 
         <!-- Navegación -->
-        <nav class="nav-tabs">
-            <button class="nav-tab active" data-module="caja-chica">💰 Caja Chica</button>
-            <button class="nav-tab" data-module="maquinaria">🚜 Maquinaria</button>
-            <button class="nav-tab" data-module="personal">👷 Personal</button>
-            <button class="nav-tab" data-module="adquisiciones">📋 Adquisiciones</button>
-            <button class="nav-tab" data-module="reportes">📊 Reportes</button>
-            <button class="nav-tab" data-module="configuracion">⚙️ Configuración</button>
+        <nav class="nav-tabs" role="navigation" aria-label="Navegación principal de módulos">
+            <button class="nav-tab active" data-module="caja-chica" aria-current="page" aria-label="Módulo Caja Chica">💰 Caja Chica</button>
+            <button class="nav-tab" data-module="maquinaria" aria-label="Módulo Maquinaria">🚜 Maquinaria</button>
+            <button class="nav-tab" data-module="personal" aria-label="Módulo Personal">👷 Personal</button>
+            <button class="nav-tab" data-module="adquisiciones" aria-label="Módulo Adquisiciones">📋 Adquisiciones</button>
+            <button class="nav-tab" data-module="reportes" aria-label="Módulo Reportes">📊 Reportes</button>
+            <button class="nav-tab" data-module="configuracion" aria-label="Módulo Configuración">⚙️ Configuración</button>
         </nav>
 
         <!-- Módulo Caja Chica -->
-        <div id="caja-chica" class="module active tarjeta-glass">
-            <h2 style="color: var(--acento-cian); margin-top: 0;">💰 Caja Chica e Insumos</h2>
+        <div id="caja-chica" class="module active tarjeta-glass" role="region" aria-labelledby="caja-chica-title">
+            <h2 id="caja-chica-title" style="color: var(--acento-cian); margin-top: 0;">💰 Caja Chica e Insumos</h2>
             
             <div style="margin-bottom: 20px; padding: 15px; background: rgba(0, 164, 228, 0.1); border-radius: 8px; border: 1px solid var(--acento-cian);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -347,18 +693,18 @@
                 </div>
             </div>
 
-            <form id="form-caja-chica" style="margin-bottom: 25px;">
+            <form id="form-caja-chica" style="margin-bottom: 25px;" aria-label="Formulario de registro de movimientos de caja chica">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
-                        <label>Tipo de Movimiento</label>
-                        <select id="caja-tipo" required>
+                        <label for="caja-tipo">Tipo de Movimiento</label>
+                        <select id="caja-tipo" required aria-required="true">
                             <option value="ingreso">Ingreso (Apertura/Fondo)</option>
                             <option value="egreso">Egreso (Gasto)</option>
                         </select>
                     </div>
                     <div>
-                        <label>Categoría</label>
-                        <select id="caja-categoria" required>
+                        <label for="caja-categoria">Categoría</label>
+                        <select id="caja-categoria" required aria-required="true">
                             <option value="apertura">Apertura de Caja</option>
                             <option value="comida">Comida</option>
                             <option value="ferreteria">Ferretería</option>
@@ -370,27 +716,27 @@
                     </div>
                 </div>
                 <div style="margin-bottom: 15px;">
-                    <label>Descripción</label>
-                    <input type="text" id="caja-descripcion" placeholder="Descripción del movimiento" required>
+                    <label for="caja-descripcion">Descripción</label>
+                    <input type="text" id="caja-descripcion" placeholder="Descripción del movimiento" required aria-required="true" maxlength="200">
                 </div>
                 <div style="margin-bottom: 15px;">
-                    <label>Monto (Q)</label>
-                    <input type="number" step="0.01" id="caja-monto" required>
+                    <label for="caja-monto">Monto (Q)</label>
+                    <input type="number" step="0.01" id="caja-monto" required aria-required="true" min="0" max="999999">
                 </div>
-                <button type="submit" class="btn-primario" style="width: 100%;">💾 Registrar Movimiento</button>
+                <button type="submit" class="btn-primario" style="width: 100%;" data-tooltip="Registrar nuevo movimiento en caja chica">💾 Registrar Movimiento</button>
             </form>
 
             <h3 style="color: var(--texto-principal); font-size: 16px;">📜 Historial de Movimientos</h3>
             <div style="overflow-x: auto;">
-                <table id="tabla-caja-chica">
+                <table id="tabla-caja-chica" aria-label="Tabla de historial de movimientos de caja chica">
                     <thead>
                         <tr>
-                            <th>Fecha</th>
-                            <th>Tipo</th>
-                            <th>Categoría</th>
-                            <th>Descripción</th>
-                            <th>Monto</th>
-                            <th>Acciones</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Categoría</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Monto</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-caja-chica-cuerpo">
@@ -401,57 +747,57 @@
         </div>
 
         <!-- Módulo Maquinaria -->
-        <div id="maquinaria" class="module tarjeta-glass">
-            <h2 style="color: var(--acento-cian); margin-top: 0;">🚜 Control de Maquinaria y Flota</h2>
+        <div id="maquinaria" class="module tarjeta-glass" role="region" aria-labelledby="maquinaria-title">
+            <h2 id="maquinaria-title" style="color: var(--acento-cian); margin-top: 0;">🚜 Control de Maquinaria y Flota</h2>
             <p style="color: var(--texto-secundario); font-size: 13px;">Registra el uso, consumo de combustible y mantenimiento de las unidades.</p>
             
-            <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()">
+            <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()" aria-label="Formulario de registro de maquinaria">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
-                        <label>Tipo de Unidad</label>
-                        <select id="maq-tipo" required>
+                        <label for="maq-tipo">Tipo de Unidad</label>
+                        <select id="maq-tipo" required aria-required="true">
                             <option value="retroexcavadora">Retroexcavadora (Horas)</option>
                             <option value="camion">Camión de Volteo (Km)</option>
                         </select>
                     </div>
                     <div>
-                        <label>Código/Placa</label>
-                        <input type="text" id="maq-codigo" placeholder="Ej: RETRO-01" required>
+                        <label for="maq-codigo">Código/Placa</label>
+                        <input type="text" id="maq-codigo" placeholder="Ej: RETRO-01" required aria-required="true" maxlength="20">
                     </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
-                        <label id="lbl-inicial">Horómetro/Odómetro Inicial</label>
-                        <input type="number" step="0.1" id="maq-val-inicial" required>
+                        <label id="lbl-inicial" for="maq-val-inicial">Horómetro/Odómetro Inicial</label>
+                        <input type="number" step="0.1" id="maq-val-inicial" required aria-required="true" min="0" max="999999">
                     </div>
                     <div>
-                        <label id="lbl-final">Horómetro/Odómetro Final</label>
-                        <input type="number" step="0.1" id="maq-val-final" required>
+                        <label id="lbl-final" for="maq-val-final">Horómetro/Odómetro Final</label>
+                        <input type="number" step="0.1" id="maq-val-final" required aria-required="true" min="0" max="999999">
                     </div>
                 </div>
-                <span id="maq-error-uso" style="color: var(--alerta); font-size: 12px; display: block; margin-top: -10px; margin-bottom: 10px;"></span>
+                <span id="maq-error-uso" style="color: var(--alerta); font-size: 12px; display: block; margin-top: -10px; margin-bottom: 10px;" role="alert"></span>
 
                 <h3 style="color: var(--acento-purpura); font-size: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">⛽ Combustible y Suministros</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
-                        <label>Galones Suministrados</label>
-                        <input type="number" step="0.01" id="maq-galones" value="0">
+                        <label for="maq-galones">Galones Suministrados</label>
+                        <input type="number" step="0.01" id="maq-galones" value="0" min="0" max="9999">
                     </div>
                     <div>
-                        <label>Precio por Galón</label>
-                        <input type="number" step="0.01" id="maq-precio-galon" value="0">
+                        <label for="maq-precio-galon">Precio por Galón</label>
+                        <input type="number" step="0.01" id="maq-precio-galon" value="0" min="0" max="999">
                     </div>
                 </div>
 
                 <h3 style="color: var(--acento-purpura); font-size: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">🔧 Mantenimiento y Repuestos</h3>
                 <div style="margin-bottom: 15px;">
-                    <label>Detalles del Mantenimiento / Piezas Cambiadas</label>
-                    <textarea id="maq-mantenimiento-detalles" rows="2" placeholder="Ej: Cambio de aceite hidráulico, filtro de motor..."></textarea>
+                    <label for="maq-mantenimiento-detalles">Detalles del Mantenimiento / Piezas Cambiadas</label>
+                    <textarea id="maq-mantenimiento-detalles" rows="2" placeholder="Ej: Cambio de aceite hidráulico, filtro de motor..." maxlength="500"></textarea>
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <label>Costo del Mantenimiento (Q)</label>
-                    <input type="number" step="0.01" id="maq-costo-mantenimiento" value="0">
+                    <label for="maq-costo-mantenimiento">Costo del Mantenimiento (Q)</label>
+                    <input type="number" step="0.01" id="maq-costo-mantenimiento" value="0" min="0" max="999999">
                 </div>
 
                 <!-- PANEL DE CÁLCULO EN TIEMPO REAL -->
@@ -462,7 +808,7 @@
                     <div>Gasto Total: <strong id="lbl-gasto-total" style="color: #fff; font-size: 14px;">Q0.00</strong></div>
                 </div>
 
-                <button type="submit" class="btn-primario" style="width: 100%;">💾 Guardar Registro de Maquinaria</button>
+                <button type="submit" class="btn-primario" style="width: 100%;" data-tooltip="Guardar registro de uso de maquinaria">💾 Guardar Registro de Maquinaria</button>
             </form>
 
             <h3 style="color: var(--texto-principal); font-size: 16px; margin-top: 25px;">📜 Historial de Maquinaria</h3>
@@ -488,50 +834,51 @@
         </div>
 
         <!-- Módulo Personal -->
-        <div id="personal" class="module tarjeta-glass">
-            <h2 style="color: var(--acento-cian); margin-top: 0;">👷 Control de Asistencia y Nómina</h2>
+        <div id="personal" class="module tarjeta-glass" role="region" aria-labelledby="personal-title">
+            <h2 id="personal-title" style="color: var(--acento-cian); margin-top: 0;">👷 Control de Asistencia y Nómina</h2>
             
             <!-- Sección de Catálogo de Trabajadores -->
             <div style="margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid var(--glass-border);">
                 <h3 style="color: var(--acento-purpura); font-size: 14px; margin-top: 0;">📝 Catálogo de Trabajadores</h3>
-                <form id="form-trabajador" style="margin-bottom: 15px;">
+                <form id="form-trabajador" style="margin-bottom: 15px;" aria-label="Formulario de registro de trabajadores">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="trab-nombre" placeholder="Nombre completo" required>
-                        <input type="text" id="trab-puesto" placeholder="Puesto" required>
+                        <input type="text" id="trab-nombre" placeholder="Nombre completo" required aria-required="true" maxlength="100">
+                        <input type="text" id="trab-puesto" placeholder="Puesto" required aria-required="true" maxlength="50">
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                        <input type="number" step="0.01" id="trab-pago-normal" placeholder="Pago hora normal (Q/h)" required>
-                        <input type="number" step="0.01" id="trab-pago-extra" placeholder="Pago hora extra (Q/h)" required>
+                        <input type="number" step="0.01" id="trab-pago-normal" placeholder="Pago hora normal (Q/h)" required aria-required="true" min="0" max="9999">
+                        <input type="number" step="0.01" id="trab-pago-extra" placeholder="Pago hora extra (Q/h)" required aria-required="true" min="0" max="9999">
                     </div>
-                    <button type="submit" class="btn-secundario" style="width: 100%; font-size: 12px;">➕ Agregar Trabajador</button>
+                    <button type="submit" class="btn-secundario" style="width: 100%; font-size: 12px;" data-tooltip="Agregar nuevo trabajador al catálogo">➕ Agregar Trabajador</button>
                 </form>
             </div>
 
             <!-- Sección de Asistencia Diaria -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="color: var(--texto-principal); font-size: 16px; margin: 0;">📋 Pase de Lista</h3>
-                <input type="date" id="fecha-asistencia" style="width: auto; padding: 6px 12px;" value="2026-08-24">
+                <label for="fecha-asistencia" class="visually-hidden">Fecha de asistencia</label>
+                <input type="date" id="fecha-asistencia" style="width: auto; padding: 6px 12px;" aria-label="Seleccionar fecha para pase de lista">
             </div>
 
             <div id="lista-asistencia-dinamica" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
                 <!-- Tarjetas de trabajadores dinámicas -->
             </div>
 
-            <button onclick="guardarAsistenciaDiaria(document.getElementById('fecha-asistencia').value)" class="btn-primario" style="width: 100%;">
+            <button onclick="guardarAsistenciaDiaria(document.getElementById('fecha-asistencia').value)" class="btn-primario" style="width: 100%;" data-tooltip="Guardar asistencia y calcular nómina del día">
                 ✅ Cerrar y Guardar Planilla del Día
             </button>
 
             <h3 style="color: var(--texto-principal); font-size: 16px; margin-top: 25px;">📜 Historial de Asistencia</h3>
             <div style="overflow-x: auto;">
-                <table id="tabla-asistencia">
+                <table id="tabla-asistencia" aria-label="Tabla de historial de asistencia">
                     <thead>
                         <tr>
-                            <th>Fecha</th>
-                            <th>Trabajador</th>
-                            <th>Estado</th>
-                            <th>Horas Extra</th>
-                            <th>Sueldo Diario</th>
-                            <th>Acciones</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Trabajador</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Horas Extra</th>
+                            <th scope="col">Sueldo Diario</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-asistencia-cuerpo">
@@ -542,32 +889,32 @@
         </div>
 
         <!-- Módulo Adquisiciones -->
-        <div id="adquisiciones" class="module tarjeta-glass">
-            <h2 style="color: var(--acento-cian); margin-top: 0;">📋 Adquisiciones y Cotizaciones</h2>
+        <div id="adquisiciones" class="module tarjeta-glass" role="region" aria-labelledby="adquisiciones-title">
+            <h2 id="adquisiciones-title" style="color: var(--acento-cian); margin-top: 0;">📋 Adquisiciones y Cotizaciones</h2>
             
             <!-- Directorio de Proveedores -->
             <div style="margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid var(--glass-border);">
                 <h3 style="color: var(--acento-purpura); font-size: 14px; margin-top: 0;">🏢 Directorio de Proveedores</h3>
-                <form id="form-proveedor" style="margin-bottom: 15px;">
+                <form id="form-proveedor" style="margin-bottom: 15px;" aria-label="Formulario de registro de proveedores">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="prov-nombre" placeholder="Nombre del proveedor" required>
-                        <input type="text" id="prov-telefono" placeholder="Teléfono" required>
+                        <input type="text" id="prov-nombre" placeholder="Nombre del proveedor" required aria-required="true" maxlength="100">
+                        <input type="text" id="prov-telefono" placeholder="Teléfono" required aria-required="true" maxlength="20">
                     </div>
-                    <input type="text" id="prov-especialidad" placeholder="Especialidad" required style="margin-bottom: 10px;">
-                    <button type="submit" class="btn-secundario" style="width: 100%; font-size: 12px;">➕ Agregar Proveedor</button>
+                    <input type="text" id="prov-especialidad" placeholder="Especialidad" required aria-required="true" maxlength="50" style="margin-bottom: 10px;">
+                    <button type="submit" class="btn-secundario" style="width: 100%; font-size: 12px;" data-tooltip="Agregar nuevo proveedor al directorio">➕ Agregar Proveedor</button>
                 </form>
             </div>
 
             <!-- Tabla de Proveedores -->
             <h3 style="color: var(--texto-principal); font-size: 16px; margin-top: 15px;">📋 Lista de Proveedores</h3>
             <div style="overflow-x: auto;">
-                <table id="tabla-proveedores">
+                <table id="tabla-proveedores" aria-label="Tabla de lista de proveedores">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Teléfono</th>
-                            <th>Especialidad</th>
-                            <th>Acciones</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Teléfono</th>
+                            <th scope="col">Especialidad</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-proveedores-cuerpo">
@@ -577,43 +924,43 @@
             </div>
 
             <!-- Formulario de Cotización -->
-            <form id="form-cotizacion" style="margin-bottom: 25px;">
+            <form id="form-cotizacion" style="margin-bottom: 25px;" aria-label="Formulario de registro de cotizaciones">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
-                        <label>Proveedor</label>
-                        <select id="cot-proveedor" required>
+                        <label for="cot-proveedor">Proveedor</label>
+                        <select id="cot-proveedor" required aria-required="true">
                             <option value="">Seleccionar proveedor...</option>
                         </select>
                     </div>
                     <div>
-                        <label>Material / Insumo</label>
-                        <input type="text" id="cot-material" placeholder="Ej: 50 sacos de Cemento" required>
+                        <label for="cot-material">Material / Insumo</label>
+                        <input type="text" id="cot-material" placeholder="Ej: 50 sacos de Cemento" required aria-required="true" maxlength="200">
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
-                        <label>Precio Unitario (Q)</label>
-                        <input type="number" step="0.01" id="cot-precio" required>
+                        <label for="cot-precio">Precio Unitario (Q)</label>
+                        <input type="number" step="0.01" id="cot-precio" required aria-required="true" min="0" max="999999">
                     </div>
                     <div>
-                        <label>Cantidad</label>
-                        <input type="number" id="cot-cantidad" required>
+                        <label for="cot-cantidad">Cantidad</label>
+                        <input type="number" id="cot-cantidad" required aria-required="true" min="1" max="99999">
                     </div>
                 </div>
-                <button type="submit" class="btn-primario" style="width: 100%;">📊 Registrar Cotización</button>
+                <button type="submit" class="btn-primario" style="width: 100%;" data-tooltip="Registrar nueva cotización de material">📊 Registrar Cotización</button>
             </form>
 
             <!-- Cuadro Comparativo -->
             <h3 style="color: var(--texto-principal); font-size: 16px;">🔍 Cuadro Comparativo de Ofertas</h3>
             <div style="overflow-x: auto;">
-                <table id="tabla-cotizaciones">
+                <table id="tabla-cotizaciones" aria-label="Tabla de cuadro comparativo de ofertas">
                     <thead>
                         <tr>
-                            <th>Material</th>
-                            <th>Proveedor</th>
-                            <th>Total (Q)</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
+                            <th scope="col">Material</th>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col">Total (Q)</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-cotizaciones-cuerpo">
@@ -624,52 +971,63 @@
         </div>
 
         <!-- Módulo Reportes -->
-        <div id="reportes" class="module tarjeta-glass">
-            <h2 style="color: var(--acento-cian); margin-top: 0;">📊 Generación de Reportes</h2>
-            
+        <div id="reportes" class="module tarjeta-glass" role="region" aria-labelledby="reportes-title">
+            <h2 id="reportes-title" style="color: var(--acento-cian); margin-top: 0;">📊 Generación de Reportes</h2>
+
             <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px;">
                 <div>
-                    <label>Tipo de Reporte</label>
-                    <select id="reporte-tipo">
+                    <label for="reporte-tipo">Tipo de Reporte</label>
+                    <select id="reporte-tipo" aria-label="Seleccionar tipo de reporte">
                         <option value="diario">Reporte Diario de Gastos</option>
                         <option value="semanal">Informe Semanal Consolidado</option>
                         <option value="asistencia">Reporte de Asistencia y Horas Extra</option>
                     </select>
                 </div>
                 <div>
-                    <label>Fecha</label>
-                    <input type="date" id="reporte-fecha" value="2026-08-24">
+                    <label for="reporte-fecha">Fecha</label>
+                    <input type="date" id="reporte-fecha" aria-label="Seleccionar fecha del reporte">
                 </div>
             </div>
 
-            <button onclick="generarYCompartirReporte()" class="btn-primario" style="width: 100%; margin-bottom: 15px;">
+            <button onclick="generarYCompartirReporte()" class="btn-primario" style="width: 100%; margin-bottom: 15px;" data-tooltip="Generar y compartir reporte por WhatsApp o correo">
                 📱 Enviar Reporte por WhatsApp / Correo
             </button>
 
-            <button onclick="generarReporteLocal()" class="btn-secundario" style="width: 100%;">
+            <button onclick="generarReporteLocal()" class="btn-secundario" style="width: 100%;" data-tooltip="Descargar reporte en PDF y CSV">
                 📥 Descargar Reporte Localmente
             </button>
         </div>
 
         <!-- Módulo Configuración -->
-        <div id="configuracion" class="module tarjeta-glass">
-            <h2 style="color: var(--acento-cian); margin-top: 0;">⚙️ Configuración y Respaldo</h2>
-            
+        <div id="configuracion" class="module tarjeta-glass" role="region" aria-labelledby="configuracion-title">
+            <h2 id="configuracion-title" style="color: var(--acento-cian); margin-top: 0;">⚙️ Configuración y Respaldo</h2>
+
+            <div style="margin-bottom: 25px;">
+                <h3 style="color: var(--texto-principal); font-size: 16px;">📁 Gestión de Proyectos</h3>
+                <div style="margin-top: 10px;">
+                    <button onclick="mostrarModalCrearProyecto()" class="btn-primario" style="margin-bottom: 15px;">➕ Crear Nuevo Proyecto</button>
+                    <div id="lista-proyectos-config" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                        <!-- Lista de proyectos se cargará dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
             <div style="margin-bottom: 25px;">
                 <h3 style="color: var(--texto-principal); font-size: 16px;">Presupuesto Inicial de Caja Chica</h3>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <input type="number" step="0.01" id="config-presupuesto" placeholder="Monto inicial">
-                    <button onclick="guardarPresupuesto()" class="btn-primario">Guardar</button>
+                    <label for="config-presupuesto" class="visually-hidden">Presupuesto inicial</label>
+                    <input type="number" step="0.01" id="config-presupuesto" placeholder="Monto inicial" aria-label="Monto inicial de caja chica" min="0" max="9999999">
+                    <button onclick="guardarPresupuesto()" class="btn-primario" aria-label="Guardar presupuesto inicial">Guardar</button>
                 </div>
             </div>
 
             <div style="margin-bottom: 25px;">
                 <h3 style="color: var(--texto-principal); font-size: 16px;">Respaldo de Datos</h3>
                 <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
-                    <button onclick="exportarBaseDatos()" class="btn-primario">📤 Exportar JSON</button>
+                    <button onclick="exportarBaseDatos()" class="btn-primario" aria-label="Exportar base de datos en formato JSON">📤 Exportar JSON</button>
                     <label class="file-label">
                         📥 Importar JSON
-                        <input type="file" id="import-json" class="file-input" accept=".json">
+                        <input type="file" id="import-json" class="file-input" accept=".json" aria-label="Importar base de datos desde archivo JSON">
                     </label>
                 </div>
             </div>
@@ -679,9 +1037,9 @@
                 <div style="margin-top: 10px;">
                     <label class="file-label">
                         📷 Cambiar Logo
-                        <input type="file" id="logo-input-config" class="file-input" accept="image/*">
+                        <input type="file" id="logo-input-config" class="file-input" accept="image/*" aria-label="Cambiar logo de la empresa">
                     </label>
-                    <button onclick="eliminarLogo()" class="btn-secundario" style="margin-left: 10px;">🗑️ Eliminar Logo</button>
+                    <button onclick="eliminarLogo()" class="btn-secundario" style="margin-left: 10px;" aria-label="Eliminar logo actual">🗑️ Eliminar Logo</button>
                 </div>
             </div>
 
@@ -709,7 +1067,7 @@
                 </td>
                 <td style="width: 25%; text-align: right; padding-bottom: 15px; vertical-align: middle; font-size: 11px; line-height: 1.4; color: #4B5563;">
                     <strong>TIPO:</strong> <span id="pdf-tipo-reporte" style="color: #00A4E4; font-weight: bold;">DIARIO DE GASTOS</span><br>
-                    <strong>FECHA:</strong> <span id="pdf-fecha-emision">24/08/2026</span><br>
+                    <strong>FECHA:</strong> <span id="pdf-fecha-emision"></span><br>
                     <strong>PROYECTO:</strong> Control de Obra Activa
                 </td>
             </tr>
@@ -759,13 +1117,19 @@
         const DB_KEY = 'construramsa_db';
         
         function getDB() {
-            const db = localStorage.getItem(DB_KEY);
-            if (!db) {
+            try {
+                const db = localStorage.getItem(DB_KEY);
+                if (!db) {
+                    return inicializarDB();
+                }
+                const parsedDB = JSON.parse(db);
+                // Migración automática para asegurar compatibilidad con estructura existente
+                return migrarDB(parsedDB);
+            } catch (error) {
+                console.error('Error al obtener base de datos:', error);
+                showToast('❌ Error al cargar datos. Se iniciará con base de datos vacía.', 'error');
                 return inicializarDB();
             }
-            const parsedDB = JSON.parse(db);
-            // Migración automática para asegurar compatibilidad con estructura existente
-            return migrarDB(parsedDB);
         }
         
         function migrarDB(db) {
@@ -832,12 +1196,31 @@
             if (!db.adquisiciones.cotizaciones_compras) {
                 db.adquisiciones.cotizaciones_compras = [];
             }
-            
+
+            // Migración para multi-proyecto
+            if (!db.configuracion.proyecto_actual) {
+                db.configuracion.proyecto_actual = null;
+            }
+
+            if (!db.proyectos) {
+                db.proyectos = [];
+            }
+
+            if (!db.proyectos_data) {
+                db.proyectos_data = {};
+            }
+
             return db;
         }
         
         function saveDB(db) {
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
+            try {
+                localStorage.setItem(DB_KEY, JSON.stringify(db));
+            } catch (error) {
+                console.error('Error al guardar base de datos:', error);
+                showToast('❌ Error al guardar datos. Verifique el espacio disponible en localStorage.', 'error');
+                throw error;
+            }
         }
         
         function inicializarDB() {
@@ -846,8 +1229,11 @@
                     nombre_empresa: "CONSTRURAMSA",
                     eslogan: "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
                     logo_base64: "",
-                    presupuesto_inicial_caja: 0
+                    presupuesto_inicial_caja: 0,
+                    proyecto_actual: null
                 },
+                proyectos: [],
+                proyectos_data: {},
                 caja_chica: [],
                 maquinaria_flota: {
                     vehiculos: [],
@@ -869,13 +1255,401 @@
         // ============================================
         // FUNCIONES DE UTILIDAD
         // ============================================
-        
+
+        // Cache de elementos DOM para performance
+        const domCache = {};
+
+        function getDomElement(id) {
+            if (!domCache[id]) {
+                domCache[id] = document.getElementById(id);
+            }
+            return domCache[id];
+        }
+
+        // Debounce function para optimizar eventos frecuentes
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
         function formatearMoneda(monto) {
             return 'Q' + parseFloat(monto).toFixed(2);
         }
-        
+
         function generarId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // ============================================
+        // FUNCIONES DE UI (TOASTS Y LOADING)
+        // ============================================
+
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (container.contains(toast)) {
+                        container.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        function showLoading(text = 'Procesando...') {
+            const overlay = document.getElementById('loading-overlay');
+            const loadingText = document.getElementById('loading-text');
+            loadingText.textContent = text;
+            overlay.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.add('hidden');
+        }
+
+        // Modal de confirmación personalizado
+        function showConfirmModal(title, message, onConfirm) {
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalConfirm = document.getElementById('modal-confirm');
+            const modalCancel = document.getElementById('modal-cancel');
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalOverlay.classList.remove('hidden');
+
+            const handleConfirm = () => {
+                modalOverlay.classList.add('hidden');
+                modalConfirm.removeEventListener('click', handleConfirm);
+                modalCancel.removeEventListener('click', handleCancel);
+                onConfirm();
+            };
+
+            const handleCancel = () => {
+                modalOverlay.classList.add('hidden');
+                modalConfirm.removeEventListener('click', handleConfirm);
+                modalCancel.removeEventListener('click', handleCancel);
+            };
+
+            modalConfirm.addEventListener('click', handleConfirm);
+            modalCancel.addEventListener('click', handleCancel);
+
+            // Cerrar con Escape
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    handleCancel();
+                    document.removeEventListener('keydown', handleEscape);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+        }
+
+        // ============================================
+        // GESTIÓN DE PROYECTOS
+        // ============================================
+
+        function crearProyecto(nombre, descripcion, presupuestoInicial) {
+            const db = getDB();
+            const proyectoId = generarId();
+
+            const nuevoProyecto = {
+                id: proyectoId,
+                nombre: nombre,
+                descripcion: descripcion || '',
+                presupuesto_inicial: presupuestoInicial || 0,
+                fecha_creacion: new Date().toISOString().split('T')[0],
+                fecha_ultima_modificacion: new Date().toISOString()
+            };
+
+            db.proyectos.push(nuevoProyecto);
+
+            // Inicializar datos del proyecto
+            db.proyectos_data[proyectoId] = {
+                caja_chica: [],
+                maquinaria_flota: { vehiculos: [], registros: [] },
+                personal: { trabajadores: [], asistencia: [] },
+                adquisiciones: { proveedores: [], cotizaciones_compras: [] }
+            };
+
+            saveDB(db);
+            return nuevoProyecto;
+        }
+
+        function seleccionarProyecto(proyectoId) {
+            const db = getDB();
+            const proyecto = db.proyectos.find(p => p.id === proyectoId);
+
+            if (!proyecto) {
+                showToast('❌ Proyecto no encontrado', 'error');
+                return false;
+            }
+
+            db.configuracion.proyecto_actual = proyectoId;
+            saveDB(db);
+
+            // Actualizar UI
+            actualizarNombreProyectoUI(proyecto.nombre);
+            cargarDatosProyecto(proyectoId);
+
+            showToast(`✅ Proyecto "${proyecto.nombre}" seleccionado`, 'success');
+            return true;
+        }
+
+        function eliminarProyecto(proyectoId) {
+            showConfirmModal(
+                'Eliminar Proyecto',
+                '¿Está seguro de eliminar este proyecto y todos sus datos? Esta acción no se puede deshacer.',
+                () => {
+                    const db = getDB();
+                    const proyecto = db.proyectos.find(p => p.id === proyectoId);
+
+                    if (!proyecto) {
+                        showToast('❌ Proyecto no encontrado', 'error');
+                        return;
+                    }
+
+                    // Eliminar proyecto y sus datos
+                    db.proyectos = db.proyectos.filter(p => p.id !== proyectoId);
+                    delete db.proyectos_data[proyectoId];
+
+                    // Si era el proyecto actual, deseleccionar
+                    if (db.configuracion.proyecto_actual === proyectoId) {
+                        db.configuracion.proyecto_actual = null;
+                        actualizarNombreProyectoUI('Sin proyecto seleccionado');
+                        // Cargar datos vacíos
+                        cargarDatosProyecto(null);
+                    }
+
+                    saveDB(db);
+                    cargarListaProyectos();
+                    showToast('✅ Proyecto eliminado exitosamente', 'success');
+                }
+            );
+        }
+
+        function obtenerDatosProyecto(proyectoId) {
+            const db = getDB();
+            if (!proyectoId || !db.proyectos_data[proyectoId]) {
+                // Retornar estructura vacía
+                return {
+                    caja_chica: [],
+                    maquinaria_flota: { vehiculos: [], registros: [] },
+                    personal: { trabajadores: [], asistencia: [] },
+                    adquisiciones: { proveedores: [], cotizaciones_compras: [] }
+                };
+            }
+            return db.proyectos_data[proyectoId];
+        }
+
+        function guardarDatosProyecto(proyectoId, datos) {
+            const db = getDB();
+            if (!proyectoId) {
+                // Si no hay proyecto seleccionado, guardar en estructura temporal
+                db.caja_chica = datos.caja_chica || [];
+                db.maquinaria_flota = datos.maquinaria_flota || { vehiculos: [], registros: [] };
+                db.personal = datos.personal || { trabajadores: [], asistencia: [] };
+                db.adquisiciones = datos.adquisiciones || { proveedores: [], cotizaciones_compras: [] };
+            } else {
+                db.proyectos_data[proyectoId] = datos;
+            }
+            saveDB(db);
+        }
+
+        function actualizarNombreProyectoUI(nombre) {
+            const elemento = document.getElementById('nombre-proyecto-actual');
+            if (elemento) {
+                elemento.textContent = nombre;
+            }
+        }
+
+        function cargarDatosProyecto(proyectoId) {
+            const datos = obtenerDatosProyecto(proyectoId);
+
+            // Actualizar todas las tablas con los datos del proyecto
+            cargarTablaCajaChicaConDatos(datos.caja_chica);
+            cargarTablaMaquinariaConDatos(datos.maquinaria_flota);
+            cargarListaAsistenciaConDatos(datos.personal);
+            cargarTablaProveedoresConDatos(datos.adquisiciones);
+            cargarTablaCotizacionesConDatos(datos.adquisiciones);
+
+            // Actualizar saldo
+            const db = getDB();
+            let presupuesto = 0;
+            if (proyectoId && db.proyectos_data[proyectoId]) {
+                const proyecto = db.proyectos.find(p => p.id === proyectoId);
+                presupuesto = proyecto ? proyecto.presupuesto_inicial : 0;
+            } else {
+                presupuesto = db.configuracion.presupuesto_inicial_caja || 0;
+            }
+            actualizarSaldoCajaChicaConPresupuesto(presupuesto, datos.caja_chica);
+        }
+
+        function cargarListaProyectos() {
+            const db = getDB();
+            const select = document.getElementById('selector-proyectos');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">-- Seleccionar Proyecto --</option>';
+
+            db.proyectos.forEach(proyecto => {
+                const option = document.createElement('option');
+                option.value = proyecto.id;
+                option.textContent = proyecto.nombre;
+                if (db.configuracion.proyecto_actual === proyecto.id) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function mostrarModalCrearProyecto() {
+            const modal = document.getElementById('modal-crear-proyecto');
+            modal.classList.remove('hidden');
+            document.getElementById('proyecto-nombre').value = '';
+            document.getElementById('proyecto-descripcion').value = '';
+            document.getElementById('proyecto-presupuesto').value = '';
+            document.getElementById('proyecto-nombre').focus();
+        }
+
+        function cerrarModalCrearProyecto() {
+            const modal = document.getElementById('modal-crear-proyecto');
+            modal.classList.add('hidden');
+        }
+
+        function crearProyectoDesdeModal() {
+            const nombre = document.getElementById('proyecto-nombre').value.trim();
+            const descripcion = document.getElementById('proyecto-descripcion').value.trim();
+            const presupuesto = parseFloat(document.getElementById('proyecto-presupuesto').value) || 0;
+
+            if (!nombre || nombre.length < 3) {
+                showToast('❌ El nombre del proyecto debe tener al menos 3 caracteres', 'error');
+                return;
+            }
+
+            if (presupuesto < 0) {
+                showToast('❌ El presupuesto no puede ser negativo', 'error');
+                return;
+            }
+
+            const nuevoProyecto = crearProyecto(nombre, descripcion, presupuesto);
+            cerrarModalCrearProyecto();
+            cargarListaProyectos();
+
+            // Seleccionar automáticamente el nuevo proyecto
+            seleccionarProyecto(nuevoProyecto.id);
+        }
+
+        // Event listener para cambio de proyecto
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar lista de proyectos al inicio
+            cargarListaProyectos();
+
+            // Actualizar nombre del proyecto actual
+            const db = getDB();
+            if (db.configuracion.proyecto_actual) {
+                const proyecto = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
+                if (proyecto) {
+                    actualizarNombreProyectoUI(proyecto.nombre);
+                    cargarDatosProyecto(proyecto.id);
+                }
+            }
+
+            const selectorProyectos = document.getElementById('selector-proyectos');
+            if (selectorProyectos) {
+                selectorProyectos.addEventListener('change', function() {
+                    const proyectoId = this.value;
+                    if (proyectoId) {
+                        seleccionarProyecto(proyectoId);
+                    } else {
+                        // Deseleccionar proyecto
+                        const db = getDB();
+                        db.configuracion.proyecto_actual = null;
+                        saveDB(db);
+                        actualizarNombreProyectoUI('Sin proyecto seleccionado');
+                        cargarDatosProyecto(null);
+                        showToast('ℹ️ Proyecto deseleccionado', 'info');
+                    }
+                });
+            }
+        });
+
+        // ============================================
+        // FUNCIONES HELPER PARA CARGA DE DATOS ESPECÍFICOS
+        // ============================================
+
+        function cargarTablaCajaChicaConDatos(cajaChicaData) {
+            const tbody = document.getElementById('tabla-caja-chica-cuerpo');
+            tbody.innerHTML = '';
+
+            cajaChicaData.forEach(movimiento => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${movimiento.fecha}</td>
+                    <td>${movimiento.tipo === 'ingreso' ? 'Ingreso' : 'Egreso'}</td>
+                    <td>${movimiento.categoria}</td>
+                    <td>${movimiento.descripcion}</td>
+                    <td>${formatearMoneda(movimiento.monto)}</td>
+                    <td>
+                        <button onclick="editarMovimientoCaja('${movimiento.id}')" class="btn-secundario" style="padding: 4px 8px; font-size: 11px;">✏️</button>
+                        <button onclick="eliminarMovimientoCaja('${movimiento.id}')" class="btn-secundario" style="padding: 4px 8px; font-size: 11px; background: rgba(239, 68, 68, 0.2);">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function cargarTablaMaquinariaConDatos(maquinariaData) {
+            // Implementación similar para maquinaria
+            // Por ahora delegamos a la función existente
+            cargarTablaMaquinaria();
+        }
+
+        function cargarListaAsistenciaConDatos(personalData) {
+            // Implementación similar para personal
+            cargarListaAsistencia();
+        }
+
+        function cargarTablaProveedoresConDatos(adquisicionesData) {
+            // Implementación similar para proveedores
+            cargarTablaProveedores();
+        }
+
+        function cargarTablaCotizacionesConDatos(adquisicionesData) {
+            // Implementación similar para cotizaciones
+            cargarTablaCotizaciones();
+        }
+
+        function actualizarSaldoCajaChicaConPresupuesto(presupuesto, cajaChicaData) {
+            let saldo = presupuesto || 0;
+
+            cajaChicaData.forEach(movimiento => {
+                if (movimiento.tipo === 'ingreso') {
+                    saldo += movimiento.monto;
+                } else if (movimiento.tipo === 'egreso') {
+                    saldo -= movimiento.monto;
+                }
+            });
+
+            const saldoElement = document.getElementById('saldo-caja-chica');
+            saldoElement.textContent = formatearMoneda(saldo);
+            saldoElement.className = saldo >= 0 ? 'saldo-positivo' : 'saldo-negativo';
+
+            return saldo;
         }
 
         // ============================================
@@ -1012,23 +1786,51 @@
         
         document.getElementById('form-caja-chica').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const tipo = document.getElementById('caja-tipo').value;
             const categoria = document.getElementById('caja-categoria').value;
-            const descripcion = document.getElementById('caja-descripcion').value;
+            const descripcion = document.getElementById('caja-descripcion').value.trim();
             const monto = parseFloat(document.getElementById('caja-monto').value);
-            
-            const db = getDB();
-            
-            if (tipo === 'egreso') {
-                const saldoActual = actualizarSaldoCajaChica();
-                if (monto > saldoActual) {
-                    alert(`❌ Fondos insuficientes en Caja Chica. Saldo disponible: ${formatearMoneda(saldoActual)}`);
-                    return;
-                }
+
+            // Validaciones adicionales
+            if (!descripcion || descripcion.length < 3) {
+                showToast('❌ La descripción debe tener al menos 3 caracteres', 'error');
+                return;
             }
-            
-            db.caja_chica.push({
+
+            if (isNaN(monto) || monto <= 0) {
+                showToast('❌ El monto debe ser un número positivo', 'error');
+                return;
+            }
+
+            if (monto > 999999) {
+                showToast('❌ El monto excede el límite permitido', 'error');
+                return;
+            }
+
+            const db = getDB();
+            const proyectoId = db.configuracion.proyecto_actual;
+
+            // Verificar saldo según proyecto
+            let saldoActual = 0;
+            if (proyectoId && db.proyectos_data[proyectoId]) {
+                const proyecto = db.proyectos.find(p => p.id === proyectoId);
+                saldoActual = proyecto ? proyecto.presupuesto_inicial : 0;
+                const cajaChicaData = db.proyectos_data[proyectoId].caja_chica || [];
+                cajaChicaData.forEach(movimiento => {
+                    if (movimiento.tipo === 'ingreso') saldoActual += movimiento.monto;
+                    else if (movimiento.tipo === 'egreso') saldoActual -= movimiento.monto;
+                });
+            } else {
+                saldoActual = actualizarSaldoCajaChica();
+            }
+
+            if (tipo === 'egreso' && monto > saldoActual) {
+                showToast(`❌ Fondos insuficientes en Caja Chica. Saldo disponible: ${formatearMoneda(saldoActual)}`, 'error');
+                return;
+            }
+
+            const nuevoMovimiento = {
                 id: generarId(),
                 fecha: new Date().toISOString().split('T')[0],
                 tipo: tipo,
@@ -1036,14 +1838,21 @@
                 descripcion: descripcion,
                 monto: monto,
                 responsable: "Usuario"
-            });
-            
+            };
+
+            // Guardar en el proyecto correspondiente
+            if (proyectoId && db.proyectos_data[proyectoId]) {
+                db.proyectos_data[proyectoId].caja_chica.push(nuevoMovimiento);
+            } else {
+                db.caja_chica.push(nuevoMovimiento);
+            }
+
             saveDB(db);
             actualizarSaldoCajaChica();
             cargarTablaCajaChica();
-            
+
             this.reset();
-            alert('✅ Movimiento registrado exitosamente');
+            showToast('✅ Movimiento registrado exitosamente', 'success');
         });
         
         function cargarTablaCajaChica() {
@@ -1092,31 +1901,33 @@
         }
         
         function eliminarMovimientoCaja(id) {
-            if (!confirm('⚠️ ¿Está seguro de eliminar este movimiento de caja chica? Esta acción no se puede deshacer.')) {
-                return;
-            }
-            
-            const db = getDB();
-            const movimiento = db.caja_chica.find(m => m.id === id);
-            
-            // Si es un egreso, revertir el saldo de caja chica
-            if (movimiento && movimiento.tipo === 'egreso') {
-                db.caja_chica.push({
-                    id: generarId(),
-                    fecha: new Date().toISOString().split('T')[0],
-                    tipo: 'ingreso',
-                    categoria: 'Reembolso',
-                    descripcion: `Reembolso por eliminación de movimiento: ${movimiento.descripcion}`,
-                    monto: movimiento.monto,
-                    responsable: 'Sistema Automático'
-                });
-            }
-            
-            db.caja_chica = db.caja_chica.filter(m => m.id !== id);
-            saveDB(db);
-            actualizarSaldoCajaChica();
-            cargarTablaCajaChica();
-            alert('✅ Movimiento eliminado exitosamente');
+            showConfirmModal(
+                'Eliminar Movimiento',
+                '¿Está seguro de eliminar este movimiento de caja chica? Esta acción no se puede deshacer.',
+                () => {
+                    const db = getDB();
+                    const movimiento = db.caja_chica.find(m => m.id === id);
+
+                    // Si es un egreso, revertir el saldo de caja chica
+                    if (movimiento && movimiento.tipo === 'egreso') {
+                        db.caja_chica.push({
+                            id: generarId(),
+                            fecha: new Date().toISOString().split('T')[0],
+                            tipo: 'ingreso',
+                            categoria: 'Reembolso',
+                            descripcion: `Reembolso por eliminación de movimiento: ${movimiento.descripcion}`,
+                            monto: movimiento.monto,
+                            responsable: 'Sistema Automático'
+                        });
+                    }
+
+                    db.caja_chica = db.caja_chica.filter(m => m.id !== id);
+                    saveDB(db);
+                    actualizarSaldoCajaChica();
+                    cargarTablaCajaChica();
+                    showToast('✅ Movimiento eliminado exitosamente', 'success');
+                }
+            );
         }
 
         // ============================================
@@ -1124,51 +1935,77 @@
         // ============================================
         
         function calcularMetricasMaquinaria() {
-            const tipoVehiculo = document.getElementById('maq-tipo').value;
-            const valInicial = parseFloat(document.getElementById('maq-val-inicial').value) || 0;
-            const valFinal = parseFloat(document.getElementById('maq-val-final').value) || 0;
-            const galones = parseFloat(document.getElementById('maq-galones').value) || 0;
-            const precioGalon = parseFloat(document.getElementById('maq-precio-galon').value) || 0;
-            const costoMantenimiento = parseFloat(document.getElementById('maq-costo-mantenimiento').value) || 0;
-            
+            const tipoVehiculo = getDomElement('maq-tipo').value;
+            const valInicial = parseFloat(getDomElement('maq-val-inicial').value) || 0;
+            const valFinal = parseFloat(getDomElement('maq-val-final').value) || 0;
+            const galones = parseFloat(getDomElement('maq-galones').value) || 0;
+            const precioGalon = parseFloat(getDomElement('maq-precio-galon').value) || 0;
+            const costoMantenimiento = parseFloat(getDomElement('maq-costo-mantenimiento').value) || 0;
+
             const usoTotal = valFinal - valInicial;
             if (usoTotal < 0) {
-                document.getElementById('maq-error-uso').innerText = "El valor final no puede ser menor al inicial";
+                getDomElement('maq-error-uso').innerText = "El valor final no puede ser menor al inicial";
                 return;
             } else {
-                document.getElementById('maq-error-uso').innerText = "";
+                getDomElement('maq-error-uso').innerText = "";
             }
-            
+
             const costoCombustibleTotal = galones * precioGalon;
-            
+
             let rendimiento = 0;
             if (galones > 0) {
                 rendimiento = usoTotal / galones;
             }
-            
+
             const gastoTotalRegistro = costoCombustibleTotal + costoMantenimiento;
-            
-            document.getElementById('lbl-uso-total').innerText = usoTotal.toFixed(2) + (tipoVehiculo === 'retroexcavadora' ? ' Hrs' : ' Km');
-            document.getElementById('lbl-costo-combustible').innerText = formatearMoneda(costoCombustibleTotal);
-            document.getElementById('lbl-rendimiento').innerText = rendimiento.toFixed(2) + (tipoVehiculo === 'retroexcavadora' ? ' Hrs/Gal' : ' Km/Gal');
-            document.getElementById('lbl-gasto-total').innerText = formatearMoneda(gastoTotalRegistro);
+
+            getDomElement('lbl-uso-total').innerText = usoTotal.toFixed(2) + (tipoVehiculo === 'retroexcavadora' ? ' Hrs' : ' Km');
+            getDomElement('lbl-costo-combustible').innerText = formatearMoneda(costoCombustibleTotal);
+            getDomElement('lbl-rendimiento').innerText = rendimiento.toFixed(2) + (tipoVehiculo === 'retroexcavadora' ? ' Hrs/Gal' : ' Km/Gal');
+            getDomElement('lbl-gasto-total').innerText = formatearMoneda(gastoTotalRegistro);
         }
         
         document.getElementById('form-maquinaria').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const tipo = document.getElementById('maq-tipo').value;
-            const codigo = document.getElementById('maq-codigo').value;
+            const codigo = document.getElementById('maq-codigo').value.trim();
             const valInicial = parseFloat(document.getElementById('maq-val-inicial').value);
             const valFinal = parseFloat(document.getElementById('maq-val-final').value);
             const galones = parseFloat(document.getElementById('maq-galones').value) || 0;
             const precioGalon = parseFloat(document.getElementById('maq-precio-galon').value) || 0;
-            const mantenimientoDetalles = document.getElementById('maq-mantenimiento-detalles').value;
+            const mantenimientoDetalles = document.getElementById('maq-mantenimiento-detalles').value.trim();
             const costoMantenimiento = parseFloat(document.getElementById('maq-costo-mantenimiento').value) || 0;
-            
+
+            // Validaciones adicionales
+            if (!codigo || codigo.length < 3) {
+                showToast('❌ El código debe tener al menos 3 caracteres', 'error');
+                return;
+            }
+
+            if (isNaN(valInicial) || valInicial < 0) {
+                showToast('❌ El valor inicial debe ser un número positivo', 'error');
+                return;
+            }
+
+            if (isNaN(valFinal) || valFinal < 0) {
+                showToast('❌ El valor final debe ser un número positivo', 'error');
+                return;
+            }
+
+            if (galones < 0 || precioGalon < 0 || costoMantenimiento < 0) {
+                showToast('❌ Los valores monetarios no pueden ser negativos', 'error');
+                return;
+            }
+
             const usoTotal = valFinal - valInicial;
             if (usoTotal < 0) {
-                alert("El valor final no puede ser menor al inicial");
+                showToast("❌ El valor final no puede ser menor al inicial", 'error');
+                return;
+            }
+
+            if (usoTotal === 0 && galones === 0 && costoMantenimiento === 0) {
+                showToast('❌ Debe registrar al menos un cambio en odómetro/horómetro o algún gasto', 'error');
                 return;
             }
             
@@ -1208,8 +2045,8 @@
                     
                     saveDB(db);
                     cargarTablaMaquinaria();
-                    
-                    alert('✅ Registro de maquinaria actualizado exitosamente');
+
+                    showToast('✅ Registro de maquinaria actualizado exitosamente', 'success');
                     this.reset();
                     document.getElementById('lbl-uso-total').innerText = '0.00';
                     document.getElementById('lbl-costo-combustible').innerText = formatearMoneda(0);
@@ -1252,8 +2089,8 @@
             document.getElementById('lbl-costo-combustible').innerText = formatearMoneda(0);
             document.getElementById('lbl-rendimiento').innerText = '0.00';
             document.getElementById('lbl-gasto-total').innerText = formatearMoneda(0);
-            
-            alert('✅ Registro de maquinaria guardado exitosamente');
+
+            showToast('✅ Registro de maquinaria guardado exitosamente', 'success');
         });
         
         function cargarTablaMaquinaria() {
@@ -1344,7 +2181,7 @@
             saveDB(db);
             actualizarSaldoCajaChica();
             cargarTablaMaquinaria();
-            alert('✅ Registro de maquinaria eliminado exitosamente');
+            showToast('✅ Registro de maquinaria eliminado exitosamente', 'success');
         }
 
         // ============================================
@@ -1353,12 +2190,38 @@
         
         document.getElementById('form-trabajador').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const nombre = document.getElementById('trab-nombre').value;
-            const puesto = document.getElementById('trab-puesto').value;
+
+            const nombre = document.getElementById('trab-nombre').value.trim();
+            const puesto = document.getElementById('trab-puesto').value.trim();
             const pagoNormal = parseFloat(document.getElementById('trab-pago-normal').value);
             const pagoExtra = parseFloat(document.getElementById('trab-pago-extra').value);
-            
+
+            // Validaciones adicionales
+            if (!nombre || nombre.length < 3) {
+                showToast('❌ El nombre debe tener al menos 3 caracteres', 'error');
+                return;
+            }
+
+            if (!puesto || puesto.length < 2) {
+                showToast('❌ El puesto debe tener al menos 2 caracteres', 'error');
+                return;
+            }
+
+            if (isNaN(pagoNormal) || pagoNormal <= 0) {
+                showToast('❌ El pago normal debe ser un número positivo', 'error');
+                return;
+            }
+
+            if (isNaN(pagoExtra) || pagoExtra < 0) {
+                showToast('❌ El pago extra no puede ser negativo', 'error');
+                return;
+            }
+
+            if (pagoNormal > 9999 || pagoExtra > 9999) {
+                showToast('❌ Los pagos exceden el límite permitido', 'error');
+                return;
+            }
+
             const db = getDB();
             
             // Verificar si estamos en modo edición
@@ -1384,8 +2247,8 @@
                     
                     saveDB(db);
                     cargarListaAsistencia();
-                    
-                    alert('✅ Trabajador actualizado exitosamente');
+
+                    showToast('✅ Trabajador actualizado exitosamente', 'success');
                     this.reset();
                     return;
                 }
@@ -1401,9 +2264,9 @@
             
             saveDB(db);
             cargarListaAsistencia();
-            
+
             this.reset();
-            alert('✅ Trabajador agregado exitosamente');
+            showToast('✅ Trabajador agregado exitosamente', 'success');
         });
         
         function editarTrabajador(id) {
@@ -1442,7 +2305,7 @@
             saveDB(db);
             cargarListaAsistencia();
             cargarTablaAsistencia();
-            alert('✅ Trabajador eliminado exitosamente');
+            showToast('✅ Trabajador eliminado exitosamente', 'success');
         }
         
         function cargarListaAsistencia() {
@@ -1607,7 +2470,7 @@
             
             saveDB(db);
             cargarTablaAsistencia();
-            alert('✅ Registro de asistencia eliminado exitosamente');
+            showToast('✅ Registro de asistencia eliminado exitosamente', 'success');
         }
 
         // ============================================
@@ -1616,11 +2479,27 @@
         
         document.getElementById('form-proveedor').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const nombre = document.getElementById('prov-nombre').value;
-            const telefono = document.getElementById('prov-telefono').value;
-            const especialidad = document.getElementById('prov-especialidad').value;
-            
+
+            const nombre = document.getElementById('prov-nombre').value.trim();
+            const telefono = document.getElementById('prov-telefono').value.trim();
+            const especialidad = document.getElementById('prov-especialidad').value.trim();
+
+            // Validaciones adicionales
+            if (!nombre || nombre.length < 3) {
+                showToast('❌ El nombre debe tener al menos 3 caracteres', 'error');
+                return;
+            }
+
+            if (!telefono || telefono.length < 7) {
+                showToast('❌ El teléfono debe tener al menos 7 caracteres', 'error');
+                return;
+            }
+
+            if (!especialidad || especialidad.length < 2) {
+                showToast('❌ La especialidad debe tener al menos 2 caracteres', 'error');
+                return;
+            }
+
             const db = getDB();
             
             // Verificar si estamos en modo edición
@@ -1643,12 +2522,12 @@
                     
                     delete this.dataset.editando;
                     document.querySelector('#form-proveedor button[type="submit"]').textContent = '➕ Agregar Proveedor';
-                    
+
                     saveDB(db);
                     cargarProveedores();
                     cargarTablaProveedores();
-                    
-                    alert('✅ Proveedor actualizado exitosamente');
+
+                    showToast('✅ Proveedor actualizado exitosamente', 'success');
                     this.reset();
                     return;
                 }
@@ -1665,9 +2544,9 @@
             saveDB(db);
             cargarProveedores();
             cargarTablaProveedores();
-            
+
             this.reset();
-            alert('✅ Proveedor agregado exitosamente');
+            showToast('✅ Proveedor agregado exitosamente', 'success');
         });
         
         function editarProveedor(id) {
@@ -1698,7 +2577,7 @@
             saveDB(db);
             cargarProveedores();
             cargarTablaProveedores();
-            alert('✅ Proveedor eliminado exitosamente');
+            showToast('✅ Proveedor eliminado exitosamente', 'success');
         }
         
         function cargarTablaProveedores() {
@@ -1738,15 +2617,46 @@
         
         document.getElementById('form-cotizacion').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const proveedorId = document.getElementById('cot-proveedor').value;
-            const material = document.getElementById('cot-material').value;
+            const material = document.getElementById('cot-material').value.trim();
             const precio = parseFloat(document.getElementById('cot-precio').value);
             const cantidad = parseInt(document.getElementById('cot-cantidad').value);
-            
+
+            // Validaciones adicionales
+            if (!proveedorId) {
+                showToast('❌ Debe seleccionar un proveedor', 'error');
+                return;
+            }
+
+            if (!material || material.length < 3) {
+                showToast('❌ La descripción del material debe tener al menos 3 caracteres', 'error');
+                return;
+            }
+
+            if (isNaN(precio) || precio <= 0) {
+                showToast('❌ El precio debe ser un número positivo', 'error');
+                return;
+            }
+
+            if (isNaN(cantidad) || cantidad < 1) {
+                showToast('❌ La cantidad debe ser al menos 1', 'error');
+                return;
+            }
+
+            if (precio > 999999 || cantidad > 99999) {
+                showToast('❌ Los valores exceden el límite permitido', 'error');
+                return;
+            }
+
             const db = getDB();
             const proveedor = db.adquisiciones.proveedores.find(p => p.id === proveedorId);
-            
+
+            if (!proveedor) {
+                showToast('❌ El proveedor seleccionado no existe', 'error');
+                return;
+            }
+
             const total = precio * cantidad;
             
             // Verificar si estamos en modo edición
@@ -1773,8 +2683,8 @@
                     
                     saveDB(db);
                     cargarTablaCotizaciones();
-                    
-                    alert('✅ Cotización actualizada exitosamente');
+
+                    showToast('✅ Cotización actualizada exitosamente', 'success');
                     this.reset();
                     return;
                 }
@@ -1793,9 +2703,9 @@
             
             saveDB(db);
             cargarTablaCotizaciones();
-            
+
             this.reset();
-            alert('✅ Cotización registrada exitosamente');
+            showToast('✅ Cotización registrada exitosamente', 'success');
         });
         
         function cargarTablaCotizaciones() {
@@ -1843,7 +2753,7 @@
                 cotizacion.estado = 'aprobada';
                 saveDB(db);
                 cargarTablaCotizaciones();
-                alert('✅ Cotización aprobada y compra procesada');
+                showToast('✅ Cotización aprobada y compra procesada', 'success');
             }
         }
         
@@ -1906,7 +2816,7 @@
             saveDB(db);
             actualizarSaldoCajaChica();
             cargarTablaCotizaciones();
-            alert('✅ Cotización eliminada exitosamente');
+            showToast('✅ Cotización eliminada exitosamente', 'success');
         }
 
         // ============================================
@@ -1914,32 +2824,51 @@
         // ============================================
         
         function guardarPresupuesto() {
-            const presupuesto = parseFloat(document.getElementById('config-presupuesto').value);
-            if (isNaN(presupuesto) || presupuesto < 0) {
-                alert('Ingrese un monto válido');
-                return;
+            try {
+                const presupuesto = parseFloat(document.getElementById('config-presupuesto').value);
+                if (isNaN(presupuesto) || presupuesto < 0) {
+                    showToast('❌ Ingrese un monto válido', 'error');
+                    return;
+                }
+
+                if (presupuesto > 99999999) {
+                    showToast('❌ El presupuesto excede el límite permitido', 'error');
+                    return;
+                }
+
+                const db = getDB();
+                if (!db.configuracion) db.configuracion = {};
+                db.configuracion.presupuesto_inicial_caja = presupuesto;
+                saveDB(db);
+
+                actualizarSaldoCajaChica();
+                showToast('✅ Presupuesto guardado exitosamente', 'success');
+            } catch (error) {
+                console.error('Error al guardar presupuesto:', error);
+                showToast('❌ Error al guardar presupuesto', 'error');
             }
-            
-            const db = getDB();
-            if (!db.configuracion) db.configuracion = {};
-            db.configuracion.presupuesto_inicial_caja = presupuesto;
-            saveDB(db);
-            
-            actualizarSaldoCajaChica();
-            alert('✅ Presupuesto guardado exitosamente');
         }
         
         function exportarBaseDatos() {
-            const db = getDB();
-            const dataStr = JSON.stringify(db, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = 'construramsa_backup_' + new Date().toISOString().split('T')[0] + '.json';
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
+            try {
+                showLoading('Exportando base de datos...');
+                const db = getDB();
+                const dataStr = JSON.stringify(db, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+                const exportFileDefaultName = 'construramsa_backup_' + new Date().toISOString().split('T')[0] + '.json';
+
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                hideLoading();
+                showToast('✅ Base de datos exportada exitosamente', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Error al exportar base de datos:', error);
+                showToast('❌ Error al exportar base de datos', 'error');
+            }
         }
         
         function importarBaseDatosConFusion(dbImportado) {
@@ -2045,11 +2974,13 @@
         document.getElementById('import-json').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                showLoading('Importando base de datos...');
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     try {
                         const dbImportado = JSON.parse(event.target.result);
-                        
+
+                        hideLoading();
                         if (!confirm('📥 Importar base de datos:\n\n' +
                             'Esta acción FUSIONARÁ los datos importados con los existentes.\n' +
                             '- Los registros nuevos se agregarán\n' +
@@ -2058,15 +2989,17 @@
                             '¿Desea continuar?')) {
                             return;
                         }
-                        
+
+                        showLoading('Procesando fusión de datos...');
                         const dbFusionado = importarBaseDatosConFusion(dbImportado);
                         saveDB(dbFusionado);
-                        
-                        alert('✅ Base de datos importada y fusionada exitosamente.\nLos datos de días anteriores se han conservado.');
+
+                        showToast('✅ Base de datos importada y fusionada exitosamente. Los datos de días anteriores se han conservado.', 'success', 5000);
                         location.reload();
                     } catch (error) {
+                        hideLoading();
                         console.error('Error al importar:', error);
-                        alert('❌ Error al importar el archivo JSON. Verifique que el formato sea correcto.');
+                        showToast('❌ Error al importar el archivo JSON. Verifique que el formato sea correcto.', 'error');
                     }
                 };
                 reader.readAsText(file);
@@ -2139,7 +3072,7 @@
             if (firmaGerente) firmaGerente.style.display = 'block';
             
             document.getElementById('pdf-tipo-reporte').innerText = tituloReporte.toUpperCase();
-            document.getElementById('pdf-fecha-emision').innerText = new Date().toLocaleDateString('es-ES');
+            document.getElementById('pdf-fecha-emision').innerText = new Date().toLocaleDateString('es-GT');
             
             document.getElementById('pdf-contenido-dinamico').innerHTML = tablaHTMLData;
             
@@ -2254,19 +3187,19 @@
                 const tipo = document.getElementById('reporte-tipo').value;
                 const fecha = document.getElementById('reporte-fecha').value;
                 const nombreReporte = `reporte_${tipo}_${fecha}`;
-                
+
                 const archivosParaCompartir = [];
-                
+
                 // Generar CSV
                 const csvContent = generarCSVReporte(tipo, fecha);
                 const blobCSV = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const archivoCSV = new File([blobCSV], `${nombreReporte}.csv`, { type: 'text/csv' });
                 archivosParaCompartir.push(archivoCSV);
-                
+
                 // Generar PDF
                 const htmlContent = generarHTMLReporte(tipo, fecha);
                 const contenedorImpresion = prepararContenedorImpresion(`Reporte ${tipo}`, htmlContent);
-                
+
                 const opciones = {
                     margin: 10,
                     filename: `${nombreReporte}.pdf`,
@@ -2274,11 +3207,11 @@
                     html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
                 };
-                
+
                 const blobPDF = await html2pdf().set(opciones).from(contenedorImpresion).output('blob');
                 const archivoPDF = new File([blobPDF], `${nombreReporte}.pdf`, { type: 'application/pdf' });
                 archivosParaCompartir.push(archivoPDF);
-                
+
                 // Compartir archivos
                 if (navigator.canShare && navigator.canShare({ files: archivosParaCompartir })) {
                     await navigator.share({
@@ -2286,13 +3219,17 @@
                         title: `Reporte de Obra - ${nombreReporte}`,
                         text: `Adjunto se envían los reportes de control de obra de CONSTRURAMSA.`
                     });
+                    hideLoading();
+                    showToast('✅ Reporte compartido exitosamente', 'success');
                 } else {
-                    alert("Tu navegador no soporta compartir archivos directamente. Se procederá a descargarlos localmente.");
+                    hideLoading();
+                    showToast('Tu navegador no soporta compartir archivos directamente. Se descargarán localmente.', 'info');
                     descargarLocal(archivoCSV, archivoPDF);
                 }
             } catch (error) {
+                hideLoading();
                 console.error("Error al compartir en WhatsApp:", error);
-                alert("Error al compartir el reporte. Se descargarán los archivos localmente.");
+                showToast('Error al compartir el reporte. Se descargarán los archivos localmente.', 'error');
                 generarReporteLocal();
             }
         }
@@ -2314,37 +3251,115 @@
         }
         
         function generarReporteLocal() {
+            showLoading('Generando reporte...');
+
             const tipo = document.getElementById('reporte-tipo').value;
             const fecha = document.getElementById('reporte-fecha').value;
             const nombreReporte = `reporte_${tipo}_${fecha}`;
-            
-            // Generar y descargar CSV
-            const csvContent = generarCSVReporte(tipo, fecha);
-            const blobCSV = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const urlCSV = URL.createObjectURL(blobCSV);
-            const aCSV = document.createElement('a');
-            aCSV.href = urlCSV;
-            aCSV.download = `${nombreReporte}.csv`;
-            aCSV.click();
-            
-            // Generar y descargar PDF
-            const htmlContent = generarHTMLReporte(tipo, fecha);
-            const contenedorImpresion = prepararContenedorImpresion(`Reporte ${tipo}`, htmlContent);
-            
-            const opciones = {
-                margin: 10,
-                filename: `${nombreReporte}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
-            };
-            
-            html2pdf().set(opciones).from(contenedorImpresion).save();
+
+            setTimeout(() => {
+                try {
+                    // Generar y descargar CSV
+                    const csvContent = generarCSVReporte(tipo, fecha);
+                    const blobCSV = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const urlCSV = URL.createObjectURL(blobCSV);
+                    const aCSV = document.createElement('a');
+                    aCSV.href = urlCSV;
+                    aCSV.download = `${nombreReporte}.csv`;
+                    aCSV.click();
+
+                    // Generar y descargar PDF
+                    const htmlContent = generarHTMLReporte(tipo, fecha);
+                    const contenedorImpresion = prepararContenedorImpresion(`Reporte ${tipo}`, htmlContent);
+
+                    const opciones = {
+                        margin: 10,
+                        filename: `${nombreReporte}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+                    };
+
+                    html2pdf().set(opciones).from(contenedorImpresion).save().then(() => {
+                        hideLoading();
+                        showToast('✅ Reporte generado exitosamente', 'success');
+                    });
+                } catch (error) {
+                    hideLoading();
+                    showToast('❌ Error al generar reporte', 'error');
+                    console.error('Error al generar reporte:', error);
+                }
+            }, 500);
         }
         
         function generarYCompartirReporte() {
+            showLoading('Preparando reporte para compartir...');
             compartirReporteWhatsApp();
         }
+
+        // ============================================
+        // ATAJOS DE TECLADO
+        // ============================================
+
+        document.addEventListener('keydown', function(e) {
+            // Alt + 1-6 para navegar entre módulos
+            if (e.altKey && e.key >= '1' && e.key <= '6') {
+                e.preventDefault();
+                const modules = ['caja-chica', 'maquinaria', 'personal', 'adquisiciones', 'reportes', 'configuracion'];
+                const moduleIndex = parseInt(e.key) - 1;
+                const targetModule = modules[moduleIndex];
+
+                // Actualizar navegación
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                    tab.removeAttribute('aria-current');
+                });
+                document.querySelectorAll('.module').forEach(mod => {
+                    mod.classList.remove('active');
+                });
+
+                const activeTab = document.querySelector(`[data-module="${targetModule}"]`);
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                    activeTab.setAttribute('aria-current', 'page');
+                }
+
+                const targetModuleDiv = document.getElementById(targetModule);
+                if (targetModuleDiv) {
+                    targetModuleDiv.classList.add('active');
+                }
+
+                // Cargar datos específicos del módulo
+                if (targetModule === 'personal') cargarListaAsistencia();
+                if (targetModule === 'adquisiciones') cargarProveedores();
+
+                showToast(`📱 Navegando a ${activeTab.textContent.trim()}`, 'info', 1000);
+            }
+
+            // Alt + S para guardar formularios activos
+            if (e.altKey && (e.key === 's' || e.key === 'S')) {
+                const activeModule = document.querySelector('.module.active');
+                if (activeModule) {
+                    const activeForm = activeModule.querySelector('form');
+                    if (activeForm) {
+                        e.preventDefault();
+                        const submitButton = activeForm.querySelector('button[type="submit"]');
+                        if (submitButton) {
+                            submitButton.click();
+                        }
+                    }
+                }
+            }
+
+            // Escape para cerrar overlays
+            if (e.key === 'Escape') {
+                hideLoading();
+                const loadingOverlay = document.getElementById('loading-overlay');
+                if (loadingOverlay) {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }
+        });
 
         // ============================================
         // INICIALIZACIÓN
@@ -2370,8 +3385,10 @@
             
             // Establecer fecha actual en los campos de fecha
             const fechaActual = new Date().toISOString().split('T')[0];
+            const fechaFormateada = new Date().toLocaleDateString('es-GT');
             document.getElementById('fecha-asistencia').value = fechaActual;
             document.getElementById('reporte-fecha').value = fechaActual;
+            document.getElementById('pdf-fecha-emision').textContent = fechaFormateada;
             
             // Actualizar valores iniciales con formato correcto
             document.getElementById('saldo-caja-chica').textContent = formatearMoneda(0);

@@ -3,6 +3,10 @@ const urlsToCache = [
     './',
     './index.html',
     './manifest.json',
+    './wilson.png',
+    './juan.png',
+    './icon.png',
+    './icon.svg',
     'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
 ];
 
