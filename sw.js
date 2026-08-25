@@ -1,9 +1,9 @@
 // ============================================================
-// SERVICE WORKER — CONSTRURAMSA Control de Obra v1.2.0
+// SERVICE WORKER — CONSTRURAMSA Control de Obra v2.1.0
 // Estrategia: Network First con fallback a Cache
 // ============================================================
 
-const CACHE_NAME = 'construramsa-v1.2.0';
+const CACHE_NAME = 'construramsa-v2.1.0';
 
 const urlsToCache = [
     './',
@@ -14,7 +14,8 @@ const urlsToCache = [
     './icon.svg',
     './wilson.png',
     './juan.png',
-    'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
+    'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
+    'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js'
 ];
 
 // ── Instalación ───────────────────────────────────────────────

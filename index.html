@@ -33,6 +33,8 @@
     <meta name="mobile-web-app-capable" content="yes">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- SheetJS para exportar reportes a XLSX -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             /* Paleta Construramsa */
@@ -612,6 +614,51 @@
             color: var(--texto-secundario);
             padding: 0 8px;
         }
+
+        /* ═══ RESULTADOS / DASHBOARD ═══ */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: linear-gradient(145deg, rgba(0,75,147,0.25), rgba(0,164,228,0.12));
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        }
+        .kpi-card .kpi-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--texto-secundario);
+            margin-bottom: 6px;
+        }
+        .kpi-card .kpi-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--texto-principal);
+            word-break: break-word;
+        }
+        .kpi-card .kpi-sub { font-size: 11px; color: var(--texto-secundario); margin-top: 4px; }
+        .kpi-card.positivo .kpi-value { color: #10b981; }
+        .kpi-card.negativo .kpi-value { color: #f87171; }
+        .kpi-card.ciano .kpi-value { color: var(--acento-cian); }
+        .kpi-card.purpura .kpi-value { color: var(--acento-purpura); }
+        .kpi-aviso {
+            background: rgba(251,191,36,0.12);
+            border: 1px solid rgba(251,191,36,0.5);
+            color: var(--advertencia-texto);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+        /* Rangos semanales en la tarjeta de viajes */
+        .viaje-resumen { font-size: 12px; color: var(--texto-secundario); margin-top: 6px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -689,18 +736,40 @@
 
         <!-- Navegación -->
         <nav class="nav-tabs" role="navigation" aria-label="Navegación principal de módulos">
-            <button class="nav-tab active" data-module="caja-chica" aria-current="page" aria-label="Módulo Caja Chica">💰 Caja Chica</button>
+            <button class="nav-tab active" data-module="resumen" aria-current="page" aria-label="Módulo Panel de Resumen">📊 Resumen</button>
+            <button class="nav-tab" data-module="caja-chica" aria-label="Módulo Caja Chica">💰 Caja Chica</button>
             <button class="nav-tab" data-module="maquinaria" aria-label="Módulo Maquinaria">🚜 Maquinaria</button>
             <button class="nav-tab" data-module="personal" aria-label="Módulo Personal">👷 Personal</button>
             <button class="nav-tab" data-module="adquisiciones" aria-label="Módulo Adquisiciones">📋 Adquisiciones</button>
+            <button class="nav-tab" data-module="viajes" aria-label="Módulo Viajes de Camiones">🚛 Viajes</button>
+            <button class="nav-tab" data-module="mantenimiento" aria-label="Módulo Mantenimiento y Repuestos">🔧 Mantenimiento</button>
             <button class="nav-tab" data-module="reportes" aria-label="Módulo Reportes">📊 Reportes</button>
             <button class="nav-tab" data-module="configuracion" aria-label="Módulo Configuración">⚙️ Configuración</button>
         </nav>
 
         <!-- ═══════════════════════════════════════ -->
+        <!-- MÓDULO RESUMEN / DASHBOARD             -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="resumen" class="module active tarjeta-glass" role="region" aria-labelledby="resumen-title">
+            <h2 id="resumen-title" style="color:var(--acento-cian);margin-top:0;">📊 Panel de Resumen Ejecutivo</h2>
+            <p style="color:var(--texto-secundario);font-size:13px;">Visión general de la obra: saldo, movimientos, viajes, mantenimiento e insumos.</p>
+
+            <div id="kpi-avisos"></div>
+
+            <div class="kpi-grid" id="kpi-grid"></div>
+
+            <div style="margin-top:5px;padding:14px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid var(--glass-border);">
+                <h3 style="color:var(--acento-cian);font-size:14px;margin:0 0 10px 0;">📌 Próximos registros pendientes</h3>
+                <ul id="lista-pendientes" style="margin:0;padding-left:18px;color:var(--texto-principal);font-size:13px;line-height:1.8;">
+                    <li>Cargando...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
         <!-- MÓDULO CAJA CHICA                       -->
         <!-- ═══════════════════════════════════════ -->
-        <div id="caja-chica" class="module active tarjeta-glass" role="region" aria-labelledby="caja-chica-title">
+        <div id="caja-chica" class="module tarjeta-glass" role="region" aria-labelledby="caja-chica-title">
             <h2 id="caja-chica-title" style="color:var(--acento-cian);margin-top:0;">💰 Caja Chica e Insumos</h2>
 
             <div style="margin-bottom:20px;padding:15px;background:rgba(0,164,228,0.1);border-radius:8px;border:1px solid var(--acento-cian);">
@@ -1019,10 +1088,292 @@
         </div>
 
         <!-- ═══════════════════════════════════════ -->
-        <!-- MÓDULO REPORTES                         -->
+        <!-- MÓDULO VIAJES DE CAMIONES                -->
         <!-- ═══════════════════════════════════════ -->
-        <div id="reportes" class="module tarjeta-glass" role="region" aria-labelledby="reportes-title">
+        <div id="viajes" class="module tarjeta-glass" role="region" aria-labelledby="viajes-title">
+            <h2 id="viajes-title" style="color:var(--acento-cian);margin-top:0;">🚛 Control de Viajes de Camiones</h2>
+            <p style="color:var(--texto-secundario);font-size:13px;">Registra transportes al botadero, extracción y tipo de material. Para camiones propios se estima el combustible por distancia; para alquilados se registra la tarifa por día o por viaje.</p>
+
+            <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
+                <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🚚 Catálogo de Camiones y Equipo</h3>
+                <form id="form-camion" style="margin-bottom:15px;" aria-label="Formulario de registro de camión o equipo">
+                    <div class="form-grid-2-sm">
+                        <div>
+                            <label for="cam-nombre" class="visually-hidden">Nombre o placa</label>
+                            <input type="text" id="cam-nombre" placeholder="Nombre/Placa" required aria-required="true" maxlength="40" aria-label="Nombre o placa del camión">
+                        </div>
+                        <div>
+                            <label for="cam-propiedad" class="visually-hidden">Propiedad</label>
+                            <select id="cam-propiedad" aria-label="Propiedad del camión">
+                                <option value="propio">Propio</option>
+                                <option value="alquilado">Alquilado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid-3">
+                        <div>
+                            <label for="cam-capacidad">Capacidad (m³)</label>
+                            <input type="number" step="0.1" id="cam-capacidad" value="12" min="1" max="100" aria-label="Capacidad en metros cúbicos">
+                        </div>
+                        <div>
+                            <label for="cam-consumo">Consumo (L/km)</label>
+                            <input type="number" step="0.01" id="cam-consumo" value="0.35" min="0" max="10" aria-label="Consumo estimado en litros por kilómetro">
+                        </div>
+                        <div>
+                            <label for="cam-tarifa">Tarifa Alquiler (Q)</label>
+                            <input type="number" step="0.01" id="cam-tarifa" value="0" min="0" max="999999" aria-label="Tarifa de alquiler por día o por viaje">
+                        </div>
+                    </div>
+                    <div class="form-grid-2-sm" style="margin-bottom:10px;">
+                        <div>
+                            <label for="cam-modalidad" class="visually-hidden">Modalidad de alquiler</label>
+                            <select id="cam-modalidad" aria-label="Modalidad de alquiler del equipo">
+                                <option value="dia">Por día</option>
+                                <option value="viaje">Por viaje</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-secundario" style="width:100%;font-size:12px;" data-tooltip="Guardar camión o equipo">➕ Guardar Camión/Equipo</button>
+                    </div>
+                </form>
+                <div class="overflow-x-auto">
+                    <table id="tabla-camiones" aria-label="Lista de camiones y equipos">
+                        <thead><tr><th scope="col">Unidad</th><th scope="col">Propiedad</th><th scope="col">Tarifa</th><th scope="col">Consumo</th><th scope="col">Acciones</th></tr></thead>
+                        <tbody id="tabla-camiones-cuerpo"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
+                <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🗺️ Rutas / Distancias al Botadero</h3>
+                <form id="form-ruta" style="margin-bottom:15px;" aria-label="Formulario de ruta al botadero">
+                    <div class="form-grid-2">
+                        <div>
+                            <label for="ruta-nombre">Nombre / Destino</label>
+                            <input type="text" id="ruta-nombre" placeholder="Ej: Botadero Zona 8" required aria-required="true" maxlength="60" aria-label="Nombre del botadero">
+                        </div>
+                        <div>
+                            <label for="ruta-distancia">Distancia (km ida)</label>
+                            <input type="number" step="0.1" id="ruta-distancia" placeholder="0.0" required aria-required="true" min="0.1" max="9999" aria-label="Distancia de ida en kilómetros">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar ruta">💾 Registrar Ruta</button>
+                </form>
+                <div class="overflow-x-auto">
+                    <table id="tabla-rutas" aria-label="Rutas al botadero">
+                        <thead><tr><th>Botadero</th><th>Distancia Ida</th><th>Acciones</th></tr></thead>
+                        <tbody id="tabla-rutas-cuerpo"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:10px;">📦 Registrar Viaje</h3>
+            <form id="form-viaje" oninput="calcularMetricasViaje()" style="margin-bottom:25px;" aria-label="Formulario de registro de viaje de camión">
+                <div class="form-grid-2">
+                    <div>
+                        <label for="viaje-fecha">Fecha</label>
+                        <input type="date" id="viaje-fecha" required aria-required="true">
+                    </div>
+                    <div>
+                        <label for="viaje-cam">Camión / Equipo</label>
+                        <select id="viaje-cam" required aria-required="true">
+                            <option value="">Seleccionar unidad...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div>
+                        <label for="viaje-ruta">Botadero / Distancia</label>
+                        <select id="viaje-ruta" required aria-required="true">
+                            <option value="">Seleccionar ruta...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="viaje-material">Tipo de Material</label>
+                        <select id="viaje-material" required aria-required="true">
+                            <option value="arena">Arena</option>
+                            <option value="grava">Grava</option>
+                            <option value="tierra">Tierra / Relleno</option>
+                            <option value="despalme">Despalme</option>
+                            <option value="escombro">Escombro</option>
+                            <option value="piedrin">Piedrín</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid-3">
+                    <div>
+                        <label for="viaje-numero">No. de Viajes</label>
+                        <input type="number" id="viaje-numero" value="1" min="1" max="999" aria-label="Número de viajes realizados">
+                    </div>
+                    <div>
+                        <label for="viaje-precio-diesel">Precio Diesel (Q/L)</label>
+                        <input type="number" step="0.01" id="viaje-precio-diesel" value="0" min="0" max="999" aria-label="Precio del diesel por litro">
+                    </div>
+                    <div>
+                        <label for="viaje-extra">Tarifa Excedente (Q)</label>
+                        <input type="number" step="0.01" id="viaje-extra" value="0" min="0" max="999999" aria-label="Costo adicional o ajuste de tarifa">
+                    </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.02);border:1px dashed var(--acento-cian);border-radius:8px;padding:15px;margin-bottom:20px;" aria-live="polite" aria-label="Cálculo del viaje en tiempo real">
+                    <div class="form-grid-2" style="margin-bottom:0;">
+                        <div>Distancia Total: <strong id="lbl-viaje-km" style="color:var(--acento-cian);">0.0 km</strong></div>
+                        <div>Combustible Estimado: <strong id="lbl-viaje-litros">0.0 L</strong></div>
+                        <div>Costo Combustible: <strong id="lbl-viaje-costo-comb">Q0.00</strong></div>
+                        <div>Costo Tarifa: <strong id="lbl-viaje-costo-tarifa">Q0.00</strong></div>
+                        <div style="grid-column:1/-1;">Total del Viaje: <strong id="lbl-viaje-total" style="color:var(--exito);font-size:16px;">Q0.00</strong></div>
+                    </div>
+                </div>
+                <span id="viaje-aviso" style="color:var(--advertencia-texto);font-size:12px;display:block;margin-bottom:10px;" role="status"></span>
+                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar viaje y descontar de caja">📦 Registrar Viaje</button>
+            </form>
+
+            <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Viajes</h3>
+            <div class="overflow-x-auto">
+                <table id="tabla-viajes" aria-label="Historial de viajes de camiones">
+                    <thead><tr><th scope="col">Fecha</th><th scope="col">Unidad</th><th scope="col">Material</th><th scope="col">Viajes</th><th scope="col">Km</th><th scope="col">Combustible</th><th scope="col">Total (Q)</th><th scope="col">Acciones</th></tr></thead>
+                    <tbody id="tabla-viajes-cuerpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- MÓDULO CONSOLIDADO                       -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="mantenimiento" class="module tarjeta-glass" role="region" aria-labelledby="mantenimiento-title">
+            <h2 id="mantenimiento-title" style="color:var(--acento-cian);margin-top:0;">🔧 Mantenimiento y Control de Insumos</h2>
+            <p style="color:var(--texto-secundario);font-size:13px;">Gestiona el catálogo de maquinaria, formatos de inspección (mantenimiento preventivo/correctivo) y compras de repuestos, aceites, hidráulicos y combustible.</p>
+
+            <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
+                <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🏗️ Catálogo de Maquinaria</h3>
+                <form id="form-maqcat" style="margin-bottom:15px;" aria-label="Formulario de catálogo de maquinaria">
+                    <div class="form-grid-2-sm">
+                        <div>
+                            <label for="maqcat-nombre" class="visually-hidden">Nombre del equipo</label>
+                            <input type="text" id="maqcat-nombre" placeholder="Nombre / código" required aria-required="true" maxlength="50" aria-label="Nombre del equipo">
+                        </div>
+                        <div>
+                            <label for="maqcat-tipo" class="visually-hidden">Tipo de equipo</label>
+                            <select id="maqcat-tipo" aria-label="Tipo de maquinaria">
+                                <option value="Retroexcavadora">Retroexcavadora</option>
+                                <option value="Camión de Volteo">Camión de Volteo</option>
+                                <option value="Excavadora">Excavadora</option>
+                                <option value="Rodo 8T">Rodo 8 Toneladas</option>
+                                <option value="Rodo 10T">Rodo 10 Toneladas</option>
+                                <option value="Rodo 12T">Rodo 12 Toneladas</option>
+                                <option value="Patrol">Patrol / Motoniveladora</option>
+                                <option value="Compactadora">Compactadora</option>
+                                <option value="Vibrocompactadora">Vibrocompactadora</option>
+                                <option value="Mezcladora">Mezcladora</option>
+                                <option value="Grúa">Grúa</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-secundario" style="width:100%;font-size:12px;">➕ Agregar Maquinaria</button>
+                </form>
+                <div class="overflow-x-auto">
+                    <table id="tabla-maqcat" aria-label="Catálogo de maquinaria">
+                        <thead><tr><th>Equipo</th><th>Tipo</th><th>Acciones</th></tr></thead>
+                        <tbody id="tabla-maqcat-cuerpo"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:10px;">🔩 Registrar Orden de Mantenimiento</h3>
+            <form id="form-orden" style="margin-bottom:25px;" aria-label="Formulario de orden de mantenimiento">
+                <div class="form-grid-2">
+                    <div>
+                        <label for="ord-fecha">Fecha</label>
+                        <input type="date" id="ord-fecha" required aria-required="true">
+                    </div>
+                    <div>
+                        <label for="ord-maquina">Maquinaria</label>
+                        <select id="ord-maquina" required aria-required="true">
+                            <option value="">— Seleccionar —</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div>
+                        <label for="ord-tipo">Tipo de Mantenimiento</label>
+                        <select id="ord-tipo" aria-label="Tipo de mantenimiento">
+                            <option value="preventivo">Preventivo</option>
+                            <option value="correctivo">Correctivo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="ord-costo">Costo (Q)</label>
+                        <input type="number" step="0.01" id="ord-costo" value="0" min="0" max="999999" aria-label="Costo del mantenimiento">
+                    </div>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label for="ord-observaciones">Observaciones / Trabajo realizado</label>
+                    <textarea id="ord-observaciones" rows="2" maxlength="500" aria-label="Observaciones del mantenimiento"></textarea>
+                </div>
+                <div id="formatos-inspeccion" style="margin-bottom:15px;"></div>
+                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Guardar orden de mantenimiento">💾 Guardar Orden</button>
+            </form>
+
+            <h3 style="color:var(--texto-principal);font-size:16px;">📜 Órdenes de Mantenimiento</h3>
+            <div class="overflow-x-auto">
+                <table id="tabla-ordenes" aria-label="Historial de órdenes de mantenimiento">
+                    <thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Costo (Q)</th><th>Acciones</th></tr></thead>
+                    <tbody id="tabla-ordenes-cuerpo"></tbody>
+                </table>
+            </div>
+
+            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">🛒 Compra de Repuestos, Aceites e Insumos</h3>
+            <form id="form-insumo" style="margin-bottom:25px;" aria-label="Formulario de compra de insumos">
+                <div class="form-grid-2">
+                    <div>
+                        <label for="insumo-tipo">Tipo de Insumo</label>
+                        <select id="insumo-tipo" aria-label="Tipo de insumo">
+                            <option value="repuesto">Repuesto</option>
+                            <option value="aceite">Aceite</option>
+                            <option value="hidraulico">Hidráulico</option>
+                            <option value="combustible">Combustible</option>
+                            <option value="herramienta">Herramienta</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="insumo-articulo">Artículo</label>
+                        <input type="text" id="insumo-articulo" placeholder="Ej: Filtro de aire, aceite 15W40" required aria-required="true" maxlength="80" aria-label="Descripción del insumo">
+                    </div>
+                </div>
+                <div class="form-grid-3">
+                    <div>
+                        <label for="insumo-fecha">Fecha</label>
+                        <input type="date" id="insumo-fecha" required aria-required="true">
+                    </div>
+                    <div>
+                        <label for="insumo-cantidad">Cantidad</label>
+                        <input type="number" id="insumo-cantidad" value="1" min="1" max="99999" aria-label="Cantidad de insumo">
+                    </div>
+                    <div>
+                        <label for="insumo-costo">Costo Total (Q)</label>
+                        <input type="number" step="0.01" id="insumo-costo" value="0" min="0" max="999999" aria-label="Costo total del insumo">
+                    </div>
+                </div>
+                <div style="margin-top:12px;">
+                    <label for="insumo-stock-min">Stock mínimo de alerta (Qty) <span style="color:var(--texto-secundario);font-weight:normal;">— opcional. Se mostrará una alerta en el Resumen cuando la cantidad bajé de este valor.</span></label>
+                    <input type="number" id="insumo-stock-min" value="0" min="0" max="99999" aria-label="Stock mínimo de alerta">
+                </div>
+                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar compra y descontar de caja">💾 Registrar Compra</button>
+            </form>
+
+            <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Compras de Insumos</h3>
+            <div class="overflow-x-auto">
+                <table id="tabla-insumos" aria-label="Historial de compras de insumos">
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th>Costo (Q)</th><th>Acciones</th></tr></thead>
+                    <tbody id="tabla-insumos-cuerpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+            <div id="reportes" class="module tarjeta-glass" role="region" aria-labelledby="reportes-title">
             <h2 id="reportes-title" style="color:var(--acento-cian);margin-top:0;">📊 Generación de Reportes</h2>
+
             <div style="display:grid;grid-template-columns:1fr;gap:15px;margin-bottom:25px;">
                 <div>
                     <label for="reporte-tipo">Tipo de Reporte</label>
@@ -1030,6 +1381,8 @@
                         <option value="diario">Reporte Diario de Gastos</option>
                         <option value="semanal">Informe Semanal Consolidado</option>
                         <option value="asistencia">Reporte de Asistencia y Horas Extra</option>
+                        <option value="viajes">Reporte de Viajes de Camiones</option>
+                        <option value="mantenimiento">Reporte de Mantenimiento e Insumos</option>
                     </select>
                 </div>
                 <div>
@@ -1093,7 +1446,7 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 1.1.0 (correcciones aplicadas)<br>
+                    Versión: 2.1.0 (Panel de Resumen, viajes, mantenimiento, export XLSX)<br>
                     Desarrollado para: CONSTRURAMSA<br>
                     Modo: Offline (LocalStorage)
                 </p>
@@ -1265,6 +1618,16 @@
                 delete db.adquisiciones.cotizaciones;
             }
             if (!db.adquisiciones.cotizaciones_compras) db.adquisiciones.cotizaciones_compras = [];
+            if (!db.viajes_camiones) db.viajes_camiones = { rutas_botadero:[], camiones:[], equipo_alquilado:[], viajes:[] };
+            if (!db.viajes_camiones.rutas_botadero) db.viajes_camiones.rutas_botadero = [];
+            if (!db.viajes_camiones.camiones) db.viajes_camiones.camiones = [];
+            if (!db.viajes_camiones.equipo_alquilado) db.viajes_camiones.equipo_alquilado = [];
+            if (!db.viajes_camiones.viajes) db.viajes_camiones.viajes = [];
+            if (!db.mantenimiento) db.mantenimiento = { maquinaria:[], formatos:{}, ordenes:[], compras_insumos:[] };
+            if (!db.mantenimiento.maquinaria) db.mantenimiento.maquinaria = [];
+            if (!db.mantenimiento.formatos) db.mantenimiento.formatos = {};
+            if (!db.mantenimiento.ordenes) db.mantenimiento.ordenes = [];
+            if (!db.mantenimiento.compras_insumos) db.mantenimiento.compras_insumos = [];
             return db;
         }
 
@@ -1275,7 +1638,9 @@
                 caja_chica: [],
                 maquinaria_flota: { vehiculos:[], registros:[] },
                 personal: { trabajadores:[], asistencia:[] },
-                adquisiciones: { proveedores:[], cotizaciones_compras:[] }
+                adquisiciones: { proveedores:[], cotizaciones_compras:[] },
+                viajes_camiones: { rutas_botadero:[], camiones:[], equipo_alquilado:[], viajes:[] },
+                mantenimiento: { maquinaria:[], formatos:{}, ordenes:[], compras_insumos:[] }
             };
             saveDB(db);
             return db;
@@ -1303,6 +1668,16 @@
                 if (!d.adquisiciones) d.adquisiciones = { proveedores:[], cotizaciones_compras:[] };
                 if (!d.adquisiciones.proveedores) d.adquisiciones.proveedores = [];
                 if (!d.adquisiciones.cotizaciones_compras) d.adquisiciones.cotizaciones_compras = [];
+                if (!d.viajes_camiones) d.viajes_camiones = { rutas_botadero:[], camiones:[], equipo_alquilado:[], viajes:[] };
+                if (!d.viajes_camiones.rutas_botadero) d.viajes_camiones.rutas_botadero = [];
+                if (!d.viajes_camiones.camiones) d.viajes_camiones.camiones = [];
+                if (!d.viajes_camiones.equipo_alquilado) d.viajes_camiones.equipo_alquilado = [];
+                if (!d.viajes_camiones.viajes) d.viajes_camiones.viajes = [];
+                if (!d.mantenimiento) d.mantenimiento = { maquinaria:[], formatos:{}, ordenes:[], compras_insumos:[] };
+                if (!d.mantenimiento.maquinaria) d.mantenimiento.maquinaria = [];
+                if (!d.mantenimiento.formatos) d.mantenimiento.formatos = {};
+                if (!d.mantenimiento.ordenes) d.mantenimiento.ordenes = [];
+                if (!d.mantenimiento.compras_insumos) d.mantenimiento.compras_insumos = [];
                 return d;
             }
             // Sin proyecto: usa raíz
@@ -1310,7 +1685,9 @@
                 caja_chica: db.caja_chica,
                 maquinaria_flota: db.maquinaria_flota,
                 personal: db.personal,
-                adquisiciones: db.adquisiciones
+                adquisiciones: db.adquisiciones,
+                viajes_camiones: db.viajes_camiones,
+                mantenimiento: db.mantenimiento
             };
         }
 
@@ -1325,6 +1702,8 @@
                 db.maquinaria_flota = datos.maquinaria_flota;
                 db.personal = datos.personal;
                 db.adquisiciones = datos.adquisiciones;
+                db.viajes_camiones = datos.viajes_camiones;
+                db.mantenimiento = datos.mantenimiento;
             }
             saveDB(db);
         }
@@ -1353,7 +1732,8 @@
             let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
         }
 
-        function formatearMoneda(v) { return 'Q' + parseFloat(v || 0).toFixed(2); }
+        function numToF(v) { return (isNaN(parseFloat(v)) ? 0 : parseFloat(v)).toFixed(2); }
+        function formatearMoneda(v) { return 'Q' + (parseFloat(v || 0)).toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
         function generarId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
 
@@ -1427,7 +1807,7 @@
             const db = getDB();
             const id = generarId();
             db.proyectos.push({ id, nombre, descripcion: descripcion || '', presupuesto_inicial: presupuesto || 0, fecha_creacion: new Date().toISOString().split('T')[0], fecha_ultima_modificacion: new Date().toISOString() });
-            db.proyectos_data[id] = { caja_chica:[], maquinaria_flota:{vehiculos:[],registros:[]}, personal:{trabajadores:[],asistencia:[]}, adquisiciones:{proveedores:[],cotizaciones_compras:[]} };
+            db.proyectos_data[id] = { caja_chica:[], maquinaria_flota:{vehiculos:[],registros:[]}, personal:{trabajadores:[],asistencia:[]}, adquisiciones:{proveedores:[],cotizaciones_compras:[]}, viajes_camiones:{rutas_botadero:[],camiones:[],equipo_alquilado:[],viajes:[]}, mantenimiento:{maquinaria:[],formatos:{},ordenes:[],compras_insumos:[]} };
             saveDB(db);
             return db.proyectos[db.proyectos.length - 1];
         }
@@ -1544,6 +1924,90 @@
             cargarProveedores();
             cargarTablaCotizaciones();
             actualizarSaldoCajaChica();
+            cargarResumen();
+            cargarCamiones();
+            cargarRutas();
+            cargarTablaViajes();
+            cargarMaquinasCatalogo();
+            cargarTablaOrdenes();
+            cargarTablaInsumos();
+        }
+
+        // ============================================================
+        // RESUMEN / DASHBOARD EJECUTIVO
+        // ============================================================
+        function cargarResumen() {
+            const grid = document.getElementById('kpi-grid');
+            const avisosEl = document.getElementById('kpi-avisos');
+            const pendEl = document.getElementById('lista-pendientes');
+            if (!grid) return;
+            const datos = getProyectoData();
+            const db = getDB();
+            const proy = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
+            const proyNombre = proy ? proy.nombre : 'General';
+            const presupuesto = getPresupuestoActual();
+
+            let totalIng = 0, totalEgr = 0;
+            (datos.caja_chica || []).forEach(m => { if (m.tipo === 'ingreso') totalIng += m.monto; else totalEgr += m.monto; });
+            const saldo = presupuesto + totalIng - totalEgr;
+
+            const viajes = datos.viajes_camiones.viajes || [];
+            const camiones = datos.viajes_camiones.camiones || [];
+            let totalViajes = 0, viajesPropios = 0, viajesAlq = 0, kmTot = 0, litrosTot = 0;
+            viajes.forEach(v => {
+                totalViajes += (v.total || 0); kmTot += (v.km_total || 0); litrosTot += (v.litros || 0);
+                if (v.propiedad === 'alquilado') viajesAlq += 1; else viajesPropios += 1;
+            });
+
+            const ords = datos.mantenimiento.ordenes || [];
+            const ins = datos.mantenimiento.compras_insumos || [];
+            let totalMTTO = 0;
+            ords.forEach(o => totalMTTO += (o.costo || 0));
+            ins.forEach(i => totalMTTO += (i.costo || 0));
+
+            const regsAsist = (datos.personal.asistencia || []).flatMap(dia => dia.registros.map(r => ({...r, fecha: dia.fecha})));
+            let totalNomina = 0;
+            regsAsist.forEach(r => { if (r.calculos) totalNomina += (r.calculos.total_diario || 0); });
+
+            const pending = [];
+            (datos.adquisiciones.cotizaciones_compras || []).forEach(c => {
+                if (c.estado === 'pendiente') pending.push({ texto: `📋 Cotización: ${c.material_descripcion} (${formatearMoneda(c.total)})`, fecha: c.fecha });
+            });
+            const hoy = new Date().toISOString().split('T')[0];
+            viajes.forEach(v => { if (v.fecha === hoy) pending.push({ texto: `🚛 Hoy: ${(camiones.find(x=>x.id===v.vehiculo_id))?.nombre || 'N/A'} — ${v.numero} viaje(s) de ${v.material}`, fecha: v.fecha }); });
+            ords.forEach(o => { if (o.fecha === hoy) pending.push({ texto: `🔧 Hoy: orden de mantenimiento ${o.tipo}`, fecha: o.fecha }); });
+            ins.forEach(i => { if (i.fecha === hoy) pending.push({ texto: `🛒 Hoy: compra de ${i.articulo} (x${i.cantidad})`, fecha: i.fecha }); });
+            pending.sort((a,b) => (a.fecha||'').localeCompare(b.fecha||''));
+
+            const kpis = [
+                { clase: saldo >= 0 ? 'positivo' : 'negativo', label: 'Saldo Disponible', valor: formatearMoneda(saldo), sub: `Presupuesto: ${formatearMoneda(presupuesto)}` },
+                { clase: 'positivo', label: 'Ingresos', valor: formatearMoneda(totalIng), sub: `${(datos.caja_chica||[]).filter(m=>m.tipo==='ingreso').length} mov.` },
+                { clase: 'negativo', label: 'Egresos', valor: formatearMoneda(totalEgr), sub: `${(datos.caja_chica||[]).filter(m=>m.tipo==='egreso').length} mov.` },
+                { clase: 'ciano', label: 'Viajes', valor: String(viajes.length), sub: `${viajesPropios} propios · ${viajesAlq} alq.` },
+                { clase: 'purpura', label: 'Km recorridos', valor: numToF(kmTot) + ' km', sub: numToF(litrosTot) + ' L combust. aprox.' },
+                { clase: 'purpura', label: 'Mtto y Insumos', valor: formatearMoneda(totalMTTO), sub: `${ords.length} órdenes · ${ins.length} insumos` },
+                { clase: 'ciano', label: 'Nómina', valor: formatearMoneda(totalNomina), sub: `${regsAsist.length} registros` }
+            ];
+            grid.innerHTML = kpis.map(k => `<div class="kpi-card ${k.clase}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.valor}</div><div class="kpi-sub">${k.sub || ''}</div></div>`).join('');
+
+            const insLow = ins.filter(i => typeof i.stock_min === 'number' && i.cantidad < i.stock_min);
+            let avisosHtml = '';
+            if (insLow.length > 0) {
+                avisosHtml += `<div class="kpi-aviso">⚠️ <strong>Stock bajo:</strong> ${insLow.map(i => `${i.articulo} (quedan ${i.cantidad}, mín. ${i.stock_min})`).join(' · ')}</div>`;
+            }
+            if (saldo < 0) {
+                avisosHtml += `<div class="kpi-aviso">🚨 <strong>Fondos negativos:</strong> saldo de ${proyNombre} es negativo (${formatearMoneda(saldo)}).</div>`;
+            } else if (presupuesto > 0 && saldo / presupuesto < 0.15) {
+                avisosHtml += `<div class="kpi-aviso">⚠️ <strong>Fondos bajos:</strong> queda menos del 15% del presupuesto (${formatearMoneda(saldo)}).</div>`;
+            }
+            avisosEl.innerHTML = avisosHtml;
+
+            if (pending.length === 0) {
+                pendEl.innerHTML = '<li style="color:var(--texto-secundario);">✅ Sin registros pendientes para hoy.</li>';
+            } else {
+                pendEl.innerHTML = pending.slice(0, 8).map(p => `<li>${p.texto}</li>`).join('') +
+                    (pending.length > 8 ? `<li style="color:var(--texto-secundario);">+${pending.length - 8} más...</li>` : '');
+            }
         }
 
         // ============================================================
@@ -1568,11 +2032,34 @@
             img.onerror = () => { img.style.display = 'none'; };
         }
         function guardarLogo(b64) {
-            const db = getDB();
-            db.configuracion.logo_base64 = b64;
-            saveDB(db);
-            cargarLogo();
-            showToast('✅ Logo actualizado', 'success');
+            // Comprime/redimensiona el logo antes de guardarlo en localStorage
+            const img = new Image();
+            img.onload = function () {
+                const MAX = 600;
+                const escala = Math.min(1, MAX / Math.max(img.width, img.height));
+                const w = Math.round(img.width * escala);
+                const h = Math.round(img.height * escala);
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                let out;
+                try { out = canvas.toDataURL('image/jpeg', 0.85); }
+                catch (e) { out = b64; }
+                const db = getDB();
+                db.configuracion.logo_base64 = out;
+                saveDB(db);
+                cargarLogo();
+                showToast('✅ Logo actualizado y optimizado', 'success');
+            };
+            img.onerror = function () {
+                const db = getDB();
+                db.configuracion.logo_base64 = b64;
+                saveDB(db);
+                cargarLogo();
+                showToast('✅ Logo actualizado', 'success');
+            };
+            img.src = b64;
         }
         function eliminarLogo() {
             const db = getDB();
@@ -1594,8 +2081,11 @@
                     this.setAttribute('aria-current', 'page');
                     const mid = this.dataset.module;
                     document.getElementById(mid).classList.add('active');
+                    if (mid === 'resumen') { cargarResumen(); }
                     if (mid === 'personal') { cargarListaAsistencia(); cargarTablaAsistencia(); }
                     if (mid === 'adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
+                    if (mid === 'viajes') { cargarCamiones(); cargarRutas(); cargarTablaViajes(); }
+                    if (mid === 'mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }
                     if (mid === 'configuracion') cargarListaProyectosConfig();
                 });
             });
@@ -2414,6 +2904,19 @@
             ex.personal.asistencia = Array.from(mapaDias.values());
             ex.adquisiciones.proveedores        = fusionarArrays(ex.adquisiciones.proveedores||[], imp.adquisiciones?.proveedores||[], 'id');
             ex.adquisiciones.cotizaciones_compras = fusionarArrays(ex.adquisiciones.cotizaciones_compras||[], imp.adquisiciones?.cotizaciones_compras||[], 'id');
+            // Nuevos módulos: viajes y mantenimiento (raíz)
+            if (!ex.viajes_camiones) ex.viajes_camiones = { rutas_botadero:[], camiones:[], equipo_alquilado:[], viajes:[] };
+            const vc = imp.viajes_camiones || {};
+            ex.viajes_camiones.rutas_botadero = fusionarArrays(ex.viajes_camiones.rutas_botadero||[], vc.rutas_botadero||[], 'id');
+            ex.viajes_camiones.camiones       = fusionarArrays(ex.viajes_camiones.camiones||[], vc.camiones||[], 'id');
+            ex.viajes_camiones.equipo_alquilado = fusionarArrays(ex.viajes_camiones.equipo_alquilado||[], vc.equipo_alquilado||[], 'id');
+            ex.viajes_camiones.viajes          = fusionarArrays(ex.viajes_camiones.viajes||[], vc.viajes||[], 'id');
+            if (!ex.mantenimiento) ex.mantenimiento = { maquinaria:[], formatos:{}, ordenes:[], compras_insumos:[] };
+            const mt = imp.mantenimiento || {};
+            ex.mantenimiento.maquinaria = fusionarArrays(ex.mantenimiento.maquinaria||[], mt.maquinaria||[], 'id');
+            ex.mantenimiento.ordenes    = fusionarArrays(ex.mantenimiento.ordenes||[], mt.ordenes||[], 'id');
+            ex.mantenimiento.compras_insumos = fusionarArrays(ex.mantenimiento.compras_insumos||[], mt.compras_insumos||[], 'id');
+            ex.mantenimiento.formatos   = { ...(ex.mantenimiento.formatos||{}), ...(mt.formatos||{}) };
             if (imp.proyectos?.length) ex.proyectos = fusionarArrays(ex.proyectos||[], imp.proyectos, 'id');
             if (imp.proyectos_data) Object.keys(imp.proyectos_data).forEach(k => { ex.proyectos_data[k] = imp.proyectos_data[k]; });
             return ex;
@@ -2437,7 +2940,6 @@
                             saveDB(fusionado);
                             hideLoading();
                             showToast('✅ Datos importados y fusionados correctamente', 'success', 5000);
-                            hideLoading();
                             setTimeout(() => location.reload(), 1500);
                         }
                     );
@@ -2446,6 +2948,453 @@
             reader.readAsText(file);
             this.value = '';
         });
+
+        // ============================================================
+        // MÓDULO VIAJES DE CAMIONES
+        // ============================================================
+        function cargarCamiones() {
+            const datos = getProyectoData();
+            const sel = document.getElementById('viaje-cam');
+            sel.innerHTML = '<option value="">Seleccionar unidad...</option>';
+            (datos.viajes_camiones.camiones || []).forEach(c => {
+                if (c.propiedad !== 'propio') return;
+                const o = document.createElement('option');
+                o.value = c.id; o.textContent = c.nombre;
+                sel.appendChild(o);
+            });
+            cargarTablaCamiones();
+        }
+
+        function cargarRutas() {
+            const datos = getProyectoData();
+            const sel = document.getElementById('viaje-ruta');
+            sel.innerHTML = '<option value="">Seleccionar ruta...</option>';
+            (datos.viajes_camiones.rutas_botadero || []).forEach(r => {
+                const o = document.createElement('option');
+                o.value = r.id; o.textContent = `${r.nombre} (${r.distancia} km)`;
+                sel.appendChild(o);
+            });
+            cargarTablaRutas();
+        }
+
+        function calcularMetricasViaje() {
+            const datos = getProyectoData();
+            const camId = document.getElementById('viaje-cam').value;
+            const rutaId = document.getElementById('viaje-ruta').value;
+            const cam = (datos.viajes_camiones.camiones || []).find(c => c.id === camId);
+            const ruta = (datos.viajes_camiones.rutas_botadero || []).find(r => r.id === rutaId);
+            const numero = parseFloat(document.getElementById('viaje-numero').value) || 0;
+            const precio = parseFloat(document.getElementById('viaje-precio-diesel').value) || 0;
+            const extra = parseFloat(document.getElementById('viaje-extra').value) || 0;
+            const aviso = document.getElementById('viaje-aviso');
+            if (!cam) { aviso.textContent = '⚠️ Registre primero el camión.'; return; }
+            if (!ruta) { aviso.textContent = '⚠️ Registre una ruta/botadero.'; return; }
+            aviso.textContent = '';
+            const kmTotal = (ruta.distancia || 0) * 2 * numero;
+            const litros = kmTotal * (parseFloat(cam.consumo) || 0);
+            const costoComb = litros * precio;
+            let costoAlq = 0;
+            if (cam.propiedad === 'alquilado') {
+                costoAlq = (parseFloat(cam.tarifa) || 0) * (cam.modalidad === 'viaje' ? numero : 1);
+            }
+            document.getElementById('lbl-viaje-km').textContent = numToF(kmTotal) + ' km';
+            document.getElementById('lbl-viaje-litros').textContent = numToF(litros) + ' L';
+            document.getElementById('lbl-viaje-costo-comb').textContent = formatearMoneda(costoComb);
+            document.getElementById('lbl-viaje-costo-tarifa').textContent = formatearMoneda(costoAlq);
+            document.getElementById('lbl-viaje-total').textContent = formatearMoneda(costoComb + costoAlq + extra);
+        }
+
+        document.getElementById('form-camion').addEventListener('submit', agregarCamion);
+        document.getElementById('form-ruta').addEventListener('submit', agregarRuta);
+
+        function agregarCamion(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('cam-nombre').value.trim();
+            const propiedad = document.getElementById('cam-propiedad').value;
+            const capacidad = parseFloat(document.getElementById('cam-capacidad').value) || 0;
+            const consumo = parseFloat(document.getElementById('cam-consumo').value) || 0;
+            const tarifa = parseFloat(document.getElementById('cam-tarifa').value) || 0;
+            const modalidad = document.getElementById('cam-modalidad').value;
+            if (!nombre || nombre.length < 2) { showToast('Escriba el nombre del camión', 'error'); return; }
+            const datos = getProyectoData();
+            datos.viajes_camiones.camiones.push({ id: generarId(), nombre, propiedad, capacidad, consumo, tarifa, modalidad });
+            saveProyectoData(datos);
+            this.reset(); cargarCamiones();
+            showToast('Camión/equipo guardado', 'success');
+        }
+
+        function cargarTablaCamiones() {
+            const datos = getProyectoData();
+            const tbody = document.getElementById('tabla-camiones-cuerpo');
+            if (!tbody) return;
+            const cams = datos.viajes_camiones.camiones || [];
+            if (cams.length === 0) { tbody.innerHTML = filaVacia(5, 'No hay camiones registrados'); return; }
+            tbody.innerHTML = '';
+            cams.forEach(c => {
+                const prop = c.propiedad === 'propio' ? 'Propio' : 'Alquilado';
+                const tar = c.propiedad === 'alquilado' ? `${formatearMoneda(c.tarifa)}/${c.modalidad}` : '—';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${c.nombre}</td>
+                    <td>${prop}</td>
+                    <td>${tar}</td>
+                    <td>${c.consumo} L/km</td>
+                    <td><button onclick="eliminarCamion('${c.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar camión">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eliminarCamion(id) {
+            showConfirmModal('Eliminar Camión', '¿Eliminar este camión? No se puede deshacer.', () => {
+                const datos = getProyectoData();
+                datos.viajes_camiones.camiones = datos.viajes_camiones.camiones.filter(c => c.id !== id);
+                saveProyectoData(datos);
+                cargarCamiones();
+                showToast('Camión eliminado', 'success');
+            });
+        }
+
+        function agregarRuta(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('ruta-nombre').value.trim();
+            const distancia = parseFloat(document.getElementById('ruta-distancia').value);
+            if (!nombre || nombre.length < 2) { showToast('Ingrese el nombre', 'error'); return; }
+            if (!distancia || distancia <= 0) { showToast('Distancia inválida', 'error'); return; }
+            const datos = getProyectoData();
+            datos.viajes_camiones.rutas_botadero.push({ id: generarId(), nombre, distancia });
+            saveProyectoData(datos);
+            this.reset(); cargarRutas();
+            showToast('Ruta registrada', 'success');
+        }
+
+        function cargarTablaRutas() {
+            const datos = getProyectoData();
+            const tbody = document.getElementById('tabla-rutas-cuerpo');
+            if (!tbody) return;
+            const rutas = datos.viajes_camiones.rutas_botadero || [];
+            if (rutas.length === 0) { tbody.innerHTML = filaVacia(3, 'No hay rutas registradas'); return; }
+            tbody.innerHTML = '';
+            rutas.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${r.nombre}</td>
+                    <td>${r.distancia} km</td>
+                    <td><button onclick="eliminarRuta('${r.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar ruta">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eliminarRuta(id) {
+            showConfirmModal('Eliminar Ruta', '¿Eliminar esta ruta/botadero?', () => {
+                const datos = getProyectoData();
+                datos.viajes_camiones.rutas_botadero = datos.viajes_camiones.rutas_botadero.filter(r => r.id !== id);
+                saveProyectoData(datos);
+                cargarRutas();
+                showToast('Ruta eliminada', 'success');
+            });
+        }
+
+        document.getElementById('form-viaje').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const camId = document.getElementById('viaje-cam').value;
+            const rutaId = document.getElementById('viaje-ruta').value;
+            const fecha = document.getElementById('viaje-fecha').value;
+            const material = document.getElementById('viaje-material').value;
+            const numero = parseInt(document.getElementById('viaje-numero').value) || 0;
+            const precio = parseFloat(document.getElementById('viaje-precio-diesel').value) || 0;
+            const extra = parseFloat(document.getElementById('viaje-extra').value) || 0;
+            if (!fecha) { showToast('Seleccione la fecha', 'error'); return; }
+            if (!camId) { showToast('Seleccione un camión', 'error'); return; }
+            if (!rutaId) { showToast('Seleccione una ruta/botadero', 'error'); return; }
+            if (numero < 1) { showToast('Número de viajes inválido', 'error'); return; }
+            const datos = getProyectoData();
+            const cam = datos.viajes_camiones.camiones.find(c => c.id === camId);
+            const ruta = datos.viajes_camiones.rutas_botadero.find(r => r.id === rutaId);
+            if (!cam || !ruta) { showToast('Camión o ruta no encontrado', 'error'); return; }
+            const kmTotal = (ruta.distancia || 0) * 2 * numero;
+            const litros = kmTotal * (parseFloat(cam.consumo) || 0);
+            const costoComb = litros * precio;
+            let costoAlq = 0;
+            if (cam.propiedad === 'alquilado') {
+                costoAlq = (parseFloat(cam.tarifa) || 0) * (cam.modalidad === 'viaje' ? numero : 1);
+            }
+            const total = costoComb + costoAlq + extra;
+            const descripcion = `Viaje ${numero} (${material}) ${cam.nombre} → ${ruta.nombre}`;
+            const categoria = cam.propiedad === 'alquilado' ? 'Alquiler de Equipo' : 'Combustible';
+            if (total > 0) { if (!procesarGastoCajaChica(total, categoria, descripcion)) return; }
+            const datos2 = getProyectoData();
+            datos2.viajes_camiones.viajes.push({
+                id: generarId(), fecha, vehiculo_id: camId, ruta_id: rutaId,
+                material, numero, km_total: kmTotal, litros, costo_combustible: costoComb,
+                costo_alquiler: costoAlq, extra, total, propiedad: cam.propiedad, tarifa_modalidad: cam.modalidad
+            });
+            saveProyectoData(datos2);
+            this.reset();
+            document.getElementById('viaje-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('viaje-numero').value = 1;
+            cargarTablaViajes(); actualizarSaldoCajaChica(); cargarTablaCajaChica();
+            showToast('Viaje registrado y descontado de caja', 'success');
+        });
+
+        function cargarTablaViajes() {
+            const datos = getProyectoData();
+            const tbody = document.getElementById('tabla-viajes-cuerpo');
+            if (!tbody) return;
+            const viajes = [...(datos.viajes_camiones.viajes || [])].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            if (viajes.length === 0) { tbody.innerHTML = filaVacia(8, 'No hay viajes registrados'); return; }
+            tbody.innerHTML = '';
+            viajes.forEach(v => {
+                const cam = (datos.viajes_camiones.camiones || []).find(c => c.id === v.vehiculo_id);
+                const nombre = cam ? cam.nombre : 'N/A';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${v.fecha}</td>
+                    <td>${nombre}</td>
+                    <td>${v.material}</td>
+                    <td>${v.numero}</td>
+                    <td>${numToF(v.km_total)} km</td>
+                    <td>${numToF(v.litros)} L</td>
+                    <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(v.total)}</td>
+                    <td><button onclick="eliminarViaje('${v.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar viaje">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eliminarViaje(id) {
+            showConfirmModal('Eliminar Viaje', 'Se revertirá el gasto asociado en caja. ¿Continuar?', () => {
+                const datos = getProyectoData();
+                const v = datos.viajes_camiones.viajes.find(x => x.id === id);
+                if (v && v.total > 0) {
+                    datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: `Reversión viaje: ${v.material}`, monto: v.total, responsable: 'Sistema' });
+                }
+                datos.viajes_camiones.viajes = datos.viajes_camiones.viajes.filter(x => x.id !== id);
+                saveProyectoData(datos);
+                actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarTablaViajes();
+                showToast('Viaje eliminado y gasto revertido', 'success');
+            });
+        }
+
+        // ============================================================
+        // MÓDULO MANTENIMIENTO Y REPUESTOS
+        // ============================================================
+        const FORMATOS_BASE = {
+            'Retroexcavadora': ['Revisión de niveles (aceite, hidráulico, refrigerante)', 'Inspección de cucharón y brazos', 'Estado de mangueras hidráulicas', 'Filtro de aire y sistema de combustible', 'Chequeo de rodada y zapatas', 'Fugas visibles', 'Estado de batería y arranque', 'Apretado de retenes y junta'],
+            'Camión de Volteo': ['Nivel de aceite motor', 'Presión de llantas y rodada', 'Estado de mangueras del volteo', 'Bomba hidráulica de volteo', 'Filtro de combustible y aire', 'Sistema de frenos', 'Fugas visibles', 'Estado de batería y luces'],
+            'Excavadora': ['Revisión de nivel de aceite e hidráulico', 'Inspección de pluma y cilindros', 'Estado de zapatas y rodillos', 'Filtro de aire y combustible', 'Fugas en mangueras hidráulicas', 'Estado de batería y arranque', 'Presión y rodados', 'Apretado de pernería principal'],
+            'Rodo 8T': ['Nivel de aceite motor', 'Presión y estado de llantas/rodillos', 'Sistema de vibración', 'Estado de mangueras hidráulicas', 'Filtro de aire', 'Fugas visibles', 'Batería y luces', 'Estado de rodamiento'],
+            'Rodo 10T': ['Nivel de aceite motor', 'Presión de llantas/rodillos', 'Sistema de vibración', 'Mangueras hidráulicas', 'Filtro de aire y combustible', 'Fugas visibles', 'Batería y luces', 'Rodamiento y rodillos'],
+            'Rodo 12T': ['Nivel de aceite motor', 'Presión y estado de rodillos', 'Sistema de vibración y frenos', 'Mangueras hidráulicas', 'Filtro de aire y combustible', 'Fugas visibles', 'Batería y luces', 'Rodamiento y pernería'],
+            'Patrol': ['Nivel de aceite motor e hidráulico', 'Cuchilla y sistemas de inclinación', 'Estado de llantas', 'Filtro de aire y combustible', 'Mangueras hidráulicas', 'Fugas visibles', 'Batería y luces', 'Estado de rodamiento y frenos'],
+            'Compactadora': ['Nivel de aceite', 'Estado de rodillo y vibración', 'Filtro de aire', 'Fugas visibles', 'Batería y luces', 'Estado de mangueras'],
+            'Vibrocompactadora': ['Nivel de aceite', 'Estado de rodillos y vibración', 'Filtro de aire', 'Mangueras hidráulicas', 'Fugas visibles', 'Batería y luces'],
+            'Mezcladora': ['Nivel de aceite del motor', 'Estado de polea y banda', 'Tambor y cuchillas', 'Fugas visibles', 'Motor de arranque'],
+            'Grúa': ['Nivel de aceite e hidráulico', 'Estado de cable y gancho', 'Frenos y embragues', 'Mangueras hidráulicas', 'Fugas visibles', 'Luces y batería'],
+            'Otro': ['Revisión general', 'Nivel de aceite', 'Fugas visibles', 'Estado de filtros', 'Batería y luces']
+        };
+
+        function shownombreTipoMaquina(tipo) {
+            return tipo;
+        }
+
+        function cargarMaquinasCatalogo() {
+            const datos = getProyectoData();
+            const sel = document.getElementById('ord-maquina');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">— Seleccionar —</option>';
+            (datos.mantenimiento.maquinaria || []).forEach(m => {
+                const o = document.createElement('option');
+                o.value = m.id; o.textContent = `${m.nombre} (${m.tipo})`;
+                sel.appendChild(o);
+            });
+            cargarTablaMaqCat();
+        }
+
+        function cargarTablaMaqCat() {
+            const datos = getProyectoData();
+            const tbody = document.getElementById('tabla-maqcat-cuerpo');
+            if (!tbody) return;
+            const lista = datos.mantenimiento.maquinaria || [];
+            if (lista.length === 0) { tbody.innerHTML = filaVacia(3, 'No hay maquinaria registrada'); return; }
+            tbody.innerHTML = '';
+            lista.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${m.nombre}</td>
+                    <td>${m.tipo}</td>
+                    <td><button onclick="eliminarMaquinaCatalogo('${m.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar maquinaria">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('form-maqcat').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('maqcat-nombre').value.trim();
+            const tipo = document.getElementById('maqcat-tipo').value;
+            if (!nombre || nombre.length < 2) { showToast('Ingrese el nombre del equipo', 'error'); return; }
+            const datos = getProyectoData();
+            datos.mantenimiento.maquinaria.push({ id: generarId(), nombre, tipo });
+            saveProyectoData(datos);
+            this.reset(); cargarMaquinasCatalogo();
+            showToast('Maquinaria agregada al catálogo', 'success');
+        });
+
+        function eliminarMaquinaCatalogo(id) {
+            showConfirmModal('Eliminar Maquinaria', '¿Eliminar este equipo del catálogo?', () => {
+                const datos = getProyectoData();
+                datos.mantenimiento.maquinaria = datos.mantenimiento.maquinaria.filter(m => m.id !== id);
+                saveProyectoData(datos);
+                cargarMaquinasCatalogo();
+                showToast('Maquinaria eliminada', 'success');
+            });
+        }
+
+        // Formato de inspección: checkboxes basados en el tipo de la máquina seleccionada
+        function buildFormatosInspeccion() {
+            const datos = getProyectoData();
+            const maqId = document.getElementById('ord-maquina').value;
+            const cont = document.getElementById('formatos-inspeccion');
+            if (!cont) return;
+            cont.innerHTML = '';
+            const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === maqId);
+            if (!m) { cont.innerHTML = '<p style="color:var(--texto-secundario);font-size:12px;">Seleccione una maquinaria para ver su formato de inspección.</p>'; return; }
+            let items = FORMATOS_BASE[m.tipo] || FORMATOS_BASE['Otro'];
+            cont.innerHTML = `<h4 style="color:var(--acento-cian);font-size:13px;margin:0 0 8px 0;">📋 Formato de Inspección — ${snDocAcentos(m.tipo)}</h4>`;
+            items.forEach((it, i) => {
+                const d = document.createElement('label');
+                d.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:12px;color:var(--texto-principal);cursor:pointer;';
+                d.innerHTML = `<input type="checkbox" class="fmt-inspeccion" value="Bien" data-idx="${i}" style="width:auto;margin-top:2px;" aria-label="${it}"> <span>${it}</span>`;
+                cont.appendChild(d);
+            });
+        }
+
+        function snapshotNombreTipoMaq() { return ''; }
+        function snapshotNombreAcentos(s) { return s; }
+        function snDocAcentos(s) { return s; }
+
+        document.getElementById('ord-maquina').addEventListener('change', function() {
+            buildFormatosInspeccion();
+        });
+
+        // Orden de mantenimiento
+        document.getElementById('form-orden').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fecha = document.getElementById('ord-fecha').value;
+            const maqId = document.getElementById('ord-maquina').value;
+            const tipo = document.getElementById('ord-tipo').value;
+            const costo = parseFloat(document.getElementById('ord-costo').value) || 0;
+            const obs = document.getElementById('ord-observaciones').value.trim();
+            if (!fecha) { showToast('Seleccione la fecha', 'error'); return; }
+            if (!maqId) { showToast('Seleccione la maquinaria', 'error'); return; }
+            const datos = getProyectoData();
+            const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === maqId);
+            const items = [];
+            document.querySelectorAll('#formatos-inspeccion .fmt-inspeccion').forEach(cb => {
+                items.push({ estado: cb.checked ? 'Bien' : 'Revisar', descripcion: cb.closest('label').querySelector('span').textContent });
+            });
+            const descripcion = `${tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'} ${m ? m.nombre : ''}`;
+            if (costo > 0) { if (!procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Mantenimiento ${descripcion}`)) return; }
+            const datos2 = getProyectoData();
+            datos2.mantenimiento.ordenes.push({ id: generarId(), fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items });
+            saveProyectoData(datos2);
+            this.reset();
+            document.getElementById('ord-fecha').value = new Date().toISOString().split('T')[0];
+            buildFormatosInspeccion();
+            cargarTablaOrdenes(); actualizarSaldoCajaChica(); cargarTablaCajaChica();
+            showToast('Orden de mantenimiento guardada', 'success');
+        });
+
+        function cargarTablaOrdenes() {
+            const datos = getProyectoData();
+            const tbody = document.getElementById('tabla-ordenes-cuerpo');
+            if (!tbody) return;
+            const ords = [...(datos.mantenimiento.ordenes || [])].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            if (ords.length === 0) { tbody.innerHTML = filaVacia(5, 'No hay órdenes de mantenimiento'); return; }
+            tbody.innerHTML = '';
+            ords.forEach(o => {
+                const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === o.maquinaria_id);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${o.fecha}</td>
+                    <td>${m ? m.nombre : 'N/A'}</td>
+                    <td>${o.tipo}</td>
+                    <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(o.costo)}</td>
+                    <td><button onclick="eliminarOrden('${o.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar orden">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eliminarOrden(id) {
+            showConfirmModal('Eliminar Orden', 'Se revertirá el gasto de mantenimiento. ¿Continuar?', () => {
+                const datos = getProyectoData();
+                const o = datos.mantenimiento.ordenes.find(x => x.id === id);
+                if (o && o.costo > 0) {
+                    datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: 'Reversión mantenimiento', monto: o.costo, responsable: 'Sistema' });
+                }
+                datos.mantenimiento.ordenes = datos.mantenimiento.ordenes.filter(x => x.id !== id);
+                saveProyectoData(datos);
+                actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarTablaOrdenes();
+                showToast('Orden eliminada y gasto revertido', 'success');
+            });
+        }
+
+        document.getElementById('form-insumo').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fecha = document.getElementById('insumo-fecha').value;
+            const tipo = document.getElementById('insumo-tipo').value;
+            const articulo = document.getElementById('insumo-articulo').value.trim();
+            const cantidad = parseInt(document.getElementById('insumo-cantidad').value) || 0;
+            const costo = parseFloat(document.getElementById('insumo-costo').value) || 0;
+            const stockMin = parseInt(document.getElementById('insumo-stock-min').value) || 0;
+            if (!fecha) { showToast('Seleccione la fecha', 'error'); return; }
+            if (!articulo || articulo.length < 2) { showToast('Describa el artículo', 'error'); return; }
+            if (cantidad < 1) { showToast('Cantidad inválida', 'error'); return; }
+            if (costo <= 0) { showToast('Ingrese el costo', 'error'); return; }
+            const descripcion = `${tipo}: ${articulo} x${cantidad}`;
+            if (!procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Insumo ${descripcion}`)) return;
+            const datos = getProyectoData();
+            datos.mantenimiento.compras_insumos.push({ id: generarId(), fecha, tipo, articulo, cantidad, costo, stock_min: stockMin });
+            saveProyectoData(datos);
+            this.reset();
+            document.getElementById('insumo-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('insumo-cantidad').value = 1;
+            document.getElementById('insumo-stock-min').value = 0;
+            cargarTablaInsumos(); actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarResumen();
+            showToast('Compra de insumo registrada', 'success');
+        });
+
+        function cargarTablaInsumos() {
+            const datos = getProyectoData();
+            const tbody = document.getElementById('tabla-insumos-cuerpo');
+            if (!tbody) return;
+            const ins = [...(datos.mantenimiento.compras_insumos || [])].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            if (ins.length === 0) { tbody.innerHTML = filaVacia(6, 'No hay compras de insumos'); return; }
+            tbody.innerHTML = '';
+            ins.forEach(i => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${i.fecha}</td>
+                    <td>${i.tipo}</td>
+                    <td>${i.articulo}</td>
+                    <td>${i.cantidad}</td>
+                    <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(i.costo)}</td>
+                    <td><button onclick="eliminarInsumo('${i.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar insumo">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eliminarInsumo(id) {
+            showConfirmModal('Eliminar Compra', 'Se revertirá el gasto del insumo. ¿Continuar?', () => {
+                const datos = getProyectoData();
+                const i = datos.mantenimiento.compras_insumos.find(x => x.id === id);
+                if (i) {
+                    datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: 'Reversión insumo', monto: i.costo, responsable: 'Sistema' });
+                }
+                datos.mantenimiento.compras_insumos = datos.mantenimiento.compras_insumos.filter(x => x.id !== id);
+                saveProyectoData(datos);
+                actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarTablaInsumos();
+                showToast('Compra eliminada y gasto revertido', 'success');
+            });
+        }
 
         // ============================================================
         // REPORTES
@@ -2480,41 +3429,41 @@
             csv += `# Guatemala, C.A. | Tel: +502 5997 9501 | Email: contacto@construramsa.com\n`;
             csv += `# \n`;
 
-            if (tipo === 'diario') {
-                csv += `Reporte Diario de Gastos - ${empresa} - Proyecto: ${proyNombre}\n`;
-                csv += `Fecha,Tipo,Categoría,Descripción,Monto (Q)\n`;
-                const movs = (datos.caja_chica||[]).filter(g => g.fecha === fecha);
+            if (tipo === 'diario' || tipo === 'semanal') {
+                const rango = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
+                const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rango.inicio && f <= rango.fin);
+                csv += `# ${tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado'} - ${empresa} - Proyecto: ${proyNombre}\n`;
+                if (tipo === 'semanal') csv += `# Periodo: ${rango.inicio} al ${rango.fin}\n`;
+                csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
+                csv += `Fecha,Tipo,Categoria,Descripcion,Monto (Q)\n`;
+                const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha));
                 let totalIng = 0, totalEgr = 0;
-                if (movs.length === 0) {
-                    csv += `"SIN REGISTROS EN LA FECHA ${fecha}",,,,\n`;
-                } else {
-                    movs.forEach(g => {
-                        csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${g.monto}\n`;
-                        if (g.tipo==='ingreso') totalIng += g.monto; else totalEgr += g.monto;
+                if (movs.length === 0) { csv += `SIN MOVIMIENTOS DE CAJA EN EL PERIODO\n`; }
+                else { movs.forEach(g => { csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${numToF(g.monto)}\n`; if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto; }); }
+                /* ===== SECCION CONSOLIDADA: VIAJES ===== */
+                const viajes = (datos.viajes_camiones.viajes || []).filter(v => enRango(v.fecha));
+                let totalViajes = 0;
+                if (viajes.length > 0) {
+                    csv += `,,,,,,\n--- VIAJES DE CAMIONES ---\nFecha,Unidad,Material,No.,Km,Litros,Combustible (Q),Alquiler (Q),Total (Q)\n`;
+                    viajes.forEach(v => {
+                        const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A'};
+                        totalViajes += v.total || 0;
+                        totalEgr += v.total || 0;
+                        csv += `${v.fecha},${c.nombre},${v.material},${v.numero},${numToF(v.km_total)},${numToF(v.litros)},${numToF(v.costo_combustible)},${numToF(v.costo_alquiler)},${numToF(v.total)}\n`;
                     });
+                    csv += `,,,TOTAL VIAJES:,,${numToF(totalViajes)}\n`;
                 }
-                csv += `,,,,\n`;
-                csv += `,,,TOTAL INGRESOS:,${totalIng.toFixed(2)}\n`;
-                csv += `,,,TOTAL EGRESOS:,${totalEgr.toFixed(2)}\n`;
-                csv += `,,,SALDO NETO:,${(totalIng - totalEgr).toFixed(2)}\n`;
-            } else if (tipo === 'semanal') {
-                const rango = obtenerRangoSemana(fecha);
-                csv += `Informe Semanal (${rango.inicio} al ${rango.fin}) - ${empresa} - Proyecto: ${proyNombre}\n`;
-                csv += `Fecha,Tipo,Categoría,Descripción,Monto (Q)\n`;
-                const movs = (datos.caja_chica||[]).filter(g => g.fecha >= rango.inicio && g.fecha <= rango.fin);
-                let totalIng = 0, totalEgr = 0;
-                if (movs.length === 0) {
-                    csv += `"SIN REGISTROS EN EL PERÍODO ${rango.inicio} - ${rango.fin}",,,,\n`;
-                } else {
-                    movs.forEach(g => {
-                        csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${g.monto}\n`;
-                        if (g.tipo==='ingreso') totalIng += g.monto; else totalEgr += g.monto;
-                    });
+                /* ===== CONSOLIDADO: MANTENIMIENTO E INSUMOS ===== */
+                const ordsMT = (datos.mantenimiento.ordenes || []).filter(o => enRango(o.fecha));
+                const insMT = (datos.mantenimiento.compras_insumos || []).filter(i => enRango(i.fecha));
+                let totalMT = 0;
+                if (ordsMT.length > 0 || insMT.length > 0) {
+                    csv += '\n--- MANTENIMIENTO E INSUMOS ---\n';
+                    ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMT += o.costo||0; totalEgr += o.costo||0; csv += `${o.fecha},Mantenimiento ${o.tipo},"${o.observaciones||'N/A'} - ${m.nombre}",${numToF(o.costo)}\n`; });
+                    insMT.forEach(i => { totalMT += i.costo||0; totalEgr += i.costo||0; csv += `${i.fecha},Insumo ${i.tipo},"${i.articulo} (x${i.cantidad})",${numToF(i.costo)}\n`; });
+                    csv += `,,TOTAL MTTO E INSUMOS:,${numToF(totalMT)}\n`;
                 }
-                csv += `,,,,\n`;
-                csv += `,,,TOTAL INGRESOS:,${totalIng.toFixed(2)}\n`;
-                csv += `,,,TOTAL EGRESOS:,${totalEgr.toFixed(2)}\n`;
-                csv += `,,,SALDO NETO:,${(totalIng - totalEgr).toFixed(2)}\n`;
+                csv += `,,,,\n,,,TOTAL INGRESOS:,${numToF(totalIng)}\n,,,TOTAL EGRESOS:,${numToF(totalEgr)}\n,,,SALDO NETO:,${numToF(totalIng - totalEgr)}\n`;
             } else if (tipo === 'asistencia') {
                 csv += `Reporte de Asistencia - ${empresa} - Proyecto: ${proyNombre}\n`;
                 csv += `Fecha,Trabajador,Puesto,Estado,Horas Extra,Sueldo Diario (Q)\n`;
@@ -2536,6 +3485,43 @@
                     });
                 }
                 csv += `,,,,TOTAL NÓMINA:,${total.toFixed(2)}\n`;
+            } else if (tipo === 'viajes') {
+                csv += `Reporte de Viajes de Camiones - ${empresa} - Proyecto: ${proyNombre}\n`;
+                csv += `Fecha,Unidad,Material,No. Viajes,Km Total,Litros,Costo Combustible (Q),Costo Alquiler (Q),Total (Q)\n`;
+                const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha);
+                let totalV = 0;
+                if (viajes.length === 0) {
+                    csv += `"SIN VIAJES EN LA FECHA ${fecha}",,,,,,,,\n`;
+                } else {
+                    viajes.forEach(v => {
+                        const cam = (datos.viajes_camiones.camiones||[]).find(c => c.id === v.vehiculo_id);
+                        totalV += v.total || 0;
+                        csv += `${v.fecha},${cam?cam.nombre:'N/A'},${v.material},${v.numero},${v.km_total?numToF(v.km_total):0},${v.litros?numToF(v.litros):0},${v.costo_combustible?numToF(v.costo_combustible):'0.00'},${v.costo_alquiler?numToF(v.costo_alquiler):'0.00'},${v.total?numToF(v.total):'0.00'}\n`;
+                    });
+                }
+                csv += `,,,,,,,,,\n`;
+                csv += `,,,,,,,,,TOTAL VIAJES:,${totalV.toFixed(2)}\n`;
+            } else if (tipo === 'mantenimiento') {
+                csv += `Reporte de Mantenimiento e Insumos - ${empresa} - Proyecto: ${proyNombre}\n`;
+                csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
+                let totalM = 0;
+                const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
+                const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
+                if (ins.length === 0 && ords.length === 0) {
+                    csv += `"SIN MANTENIMIENTO/INSUMOS EN ${fecha}",,,\n`;
+                } else {
+                    ords.forEach(o => {
+                        const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
+                        totalM += o.costo || 0;
+                        csv += `${o.fecha},Mantenimiento ${o.tipo},${m?m.nombre:'N/A'},${(o.costo||0).toFixed(2)}\n`;
+                    });
+                    ins.forEach(i => {
+                        totalM += i.costo || 0;
+                        csv += `${i.fecha},Insumo ${i.tipo},${i.articulo},${(i.costo||0).toFixed(2)}\n`;
+                    });
+                }
+                csv += `,,,\n`;
+                csv += `,,,,TOTAL MANTENIMIENTO E INSUMOS:,${totalM.toFixed(2)}\n`;
             }
             return csv;
         }
@@ -2547,42 +3533,65 @@
             const proyNombre = proy ? proy.nombre : 'General';
             let html = '';
 
-            if (tipo === 'diario') {
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte Diario de Gastos</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${fecha} | Proyecto: ${proyNombre}</p>`;
+            if (tipo === 'diario' || tipo === 'semanal') {
+                const rangoT = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
+                const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rangoT.inicio && f <= rangoT.fin);
+                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">${tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado'}</h2>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + fecha) : ('Período: ' + rangoT.inicio + ' al ' + rangoT.fin)} | Proyecto: ${proyNombre}</p>`;
+                html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica</h3>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
-                const movs = (datos.caja_chica||[]).filter(g => g.fecha === fecha);
+                const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
                     const esIng = g.tipo === 'ingreso';
                     html += `<tr><td>${g.fecha}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${g.tipo.toUpperCase()}</td><td>${g.categoria}</td><td>${g.descripcion}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
                     if (esIng) totalIng += g.monto; else totalEgr += g.monto;
                 });
-                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos en esta fecha</td></tr>`;
-                // FIX #6: distinción ingresos/egresos en totales
+                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos de caja en este período</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#059669;">TOTAL INGRESOS:</td><td class="total-ingreso">${formatearMoneda(totalIng)}</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#dc2626;">TOTAL EGRESOS:</td><td class="total-egreso">${formatearMoneda(totalEgr)}</td></tr>`;
-                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;">SALDO NETO:</td><td class="total-destacado">${formatearMoneda(totalIng-totalEgr)}</td></tr>`;
+                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;">SUBTOTAL CAJA:</td><td class="total-destacado">${formatearMoneda(totalIng-totalEgr)}</td></tr>`;
                 html += `</tbody></table>`;
-
-            } else if (tipo === 'semanal') {
-                const rango = obtenerRangoSemana(fecha);
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Informe Semanal Consolidado</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Período: ${rango.inicio} al ${rango.fin} | Proyecto: ${proyNombre}</p>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
-                const movs = (datos.caja_chica||[]).filter(g => g.fecha >= rango.inicio && g.fecha <= rango.fin).sort((a,b) => a.fecha.localeCompare(b.fecha));
-                let totalIng = 0, totalEgr = 0;
-                movs.forEach(g => {
-                    const esIng = g.tipo === 'ingreso';
-                    html += `<tr><td>${g.fecha}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${g.tipo.toUpperCase()}</td><td>${g.categoria}</td><td>${g.descripcion}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
-                    if (esIng) totalIng += g.monto; else totalEgr += g.monto;
-                });
-                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos en esta semana</td></tr>`;
-                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#059669;">TOTAL INGRESOS:</td><td class="total-ingreso">${formatearMoneda(totalIng)}</td></tr>`;
-                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#dc2626;">TOTAL EGRESOS:</td><td class="total-egreso">${formatearMoneda(totalEgr)}</td></tr>`;
-                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;">SALDO NETO:</td><td class="total-destacado">${formatearMoneda(totalIng-totalEgr)}</td></tr>`;
-                html += `</tbody></table>`;
-
+                /* VIAJES (consolidado) */
+                const viajesC = (datos.viajes_camiones.viajes||[]).filter(v => enRango(v.fecha)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+                if (viajesC.length > 0) {
+                    let totalVTmp = 0;
+                    html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🚛 Viajes de Camiones</h3>`;
+                    html += `<table class="tabla-pdf"><thead><tr><th>Unidad</th><th>Material</th><th>No.</th><th>Km</th><th>Litros</th><th style="text-align:right;">Comb. (Q)</th><th style="text-align:right;">Alquiler (Q)</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
+                    viajesC.forEach(v => {
+                        const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A',propiedad:'propio'};
+                        const prop = c.propiedad==='alquilado' ? ' (Alq.)' : '';
+                        totalVTmp += v.total || 0; totalEgr += v.total || 0;
+                        html += `<tr><td>${c.nombre}${prop}</td><td>${v.material}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:#dc2626;">${formatearMoneda(v.total)}</td></tr>`;
+                    });
+                    html += `<tr><td colspan="7" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalVTmp)}</td></tr>`;
+                    html += `</tbody></table>`;
+                }
+                /* MANTENIMIENTO */
+                const ordsMT = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
+                if (ordsMT.length > 0) {
+                    let totalMTmp = 0;
+                    html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">🔩 Mantenimiento</h3>`;
+                    html += `<table class="tabla-pdf"><thead><tr><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
+                    ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMTmp += o.costo||0; totalEgr += o.costo||0; html += `<tr><td>${m.nombre}</td><td>${o.tipo}</td><td>${o.observaciones||'—'}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`; });
+                    html += `<tr><td colspan="3" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMTmp)}</td></tr>`;
+                    html += `</tbody></table>`;
+                }
+                /* INSUMOS */
+                const insMT = (datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha));
+                if (insMT.length > 0) {
+                    let totalITmp = 0;
+                    html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
+                    html += `<table class="tabla-pdf"><thead><tr><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
+                    insMT.forEach(i => { totalITmp += i.costo||0; totalEgr += i.costo||0; html += `<tr><td>${i.tipo}</td><td>${i.articulo}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td></tr>`; });
+                    html += `<tr><td colspan="3" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalITmp)}</td></tr>`;
+                    html += `</tbody></table>`;
+                }
+                if (movs.length === 0 && viajesC.length === 0 && ordsMT.length === 0 && insMT.length === 0) {
+                    html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin registros en este período</td></tr>`;
+                }
+                html += `<div style="text-align:right;font-weight:bold;color:#004B93;background:#EFF6FF;padding:10px;margin-top:10px;">GRAN TOTAL EGRESOS: ${formatearMoneda(totalEgr)}</div>`;
+                html += `<div style="text-align:right;font-weight:bold;color:#059669;">SALDO NETO (ingresos − egresos): ${formatearMoneda(totalIng - totalEgr)}</div>`;
             } else if (tipo === 'asistencia') {
                 html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Asistencia y Horas Extra</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Generado: ${new Date().toLocaleDateString('es-GT')} | Proyecto: ${proyNombre}</p>`;
@@ -2606,6 +3615,56 @@
                 }
                 html += `<tr><td colspan="5" style="text-align:right;font-weight:bold;">TOTAL NÓMINA:</td><td class="total-destacado">${formatearMoneda(totalNomina)}</td></tr>`;
                 html += `</tbody></table>`;
+            } else if (tipo === 'viajes') {
+                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${fecha} | Proyecto: ${proyNombre}</p>`;
+                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
+                const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha).sort((a,b) => a.fecha.localeCompare(b.fecha));
+                let totalV = 0;
+                if (viajes.length === 0) {
+                    html += `<tr><td colspan="9" style="text-align:center;color:#6B7280;padding:20px;">Sin viajes en esta fecha</td></tr>`;
+                } else {
+                    viajes.forEach(v => {
+                        const cam = (datos.viajes_camiones.camiones||[]).find(c => c.id === v.vehiculo_id);
+                        const prop = (cam&&cam.propiedad==='alquilado')?' (Alq.)':'';
+                        totalV += v.total || 0;
+                        html += `<tr><td>${v.fecha}</td><td>${cam?cam.nombre:'N/A'}${prop}</td><td>${v.material}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:#dc2626;">${formatearMoneda(v.total)}</td></tr>`;
+                    });
+                }
+                html += `<tr><td colspan="8" style="text-align:right;font-weight:bold;">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalV)}</td></tr>`;
+                html += `</tbody></table>`;
+            } else if (tipo === 'mantenimiento') {
+                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Mantenimiento e Insumos</h2>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${fecha} | Proyecto: ${proyNombre}</p>`;
+                const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
+                const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
+                let totalM = 0;
+                // Órdenes de mantenimiento
+                html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">🔩 Órdenes de Mantenimiento</h3>`;
+                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
+                if (ords.length === 0) {
+                    html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:15px;">Sin órdenes en esta fecha</td></tr>`;
+                } else {
+                    ords.forEach(o => {
+                        const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
+                        totalM += o.costo || 0;
+                        html += `<tr><td>${o.fecha}</td><td>${m?m.nombre:'N/A'}</td><td>${o.tipo}</td><td>${o.observaciones||'—'}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`;
+                    });
+                }
+                html += `</tbody></table>`;
+                // Compras de insumos
+                html += `<h3 class="tabla-titulo" style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
+                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
+                if (ins.length === 0) {
+                    html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:15px;">Sin compras en esta fecha</td></tr>`;
+                } else {
+                    ins.forEach(i => {
+                        totalM += i.costo || 0;
+                        html += `<tr><td>${i.fecha}</td><td>${i.tipo}</td><td>${i.articulo}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td></tr>`;
+                    });
+                }
+                html += `</tbody></table>`;
+                html += `<div style="text-align:right;font-weight:bold;color:#004B93;background:#EFF6FF;padding:10px;margin-top:10px;">TOTAL MANTENIMIENTO E INSUMOS: ${formatearMoneda(totalM)}</div>`;
             }
             return html;
         }
@@ -2682,6 +3741,10 @@
                 const nombre = `reporte_${tipo}_${fecha || 'asistencia'}`;
                 const archivos = [];
 
+                const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
+                const proyNombreX = proyObj ? proyObj.nombre : 'General';
+                generarXLSX(tipo, fecha, proyNombreX, nombre);
+
                 const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
                 archivos.push(new File([csvBlob], `${nombre}.csv`, { type:'text/csv' }));
 
@@ -2729,6 +3792,10 @@
             const nombre= `reporte_${tipo}_${fecha || 'asistencia'}`;
             setTimeout(async () => {
                 try {
+                    const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
+                    const proyNombreX = proyObj ? proyObj.nombre : 'General';
+                    generarXLSX(tipo, fecha, proyNombreX, nombre);
+
                     const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
                     const urlCSV  = URL.createObjectURL(csvBlob);
                     const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click();
@@ -2756,15 +3823,67 @@
             }, 300);
         }
 
+        // Exporta el reporte actual a XLSX con SheetJS
+        function generarXLSX(tipo, fecha, proyNombre, nombre) {
+            if (typeof XLSX === 'undefined') { showToast('⚠️ Módulo XLSX no disponible. Intente conectado a internet.', 'error'); return null; }
+            const datos = getProyectoData();
+            const db = getDB();
+            const config = db.configuracion || {};
+            const empresa = config.nombre_empresa || 'CONSTRURAMSA';
+            let data = [];
+            const enc = [['CONSTRURAMSA'], [config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA'], ['Guatemala, C.A. | Tel: +502 5997 9501 | contacto@construramsa.com'], []];
+
+                        if (tipo === 'diario' || tipo === 'semanal') {
+                const rangoX = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
+                const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rangoX.inicio && f <= rangoX.fin);
+                const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha));
+                const viajesX = (datos.viajes_camiones.viajes||[]).filter(v => enRango(v.fecha));
+                const ordsX = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
+                const insX = (datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha));
+                const filasCaja = movs.map(g => [g.fecha, g.tipo, g.categoria, g.descripcion, g.monto]);
+                const filasViajes = viajesX.map(v => { const c=(datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id)||{nombre:'N/A'}; return [v.fecha, 'Viaje', c.nombre+' ('+v.material+') x'+v.numero, (v.propiedad==='alquilado'?'Alquiler Equipo':'Combustible'), v.total]; });
+                const filasMT = ordsX.map(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id)||{nombre:'N/A'}; return [o.fecha, 'Mantenimiento '+o.tipo, m.nombre+' - '+(o.observaciones||''), 'Repuestos/Mantenimiento', o.costo]; });
+                const filasIn = insX.map(i => [i.fecha, 'Insumo '+i.tipo, i.articulo+' (x'+i.cantidad+')', 'Insumo', i.costo]);
+                data = [...enc, [`Reporte ${tipo==='diario'?'Diario Consolidado':'Semanal Consolidado'} - Proyecto: ${proyNombre}`],
+                    ['Fecha','Tipo','Descripción','Categoría','Monto (Q)'],
+                    ['--- CAJA CHICA ---'], ...filasCaja,
+                    ['--- VIAJES DE CAMIONES ---'], ...filasViajes,
+                    ['--- MANTENIMIENTO E INSUMOS ---'], ...filasMT, ...filasIn];
+            } else if (tipo === 'viajes') {
+                const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha);
+                data = [...enc, [`Reporte de Viajes - Proyecto: ${proyNombre}`], ['Fecha','Unidad','Material','No. Viajes','Km Total','Litros','Costo Comb.(Q)','Alquiler (Q)','Total (Q)'],
+                    ...viajes.map(v => { const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id); return [v.fecha, c?c.nombre:'N/A', v.material, v.numero, v.km_total, v.litros, v.costo_combustible, v.costo_alquiler, v.total]; })];
+            } else if (tipo === 'mantenimiento') {
+                const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
+                const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
+                const filas = [];
+                ords.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id); filas.push([o.fecha,'Mantenimiento '+o.tipo, m?m.nombre:'N/A', o.costo]); });
+                ins.forEach(i => filas.push([i.fecha,'Insumo '+i.tipo, i.articulo, i.costo]));
+                data = [...enc, [`Reporte de Mantenimiento e Insumos - Proyecto: ${proyNombre}`], ['Fecha','Módulo','Descripción','Monto (Q)'], ...filas];
+            } else if (tipo === 'asistencia') {
+                const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(r => ({...r, fecha:dia.fecha})));
+                data = [...enc, [`Reporte de Asistencia - Proyecto: ${proyNombre}`], ['Fecha','Trabajador','Puesto','Estado','Horas Extra','Sueldo (Q)'],
+                    ...regs.map(r => { const t=(datos.personal.trabajadores||[]).find(x=>x.id===r.trabajador_id); let s=0; if(r.calculos) s=r.calculos.total_diario; else if(r.estado==='asistio'&&t){const he=r.horas_extras||0;s=8*(parseFloat(t.pago_hora_normal)||0)+he*(parseFloat(t.pago_hora_extra)||0);} return [r.fecha, t?t.nombre:'Desconocido', t?t.puesto:'N/A', r.estado, r.horas_extras||0, s]; })];
+            } else {
+                return null;
+            }
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            if (ws['!cols']) ws['!cols'] = data[0].map((c,i)=> ({ wch: 22 }));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+            XLSX.writeFile(wb, nombre + '.xlsx');
+            return true;
+        }
+
         function generarYCompartirReporte() { showLoading('Preparando reporte...'); compartirReporteWhatsApp(); }
 
         // ============================================================
         // ATAJOS DE TECLADO
         // ============================================================
         document.addEventListener('keydown', function(e) {
-            if (e.altKey && e.key >= '1' && e.key <= '6') {
+            if (e.altKey && e.key >= '1' && e.key <= '9') {
                 e.preventDefault();
-                const mods = ['caja-chica','maquinaria','personal','adquisiciones','reportes','configuracion'];
+                const mods = ['resumen','caja-chica','maquinaria','personal','adquisiciones','viajes','mantenimiento','reportes','configuracion'];
                 const mid  = mods[parseInt(e.key)-1];
                 document.querySelectorAll('.nav-tab').forEach(t => { t.classList.remove('active'); t.removeAttribute('aria-current'); });
                 document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
@@ -2772,8 +3891,11 @@
                 if (tab) { tab.classList.add('active'); tab.setAttribute('aria-current','page'); }
                 const modEl = document.getElementById(mid);
                 if (modEl) modEl.classList.add('active');
+                if (mid==='resumen') { cargarResumen(); }
                 if (mid==='personal') { cargarListaAsistencia(); cargarTablaAsistencia(); }
                 if (mid==='adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
+                if (mid==='viajes') { cargarCamiones(); cargarRutas(); cargarTablaViajes(); }
+                if (mid==='mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }
                 if (mid==='configuracion') cargarListaProyectosConfig();
                 if (tab) showToast(`📱 ${tab.textContent.trim()}`, 'info', 1200);
             }
@@ -2845,6 +3967,9 @@
             document.getElementById('caja-fecha').value          = fechaHoy;
             document.getElementById('fecha-asistencia').value    = fechaHoy;
             document.getElementById('reporte-fecha').value       = fechaHoy;
+            document.getElementById('viaje-fecha').value         = fechaHoy;
+            document.getElementById('ord-fecha').value           = fechaHoy;
+            document.getElementById('insumo-fecha').value        = fechaHoy;
             document.getElementById('pdf-fecha-emision').textContent = new Date().toLocaleDateString('es-GT');
 
             if (db.configuracion.presupuesto_inicial_caja) {
@@ -2862,7 +3987,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const moduloURL = urlParams.get('module');
             if (moduloURL) {
-                const modulosValidos = ['caja-chica','maquinaria','personal','adquisiciones','reportes','configuracion'];
+                const modulosValidos = ['resumen','caja-chica','maquinaria','personal','adquisiciones','viajes','mantenimiento','reportes','configuracion'];
                 if (modulosValidos.includes(moduloURL)) {
                     // Activar el módulo indicado en la URL
                     document.querySelectorAll('.nav-tab').forEach(t => { t.classList.remove('active'); t.removeAttribute('aria-current'); });
@@ -2871,8 +3996,11 @@
                     if (tab) { tab.classList.add('active'); tab.setAttribute('aria-current','page'); }
                     const modEl = document.getElementById(moduloURL);
                     if (modEl) modEl.classList.add('active');
+                    if (moduloURL === 'resumen') { cargarResumen(); }
                     if (moduloURL === 'personal') { cargarListaAsistencia(); cargarTablaAsistencia(); }
                     if (moduloURL === 'adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
+                    if (moduloURL === 'viajes') { cargarCamiones(); cargarRutas(); cargarTablaViajes(); }
+                    if (moduloURL === 'mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }
                     if (moduloURL === 'configuracion') cargarListaProyectosConfig();
                 }
             }

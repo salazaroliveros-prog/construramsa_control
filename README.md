@@ -9,16 +9,19 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 - **Sistema Monetario en Quetzales (Q)**: Todos los montos expresados en moneda nacional de Guatemala
 - **Multi-Proyecto**: Gestión de múltiples proyectos con datos completamente aislados por proyecto
 - **Módulos Completos**:
+  - 📊 Panel de Resumen Ejecutivo con KPIs, alertas de fondos bajos, stock mínimo de insumos y pendientes del día
   - 💰 Caja Chica e Insumos con validación de saldo por proyecto
   - 🚜 Maquinaria y Flota con cálculos automáticos de rendimiento (N/A cuando sin combustible)
   - 👷 Personal, Asistencia y Nómina con cálculo de horas extra
   - 📋 Adquisiciones y Proveedores con cotizaciones
-- **Reportes Profesionales**: PDF y CSV con desglose de ingresos, egresos y saldo neto
+  - 🚛 Control de Viajes de Camiones: rutas al botadero, distancia, tipo de material, camiones propios (consumo de combustible estimado por km) y alquilados (tarifa por día o por viaje)
+  - 🔧 Mantenimiento y Control de Insumos: catálogo de maquinaria, formatos de inspección preventivo/correctivo, compras de repuestos/aceites/hidráulicos/combustible y alertas de stock mínimo
+- **Reportes Profesionales**: PDF, CSV y XLSX con membrete corporativo, desglose de ingresos, egresos, saldo neto y consolidado (caja + viajes + mantenimiento + insumos) diario y semanal
 - **Compartir por WhatsApp**: Integración con Web Share API
 - **Respaldo de Datos**: Exportación e importación con fusión inteligente
 - **Accesibilidad WCAG 2.1 AA**: Contraste de colores corregido, aria-live, aria-label en todos los controles
 - **Paginación**: Tablas de historial paginadas a 20 registros por página
-- **PWA Completa**: Service Worker v1.1.0 con activación inmediata y cache robusto
+- **PWA Completa**: Service Worker v2.1.0 con activación inmediata y cache robusto
 
 ## Instalación
 
@@ -60,7 +63,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 | Archivo | Descripción |
 |---------|-------------|
 | `index.html` | Aplicación principal (HTML + CSS + JavaScript) |
-| `sw.js` | Service Worker v1.1.0 para funcionalidad offline |
+| `sw.js` | Service Worker v2.1.0 para funcionalidad offline |
 | `manifest.json` | Configuración PWA con shortcuts de módulos |
 | `icon.png` | Icono corporativo (192×192px) |
 | `icon.svg` | Icono vectorial corporativo |
@@ -134,6 +137,25 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 
 ## Historial de Cambios
 
+### v2.1.0 (2026-08-24) — Panel de Resumen y optimizaciones
+- **Nuevo**: 📊 Panel de Resumen Ejecutivo con KPIs (saldo, ingresos/egresos, viajes, km, mantenimiento, nómina), alertas de fondos bajos/negativos, alertas de stock mínimo de insumos y lista de pendientes del día
+- **Nuevo**: Atajo de teclado Alt+1..9 y shortcut PWA al Panel de Resumen
+- **Nuevo**: Campo de "stock mínimo" en compras de insumos con alerta automática en el Resumen
+- **Optimización**: responsive móvil Android/iOS confirmado (safe-area, botones 44px, tablas con scroll táctil, breakpoints 768px/375px)
+- **Cambios internos**: versión unificada y cache del Service Worker actualizado a v2.1.0
+
+### v2.0.0 (2026-08-24) — Viajes, Mantenimiento y Reportes consolidados
+- **Nuevo**: 📊 Panel de Resumen Ejecutivo (tab "Resumen") con KPIs de saldo, ingresos/egresos, viajes, km recorridos, mantenimiento e insumos, nómina, más alertas de fondos bajos/negativos, stock mínimo y pendientes del día
+- **Nuevo**: 🚛 Módulo de Control de Viajes de Camiones (rutas al botadero con distancia, tipo de material, camiones propios con consumo de combustible estimado por km, camiones alquilados con tarifa por día o por viaje y descuento automático a caja)
+- **Nuevo**: 🔧 Módulo de Mantenimiento y Control de Insumos (catálogo de maquinaria, formatos de inspección preventivo/correctivo por tipo de equipo, órdenes de mantenimiento y compras de repuestos, aceites, hidráulicos y combustible) con campo de stock mínimo y alerta automática
+- **Nuevo**: Exportación a XLSX con SheetJS además de PDF y CSV
+- **Nuevo**: Atajo de teclado ampliado a Alt+1..9 (Resumen, Caja Chica, ... Configuración) y shortcut PWA al Panel de Resumen
+- **Mejora**: Reportes diario y semanal consolidados (caja chica + viajes + mantenimiento + insumos) en PDF, CSV y XLSX
+- **Mejora**: Plantilla de PDF con membrete corporativo, firmas y pie de página numerado
+- **Crítico**: `construramsa_db.json` corregido (estructura multi-proyecto válida con `viajes_camiones` y `mantenimiento` correctamente anidados)
+- **Bajo**: Corregido doble `hideLoading()` en la importación de datos
+- **DB**: Semilla ampliada con datos de ejemplo de viajes y mantenimiento en el proyecto "Residencial Los Pinos"
+
 ### v1.1.0 (2026-08-24) — Correcciones técnicas
 - **Crítico**: Arquitectura multi-proyecto unificada con `getProyectoData()`/`saveProyectoData()`
 - **Crítico**: Eliminado doble bloque `DOMContentLoaded`
@@ -161,8 +183,20 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 
 Para soporte técnico o reporte de problemas, contacte al equipo de desarrollo de CONSTRURAMSA.
 
+## Compatibilidad Móvil (Android / iOS)
+
+La aplicación es una PWA instalable y 100% responsive, optimizada para uso en campo:
+
+- **Android (Chrome)**: instalable como app nativa desde el menú "Agregar a pantalla principal"; se abre en modo *standalone* a pantalla completa.
+- **iOS (Safari)**: `apple-mobile-web-app-capable`, icono de inicio (`apple-touch-icon`), barras `black-translucent` y soporte de *safe-area* del notch/Dynamic Island (`env(safe-area-inset-*)`). Añadir a pantalla de inicio: botón Compartir → "Añadir a pantalla de inicio".
+- **Responsive**: breakpoints a 768px y 375px que apilan formularios, centran la navegación, reducen tipografía, ajustan tarjetas y permiten scroll horizontal con gesto táctil en las tablas de datos.
+- **Touch optimizado**: botones con altura mínima de 44px (WCAG target size), sin `:hover` dependiente en móvil, y `-webkit-tap-highlight-color` desactivado.
+- **Atajos de teclado** (Alt+1..9) para equipos de oficina.
+
+> **Nota**: al abrir la app por primera vez conviene estar conectado para precargar las librerías PDF (html2pdf) y XLSX (SheetJS) en el caché del Service Worker. Luego funciona 100% offline.
+
 ---
 
-**Versión**: 1.1.0  
+**Versión**: 2.1.0  
 **Desarrollado para**: CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura  
 **Moneda**: Quetzales (Q) — Guatemala

@@ -50,6 +50,13 @@
 
   "shortcuts": [
     {
+      "name": "Panel de Resumen",
+      "short_name": "Resumen",
+      "description": "Ver el resumen ejecutivo de la obra",
+      "url": "./index.html?module=resumen&source=shortcut",
+      "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
       "name": "Caja Chica",
       "short_name": "Caja",
       "description": "Registrar movimientos de caja chica",

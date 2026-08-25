@@ -24,3 +24,8 @@ build/
 # Documentation and notes
 *.md
 !README.md
+
+# Servidor local de desarrollo (no parte de la app / no va a Vercel)
+server.js
+server_log.txt
+_*.js
