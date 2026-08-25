@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -303,43 +303,82 @@
         }
         .tabla-vacia span { display: block; font-size: 28px; margin-bottom: 8px; }
 
-        /* Plantilla de impresión */
+        /* Plantilla de impresión (oculta pero renderizable para html2canvas) */
         #plantilla-reporte-impresion {
-            display: none;
+            position: fixed;
+            left: -9999px;
+            top: -9999px;
+            width: 210mm;
+            min-height: 297mm;
             font-family: 'Arial', sans-serif;
             color: #111827;
-            padding: 30px;
             background: #ffffff;
+            padding: 20mm;
+            box-sizing: border-box;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Clase para hacer visible la plantilla durante la generación de PDF */
+        #plantilla-reporte-impresion.pdf-generating {
+            left: 0;
+            top: 0;
+            opacity: 1;
+            z-index: 9999;
+            pointer-events: auto;
         }
 
         #plantilla-reporte-impresion table.tabla-pdf {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            font-size: 10px;
         }
         #plantilla-reporte-impresion table.tabla-pdf th {
-            background-color: #f3f4f6;
-            color: #111827;
-            font-size: 11px;
+            background-color: #004B93;
+            color: #ffffff;
+            font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
-            padding: 8px 10px;
-            border: 1px solid #e5e7eb;
+            padding: 8px 6px;
+            border: 1px solid #004B93;
             text-align: left;
+            letter-spacing: 0.3px;
         }
         #plantilla-reporte-impresion table.tabla-pdf td {
-            font-size: 11px;
-            padding: 8px 10px;
-            border: 1px solid #e5e7eb;
+            font-size: 9.5px;
+            padding: 7px 6px;
+            border: 1px solid #E5E7EB;
             color: #374151;
+            vertical-align: middle;
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:nth-child(even) {
-            background-color: #f9fafb;
+            background-color: #F9FAFB;
+        }
+        #plantilla-reporte-impresion table.tabla-pdf tr:hover {
+            background-color: #F0F4F8;
         }
 
-        .total-destacado { font-weight: bold; color: #004B93; text-align: right; }
-        .total-egreso    { font-weight: bold; color: #dc2626; text-align: right; }
-        .total-ingreso   { font-weight: bold; color: #059669; text-align: right; }
+        /* Estilos para totales en tablas PDF */
+        #plantilla-reporte-impresion .total-destacado { 
+            font-weight: 700; 
+            color: #004B93; 
+            text-align: right; 
+            background-color: #EFF6FF !important;
+        }
+        #plantilla-reporte-impresion .total-egreso { 
+            font-weight: 700; 
+            color: #DC2626; 
+            text-align: right; 
+            background-color: #FEF2F2 !important;
+        }
+        #plantilla-reporte-impresion .total-ingreso { 
+            font-weight: 700; 
+            color: #059669; 
+            text-align: right; 
+            background-color: #ECFDF5 !important;
+        }
 
         /* FIX #18: footer PDF usa color accesible (#6B7280 sobre blanco = 4.6:1, pasa AA) */
         .pdf-footer-text { color: #6B7280; }
@@ -1064,53 +1103,107 @@
 
     <!-- Plantilla de Impresión Oculta (solo para PDF) -->
     <div id="plantilla-reporte-impresion">
-        <table style="width:100%;border-collapse:collapse;margin-bottom:25px;border-bottom:3px solid #004B93;">
-            <tr>
-                <td style="width:25%;padding-bottom:15px;vertical-align:middle;">
-                    <img id="pdf-logo-membrete" src="./icon.png" alt="Logo CONSTRURAMSA" style="max-height:85px;width:auto;object-fit:contain;">
-                </td>
-                <td style="width:50%;text-align:center;padding-bottom:15px;vertical-align:middle;">
-                    <h1 style="margin:0;font-size:24px;font-weight:800;letter-spacing:1px;color:#004B93;text-transform:uppercase;">CONSTRURAMSA</h1>
-                    <!-- FIX #18: color PDF slogan accesible (#4B5563 sobre blanco = 7.2:1) -->
-                    <p style="margin:4px 0 0 0;font-size:10px;font-weight:600;color:#4B5563;text-transform:uppercase;letter-spacing:0.5px;">Soluciones en Ingeniería y Arquitectura</p>
-                </td>
-                <td style="width:25%;text-align:right;padding-bottom:15px;vertical-align:middle;font-size:11px;line-height:1.4;color:#374151;">
-                    <strong>TIPO:</strong> <span id="pdf-tipo-reporte" style="color:#00A4E4;font-weight:bold;">DIARIO DE GASTOS</span><br>
-                    <strong>FECHA:</strong> <span id="pdf-fecha-emision"></span><br>
-                    <strong>PROYECTO:</strong> <span id="pdf-nombre-proyecto">Control de Obra</span>
-                </td>
-            </tr>
-        </table>
-
-        <div id="pdf-contenido-dinamico"></div>
-
-        <div style="margin-top:50px;page-break-inside:avoid;">
-            <table style="width:100%;margin-top:40px;">
+        <!-- ========== MEMBRETE PROFESIONAL CONSTRURAMSA ========== -->
+        <!-- Encabezado con logo y datos de la empresa -->
+        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #004B93;">
+            <table style="width:100%; border-collapse: collapse;">
                 <tr>
-                    <td style="width:45%;text-align:center;">
-                        <div style="margin-bottom:10px;">
-                            <img id="pdf-firma-jefe-proyectos" src="wilson.png" alt="Firma Jefe de Proyectos" style="max-height:60px;width:auto;object-fit:contain;">
-                        </div>
-                        <div style="border-top:1px solid #9CA3AF;width:80%;margin:0 auto;padding-top:15px;font-size:12px;font-weight:bold;color:#374151;">
-                            Arq. Wilson Dario Salazar Oliveros
-                        </div>
-                        <div style="font-size:10px;color:#6B7280;margin-top:2px;">Jefe de Proyectos</div>
+                    <!-- Logo a la izquierda -->
+                    <td style="width: 15%; padding: 10px; vertical-align: middle; text-align: center;">
+                        <img id="pdf-logo-membrete" src="./icon.png" alt="Logo CONSTRURAMSA" style="max-height: 80px; width: auto; object-fit: contain;">
                     </td>
-                    <td style="width:10%;"></td>
-                    <td style="width:45%;text-align:center;">
-                        <div style="margin-bottom:10px;">
-                            <img id="pdf-firma-gerente-comercial" src="juan.png" alt="Firma Gerente Comercial" style="max-height:60px;width:auto;object-fit:contain;">
+                    
+                    <!-- Datos centrales de la empresa -->
+                    <td style="width: 70%; padding: 10px; vertical-align: middle; text-align: center; border-left: 2px solid #004B93; border-right: 2px solid #004B93;">
+                        <h1 style="margin: 0 0 4px 0; font-size: 26px; font-weight: 800; letter-spacing: 1.5px; color: #004B93; text-transform: uppercase; line-height: 1.2;">
+                            CONSTRURAMSA
+                        </h1>
+                        <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 600; color: #4B5563; text-transform: uppercase; letter-spacing: 1px; line-height: 1.3;">
+                            SOLUCIONES EN INGENIERÍA Y ARQUITECTURA
+                        </p>
+                        <p style="margin: 0 0 4px 0; font-size: 9.5px; color: #6B7280; line-height: 1.4;">
+                            17av. Villa Mariscal, Apartamento 116, Torre 2, Zona 11, Ciudad de Guatemala
+                        </p>
+                        <p style="margin: 0; font-size: 9.5px; color: #6B7280; line-height: 1.4;">
+                            Tel: +502 5997 9501 | Email: contacto@construramsa.com
+                        </p>
+                    </td>
+                    
+                    <!-- Metadatos del reporte a la derecha -->
+                    <td style="width: 15%; padding: 10px; vertical-align: top; text-align: right; font-size: 9px; line-height: 1.6; color: #374151;">
+                        <div style="margin-bottom: 8px;">
+                            <strong style="font-size: 8px; text-transform: uppercase; color: #6B7280; letter-spacing: 0.5px;">TIPO DE REPORTE</strong><br>
+                            <span id="pdf-tipo-reporte" style="color: #004B93; font-weight: 700; font-size: 10px; text-transform: uppercase;">DIARIO DE GASTOS</span>
                         </div>
-                        <div style="border-top:1px solid #9CA3AF;width:80%;margin:0 auto;padding-top:15px;font-size:12px;font-weight:bold;color:#374151;">
-                            Ing. Juan LLuis Ramirez Jimenez
+                        <div style="margin-bottom: 8px;">
+                            <strong style="font-size: 8px; text-transform: uppercase; color: #6B7280; letter-spacing: 0.5px;">FECHA DE EMISIÓN</strong><br>
+                            <span id="pdf-fecha-emision" style="font-size: 10px; font-weight: 500;"></span>
                         </div>
-                        <div style="font-size:10px;color:#6B7280;margin-top:2px;">Gerente Comercial</div>
+                        <div>
+                            <strong style="font-size: 8px; text-transform: uppercase; color: #6B7280; letter-spacing: 0.5px;">PROYECTO</strong><br>
+                            <span id="pdf-nombre-proyecto" style="font-size: 10px; font-weight: 600;">Control de Obra</span>
+                        </div>
                     </td>
                 </tr>
             </table>
-            <!-- FIX #18: footer PDF usa #6B7280 (4.6:1 sobre blanco, pasa AA) -->
-            <div style="text-align:center;margin-top:30px;font-size:9px;color:#6B7280;">
-                Documento generado digitalmente desde la App Oficial de CONSTRURAMSA.
+        </div>
+
+        <!-- Línea divisoria elegante -->
+        <div style="height: 2px; background: linear-gradient(90deg, #004B93, #00A4E4); margin-bottom: 20px; border-radius: 1px;"></div>
+
+        <!-- Contenido dinámico del reporte -->
+        <div id="pdf-contenido-dinamico"></div>
+
+        <!-- ========== ÁREA DE FIRMAS AUTORIZADAS ========== -->
+        <div style="margin-top: 50px; page-break-inside: avoid;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <!-- Firma Jefe de Proyectos -->
+                    <td style="width: 45%; text-align: center; vertical-align: top; padding: 0 15px;">
+                        <div style="margin-bottom: 12px;">
+                            <img id="pdf-firma-jefe-proyectos" src="wilson.png" alt="Firma Jefe de Proyectos" style="max-height: 65px; width: auto; object-fit: contain; opacity: 0.9;">
+                        </div>
+                        <div style="border-top: 1.5px solid #374151; width: 85%; margin: 0 auto; padding-top: 10px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #111827; line-height: 1.4;">
+                                Arq. Wilson Dario Salazar Oliveros
+                            </div>
+                            <div style="font-size: 8.5px; color: #6B7280; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.6px; line-height: 1.3;">
+                                JEFE DE PROYECTOS
+                            </div>
+                        </div>
+                    </td>
+                    
+                    <!-- Espacio central -->
+                    <td style="width: 10%;"></td>
+                    
+                    <!-- Firma Gerente Comercial -->
+                    <td style="width: 45%; text-align: center; vertical-align: top; padding: 0 15px;">
+                        <div style="margin-bottom: 12px;">
+                            <img id="pdf-firma-gerente-comercial" src="juan.png" alt="Firma Gerente Comercial" style="max-height: 65px; width: auto; object-fit: contain; opacity: 0.9;">
+                        </div>
+                        <div style="border-top: 1.5px solid #374151; width: 85%; margin: 0 auto; padding-top: 10px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #111827; line-height: 1.4;">
+                                Ing. Juan LLuis Ramirez Jimenez
+                            </div>
+                            <div style="font-size: 8.5px; color: #6B7280; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.6px; line-height: 1.3;">
+                                GERENTE COMERCIAL
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Pie de página oficial con información legal -->
+            <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #E5E7EB; text-align: center;">
+                <p style="margin: 0 0 4px 0; font-size: 8.5px; color: #6B7280; line-height: 1.4;">
+                    <strong style="color: #374151;">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura
+                </p>
+                <p style="margin: 0 0 4px 0; font-size: 8px; color: #9CA3AF; line-height: 1.4;">
+                    Documento generado digitalmente desde la App Oficial de CONSTRURAMSA
+                </p>
+                <p style="margin: 0; font-size: 8px; color: #9CA3AF; line-height: 1.4;">
+                    Confidencial — Uso interno autorizado
+                </p>
             </div>
         </div>
     </div>
@@ -2369,46 +2462,68 @@
         }
 
         function generarCSVReporte(tipo, fecha) {
+            if (!fecha && tipo !== 'asistencia') {
+                return '\uFEFFError: Debe seleccionar una fecha para generar el reporte.';
+            }
             const datos = getProyectoData();
             const db    = getDB();
             const proy  = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
             const proyNombre = proy ? proy.nombre : 'General';
+            const config = db.configuracion || {};
+            const empresa = config.nombre_empresa || 'CONSTRURAMSA';
+            const eslogan = config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
             let csv = '\uFEFF'; // BOM UTF-8 para Excel
+            
+            // Encabezado con información de la empresa (como comentarios para Excel)
+            csv += `# ${empresa}\n`;
+            csv += `# ${eslogan}\n`;
+            csv += `# Guatemala, C.A. | Tel: +502 5997 9501 | Email: contacto@construramsa.com\n`;
+            csv += `# \n`;
 
             if (tipo === 'diario') {
-                csv += `Reporte Diario de Gastos - CONSTRURAMSA - Proyecto: ${proyNombre}\n`;
+                csv += `Reporte Diario de Gastos - ${empresa} - Proyecto: ${proyNombre}\n`;
                 csv += `Fecha,Tipo,Categoría,Descripción,Monto (Q)\n`;
                 const movs = (datos.caja_chica||[]).filter(g => g.fecha === fecha);
                 let totalIng = 0, totalEgr = 0;
-                movs.forEach(g => {
-                    csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${g.monto}\n`;
-                    if (g.tipo==='ingreso') totalIng += g.monto; else totalEgr += g.monto;
-                });
-                // FIX #6
+                if (movs.length === 0) {
+                    csv += `"SIN REGISTROS EN LA FECHA ${fecha}",,,,\n`;
+                } else {
+                    movs.forEach(g => {
+                        csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${g.monto}\n`;
+                        if (g.tipo==='ingreso') totalIng += g.monto; else totalEgr += g.monto;
+                    });
+                }
                 csv += `,,,,\n`;
                 csv += `,,,TOTAL INGRESOS:,${totalIng.toFixed(2)}\n`;
                 csv += `,,,TOTAL EGRESOS:,${totalEgr.toFixed(2)}\n`;
                 csv += `,,,SALDO NETO:,${(totalIng - totalEgr).toFixed(2)}\n`;
             } else if (tipo === 'semanal') {
                 const rango = obtenerRangoSemana(fecha);
-                csv += `Informe Semanal (${rango.inicio} al ${rango.fin}) - CONSTRURAMSA - Proyecto: ${proyNombre}\n`;
+                csv += `Informe Semanal (${rango.inicio} al ${rango.fin}) - ${empresa} - Proyecto: ${proyNombre}\n`;
                 csv += `Fecha,Tipo,Categoría,Descripción,Monto (Q)\n`;
                 const movs = (datos.caja_chica||[]).filter(g => g.fecha >= rango.inicio && g.fecha <= rango.fin);
                 let totalIng = 0, totalEgr = 0;
-                movs.forEach(g => {
-                    csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${g.monto}\n`;
-                    if (g.tipo==='ingreso') totalIng += g.monto; else totalEgr += g.monto;
-                });
+                if (movs.length === 0) {
+                    csv += `"SIN REGISTROS EN EL PERÍODO ${rango.inicio} - ${rango.fin}",,,,\n`;
+                } else {
+                    movs.forEach(g => {
+                        csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${g.monto}\n`;
+                        if (g.tipo==='ingreso') totalIng += g.monto; else totalEgr += g.monto;
+                    });
+                }
                 csv += `,,,,\n`;
                 csv += `,,,TOTAL INGRESOS:,${totalIng.toFixed(2)}\n`;
                 csv += `,,,TOTAL EGRESOS:,${totalEgr.toFixed(2)}\n`;
                 csv += `,,,SALDO NETO:,${(totalIng - totalEgr).toFixed(2)}\n`;
             } else if (tipo === 'asistencia') {
-                csv += `Reporte de Asistencia - CONSTRURAMSA - Proyecto: ${proyNombre}\n`;
+                csv += `Reporte de Asistencia - ${empresa} - Proyecto: ${proyNombre}\n`;
                 csv += `Fecha,Trabajador,Puesto,Estado,Horas Extra,Sueldo Diario (Q)\n`;
                 let total = 0;
-                (datos.personal.asistencia||[]).forEach(dia => {
-                    dia.registros.forEach(reg => {
+                const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
+                if (regs.length === 0) {
+                    csv += `"SIN REGISTROS DE ASISTENCIA",,,,,\n`;
+                } else {
+                    regs.forEach(reg => {
                         const t = datos.personal.trabajadores.find(t => t.id === reg.trabajador_id);
                         let sueldo = 0;
                         if (reg.calculos) { sueldo = reg.calculos.total_diario; }
@@ -2417,9 +2532,9 @@
                             sueldo = 8*(parseFloat(t.pago_hora_normal)||0) + he*(parseFloat(t.pago_hora_extra)||0);
                         }
                         total += sueldo;
-                        csv += `${dia.fecha},${t?t.nombre:'Desconocido'},${t?t.puesto:'N/A'},${reg.estado},${reg.horas_extras||0},${sueldo.toFixed(2)}\n`;
+                        csv += `${reg.fecha},${t?t.nombre:'Desconocido'},${t?t.puesto:'N/A'},${reg.estado},${reg.horas_extras||0},${sueldo.toFixed(2)}\n`;
                     });
-                });
+                }
                 csv += `,,,,TOTAL NÓMINA:,${total.toFixed(2)}\n`;
             }
             return csv;
@@ -2433,9 +2548,9 @@
             let html = '';
 
             if (tipo === 'diario') {
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;">Reporte Diario de Gastos</h2>`;
+                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte Diario de Gastos</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${fecha} | Proyecto: ${proyNombre}</p>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th>Monto (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
                 const movs = (datos.caja_chica||[]).filter(g => g.fecha === fecha);
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
@@ -2443,7 +2558,7 @@
                     html += `<tr><td>${g.fecha}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${g.tipo.toUpperCase()}</td><td>${g.categoria}</td><td>${g.descripcion}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
                     if (esIng) totalIng += g.monto; else totalEgr += g.monto;
                 });
-                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;">Sin movimientos en esta fecha</td></tr>`;
+                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos en esta fecha</td></tr>`;
                 // FIX #6: distinción ingresos/egresos en totales
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#059669;">TOTAL INGRESOS:</td><td class="total-ingreso">${formatearMoneda(totalIng)}</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#dc2626;">TOTAL EGRESOS:</td><td class="total-egreso">${formatearMoneda(totalEgr)}</td></tr>`;
@@ -2452,9 +2567,9 @@
 
             } else if (tipo === 'semanal') {
                 const rango = obtenerRangoSemana(fecha);
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;">Informe Semanal Consolidado</h2>`;
+                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Informe Semanal Consolidado</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Período: ${rango.inicio} al ${rango.fin} | Proyecto: ${proyNombre}</p>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th>Monto (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
                 const movs = (datos.caja_chica||[]).filter(g => g.fecha >= rango.inicio && g.fecha <= rango.fin).sort((a,b) => a.fecha.localeCompare(b.fecha));
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
@@ -2462,20 +2577,22 @@
                     html += `<tr><td>${g.fecha}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${g.tipo.toUpperCase()}</td><td>${g.categoria}</td><td>${g.descripcion}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
                     if (esIng) totalIng += g.monto; else totalEgr += g.monto;
                 });
-                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;">Sin movimientos en esta semana</td></tr>`;
+                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos en esta semana</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#059669;">TOTAL INGRESOS:</td><td class="total-ingreso">${formatearMoneda(totalIng)}</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#dc2626;">TOTAL EGRESOS:</td><td class="total-egreso">${formatearMoneda(totalEgr)}</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;">SALDO NETO:</td><td class="total-destacado">${formatearMoneda(totalIng-totalEgr)}</td></tr>`;
                 html += `</tbody></table>`;
 
             } else if (tipo === 'asistencia') {
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;">Reporte de Asistencia y Horas Extra</h2>`;
+                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Asistencia y Horas Extra</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Generado: ${new Date().toLocaleDateString('es-GT')} | Proyecto: ${proyNombre}</p>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Trabajador</th><th>Puesto</th><th>Estado</th><th>H. Extra</th><th>Sueldo (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Trabajador</th><th>Puesto</th><th>Estado</th><th>H. Extra</th><th style="text-align:right;">Sueldo (Q)</th></tr></thead><tbody>`;
                 let totalNomina = 0;
-                const sorted = [...(datos.personal.asistencia||[])].sort((a,b)=>a.fecha.localeCompare(b.fecha));
-                sorted.forEach(dia => {
-                    dia.registros.forEach(reg => {
+                const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
+                if (regs.length === 0) {
+                    html += `<tr><td colspan="6" style="text-align:center;color:#6B7280;padding:20px;">Sin registros de asistencia</td></tr>`;
+                } else {
+                    regs.forEach(reg => {
                         const t = datos.personal.trabajadores.find(t => t.id === reg.trabajador_id);
                         let sueldo = 0;
                         if (reg.calculos) { sueldo = reg.calculos.total_diario; }
@@ -2484,10 +2601,9 @@
                             sueldo = 8*(parseFloat(t.pago_hora_normal)||0)+he*(parseFloat(t.pago_hora_extra)||0);
                         }
                         totalNomina += sueldo;
-                        html += `<tr><td>${dia.fecha}</td><td>${t?t.nombre:'Desconocido'}</td><td>${t?t.puesto:'N/A'}</td><td style="color:${reg.estado==='asistio'?'#059669':reg.estado==='falto'?'#dc2626':'#6B7280'};font-weight:600;">${reg.estado.toUpperCase()}</td><td>${reg.horas_extras||0}h</td><td style="text-align:right;">${formatearMoneda(sueldo)}</td></tr>`;
+                        html += `<tr><td>${reg.fecha}</td><td>${t?t.nombre:'Desconocido'}</td><td>${t?t.puesto:'N/A'}</td><td style="color:${reg.estado==='asistio'?'#059669':reg.estado==='falto'?'#dc2626':'#6B7280'};font-weight:600;">${reg.estado.toUpperCase()}</td><td>${reg.horas_extras||0}h</td><td style="text-align:right;">${formatearMoneda(sueldo)}</td></tr>`;
                     });
-                });
-                if (sorted.length === 0) html += `<tr><td colspan="6" style="text-align:center;color:#6B7280;">Sin registros de asistencia</td></tr>`;
+                }
                 html += `<tr><td colspan="5" style="text-align:right;font-weight:bold;">TOTAL NÓMINA:</td><td class="total-destacado">${formatearMoneda(totalNomina)}</td></tr>`;
                 html += `</tbody></table>`;
             }
@@ -2498,8 +2614,18 @@
             const db   = getDB();
             const b64  = db.configuracion?.logo_base64;
             const logo = document.getElementById('pdf-logo-membrete');
-            if (b64 && b64.length > 100 && b64.startsWith('data:image')) { logo.src = b64; logo.onerror = () => { logo.src='./icon.png'; }; }
-            else logo.src = './icon.png';
+            if (b64 && b64.length > 100 && b64.startsWith('data:image')) { 
+                logo.src = b64; 
+                logo.onerror = () => { logo.src='./icon.png'; }; 
+            } else { 
+                logo.src = './icon.png'; 
+            }
+
+            // Precargar imágenes de firmas para asegurar que estén listas
+            const firma1 = document.getElementById('pdf-firma-jefe-proyectos');
+            const firma2 = document.getElementById('pdf-firma-gerente-comercial');
+            if (firma1) firma1.src = 'wilson.png';
+            if (firma2) firma2.src = 'juan.png';
 
             const proy = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
             document.getElementById('pdf-nombre-proyecto').textContent = proy ? proy.nombre : 'General';
@@ -2509,20 +2635,68 @@
             return document.getElementById('plantilla-reporte-impresion');
         }
 
+        // Esperar a que el logo y las firmas del membrete terminen de cargar
+        function esperarImagenesPlantilla() {
+            return Promise.all(
+                ['pdf-logo-membrete', 'pdf-firma-jefe-proyectos', 'pdf-firma-gerente-comercial'].map(id => {
+                    return new Promise(resolve => {
+                        const img = document.getElementById(id);
+                        if (!img || img.complete) return resolve();
+                        img.onload = () => resolve();
+                        img.onerror = () => resolve();
+                    });
+                })
+            );
+        }
+
+        // Generar el PDF del reporte y estampar "Página i de N" en cada hoja
+        async function generarPDFPlantilla(contenedor, filename) {
+            await esperarImagenesPlantilla();
+            const opts = {
+                margin: 10,
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+            };
+            const pdf = await html2pdf().set(opts).from(contenedor).toPdf().get('pdf');
+            const total = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= total; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(8);
+                pdf.setTextColor(156, 163, 175);
+                pdf.text(`Página ${i} de ${total}`, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 5, { align: 'center' });
+            }
+            return pdf;
+        }
+
         async function compartirReporteWhatsApp() {
             try {
                 const tipo   = document.getElementById('reporte-tipo').value;
                 const fecha  = document.getElementById('reporte-fecha').value;
-                const nombre = `reporte_${tipo}_${fecha}`;
+                if (!fecha && tipo !== 'asistencia') {
+                    showToast('⚠️ Seleccione una fecha para generar el reporte.', 'error');
+                    hideLoading();
+                    return;
+                }
+                const nombre = `reporte_${tipo}_${fecha || 'asistencia'}`;
                 const archivos = [];
 
                 const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
                 archivos.push(new File([csvBlob], `${nombre}.csv`, { type:'text/csv' }));
 
-                const htmlData  = generarHTMLReporte(tipo, fecha);
+                const htmlData   = generarHTMLReporte(tipo, fecha);
                 const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
-                const opts = { margin:10, filename:`${nombre}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'mm',format:'letter',orientation:'portrait'} };
-                const pdfBlob = await html2pdf().set(opts).from(contenedor).output('blob');
+
+                // Hacer visible el contenedor para html2canvas
+                contenedor.classList.add('pdf-generating');
+
+                const pdf     = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
+                const pdfBlob = pdf.output('blob');
+
+                // Restaurar estado oculto
+                contenedor.classList.remove('pdf-generating');
+
                 archivos.push(new File([pdfBlob], `${nombre}.pdf`, { type:'application/pdf' }));
 
                 hideLoading();
@@ -2534,6 +2708,10 @@
                     archivos.forEach(f => { const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;a.click(); });
                 }
             } catch (err) {
+                // Asegurar que se remueva la clase en caso de error
+                const contenedor = document.getElementById('plantilla-reporte-impresion');
+                if (contenedor) contenedor.classList.remove('pdf-generating');
+                
                 hideLoading();
                 if (err.name !== 'AbortError') { console.error(err); showToast('⚠️ Error al compartir. Se descargará localmente.', 'error'); generarReporteLocal(); }
             }
@@ -2543,18 +2721,38 @@
             showLoading('Generando reporte...');
             const tipo  = document.getElementById('reporte-tipo').value;
             const fecha = document.getElementById('reporte-fecha').value;
-            const nombre= `reporte_${tipo}_${fecha}`;
-            setTimeout(() => {
+            if (!fecha && tipo !== 'asistencia') {
+                showToast('⚠️ Seleccione una fecha para generar el reporte.', 'error');
+                hideLoading();
+                return;
+            }
+            const nombre= `reporte_${tipo}_${fecha || 'asistencia'}`;
+            setTimeout(async () => {
                 try {
                     const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
                     const urlCSV  = URL.createObjectURL(csvBlob);
                     const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click();
 
-                    const htmlData  = generarHTMLReporte(tipo, fecha);
+                    const htmlData   = generarHTMLReporte(tipo, fecha);
                     const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
-                    const opts = { margin:10, filename:`${nombre}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'mm',format:'letter',orientation:'portrait'} };
-                    html2pdf().set(opts).from(contenedor).save().then(() => { hideLoading(); showToast('✅ Reporte generado y descargado', 'success'); });
-                } catch (err) { hideLoading(); showToast('❌ Error al generar reporte', 'error'); console.error(err); }
+
+                    // Hacer visible el contenedor para html2canvas
+                    contenedor.classList.add('pdf-generating');
+
+                    const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
+                    pdf.save(`${nombre}.pdf`);
+
+                    // Restaurar estado oculto
+                    contenedor.classList.remove('pdf-generating');
+                    hideLoading(); 
+                    showToast('✅ Reporte generado y descargado', 'success');
+                } catch (err) { 
+                    const contenedor = document.getElementById('plantilla-reporte-impresion');
+                    if (contenedor) contenedor.classList.remove('pdf-generating');
+                    hideLoading(); 
+                    showToast('❌ Error al generar reporte', 'error'); 
+                    console.error(err); 
+                }
             }, 300);
         }
 

@@ -3,96 +3,177 @@
     "nombre_empresa": "CONSTRURAMSA",
     "eslogan": "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
     "logo_base64": "",
-    "presupuesto_inicial_caja": 5000.00,
+    "presupuesto_inicial_caja": 10000.00,
     "proyecto_actual": null
   },
-  "proyectos": [],
-  "proyectos_data": {},
-  "caja_chica": [
+  "proyectos": [
     {
-      "id": "caja-1718234567",
-      "fecha": "2026-08-24",
-      "tipo": "egreso",
-      "categoria": "Ferretería",
-      "descripcion": "Compra de clavos de 3 pulgadas y alambre de amarre",
-      "monto": 150.50,
-      "responsable": "Ing. Carlos Mendoza"
+      "id": "proj-pinos-001",
+      "nombre": "Residencial Los Pinos",
+      "descripcion": "Construcción de 12 viviendas multifamiliares - Fase 2",
+      "presupuesto_inicial": 25000.00,
+      "fecha_creacion": "2026-07-01",
+      "fecha_ultima_modificacion": "2026-08-24T08:30:00.000Z"
+    },
+    {
+      "id": "proj-plaza-002",
+      "nombre": "Edificio Central Plaza",
+      "descripcion": "Remodelación de lobby y áreas comunes",
+      "presupuesto_inicial": 15000.00,
+      "fecha_creacion": "2026-08-01",
+      "fecha_ultima_modificacion": "2026-08-24T09:15:00.000Z"
     }
+  ],
+  "proyectos_data": {
+    "proj-pinos-001": {
+      "caja_chica": [
+        { "id": "caja-pin-001", "fecha": "2026-08-21", "tipo": "egreso", "categoria": "ferreteria", "descripcion": "Pintura vinílica blanca y equipo de aplicación", "monto": 320.00, "responsable": "Rosa Elbira Cux" },
+        { "id": "caja-pin-002", "fecha": "2026-08-24", "tipo": "egreso", "categoria": "comida", "descripcion": "Refrigerios cuadrilla albañilería", "monto": 145.00, "responsable": "Miguel Ángel Torres" },
+        { "id": "caja-pin-003", "fecha": "2026-08-24", "tipo": "egreso", "categoria": "Combustible/Mantenimiento", "descripcion": "Maquinaria RETRO-PIN-02 - Lubricación general y engrase", "monto": 104.00, "responsable": "Sistema Automático" }
+      ],
+      "maquinaria_flota": {
+        "vehiculos": [
+          { "id": "maq-pin-01", "tipo": "Retroexcavadora", "codigo": "RETRO-PIN-02", "marca_modelo": "Komatsu PC200-8" }
+        ],
+        "registros": [
+          { "id": "reg-pin-mq-001", "vehiculo_id": "maq-pin-01", "fecha": "2026-08-24", "odometro_inicial": 3200.0, "odometro_final": 3208.5, "horas_trabajadas": 8.5, "combustible_galones": 11.0, "combustible_costo": 44.00, "mantenimiento_detalles": "Lubricación general y engrase", "mantenimiento_costo": 60.00 }
+        ]
+      },
+      "personal": {
+        "trabajadores": [
+          { "id": "trab-pin-01", "nombre": "Miguel Ángel Torres", "puesto": "Albañil Maestro", "pago_hora_normal": 14.00, "pago_hora_extra": 20.00 },
+          { "id": "trab-pin-02", "nombre": "Rosa Elbira Cux", "puesto": "Albañil", "pago_hora_normal": 10.00, "pago_hora_extra": 15.00 }
+        ],
+        "asistencia": [
+          {
+            "fecha": "2026-08-24",
+            "registros": [
+              { "trabajador_id": "trab-pin-01", "estado": "asistio", "horas_extras": 2, "horas_extras_cantidad": 2, "calculos": { "pago_normal": 112.00, "pago_extra": 40.00, "total_diario": 152.00 } },
+              { "trabajador_id": "trab-pin-02", "estado": "asistio", "horas_extras": 1, "horas_extras_cantidad": 1, "calculos": { "pago_normal": 80.00, "pago_extra": 15.00, "total_diario": 95.00 } }
+            ]
+          }
+        ]
+      },
+      "adquisiciones": {
+        "proveedores": [
+          { "id": "prov-pin-01", "nombre": "Pinturas y Decorados S.A.", "contacto": "Verónica Ruiz", "telefono": "+50255557788", "especialidad": "Pinturas y acabados" }
+        ],
+        "cotizaciones_compras": [
+          { "id": "cot-pin-001", "fecha": "2026-08-23", "proveedor_id": "prov-pin-01", "material_descripcion": "25 galones de pintura vinilo blanco", "precio_unitario": 95.00, "cantidad": 25, "total": 2375.00, "estado": "pendiente" }
+        ]
+      }
+    },
+    "proj-plaza-002": {
+      "caja_chica": [
+        { "id": "caja-plz-001", "fecha": "2026-08-24", "tipo": "egreso", "categoria": "imprevistos", "descripcion": "Lijas, sellador y cinta métrica", "monto": 87.50, "responsable": "Jorge Mario Xoyón" },
+        { "id": "caja-plz-002", "fecha": "2026-08-24", "tipo": "egreso", "categoria": "Materiales", "descripcion": "Compra: Tablero eléctrico 12 circuitos - Eléctrica Central", "monto": 480.00, "responsable": "Sistema Automático" }
+      ],
+      "maquinaria_flota": {
+        "vehiculos": [],
+        "registros": []
+      },
+      "personal": {
+        "trabajadores": [
+          { "id": "trab-plz-01", "nombre": "Jorge Mario Xoyón", "puesto": "Electricista", "pago_hora_normal": 15.00, "pago_hora_extra": 22.00 }
+        ],
+        "asistencia": [
+          {
+            "fecha": "2026-08-24",
+            "registros": [
+              { "trabajador_id": "trab-plz-01", "estado": "asistio", "horas_extras": 0, "horas_extras_cantidad": 0, "calculos": { "pago_normal": 120.00, "pago_extra": 0.00, "total_diario": 120.00 } }
+            ]
+          }
+        ]
+      },
+      "adquisiciones": {
+        "proveedores": [
+          { "id": "prov-plz-01", "nombre": "Eléctrica Central", "contacto": "Fernando Paxi", "telefono": "+50255556633", "especialidad": "Material eléctrico" }
+        ],
+        "cotizaciones_compras": [
+          { "id": "cot-plz-001", "fecha": "2026-08-24", "proveedor_id": "prov-plz-01", "material_descripcion": "Tablero eléctrico 12 circuitos", "precio_unitario": 480.00, "cantidad": 1, "total": 480.00, "estado": "aprobada" },
+          { "id": "cot-plz-002", "fecha": "2026-08-24", "proveedor_id": "prov-plz-01", "material_descripcion": "Cable THW #12 (rollo 100m)", "precio_unitario": 285.00, "cantidad": 4, "total": 1140.00, "estado": "pendiente" }
+        ]
+      }
+    }
+  },
+  "caja_chica": [
+    { "id": "caja-r021", "fecha": "2026-07-10", "tipo": "egreso", "categoria": "ferreteria", "descripcion": "Brocas y puntas para rotomartillo", "monto": 33.40, "responsable": "Juan Pérez" },
+    { "id": "caja-r014", "fecha": "2026-07-15", "tipo": "egreso", "categoria": "ferreteria", "descripcion": "Silicón y adhesivos varios", "monto": 27.25, "responsable": "Juan Pérez" },
+    { "id": "caja-r015", "fecha": "2026-07-18", "tipo": "egreso", "categoria": "comida", "descripcion": "Almuerzo cuadrilla fundaciones", "monto": 60.00, "responsable": "María López" },
+    { "id": "caja-r016", "fecha": "2026-07-21", "tipo": "egreso", "categoria": "repuestos", "descripcion": "Filtro de combustible para retroexcavadora", "monto": 120.00, "responsable": "Ing. Carlos Mendoza" },
+    { "id": "caja-r017", "fecha": "2026-07-23", "tipo": "egreso", "categoria": "imprevistos", "descripcion": "Guantes y botas de seguridad", "monto": 38.75, "responsable": "María López" },
+    { "id": "caja-r018", "fecha": "2026-07-25", "tipo": "egreso", "categoria": "combustible", "descripcion": "Gasolina para motosierra", "monto": 95.00, "responsable": "Pedro Sánchez" },
+    { "id": "caja-r019", "fecha": "2026-07-28", "tipo": "egreso", "categoria": "materiales", "descripcion": "Láminas de yeso para cielo falso", "monto": 210.00, "responsable": "Ing. Carlos Mendoza" },
+    { "id": "caja-r020", "fecha": "2026-07-30", "tipo": "ingreso", "categoria": "Reembolso", "descripcion": "Devolución por envases retornables", "monto": 40.00, "responsable": "Sistema" },
+    { "id": "caja-r001", "fecha": "2026-08-17", "tipo": "ingreso", "categoria": "apertura", "descripcion": "Apertura de fondo semanal de obra", "monto": 5000.00, "responsable": "Arq. Wilson Salazar" },
+    { "id": "caja-r002", "fecha": "2026-08-18", "tipo": "egreso", "categoria": "ferreteria", "descripcion": "Compra de clavos 3 pulgadas y alambre de amarre", "monto": 150.50, "responsable": "Ing. Carlos Mendoza" },
+    { "id": "caja-r003", "fecha": "2026-08-18", "tipo": "egreso", "categoria": "comida", "descripcion": "Almuerzo para cuadrilla (8 personas)", "monto": 240.00, "responsable": "María López" },
+    { "id": "caja-r004", "fecha": "2026-08-19", "tipo": "egreso", "categoria": "Combustible/Mantenimiento", "descripcion": "Maquinaria RETRO-01 - Cambio de filtro de aire y aceite hidráulico", "monto": 83.00, "responsable": "Sistema Automático" },
+    { "id": "caja-r005", "fecha": "2026-08-19", "tipo": "egreso", "categoria": "Materiales", "descripcion": "Compra: 20 sacos de Cemento Holcim - Distribuidora Cementos GT", "monto": 250.00, "responsable": "Sistema Automático" },
+    { "id": "caja-r006", "fecha": "2026-08-19", "tipo": "egreso", "categoria": "materiales", "descripcion": "10 bultos de mortero seco", "monto": 115.00, "responsable": "Ing. Carlos Mendoza" },
+    { "id": "caja-r007", "fecha": "2026-08-21", "tipo": "egreso", "categoria": "Combustible/Mantenimiento", "descripcion": "Maquinaria CAMION-01 - Diesel 15 galones", "monto": 180.00, "responsable": "Sistema Automático" },
+    { "id": "caja-r008", "fecha": "2026-08-21", "tipo": "ingreso", "categoria": "Reembolso", "descripcion": "Reembolso garantía por devolución de tubería PVC", "monto": 95.00, "responsable": "Sistema" },
+    { "id": "caja-r009", "fecha": "2026-08-21", "tipo": "egreso", "categoria": "imprevistos", "descripcion": "Herramientas menores extraviadas en obra", "monto": 75.25, "responsable": "Juan Pérez" },
+    { "id": "caja-r010", "fecha": "2026-08-22", "tipo": "egreso", "categoria": "comida", "descripcion": "Agua embotellada y refrigerios jornada sábado", "monto": 120.00, "responsable": "María López" },
+    { "id": "caja-r011", "fecha": "2026-08-22", "tipo": "egreso", "categoria": "Materiales", "descripcion": "Compra: 5 cajas de tornillería surtida - Ferretería El Constructor", "monto": 425.00, "responsable": "Sistema Automático" },
+    { "id": "caja-r012", "fecha": "2026-08-24", "tipo": "egreso", "categoria": "Combustible/Mantenimiento", "descripcion": "Maquinaria CAMION-01 - Alineación y balanceo", "monto": 150.00, "responsable": "Sistema Automático" },
+    { "id": "caja-r013", "fecha": "2026-08-24", "tipo": "egreso", "categoria": "ferreteria", "descripcion": "Tornillería especial y discos de corte", "monto": 89.90, "responsable": "Ing. Carlos Mendoza" }
   ],
   "maquinaria_flota": {
     "vehiculos": [
-      {
-        "id": "maq-01",
-        "tipo": "Retroexcavadora",
-        "codigo": "RETRO-01",
-        "marca_modelo": "Caterpillar 420F"
-      }
+      { "id": "maq-01", "tipo": "Retroexcavadora", "codigo": "RETRO-01", "marca_modelo": "Caterpillar 420F" },
+      { "id": "maq-02", "tipo": "Camión de Volteo", "codigo": "CAMION-01", "marca_modelo": "Isuzu FVR 2019" }
     ],
     "registros": [
-      {
-        "id": "reg-maq-1718235000",
-        "vehiculo_id": "maq-01",
-        "fecha": "2026-08-24",
-        "odometro_inicial": 1250.0,
-        "odometro_final": 1258.5,
-        "horas_trabajadas": 8.5,
-        "combustible_galones": 12.0,
-        "combustible_costo": 48.00,
-        "mantenimiento_detalles": "Cambio de filtro de aire de cabina",
-        "mantenimiento_costo": 35.00
-      }
+      { "id": "reg-rmq-001", "vehiculo_id": "maq-01", "fecha": "2026-08-19", "odometro_inicial": 1250.0, "odometro_final": 1258.5, "horas_trabajadas": 8.5, "combustible_galones": 12.0, "combustible_costo": 48.00, "mantenimiento_detalles": "Cambio de filtro de aire de cabina", "mantenimiento_costo": 35.00 },
+      { "id": "reg-rmq-002", "vehiculo_id": "maq-02", "fecha": "2026-08-21", "odometro_inicial": 45200.0, "odometro_final": 45265.0, "horas_trabajadas": 0, "combustible_galones": 15.0, "combustible_costo": 180.00, "mantenimiento_detalles": "", "mantenimiento_costo": 0 },
+      { "id": "reg-rmq-003", "vehiculo_id": "maq-02", "fecha": "2026-08-24", "odometro_inicial": 45265.0, "odometro_final": 45290.0, "horas_trabajadas": 0, "combustible_galones": 0, "combustible_costo": 0, "mantenimiento_detalles": "Alineación y balanceo", "mantenimiento_costo": 150.00 }
     ]
   },
   "personal": {
     "trabajadores": [
-      {
-        "id": "trab-01",
-        "nombre": "Juan Pérez",
-        "puesto": "Operador de Retroexcavadora",
-        "pago_hora_normal": 10.00,
-        "pago_hora_extra": 15.00
-      }
+      { "id": "trab-01", "nombre": "Juan Pérez", "puesto": "Operador de Retroexcavadora", "pago_hora_normal": 12.00, "pago_hora_extra": 18.00 },
+      { "id": "trab-02", "nombre": "Carlos Mendoza", "puesto": "Albañil", "pago_hora_normal": 10.00, "pago_hora_extra": 15.00 },
+      { "id": "trab-03", "nombre": "María López", "puesto": "Ayudante General", "pago_hora_normal": 8.00, "pago_hora_extra": 12.00 },
+      { "id": "trab-04", "nombre": "Pedro Sánchez", "puesto": "Chofer", "pago_hora_normal": 11.00, "pago_hora_extra": 16.00 },
+      { "id": "trab-05", "nombre": "Luis Gómez", "puesto": "Vigilante Nocturno", "pago_hora_normal": 9.00, "pago_hora_extra": 13.00 }
     ],
     "asistencia": [
       {
+        "fecha": "2026-08-21",
+        "registros": [
+          { "trabajador_id": "trab-01", "estado": "asistio", "horas_extras": 2, "horas_extras_cantidad": 2, "calculos": { "pago_normal": 96.00, "pago_extra": 36.00, "total_diario": 132.00 } },
+          { "trabajador_id": "trab-02", "estado": "asistio", "horas_extras": 0, "horas_extras_cantidad": 0, "calculos": { "pago_normal": 80.00, "pago_extra": 0.00, "total_diario": 80.00 } },
+          { "trabajador_id": "trab-03", "estado": "falto", "horas_extras": 0, "horas_extras_cantidad": 0, "calculos": { "pago_normal": 0.00, "pago_extra": 0.00, "total_diario": 0.00 } },
+          { "trabajador_id": "trab-04", "estado": "asistio", "horas_extras": 3, "horas_extras_cantidad": 3, "calculos": { "pago_normal": 88.00, "pago_extra": 48.00, "total_diario": 136.00 } },
+          { "trabajador_id": "trab-05", "estado": "justificado", "horas_extras": 0, "horas_extras_cantidad": 0, "calculos": { "pago_normal": 0.00, "pago_extra": 0.00, "total_diario": 0.00 } }
+        ]
+      },
+      {
         "fecha": "2026-08-24",
         "registros": [
-          {
-            "trabajador_id": "trab-01",
-            "estado": "asistio",
-            "horas_extras": 2,
-            "horas_extras_cantidad": 2,
-            "calculos": {
-              "pago_normal": 80.00,
-              "pago_extra": 30.00,
-              "total_diario": 110.00
-            }
-          }
+          { "trabajador_id": "trab-01", "estado": "asistio", "horas_extras": 1, "horas_extras_cantidad": 1, "calculos": { "pago_normal": 96.00, "pago_extra": 18.00, "total_diario": 114.00 } },
+          { "trabajador_id": "trab-02", "estado": "asistio", "horas_extras": 2, "horas_extras_cantidad": 2, "calculos": { "pago_normal": 80.00, "pago_extra": 30.00, "total_diario": 110.00 } },
+          { "trabajador_id": "trab-03", "estado": "asistio", "horas_extras": 0, "horas_extras_cantidad": 0, "calculos": { "pago_normal": 64.00, "pago_extra": 0.00, "total_diario": 64.00 } },
+          { "trabajador_id": "trab-04", "estado": "falto", "horas_extras": 0, "horas_extras_cantidad": 0, "calculos": { "pago_normal": 0.00, "pago_extra": 0.00, "total_diario": 0.00 } },
+          { "trabajador_id": "trab-05", "estado": "asistio", "horas_extras": 0, "horas_extras_cantidad": 0, "calculos": { "pago_normal": 72.00, "pago_extra": 0.00, "total_diario": 72.00 } }
         ]
       }
     ]
   },
   "adquisiciones": {
     "proveedores": [
-      {
-        "id": "prov-01",
-        "nombre": "Materiales El Progreso",
-        "contacto": "Luis Gómez",
-        "telefono": "+50255551234",
-        "especialidad": "Agregados y Cemento"
-      }
+      { "id": "prov-01", "nombre": "Materiales El Progreso", "contacto": "Luis Gómez", "telefono": "+50255551234", "especialidad": "Agregados y Cemento" },
+      { "id": "prov-02", "nombre": "Ferretería El Constructor", "contacto": "Ricardo Díaz", "telefono": "+50255556789", "especialidad": "Ferretería y Herramientas" },
+      { "id": "prov-03", "nombre": "Distribuidora Cementos GT", "contacto": "Ana Martínez", "telefono": "+50255559876", "especialidad": "Cemento y Derivados" },
+      { "id": "prov-04", "nombre": "Transportes Rápidos del Norte", "contacto": "Mario Castillo", "telefono": "+50255553210", "especialidad": "Fletes y Acarreo" }
     ],
     "cotizaciones_compras": [
-      {
-        "id": "cot-1718236000",
-        "fecha": "2026-08-24",
-        "proveedor_id": "prov-01",
-        "material_descripcion": "50 sacos de Cemento UGC",
-        "precio_unitario": 11.50,
-        "cantidad": 50,
-        "total": 575.00,
-        "estado": "aprobada"
-      }
+      { "id": "cot-r001", "fecha": "2026-08-19", "proveedor_id": "prov-03", "material_descripcion": "20 sacos de Cemento Holcim", "precio_unitario": 12.50, "cantidad": 20, "total": 250.00, "estado": "aprobada" },
+      { "id": "cot-r002", "fecha": "2026-08-22", "proveedor_id": "prov-02", "material_descripcion": "5 cajas de tornillería surtida", "precio_unitario": 85.00, "cantidad": 5, "total": 425.00, "estado": "aprobada" },
+      { "id": "cot-r003", "fecha": "2026-08-24", "proveedor_id": "prov-04", "material_descripcion": "Flete de material de despalme (3 viajes)", "precio_unitario": 350.00, "cantidad": 3, "total": 1050.00, "estado": "pendiente" },
+      { "id": "cot-r004", "fecha": "2026-08-21", "proveedor_id": "prov-01", "material_descripcion": "Grava triturada (2 viajes)", "precio_unitario": 600.00, "cantidad": 2, "total": 1200.00, "estado": "rechazada" },
+      { "id": "cot-r005", "fecha": "2026-08-24", "proveedor_id": "prov-02", "material_descripcion": "Taladro percutor con juego de brocas", "precio_unitario": 1250.00, "cantidad": 1, "total": 1250.00, "estado": "pendiente" }
     ]
   }
 }
