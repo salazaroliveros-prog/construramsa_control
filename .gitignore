@@ -43,3 +43,6 @@ logocr.png
 
 # Directorio de screenshots de pruebas (solo desarrollo local)
 scroll_validation_screenshots/
+
+# Configuración local de Vercel CLI (no parte de la app)
+.vercel/
