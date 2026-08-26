@@ -21,7 +21,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 - **Respaldo de Datos**: Exportación e importación con fusión inteligente
 - **Accesibilidad WCAG 2.1 AA**: Contraste de colores corregido, aria-live, aria-label en todos los controles
 - **Paginación**: Tablas de historial paginadas a 20 registros por página
-- **PWA Completa**: Service Worker v2.5.0 con activación inmediata y cache robusto
+- **PWA Completa**: Service Worker v2.6.0 con activación inmediata y cache robusto
 
 ## Instalación
 
@@ -63,7 +63,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 | Archivo | Descripción |
 |---------|-------------|
 | `index.html` | Aplicación principal (HTML + CSS + JavaScript) |
-| `sw.js` | Service Worker v2.5.0 para funcionalidad offline |
+| `sw.js` | Service Worker v2.6.0 para funcionalidad offline |
 | `manifest.json` | Configuración PWA con shortcuts de módulos |
 | `icon.png` | Icono corporativo 1024×1024 (instalación/PWA) |
 | `icon-512.png` | Icono PWA 512×512 |
@@ -138,6 +138,13 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 | Footer PDF | `#6B7280` | `#ffffff` | ~4.6:1 | ✅ AA |
 
 ## Historial de Cambios
+
+### v2.6.0 (2026-08-24) — Más tipos de maquinaria y categorías de gasto
+- **Maquinaria**: nuevos tipos de unidad en el formulario (excavadora, minicargador, bobcat/cargadora frontal, grúa, motoniveladora/patrol, rodillos 8/10/12T, compactadora, vibrocompactadora, camión de carga) con medición correcta por horas o km
+- **Maquinaria**: catálogo de mantenimiento ampliado con `Minicargador` y `Bobcat / Cargadora Frontal` y sus formatos de inspección
+- **Caja Chica**: 30 nuevas categorías de gasto en campo de obra (mano de obra, salarios, EPI, alquiler de equipo, fletes, viáticos, energía, señalización, demolición, instalaciones, desechos, andamios, botiquín, vigilancia, seguros, lubricantes, neumáticos, laboratorio, permisos, impuestos, etc.) sin duplicar las existentes
+- **UX**: se muestran las categorías con etiquetas legibles (tabla, PDF y CSV) en vez de códigos internos
+- **Arquitectura**: mapeos `MAQ_TIPOS` y `CATEGORIAS_CAJA` + helpers `esHorasMaquinaria`, `claveMaquinariaPorNombre`, `etiquetaCategoria`
 
 ### v2.5.0 (2026-08-24) — Nuevo icono de instalación (logocr.png)
 - **Nuevo icono**: se reemplazó el icono de la app por `logocr.png` (1024×1024)
@@ -240,6 +247,6 @@ La aplicación es una PWA instalable y 100% responsive, optimizada para uso en c
 
 ---
 
-**Versión**: 2.5.0  
+**Versión**: 2.6.0  
 **Desarrollado para**: CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura  
 **Moneda**: Quetzales (Q) — Guatemala

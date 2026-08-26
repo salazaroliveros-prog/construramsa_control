@@ -897,6 +897,36 @@
                             <option value="combustible">Combustible</option>
                             <option value="materiales">Materiales</option>
                             <option value="repuestos">Repuestos</option>
+                            <option value="mano_obra">Mano de Obra / Jornales</option>
+                            <option value="salarios">Salarios / Sueldos</option>
+                            <option value="herramientas">Herramientas</option>
+                            <option value="epi">Equipo de Protección Personal (EPI)</option>
+                            <option value="seguridad">Seguridad e Higiene</option>
+                            <option value="alquiler_equipo">Alquiler de Maquinaria/Equipo</option>
+                            <option value="fletes">Fletes y Transporte</option>
+                            <option value="acarreo">Acarreos / Cargos</option>
+                            <option value="agua">Agua Potable</option>
+                            <option value="energia">Energía Eléctrica</option>
+                            <option value="comunicaciones">Comunicaciones / Teléfono</option>
+                            <option value="viaticos">Viáticos / Gastos de Viaje</option>
+                            <option value="hospedaje">Hospedaje</option>
+                            <option value="material_oficina">Material de Oficina</option>
+                            <option value="senalizacion">Señalización de Obra</option>
+                            <option value="demolicion">Demolición</option>
+                            <option value="instalaciones_electricas">Instalaciones Eléctricas</option>
+                            <option value="instalaciones_hidra">Instalaciones Hidrosanitarias</option>
+                            <option value="limpieza">Limpieza de Obra</option>
+                            <option value="desechos">Disposición de Desechos/Escombros</option>
+                            <option value="andamios">Renta de Andamios</option>
+                            <option value="botiquin">Botiquín / Primeros Auxilios</option>
+                            <option value="vigilancia">Vigilancia / Seguridad</option>
+                            <option value="seguros">Seguros</option>
+                            <option value="lubricantes">Lubricantes y Aceites</option>
+                            <option value="neumaticos">Neumáticos</option>
+                            <option value="laboratorio">Laboratorio / Ensayos</option>
+                            <option value="planos">Impresiones / Planos</option>
+                            <option value="permisos">Permisos y Licencias</option>
+                            <option value="impuestos">Impuestos / Tasas</option>
                         </select>
                     </div>
                     <div>
@@ -948,7 +978,18 @@
                         <label for="maq-tipo">Tipo de Unidad</label>
                         <select id="maq-tipo" required aria-required="true">
                             <option value="retroexcavadora">Retroexcavadora (Horas)</option>
+                            <option value="excavadora">Excavadora (Horas)</option>
+                            <option value="minicargador">Minicargador (Horas)</option>
+                            <option value="bobcat">Bobcat / Cargadora Frontal (Horas)</option>
+                            <option value="grua">Grúa (Horas)</option>
+                            <option value="patrol">Motoniveladora / Patrol (Horas)</option>
+                            <option value="rodillo8">Rodillo 8 Toneladas (Horas)</option>
+                            <option value="rodillo10">Rodillo 10 Toneladas (Horas)</option>
+                            <option value="rodillo12">Rodillo 12 Toneladas (Horas)</option>
+                            <option value="compactadora">Compactadora (Horas)</option>
+                            <option value="vibrocompactadora">Vibrocompactadora (Horas)</option>
                             <option value="camion">Camión de Volteo (Km)</option>
+                            <option value="camioneta">Camión de Carga / Pickup (Km)</option>
                         </select>
                     </div>
                     <div>
@@ -1349,6 +1390,8 @@
                                 <option value="Retroexcavadora">Retroexcavadora</option>
                                 <option value="Camión de Volteo">Camión de Volteo</option>
                                 <option value="Excavadora">Excavadora</option>
+                                <option value="Minicargador">Minicargador</option>
+                                <option value="Bobcat / Cargadora Frontal">Bobcat / Cargadora Frontal</option>
                                 <option value="Rodo 8T">Rodo 8 Toneladas</option>
                                 <option value="Rodo 10T">Rodo 10 Toneladas</option>
                                 <option value="Rodo 12T">Rodo 12 Toneladas</option>
@@ -1587,7 +1630,7 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.5.0 (Panel de Resumen, viajes, mantenimiento, export XLSX, respaldo en la nube, nuevo icono)<br>
+                    Versión: 2.6.0 (Panel de Resumen, viajes, mantenimiento, export XLSX, respaldo en la nube, más maquinaria y categorías)<br>
                     Desarrollado para: CONSTRURAMSA<br>
                     Modo: Offline (LocalStorage)
                 </p>
@@ -2275,6 +2318,26 @@
             return mov;
         }
 
+        // Mapeo de categorías de caja chica (value -> etiqueta legible)
+        const CATEGORIAS_CAJA = {
+            'apertura': 'Apertura de Caja', 'comida': 'Comida', 'ferreteria': 'Ferretería',
+            'imprevistos': 'Imprevistos', 'combustible': 'Combustible', 'materiales': 'Materiales',
+            'repuestos': 'Repuestos', 'mano_obra': 'Mano de Obra / Jornales', 'salarios': 'Salarios / Sueldos',
+            'herramientas': 'Herramientas', 'epi': 'Equipo de Protección Personal (EPI)', 'seguridad': 'Seguridad e Higiene',
+            'alquiler_equipo': 'Alquiler de Maquinaria/Equipo', 'fletes': 'Fletes y Transporte', 'acarreo': 'Acarreos / Cargos',
+            'agua': 'Agua Potable', 'energia': 'Energía Eléctrica', 'comunicaciones': 'Comunicaciones / Teléfono',
+            'viaticos': 'Viáticos / Gastos de Viaje', 'hospedaje': 'Hospedaje', 'material_oficina': 'Material de Oficina',
+            'senalizacion': 'Señalización de Obra', 'demolicion': 'Demolición', 'instalaciones_electricas': 'Instalaciones Eléctricas',
+            'instalaciones_hidra': 'Instalaciones Hidrosanitarias', 'limpieza': 'Limpieza de Obra', 'desechos': 'Disposición de Desechos/Escombros',
+            'andamios': 'Renta de Andamios', 'botiquin': 'Botiquín / Primeros Auxilios', 'vigilancia': 'Vigilancia / Seguridad',
+            'seguros': 'Seguros', 'lubricantes': 'Lubricantes y Aceites', 'neumaticos': 'Neumáticos',
+            'laboratorio': 'Laboratorio / Ensayos', 'planos': 'Impresiones / Planos', 'permisos': 'Permisos y Licencias',
+            'impuestos': 'Impuestos / Tasas',
+            // categorías automáticas del sistema
+            'Combustible/Mantenimiento': 'Combustible/Mantenimiento', 'Materiales': 'Materiales', 'Alquiler de Equipo': 'Alquiler de Equipo', 'Reembolso': 'Reembolso'
+        };
+        function etiquetaCategoria(cat) { return CATEGORIAS_CAJA[cat] || cat || ''; }
+
         estadoPaginacion.cajaChica = 1;
         function cambiarPaginaCajaChica(p) { estadoPaginacion.cajaChica = p; cargarTablaCajaChica(); }
 
@@ -2300,7 +2363,7 @@
                 row.innerHTML = `
                     <td>${mov.fecha}</td>
                     <td style="color:${color};font-weight:600;">${mov.tipo.toUpperCase()}</td>
-                    <td>${mov.categoria}</td>
+                    <td>${etiquetaCategoria(mov.categoria)}</td>
                     <td>${mov.descripcion}${mov.responsable && mov.responsable !== 'Usuario' && mov.responsable !== 'Sistema Automático' ? `<br><span style="font-size:10px;color:var(--texto-secundario);">👤 ${mov.responsable}</span>` : ''}</td>
                     <td style="font-weight:bold;color:${color};">${signo}${formatearMoneda(mov.monto)}</td>
                     <td>
@@ -2401,6 +2464,45 @@
         // FIX #5: confirm() nativo → showConfirmModal()
         // FIX #21: rendimiento N/A cuando galones=0
         // ============================================================
+        // Mapeo de tipos de unidad de maquinaria: nombre mostrado + unidad (horas/km)
+        const MAQ_TIPOS = {
+            'retroexcavadora':     { nombre: 'Retroexcavadora',            horas: true },
+            'excavadora':          { nombre: 'Excavadora',                 horas: true },
+            'minicargador':        { nombre: 'Minicargador',               horas: true },
+            'bobcat':              { nombre: 'Bobcat / Cargadora Frontal', horas: true },
+            'grua':                { nombre: 'Grúa',                       horas: true },
+            'patrol':              { nombre: 'Patrol / Motoniveladora',    horas: true },
+            'rodillo8':            { nombre: 'Rodo 8T',                    horas: true },
+            'rodillo10':           { nombre: 'Rodo 10T',                   horas: true },
+            'rodillo12':           { nombre: 'Rodo 12T',                   horas: true },
+            'compactadora':        { nombre: 'Compactadora',               horas: true },
+            'vibrocompactadora':   { nombre: 'Vibrocompactadora',          horas: true },
+            'camion':              { nombre: 'Camión de Volteo',           horas: false },
+            'camioneta':           { nombre: 'Camión de Carga',            horas: false }
+        };
+        function esHorasMaquinaria(tipo) {
+            const t = MAQ_TIPOS[tipo];
+            return t ? t.horas : (tipo !== 'camion' && tipo !== 'camioneta');
+        }
+        function nombreMaquinariaTipo(tipo) {
+            const t = MAQ_TIPOS[tipo];
+            return t ? t.nombre : (tipo === 'retroexcavadora' ? 'Retroexcavadora' : 'Camión de Volteo');
+        }
+        function claveMaquinariaPorNombre(nombre) {
+            if (!nombre) return 'retroexcavadora';
+            for (const k in MAQ_TIPOS) { if (MAQ_TIPOS[k].nombre.toLowerCase() === nombre.toLowerCase()) return k; }
+            if (nombre.toLowerCase().indexOf('retro') !== -1) return 'retroexcavadora';
+            if (nombre.toLowerCase().indexOf('camión de volteo') !== -1 || nombre.toLowerCase().indexOf('camion de volteo') !== -1) return 'camion';
+            if (nombre.toLowerCase().indexOf('camión de carga') !== -1 || nombre.toLowerCase().indexOf('camion de carga') !== -1) return 'camioneta';
+            if (nombre.toLowerCase().indexOf('excavadora') !== -1) return 'excavadora';
+            if (nombre.toLowerCase().indexOf('minicargador') !== -1) return 'minicargador';
+            if (nombre.toLowerCase().indexOf('bobcat') !== -1) return 'bobcat';
+            if (nombre.toLowerCase().indexOf('grú') !== -1 || nombre.toLowerCase().indexOf('grua') !== -1) return 'grua';
+            if (nombre.toLowerCase().indexOf('patrol') !== -1 || nombre.toLowerCase().indexOf('motoniveladora') !== -1) return 'patrol';
+            if (nombre.toLowerCase().indexOf('rodillo') !== -1 || nombre.toLowerCase().indexOf('rodo') !== -1) return 'rodillo10';
+            return 'retroexcavadora';
+        }
+
         function calcularMetricasMaquinaria() {
             const tipo   = getDomElement('maq-tipo').value;
             const ini    = parseFloat(getDomElement('maq-val-inicial').value) || 0;
@@ -2408,7 +2510,7 @@
             const gal    = parseFloat(getDomElement('maq-galones').value)     || 0;
             const precio = parseFloat(getDomElement('maq-precio-galon').value)|| 0;
             const mant   = parseFloat(getDomElement('maq-costo-mantenimiento').value) || 0;
-            const unidad = tipo === 'retroexcavadora' ? 'Hrs' : 'Km';
+            const unidad = esHorasMaquinaria(tipo) ? 'Hrs' : 'Km';
             const uso    = fin - ini;
             const errEl  = getDomElement('maq-error-uso');
             if (uso < 0) { errEl.textContent = 'El valor final no puede ser menor al inicial'; return; }
@@ -2523,10 +2625,11 @@
             const datosAct = getProyectoData();
             let veh = datosAct.maquinaria_flota.vehiculos.find(v => v.codigo === codigo);
             if (!veh) {
-                veh = { id:generarId(), tipo: tipo==='retroexcavadora'?'Retroexcavadora':'Camión de Volteo', codigo, marca_modelo: tipo==='retroexcavadora'?'Retroexcavadora':'Camión de Volteo' };
+                const nombreTipo = nombreMaquinariaTipo(tipo);
+                veh = { id:generarId(), tipo: nombreTipo, codigo, marca_modelo: nombreTipo };
                 datosAct.maquinaria_flota.vehiculos.push(veh);
             }
-            const regObj = { id:generarId(), vehiculo_id:veh.id, fecha:new Date().toISOString().split('T')[0], odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas:tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
+            const regObj = { id:generarId(), vehiculo_id:veh.id, fecha:new Date().toISOString().split('T')[0], odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas:esHorasMaquinaria(tipo)?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
             // Vincular el egreso de caja con este registro para ajuste/reversión exactos
             if (movGasto) regObj.gasto_id = movGasto.id;
             datosAct.maquinaria_flota.registros.push(regObj);
@@ -2584,7 +2687,7 @@
             const reg = datos.maquinaria_flota.registros.find(r => r.id === id);
             if (!reg) return;
             const veh = datos.maquinaria_flota.vehiculos.find(v => v.id === reg.vehiculo_id);
-            document.getElementById('maq-tipo').value   = veh?.tipo?.includes('Retro') ? 'retroexcavadora' : 'camion';
+            document.getElementById('maq-tipo').value   = claveMaquinariaPorNombre(veh?.tipo);
             document.getElementById('maq-codigo').value = veh?.codigo || '';
             document.getElementById('maq-val-inicial').value = reg.odometro_inicial;
             document.getElementById('maq-val-final').value   = reg.odometro_final;
@@ -3549,6 +3652,8 @@
             'Retroexcavadora': ['Revisión de niveles (aceite, hidráulico, refrigerante)', 'Inspección de cucharón y brazos', 'Estado de mangueras hidráulicas', 'Filtro de aire y sistema de combustible', 'Chequeo de rodada y zapatas', 'Fugas visibles', 'Estado de batería y arranque', 'Apretado de retenes y junta'],
             'Camión de Volteo': ['Nivel de aceite motor', 'Presión de llantas y rodada', 'Estado de mangueras del volteo', 'Bomba hidráulica de volteo', 'Filtro de combustible y aire', 'Sistema de frenos', 'Fugas visibles', 'Estado de batería y luces'],
             'Excavadora': ['Revisión de nivel de aceite e hidráulico', 'Inspección de pluma y cilindros', 'Estado de zapatas y rodillos', 'Filtro de aire y combustible', 'Fugas en mangueras hidráulicas', 'Estado de batería y arranque', 'Presión y rodados', 'Apretado de pernería principal'],
+            'Minicargador': ['Revisión de niveles (aceite, hidráulico, refrigerante)', 'Estado de brazos y cucharón', 'Estado de mangueras hidráulicas', 'Filtro de aire y combustible', 'Inspección de rodado/cadenas o llantas', 'Fugas visibles', 'Estado de batería y arranque', 'Sistema de dirección y frenos'],
+            'Bobcat / Cargadora Frontal': ['Revisión de niveles (aceite, hidráulico)', 'Estado de cucharón y brazos', 'Estado de mangueras hidráulicas', 'Filtro de aire y combustible', 'Inspección de rodado y zapatas', 'Fugas visibles', 'Estado de batería y arranque', 'Sistema hidráulico y de dirección'],
             'Rodo 8T': ['Nivel de aceite motor', 'Presión y estado de llantas/rodillos', 'Sistema de vibración', 'Estado de mangueras hidráulicas', 'Filtro de aire', 'Fugas visibles', 'Batería y luces', 'Estado de rodamiento'],
             'Rodo 10T': ['Nivel de aceite motor', 'Presión de llantas/rodillos', 'Sistema de vibración', 'Mangueras hidráulicas', 'Filtro de aire y combustible', 'Fugas visibles', 'Batería y luces', 'Rodamiento y rodillos'],
             'Rodo 12T': ['Nivel de aceite motor', 'Presión y estado de rodillos', 'Sistema de vibración y frenos', 'Mangueras hidráulicas', 'Filtro de aire y combustible', 'Fugas visibles', 'Batería y luces', 'Rodamiento y pernería'],
@@ -3912,7 +4017,7 @@
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
                     const esIng = g.tipo === 'ingreso';
-                    html += `<tr><td>${g.fecha}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${g.tipo.toUpperCase()}</td><td>${g.categoria}</td><td>${g.descripcion}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
+                    html += `<tr><td>${g.fecha}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${g.tipo.toUpperCase()}</td><td>${etiquetaCategoria(g.categoria)}</td><td>${g.descripcion}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
                     if (esIng) totalIng += g.monto; else totalEgr += g.monto;
                 });
                 if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos de caja en este período</td></tr>`;
@@ -4208,7 +4313,7 @@
                 const viajesX = (datos.viajes_camiones.viajes||[]).filter(v => enRango(v.fecha));
                 const ordsX = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
                 const insX = (datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha));
-                const filasCaja = movs.map(g => [g.fecha, g.tipo, g.categoria, g.descripcion, g.monto]);
+                const filasCaja = movs.map(g => [g.fecha, g.tipo, etiquetaCategoria(g.categoria), g.descripcion, g.monto]);
                 const filasViajes = viajesX.map(v => { const c=(datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id)||{nombre:'N/A'}; return [v.fecha, 'Viaje', c.nombre+' ('+v.material+') x'+v.numero, (v.propiedad==='alquilado'?'Alquiler Equipo':'Combustible'), v.total]; });
                 const filasMT = ordsX.map(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id)||{nombre:'N/A'}; return [o.fecha, 'Mantenimiento '+o.tipo, m.nombre+' - '+(o.observaciones||''), 'Repuestos/Mantenimiento', o.costo]; });
                 const filasIn = insX.map(i => [i.fecha, 'Insumo '+i.tipo, i.articulo+' (x'+i.cantidad+')', 'Insumo', i.costo]);

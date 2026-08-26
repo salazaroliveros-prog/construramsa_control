@@ -1,9 +1,9 @@
 // ============================================================
-// SERVICE WORKER — CONSTRURAMSA Control de Obra v2.5.0
+// SERVICE WORKER — CONSTRURAMSA Control de Obra v2.6.0
 // Estrategia: Network First con fallback a Cache
 // ============================================================
 
-const CACHE_NAME = 'construramsa-v2.5.0';
+const CACHE_NAME = 'construramsa-v2.6.0';
 
 const urlsToCache = [
     './',
