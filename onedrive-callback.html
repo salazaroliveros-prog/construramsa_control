@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OneDrive Callback</title>
+</head>
+<body>
+    <script>
+        // Obtener el código de autorización de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const error = urlParams.get('error');
+        
+        if (error) {
+            document.body.innerHTML = `
+                <h1>Error de autorización</h1>
+                <p>${urlParams.get('error_description') || 'Error desconocido'}</p>
+                <p>Puedes cerrar esta ventana.</p>
+            `;
+        } else if (code) {
+            document.body.innerHTML = `
+                <h1>✅ Autorización exitosa</h1>
+                <p>Puedes cerrar esta ventana. La aplicación se conectará automáticamente.</p>
+            `;
+            // El código será capturado por el popup en la ventana principal
+        } else {
+            document.body.innerHTML = `
+                <h1>Error</h1>
+                <p>No se recibió código de autorización.</p>
+                <p>Puedes cerrar esta ventana.</p>
+            `;
+        }
+    </script>
+</body>
+</html>
