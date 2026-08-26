@@ -436,17 +436,22 @@
         .nav-tabs::-webkit-scrollbar { display: none; }
         @media (max-width: 768px) {
             .nav-tabs::after {
-                content: 'Desliza para ver módulos →';
+                content: '→';
                 display: flex;
                 align-items: center;
+                justify-content: center;
                 position: sticky;
                 right: 0;
-                flex: 0 0 auto;
-                padding: 0 10px;
+                width: 30px;
+                min-width: 30px;
+                height: 48px;
+                margin-bottom: 4px;
                 color: var(--texto-secundario);
-                font-size: 10px;
+                font-size: 18px;
+                font-weight: 700;
                 pointer-events: none;
-                background: linear-gradient(90deg, transparent, var(--bg-principal) 25%);
+                background: linear-gradient(90deg, transparent, rgba(9,10,15,0.92) 55%);
+                z-index: 2;
             }
         }
 
