@@ -828,7 +828,7 @@
 
         <!-- Navegación -->
         <nav class="nav-tabs" role="navigation" aria-label="Navegación principal de módulos">
-            <button class="nav-tab active" data-module="resumen" aria-current="page" aria-label="Módulo Panel de Resumen">📊 Resumen</button>
+            <button class="nav-tab active" data-module="resumen" aria-current="page" aria-label="Módulo Panel de Resumen">📈 Resumen</button>
             <button class="nav-tab" data-module="caja-chica" aria-label="Módulo Caja Chica">💰 Caja Chica</button>
             <button class="nav-tab" data-module="maquinaria" aria-label="Módulo Maquinaria">🚜 Maquinaria</button>
             <button class="nav-tab" data-module="personal" aria-label="Módulo Personal">👷 Personal</button>
@@ -843,7 +843,7 @@
         <!-- MÓDULO RESUMEN / DASHBOARD             -->
         <!-- ═══════════════════════════════════════ -->
         <div id="resumen" class="module active tarjeta-glass" role="region" aria-labelledby="resumen-title">
-            <h2 id="resumen-title" style="color:var(--acento-cian);margin-top:0;">📊 Panel de Resumen Ejecutivo</h2>
+            <h2 id="resumen-title" style="color:var(--acento-cian);margin-top:0;">📈 Panel de Resumen Ejecutivo</h2>
             <p style="color:var(--texto-secundario);font-size:13px;">Visión general de la obra: saldo, movimientos, viajes, mantenimiento e insumos.</p>
 
             <div id="kpi-avisos"></div>
@@ -863,6 +863,7 @@
         <!-- ═══════════════════════════════════════ -->
         <div id="caja-chica" class="module tarjeta-glass" role="region" aria-labelledby="caja-chica-title">
             <h2 id="caja-chica-title" style="color:var(--acento-cian);margin-top:0;">💰 Caja Chica e Insumos</h2>
+            <div id="aviso-sin-proyecto-caja" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
 
             <div style="margin-bottom:20px;padding:15px;background:rgba(0,164,228,0.1);border-radius:8px;border:1px solid var(--acento-cian);">
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -942,7 +943,10 @@
                     <label for="caja-monto">Monto (Q)</label>
                     <input type="number" step="0.01" id="caja-monto" required aria-required="true" min="0.01" max="999999">
                 </div>
-                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar nuevo movimiento en caja chica">💾 Registrar Movimiento</button>
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar nuevo movimiento en caja chica">💾 Registrar Movimiento</button>
+                    <button type="button" id="btn-cancelar-caja" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionCaja()">✖ Cancelar</button>
+                </div>
             </form>
 
             <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Movimientos</h3>
@@ -969,11 +973,16 @@
         <!-- ═══════════════════════════════════════ -->
         <div id="maquinaria" class="module tarjeta-glass" role="region" aria-labelledby="maquinaria-title">
             <h2 id="maquinaria-title" style="color:var(--acento-cian);margin-top:0;">🚜 Control de Maquinaria y Flota</h2>
+            <div id="aviso-sin-proyecto-maq" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
             <p style="color:var(--texto-secundario);font-size:13px;">Registra el uso, consumo de combustible y mantenimiento de las unidades.</p>
 
             <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()" aria-label="Formulario de registro de maquinaria">
-                <!-- FIX #22: clase form-grid-2 -->
+                <!-- Campo de fecha + tipo en primera fila -->
                 <div class="form-grid-2">
+                    <div>
+                        <label for="maq-fecha">Fecha del Registro</label>
+                        <input type="date" id="maq-fecha" required aria-required="true">
+                    </div>
                     <div>
                         <label for="maq-tipo">Tipo de Unidad</label>
                         <select id="maq-tipo" required aria-required="true">
@@ -1043,7 +1052,10 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Guardar registro de uso de maquinaria">💾 Guardar Registro de Maquinaria</button>
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Guardar registro de uso de maquinaria">💾 Guardar Registro de Maquinaria</button>
+                    <button type="button" id="btn-cancelar-maq" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionMaquinaria()">✖ Cancelar</button>
+                </div>
             </form>
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">📜 Historial de Maquinaria</h3>
@@ -1218,6 +1230,7 @@
                     <tbody id="tabla-cotizaciones-cuerpo"></tbody>
                 </table>
             </div>
+            <div id="paginacion-cotizaciones" class="paginacion-container"></div>
         </div>
 
         <!-- ═══════════════════════════════════════ -->
@@ -1225,6 +1238,7 @@
         <!-- ═══════════════════════════════════════ -->
         <div id="viajes" class="module tarjeta-glass" role="region" aria-labelledby="viajes-title">
             <h2 id="viajes-title" style="color:var(--acento-cian);margin-top:0;">🚛 Control de Viajes de Camiones</h2>
+            <div id="aviso-sin-proyecto-viajes" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
             <p style="color:var(--texto-secundario);font-size:13px;">Registra transportes al botadero, extracción y tipo de material. Para camiones propios se estima el combustible por distancia; para alquilados se registra la tarifa por día o por viaje.</p>
 
             <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
@@ -1338,7 +1352,7 @@
                         <label for="viaje-numero">No. de Viajes</label>
                         <input type="number" id="viaje-numero" value="1" min="1" max="999" aria-label="Número de viajes realizados">
                     </div>
-                    <div>
+                    <div id="div-viaje-diesel">
                         <label for="viaje-precio-diesel">Precio Diesel (Q/L)</label>
                         <input type="number" step="0.01" id="viaje-precio-diesel" value="0" min="0" max="999" aria-label="Precio del diesel por litro">
                     </div>
@@ -1346,6 +1360,10 @@
                         <label for="viaje-extra">Tarifa Excedente (Q)</label>
                         <input type="number" step="0.01" id="viaje-extra" value="0" min="0" max="999999" aria-label="Costo adicional o ajuste de tarifa">
                     </div>
+                </div>
+                <!-- Indicador para camiones alquilados -->
+                <div id="div-viaje-tarifa-info" style="display:none;padding:8px 12px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.3);border-radius:8px;margin-bottom:10px;font-size:12px;color:var(--acento-purpura);">
+                    🔑 Camión alquilado — se aplicará la tarifa configurada en el catálogo
                 </div>
                 <div style="background:rgba(255,255,255,0.02);border:1px dashed var(--acento-cian);border-radius:8px;padding:15px;margin-bottom:20px;" aria-live="polite" aria-label="Cálculo del viaje en tiempo real">
                     <div class="form-grid-2" style="margin-bottom:0;">
@@ -1357,7 +1375,10 @@
                     </div>
                 </div>
                 <span id="viaje-aviso" style="color:var(--advertencia-texto);font-size:12px;display:block;margin-bottom:10px;" role="status"></span>
-                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar viaje y descontar de caja">📦 Registrar Viaje</button>
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar viaje y descontar de caja">📦 Registrar Viaje</button>
+                    <button type="button" id="btn-cancelar-viaje" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionViaje()">✖ Cancelar</button>
+                </div>
             </form>
 
             <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Viajes</h3>
@@ -1367,6 +1388,7 @@
                     <tbody id="tabla-viajes-cuerpo"></tbody>
                 </table>
             </div>
+            <div id="paginacion-viajes" class="paginacion-container"></div>
         </div>
 
         <!-- ═══════════════════════════════════════ -->
@@ -1374,6 +1396,7 @@
         <!-- ═══════════════════════════════════════ -->
         <div id="mantenimiento" class="module tarjeta-glass" role="region" aria-labelledby="mantenimiento-title">
             <h2 id="mantenimiento-title" style="color:var(--acento-cian);margin-top:0;">🔧 Mantenimiento y Control de Insumos</h2>
+            <div id="aviso-sin-proyecto-mant" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
             <p style="color:var(--texto-secundario);font-size:13px;">Gestiona el catálogo de maquinaria, formatos de inspección (mantenimiento preventivo/correctivo) y compras de repuestos, aceites, hidráulicos y combustible.</p>
 
             <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
@@ -1446,7 +1469,10 @@
                     <textarea id="ord-observaciones" rows="2" maxlength="500" aria-label="Observaciones del mantenimiento"></textarea>
                 </div>
                 <div id="formatos-inspeccion" style="margin-bottom:15px;"></div>
-                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Guardar orden de mantenimiento">💾 Guardar Orden</button>
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Guardar orden de mantenimiento">💾 Guardar Orden</button>
+                    <button type="button" id="btn-cancelar-orden" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionOrden()">✖ Cancelar</button>
+                </div>
             </form>
 
             <h3 style="color:var(--texto-principal);font-size:16px;">📜 Órdenes de Mantenimiento</h3>
@@ -1456,6 +1482,7 @@
                     <tbody id="tabla-ordenes-cuerpo"></tbody>
                 </table>
             </div>
+            <div id="paginacion-ordenes" class="paginacion-container"></div>
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">🛒 Compra de Repuestos, Aceites e Insumos</h3>
             <form id="form-insumo" style="margin-bottom:25px;" aria-label="Formulario de compra de insumos">
@@ -1494,7 +1521,10 @@
                     <label for="insumo-stock-min">Stock mínimo de alerta (Qty) <span style="color:var(--texto-secundario);font-weight:normal;">— opcional. Se mostrará una alerta en el Resumen cuando la cantidad bajé de este valor.</span></label>
                     <input type="number" id="insumo-stock-min" value="0" min="0" max="99999" aria-label="Stock mínimo de alerta">
                 </div>
-                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar compra y descontar de caja">💾 Registrar Compra</button>
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar compra y descontar de caja">💾 Registrar Compra</button>
+                    <button type="button" id="btn-cancelar-insumo" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionInsumo()">✖ Cancelar</button>
+                </div>
             </form>
 
             <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Compras de Insumos</h3>
@@ -1504,9 +1534,10 @@
                     <tbody id="tabla-insumos-cuerpo"></tbody>
                 </table>
             </div>
+            <div id="paginacion-insumos" class="paginacion-container"></div>
         </div>
 
-            <div id="reportes" class="module tarjeta-glass" role="region" aria-labelledby="reportes-title">
+        <div id="reportes" class="module tarjeta-glass" role="region" aria-labelledby="reportes-title">
             <h2 id="reportes-title" style="color:var(--acento-cian);margin-top:0;">📊 Generación de Reportes</h2>
 
             <div style="display:grid;grid-template-columns:1fr;gap:15px;margin-bottom:25px;">
@@ -1553,6 +1584,28 @@
                     <label for="config-presupuesto" class="visually-hidden">Presupuesto inicial</label>
                     <input type="number" step="0.01" id="config-presupuesto" placeholder="Monto inicial (Q)" aria-label="Monto inicial de caja chica" min="0" max="9999999" style="flex:1;min-width:120px;">
                     <button onclick="guardarPresupuesto()" class="btn-primario" aria-label="Guardar presupuesto inicial">Guardar</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom:25px;">
+                <h3 style="color:var(--texto-principal);font-size:16px;">📇 Datos de Contacto de la Empresa</h3>
+                <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">Estos datos aparecerán en la cabecera de los reportes PDF.</p>
+                <div class="form-grid-2" style="margin-top:10px;">
+                    <div>
+                        <label for="cfg-telefono" style="font-size:12px;color:var(--texto-principal);">Teléfono</label>
+                        <input type="text" id="cfg-telefono" placeholder="+502 0000 0000" aria-label="Teléfono de la empresa" maxlength="30">
+                    </div>
+                    <div>
+                        <label for="cfg-email" style="font-size:12px;color:var(--texto-principal);">Email</label>
+                        <input type="email" id="cfg-email" placeholder="contacto@empresa.com" aria-label="Correo electrónico de la empresa" maxlength="80">
+                    </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <label for="cfg-direccion" style="font-size:12px;color:var(--texto-principal);">Dirección</label>
+                    <input type="text" id="cfg-direccion" placeholder="Dirección completa de la empresa" aria-label="Dirección de la empresa" maxlength="120">
+                </div>
+                <div style="margin-top:12px;">
+                    <button onclick="guardarDatosContacto()" class="btn-primario" aria-label="Guardar datos de contacto">💾 Guardar Datos de Contacto</button>
                 </div>
             </div>
 
@@ -1630,7 +1683,7 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.6.0 (Panel de Resumen, viajes, mantenimiento, export XLSX, respaldo en la nube, más maquinaria y categorías)<br>
+                    Versión: 2.7.0 (Edición de registros en todos los módulos, datos de contacto en PDF, correcciones de UI)<br>
                     Desarrollado para: CONSTRURAMSA<br>
                     Modo: Offline (LocalStorage)
                 </p>
@@ -1659,10 +1712,10 @@
                             SOLUCIONES EN INGENIERÍA Y ARQUITECTURA
                         </p>
                         <p style="margin: 0 0 4px 0; font-size: 9.5px; color: #6B7280; line-height: 1.4;">
-                            17av. Villa Mariscal, Apartamento 116, Torre 2, Zona 11, Ciudad de Guatemala
+                            <span id="pdf-direccion-empresa">17av. Villa Mariscal, Apartamento 116, Torre 2, Zona 11, Ciudad de Guatemala</span>
                         </p>
                         <p style="margin: 0; font-size: 9.5px; color: #6B7280; line-height: 1.4;">
-                            Tel: +502 5997 9501 | Email: contacto@construramsa.com
+                            <span id="pdf-tel-email-empresa">Tel: +502 5997 9501 | Email: contacto@construramsa.com</span>
                         </p>
                     </td>
                     
@@ -2118,6 +2171,142 @@
             cargarMaquinasCatalogo();
             cargarTablaOrdenes();
             cargarTablaInsumos();
+            actualizarAvisosSinProyecto();
+        }
+
+        // ============================================================
+        // MEJ-08: Avisos contextuales cuando no hay proyecto activo
+        // ============================================================
+        function actualizarAvisosSinProyecto() {
+            const db = getDB();
+            const sinProyecto = !db.configuracion.proyecto_actual;
+            ['aviso-sin-proyecto-caja','aviso-sin-proyecto-maq','aviso-sin-proyecto-viajes','aviso-sin-proyecto-mant'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = sinProyecto ? '' : 'none';
+            });
+        }
+
+        // ============================================================
+        // MEJ-07: CANCELAR EDICIÓN — restablece formularios al modo 'nuevo'
+        // ============================================================
+        function cancelarEdicionCaja() {
+            const form = document.getElementById('form-caja-chica');
+            delete form.dataset.editando;
+            form.reset();
+            document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
+            form.querySelector('button[type="submit"]').textContent = '💾 Registrar Movimiento';
+            const btn = document.getElementById('btn-cancelar-caja');
+            if (btn) btn.style.display = 'none';
+        }
+        function cancelarEdicionMaquinaria() {
+            const form = document.getElementById('form-maquinaria');
+            delete form.dataset.editando;
+            form.reset();
+            document.getElementById('maq-fecha').value = new Date().toISOString().split('T')[0];
+            form.querySelector('button[type="submit"]').textContent = '💾 Guardar Registro de Maquinaria';
+            const btn = document.getElementById('btn-cancelar-maq');
+            if (btn) btn.style.display = 'none';
+            resetPanelMaquinaria();
+        }
+        function cancelarEdicionViaje() {
+            const form = document.getElementById('form-viaje');
+            delete form.dataset.editando;
+            form.reset();
+            document.getElementById('viaje-fecha').value  = new Date().toISOString().split('T')[0];
+            document.getElementById('viaje-numero').value = 1;
+            form.querySelector('button[type="submit"]').textContent = '📦 Registrar Viaje';
+            const btn = document.getElementById('btn-cancelar-viaje');
+            if (btn) btn.style.display = 'none';
+        }
+        function cancelarEdicionOrden() {
+            const form = document.getElementById('form-orden');
+            delete form.dataset.editando;
+            form.reset();
+            document.getElementById('ord-fecha').value = new Date().toISOString().split('T')[0];
+            form.querySelector('button[type="submit"]').textContent = '💾 Guardar Orden';
+            buildFormatosInspeccion();
+            const btn = document.getElementById('btn-cancelar-orden');
+            if (btn) btn.style.display = 'none';
+        }
+        function cancelarEdicionInsumo() {
+            const form = document.getElementById('form-insumo');
+            delete form.dataset.editando;
+            form.reset();
+            document.getElementById('insumo-fecha').value     = new Date().toISOString().split('T')[0];
+            document.getElementById('insumo-cantidad').value  = 1;
+            document.getElementById('insumo-stock-min').value = 0;
+            form.querySelector('button[type="submit"]').textContent = '💾 Registrar Compra';
+            const btn = document.getElementById('btn-cancelar-insumo');
+            if (btn) btn.style.display = 'none';
+        }
+
+        // ============================================================
+        // MEJ-11: EDICIÓN DE VIAJES
+        // ============================================================
+        function editarViaje(id) {
+            const datos = getProyectoData();
+            const v = datos.viajes_camiones.viajes.find(x => x.id === id);
+            if (!v) return;
+            document.getElementById('viaje-fecha').value    = v.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('viaje-cam').value      = v.vehiculo_id || '';
+            document.getElementById('viaje-ruta').value     = v.ruta_id || '';
+            document.getElementById('viaje-material').value = v.material || 'tierra';
+            document.getElementById('viaje-numero').value   = v.numero || 1;
+            // Reconstruir precio diesel desde litros/km/consumo si aplica
+            const cam = (datos.viajes_camiones.camiones || []).find(c => c.id === v.vehiculo_id);
+            const precioD = (cam && cam.propiedad !== 'alquilado' && v.litros > 0)
+                ? (v.costo_combustible / v.litros).toFixed(2) : 0;
+            document.getElementById('viaje-precio-diesel').value = precioD;
+            document.getElementById('viaje-extra').value    = v.extra || 0;
+            calcularMetricasViaje();
+            const form = document.getElementById('form-viaje');
+            form.dataset.editando = id;
+            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Viaje';
+            const btn = document.getElementById('btn-cancelar-viaje');
+            if (btn) btn.style.display = '';
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ============================================================
+        // MEJ-12: EDICIÓN DE ÓRDENES DE MANTENIMIENTO
+        // ============================================================
+        function editarOrden(id) {
+            const datos = getProyectoData();
+            const o = datos.mantenimiento.ordenes.find(x => x.id === id);
+            if (!o) return;
+            document.getElementById('ord-fecha').value         = o.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('ord-maquina').value       = o.maquinaria_id || '';
+            document.getElementById('ord-tipo').value          = o.tipo || 'preventivo';
+            document.getElementById('ord-costo').value         = o.costo || 0;
+            document.getElementById('ord-observaciones').value = o.observaciones || '';
+            buildFormatosInspeccion();
+            const form = document.getElementById('form-orden');
+            form.dataset.editando = id;
+            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Orden';
+            const btn = document.getElementById('btn-cancelar-orden');
+            if (btn) btn.style.display = '';
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ============================================================
+        // MEJ-12: EDICIÓN DE INSUMOS
+        // ============================================================
+        function editarInsumo(id) {
+            const datos = getProyectoData();
+            const i = datos.mantenimiento.compras_insumos.find(x => x.id === id);
+            if (!i) return;
+            document.getElementById('insumo-fecha').value     = i.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('insumo-tipo').value      = i.tipo || 'repuesto';
+            document.getElementById('insumo-articulo').value  = i.articulo || '';
+            document.getElementById('insumo-cantidad').value  = i.cantidad || 1;
+            document.getElementById('insumo-costo').value     = i.costo || 0;
+            document.getElementById('insumo-stock-min').value = i.stock_min || 0;
+            const form = document.getElementById('form-insumo');
+            form.dataset.editando = id;
+            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Insumo';
+            const btn = document.getElementById('btn-cancelar-insumo');
+            if (btn) btn.style.display = '';
+            form.scrollIntoView({ behavior: 'smooth' });
         }
 
         // ============================================================
@@ -2411,6 +2600,8 @@
                     saveProyectoData(datos);
                     delete this.dataset.editando;
                     this.querySelector('button[type="submit"]').textContent = '💾 Registrar Movimiento';
+                    const btnCcS = document.getElementById('btn-cancelar-caja');
+                    if (btnCcS) btnCcS.style.display = 'none';
                     showToast('✅ Movimiento actualizado', 'success');
                 }
             } else {
@@ -2442,6 +2633,8 @@
             const form = document.getElementById('form-caja-chica');
             form.dataset.editando = id;
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Movimiento';
+            const btnCc = document.getElementById('btn-cancelar-caja');
+            if (btnCc) btnCc.style.display = '';
             form.scrollIntoView({ behavior:'smooth' });
         }
 
@@ -2544,7 +2737,7 @@
                 const veh     = (datos.maquinaria_flota.vehiculos || []).find(v => v.id === reg.vehiculo_id);
                 const tipo_   = veh ? veh.tipo : 'Desconocido';
                 const codigo_ = veh ? veh.codigo : 'N/A';
-                const unidad  = tipo_.includes('Retro') ? 'Hrs' : 'Km';
+                const unidad  = esHorasMaquinaria(claveMaquinariaPorNombre(tipo_)) ? 'Hrs' : 'Km';
                 const uso     = reg.odometro_final - reg.odometro_inicial;
                 // FIX #21: N/A si galones=0
                 const rend    = reg.combustible_galones > 0 ? (uso / reg.combustible_galones).toFixed(2) + ` ${unidad}/Gal` : 'N/A';
@@ -2569,6 +2762,7 @@
 
         document.getElementById('form-maquinaria').addEventListener('submit', function(e) {
             e.preventDefault();
+            const fechaMaq = document.getElementById('maq-fecha').value;
             const tipo   = document.getElementById('maq-tipo').value;
             const codigo = document.getElementById('maq-codigo').value.trim();
             const valIni = parseFloat(document.getElementById('maq-val-inicial').value);
@@ -2579,6 +2773,7 @@
             const mantCosto = parseFloat(document.getElementById('maq-costo-mantenimiento').value) || 0;
 
             if (!codigo || codigo.length < 2) { showToast('❌ El código debe tener al menos 2 caracteres', 'error'); return; }
+            if (!fechaMaq) { showToast('❌ Seleccione la fecha del registro', 'error'); return; }
             if (isNaN(valIni) || valIni < 0)  { showToast('❌ Valor inicial inválido', 'error'); return; }
             if (isNaN(valFin) || valFin < 0)  { showToast('❌ Valor final inválido', 'error'); return; }
             if (gal < 0 || precio < 0 || mantCosto < 0) { showToast('❌ Los valores no pueden ser negativos', 'error'); return; }
@@ -2600,13 +2795,15 @@
                         const prev = datos.maquinaria_flota.registros[idx];
                         const gastoPrev = (prev.combustible_costo || 0) + (prev.mantenimiento_costo || 0);
                         const gastoNuevo = costoComb + mantCosto;
-                        datos.maquinaria_flota.registros[idx] = { ...prev, odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas: tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
+                        datos.maquinaria_flota.registros[idx] = { ...prev, fecha: fechaMaq, odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas: tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
                         // Recalcular el gasto vinculado en caja chica si cambió
                         ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo);
                         saveProyectoData(datos);
                     }
                     delete this.dataset.editando;
                     this.querySelector('button[type="submit"]').textContent = '💾 Guardar Registro de Maquinaria';
+                    const btnMaqS = document.getElementById('btn-cancelar-maq');
+                    if (btnMaqS) btnMaqS.style.display = 'none';
                     this.reset(); resetPanelMaquinaria();
                     cargarTablaMaquinaria();
                     showToast('✅ Registro de maquinaria actualizado', 'success');
@@ -2629,7 +2826,7 @@
                 veh = { id:generarId(), tipo: nombreTipo, codigo, marca_modelo: nombreTipo };
                 datosAct.maquinaria_flota.vehiculos.push(veh);
             }
-            const regObj = { id:generarId(), vehiculo_id:veh.id, fecha:new Date().toISOString().split('T')[0], odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas:esHorasMaquinaria(tipo)?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
+            const regObj = { id:generarId(), vehiculo_id:veh.id, fecha:fechaMaq, odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas:esHorasMaquinaria(tipo)?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
             // Vincular el egreso de caja con este registro para ajuste/reversión exactos
             if (movGasto) regObj.gasto_id = movGasto.id;
             datosAct.maquinaria_flota.registros.push(regObj);
@@ -2687,6 +2884,7 @@
             const reg = datos.maquinaria_flota.registros.find(r => r.id === id);
             if (!reg) return;
             const veh = datos.maquinaria_flota.vehiculos.find(v => v.id === reg.vehiculo_id);
+            document.getElementById('maq-fecha').value  = reg.fecha || new Date().toISOString().split('T')[0];
             document.getElementById('maq-tipo').value   = claveMaquinariaPorNombre(veh?.tipo);
             document.getElementById('maq-codigo').value = veh?.codigo || '';
             document.getElementById('maq-val-inicial').value = reg.odometro_inicial;
@@ -2699,6 +2897,8 @@
             const form = document.getElementById('form-maquinaria');
             form.dataset.editando = id;
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Registro';
+            const btnMaq = document.getElementById('btn-cancelar-maq');
+            if (btnMaq) btnMaq.style.display = '';
             form.scrollIntoView({ behavior:'smooth' });
         }
 
@@ -3083,15 +3283,20 @@
             form.scrollIntoView({ behavior:'smooth' });
         }
 
+        estadoPaginacion.cotizaciones = 1;
+        function cambiarPaginaCotizaciones(p) { estadoPaginacion.cotizaciones = p; cargarTablaCotizaciones(); }
+
         function cargarTablaCotizaciones() {
             const datos = getProyectoData();
             const tbody = document.getElementById('tabla-cotizaciones-cuerpo');
             if (!tbody) return;
             const cots = [...(datos.adquisiciones.cotizaciones_compras||[])].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-            // FIX #11: estado vacío
-            if (cots.length === 0) { tbody.innerHTML = filaVacia(5, 'No hay cotizaciones registradas'); return; }
+            if (cots.length === 0) { tbody.innerHTML = filaVacia(5, 'No hay cotizaciones registradas'); renderPaginacion('paginacion-cotizaciones', 0, 1, 'cambiarPaginaCotizaciones'); return; }
+            const pag  = estadoPaginacion.cotizaciones;
+            const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
+            const pag_ = cots.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
             tbody.innerHTML = '';
-            cots.forEach(c => {
+            pag_.forEach(c => {
                 const prov   = datos.adquisiciones.proveedores.find(p => p.id === c.proveedor_id);
                 const pNomb  = prov ? prov.nombre : 'Desconocido';
                 const color  = c.estado==='aprobada'?'var(--exito)':c.estado==='rechazada'?'var(--alerta-texto)':'var(--advertencia-texto)';
@@ -3110,6 +3315,7 @@
                     </td>`;
                 tbody.appendChild(row);
             });
+            renderPaginacion('paginacion-cotizaciones', cots.length, pag, 'cambiarPaginaCotizaciones');
         }
 
         function aprobarCotizacion(id) {
@@ -3176,6 +3382,47 @@
             showToast('✅ Presupuesto guardado', 'success');
         }
 
+        function guardarDatosContacto() {
+            const telefono  = (document.getElementById('cfg-telefono').value  || '').trim();
+            const email     = (document.getElementById('cfg-email').value     || '').trim();
+            const direccion = (document.getElementById('cfg-direccion').value || '').trim();
+            const db = getDB();
+            db.configuracion.telefono  = telefono;
+            db.configuracion.email     = email;
+            db.configuracion.direccion = direccion;
+            saveDB(db);
+            actualizarDatosContactoPDF();
+            showToast('✅ Datos de contacto guardados', 'success');
+        }
+
+        function cargarDatosContacto() {
+            const db = getDB();
+            const tel  = db.configuracion.telefono  || '';
+            const eml  = db.configuracion.email     || '';
+            const dir  = db.configuracion.direccion || '';
+            const elTel = document.getElementById('cfg-telefono');
+            const elEml = document.getElementById('cfg-email');
+            const elDir = document.getElementById('cfg-direccion');
+            if (elTel) elTel.value = tel;
+            if (elEml) elEml.value = eml;
+            if (elDir) elDir.value = dir;
+            actualizarDatosContactoPDF();
+        }
+
+        function actualizarDatosContactoPDF() {
+            const db  = getDB();
+            const tel  = db.configuracion.telefono  || '+502 5997 9501';
+            const eml  = db.configuracion.email     || 'contacto@construramsa.com';
+            const dir  = db.configuracion.direccion || '17av. Villa Mariscal, Apartamento 116, Torre 2, Zona 11, Ciudad de Guatemala';
+            const elDir = document.getElementById('pdf-direccion-empresa');
+            const elTE  = document.getElementById('pdf-tel-email-empresa');
+            const parts = [];
+            if (tel) parts.push('Tel: ' + tel);
+            if (eml) parts.push('Email: ' + eml);
+            if (elDir) elDir.textContent = dir;
+            if (elTE)  elTE.textContent  = parts.join(' | ');
+        }
+
         function exportarBaseDatos() {
             try {
                 showLoading('Exportando base de datos...');
@@ -3224,7 +3471,45 @@
             ex.mantenimiento.compras_insumos = fusionarArrays(ex.mantenimiento.compras_insumos||[], mt.compras_insumos||[], 'id');
             ex.mantenimiento.formatos   = { ...(ex.mantenimiento.formatos||{}), ...(mt.formatos||{}) };
             if (imp.proyectos?.length) ex.proyectos = fusionarArrays(ex.proyectos||[], imp.proyectos, 'id');
-            if (imp.proyectos_data) Object.keys(imp.proyectos_data).forEach(k => { ex.proyectos_data[k] = imp.proyectos_data[k]; });
+            if (imp.proyectos_data) {
+                Object.keys(imp.proyectos_data).forEach(k => {
+                    if (!ex.proyectos_data[k]) {
+                        // Proyecto nuevo: copiar directamente
+                        ex.proyectos_data[k] = imp.proyectos_data[k];
+                    } else {
+                        // Proyecto existente: fusionar subestructuras en lugar de sobrescribir
+                        const src = imp.proyectos_data[k];
+                        const dst = ex.proyectos_data[k];
+                        dst.caja_chica = fusionarArrays(dst.caja_chica || [], src.caja_chica || [], 'id');
+                        if (!dst.maquinaria_flota) dst.maquinaria_flota = { vehiculos: [], registros: [] };
+                        dst.maquinaria_flota.vehiculos = fusionarArrays(dst.maquinaria_flota.vehiculos || [], (src.maquinaria_flota || {}).vehiculos || [], 'id');
+                        dst.maquinaria_flota.registros = fusionarArrays(dst.maquinaria_flota.registros || [], (src.maquinaria_flota || {}).registros || [], 'id');
+                        if (!dst.personal) dst.personal = { trabajadores: [], asistencia: [] };
+                        dst.personal.trabajadores = fusionarArrays(dst.personal.trabajadores || [], (src.personal || {}).trabajadores || [], 'id');
+                        const mapaA2 = new Map();
+                        (dst.personal.asistencia || []).forEach(d => d.registros.forEach(r => mapaA2.set(d.fecha + '_' + r.trabajador_id, { fecha: d.fecha, reg: r })));
+                        ((src.personal || {}).asistencia || []).forEach(d => d.registros.forEach(r => mapaA2.set(d.fecha + '_' + r.trabajador_id, { fecha: d.fecha, reg: r })));
+                        const mapaDias2 = new Map();
+                        mapaA2.forEach(({ fecha, reg }) => { if (!mapaDias2.has(fecha)) mapaDias2.set(fecha, { fecha, registros: [] }); mapaDias2.get(fecha).registros.push(reg); });
+                        dst.personal.asistencia = Array.from(mapaDias2.values());
+                        if (!dst.adquisiciones) dst.adquisiciones = { proveedores: [], cotizaciones_compras: [] };
+                        dst.adquisiciones.proveedores = fusionarArrays(dst.adquisiciones.proveedores || [], (src.adquisiciones || {}).proveedores || [], 'id');
+                        dst.adquisiciones.cotizaciones_compras = fusionarArrays(dst.adquisiciones.cotizaciones_compras || [], (src.adquisiciones || {}).cotizaciones_compras || [], 'id');
+                        if (!dst.viajes_camiones) dst.viajes_camiones = { rutas_botadero: [], camiones: [], equipo_alquilado: [], viajes: [] };
+                        const srcVC = src.viajes_camiones || {};
+                        dst.viajes_camiones.rutas_botadero = fusionarArrays(dst.viajes_camiones.rutas_botadero || [], srcVC.rutas_botadero || [], 'id');
+                        dst.viajes_camiones.camiones = fusionarArrays(dst.viajes_camiones.camiones || [], srcVC.camiones || [], 'id');
+                        dst.viajes_camiones.equipo_alquilado = fusionarArrays(dst.viajes_camiones.equipo_alquilado || [], srcVC.equipo_alquilado || [], 'id');
+                        dst.viajes_camiones.viajes = fusionarArrays(dst.viajes_camiones.viajes || [], srcVC.viajes || [], 'id');
+                        if (!dst.mantenimiento) dst.mantenimiento = { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] };
+                        const srcMT = src.mantenimiento || {};
+                        dst.mantenimiento.maquinaria = fusionarArrays(dst.mantenimiento.maquinaria || [], srcMT.maquinaria || [], 'id');
+                        dst.mantenimiento.ordenes = fusionarArrays(dst.mantenimiento.ordenes || [], srcMT.ordenes || [], 'id');
+                        dst.mantenimiento.compras_insumos = fusionarArrays(dst.mantenimiento.compras_insumos || [], srcMT.compras_insumos || [], 'id');
+                        dst.mantenimiento.formatos = { ...(dst.mantenimiento.formatos || {}), ...(srcMT.formatos || {}) };
+                    }
+                });
+            }
             return ex;
         }
 
@@ -3428,9 +3713,9 @@
             const sel = document.getElementById('viaje-cam');
             sel.innerHTML = '<option value="">Seleccionar unidad...</option>';
             (datos.viajes_camiones.camiones || []).forEach(c => {
-                if (c.propiedad !== 'propio') return;
                 const o = document.createElement('option');
-                o.value = c.id; o.textContent = c.nombre;
+                o.value = c.id;
+                o.textContent = c.nombre + (c.propiedad === 'alquilado' ? ' 🔑 (Alquilado)' : ' 🚚 (Propio)');
                 sel.appendChild(o);
             });
             cargarTablaCamiones();
@@ -3461,6 +3746,11 @@
             if (!cam) { aviso.textContent = '⚠️ Registre primero el camión.'; return; }
             if (!ruta) { aviso.textContent = '⚠️ Registre una ruta/botadero.'; return; }
             aviso.textContent = '';
+            // Mostrar/ocultar campos según propiedad del camión
+            const divDiesel = document.getElementById('div-viaje-diesel');
+            const divTarifaInfo = document.getElementById('div-viaje-tarifa-info');
+            if (divDiesel) divDiesel.style.display = cam.propiedad === 'alquilado' ? 'none' : '';
+            if (divTarifaInfo) divTarifaInfo.style.display = cam.propiedad === 'alquilado' ? '' : 'none';
             const kmTotal = (ruta.distancia || 0) * 2 * numero;
             const litros = kmTotal * (parseFloat(cam.consumo) || 0);
             const costoComb = litros * precio;
@@ -3590,15 +3880,44 @@
                 costoAlq = (parseFloat(cam.tarifa) || 0) * (cam.modalidad === 'viaje' ? numero : 1);
             }
             const total = costoComb + costoAlq + extra;
+
+            // ── Modo edición ──────────────────────────────────────────
+            const editandoIdViaje = this.dataset.editando;
+            if (editandoIdViaje) {
+                const idx = datos.viajes_camiones.viajes.findIndex(x => x.id === editandoIdViaje);
+                if (idx !== -1) {
+                    const prev = datos.viajes_camiones.viajes[idx];
+                    // Ajustar egreso vinculado si cambió el monto
+                    let egresoV = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
+                    if (egresoV) {
+                        egresoV.monto = total;
+                    }
+                    datos.viajes_camiones.viajes[idx] = { ...prev, fecha, vehiculo_id: camId, ruta_id: rutaId, material, numero, km_total: kmTotal, litros, costo_combustible: costoComb, costo_alquiler: costoAlq, extra, total };
+                    saveProyectoData(datos);
+                }
+                cancelarEdicionViaje();
+                estadoPaginacion.viajes = 1;
+                cargarTablaViajes(); actualizarSaldoCajaChica(); cargarTablaCajaChica();
+                showToast('✅ Viaje actualizado', 'success');
+                return;
+            }
+
+            // ── Nuevo registro ────────────────────────────────────────
             const descripcion = `Viaje ${numero} (${material}) ${cam.nombre} → ${ruta.nombre}`;
             const categoria = cam.propiedad === 'alquilado' ? 'Alquiler de Equipo' : 'Combustible';
-            if (total > 0) { if (!procesarGastoCajaChica(total, categoria, descripcion)) return; }
+            let movGastoViaje = null;
+            if (total > 0) {
+                movGastoViaje = procesarGastoCajaChica(total, categoria, descripcion);
+                if (!movGastoViaje) return;
+            }
             const datos2 = getProyectoData();
-            datos2.viajes_camiones.viajes.push({
+            const viajeObj = {
                 id: generarId(), fecha, vehiculo_id: camId, ruta_id: rutaId,
                 material, numero, km_total: kmTotal, litros, costo_combustible: costoComb,
                 costo_alquiler: costoAlq, extra, total, propiedad: cam.propiedad, tarifa_modalidad: cam.modalidad
-            });
+            };
+            if (movGastoViaje) viajeObj.gasto_id = movGastoViaje.id;
+            datos2.viajes_camiones.viajes.push(viajeObj);
             saveProyectoData(datos2);
             this.reset();
             document.getElementById('viaje-fecha').value = new Date().toISOString().split('T')[0];
@@ -3607,14 +3926,20 @@
             showToast('Viaje registrado y descontado de caja', 'success');
         });
 
+        estadoPaginacion.viajes = 1;
+        function cambiarPaginaViajes(p) { estadoPaginacion.viajes = p; cargarTablaViajes(); }
+
         function cargarTablaViajes() {
             const datos = getProyectoData();
             const tbody = document.getElementById('tabla-viajes-cuerpo');
             if (!tbody) return;
             const viajes = [...(datos.viajes_camiones.viajes || [])].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-            if (viajes.length === 0) { tbody.innerHTML = filaVacia(8, 'No hay viajes registrados'); return; }
+            if (viajes.length === 0) { tbody.innerHTML = filaVacia(8, 'No hay viajes registrados'); renderPaginacion('paginacion-viajes', 0, 1, 'cambiarPaginaViajes'); return; }
+            const pag  = estadoPaginacion.viajes;
+            const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
+            const pag_ = viajes.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
             tbody.innerHTML = '';
-            viajes.forEach(v => {
+            pag_.forEach(v => {
                 const cam = (datos.viajes_camiones.camiones || []).find(c => c.id === v.vehiculo_id);
                 const nombre = cam ? cam.nombre : 'N/A';
                 const tr = document.createElement('tr');
@@ -3626,9 +3951,13 @@
                     <td>${numToF(v.km_total)} km</td>
                     <td>${numToF(v.litros)} L</td>
                     <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(v.total)}</td>
-                    <td><button onclick="eliminarViaje('${v.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar viaje">🗑️</button></td>`;
+                    <td>
+                        <button onclick="editarViaje('${v.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar viaje">✏️</button>
+                        <button onclick="eliminarViaje('${v.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar viaje">🗑️</button>
+                    </td>`;
                 tbody.appendChild(tr);
             });
+            renderPaginacion('paginacion-viajes', viajes.length, pag, 'cambiarPaginaViajes');
         }
 
         function eliminarViaje(id) {
@@ -3636,10 +3965,25 @@
                 const datos = getProyectoData();
                 const v = datos.viajes_camiones.viajes.find(x => x.id === id);
                 if (v && v.total > 0) {
-                    datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: `Reversión viaje: ${v.material}`, monto: v.total, responsable: 'Sistema' });
+                    // Buscar y eliminar egreso vinculado exacto (igual que maquinaria)
+                    let egreso = (datos.caja_chica || []).find(m => v.gasto_id && m.id === v.gasto_id && m.tipo === 'egreso');
+                    if (!egreso) {
+                        // Fallback para viajes migrados sin gasto_id
+                        egreso = (datos.caja_chica || []).find(m =>
+                            m.tipo === 'egreso' &&
+                            (m.categoria === 'Alquiler de Equipo' || m.categoria === 'Combustible') &&
+                            m.monto === v.total
+                        );
+                    }
+                    if (egreso) {
+                        datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
+                    } else {
+                        datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: `Reversión viaje: ${v.material}`, monto: v.total, responsable: 'Sistema' });
+                    }
                 }
                 datos.viajes_camiones.viajes = datos.viajes_camiones.viajes.filter(x => x.id !== id);
                 saveProyectoData(datos);
+                estadoPaginacion.viajes = estadoPaginacion.viajes || 1;
                 actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarTablaViajes();
                 showToast('Viaje eliminado y gasto revertido', 'success');
             });
@@ -3731,7 +4075,7 @@
             const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === maqId);
             if (!m) { cont.innerHTML = '<p style="color:var(--texto-secundario);font-size:12px;">Seleccione una maquinaria para ver su formato de inspección.</p>'; return; }
             let items = FORMATOS_BASE[m.tipo] || FORMATOS_BASE['Otro'];
-            cont.innerHTML = `<h4 style="color:var(--acento-cian);font-size:13px;margin:0 0 8px 0;">📋 Formato de Inspección — ${snDocAcentos(m.tipo)}</h4>`;
+            cont.innerHTML = `<h4 style="color:var(--acento-cian);font-size:13px;margin:0 0 8px 0;">📋 Formato de Inspección — ${m.tipo}</h4>`;
             items.forEach((it, i) => {
                 const d = document.createElement('label');
                 d.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:12px;color:var(--texto-principal);cursor:pointer;';
@@ -3739,10 +4083,6 @@
                 cont.appendChild(d);
             });
         }
-
-        function snapshotNombreTipoMaq() { return ''; }
-        function snapshotNombreAcentos(s) { return s; }
-        function snDocAcentos(s) { return s; }
 
         document.getElementById('ord-maquina').addEventListener('change', function() {
             buildFormatosInspeccion();
@@ -3764,10 +4104,36 @@
             document.querySelectorAll('#formatos-inspeccion .fmt-inspeccion').forEach(cb => {
                 items.push({ estado: cb.checked ? 'Bien' : 'Revisar', descripcion: cb.closest('label').querySelector('span').textContent });
             });
+
+            // ── Modo edición ──────────────────────────────────────────
+            const editandoIdOrden = this.dataset.editando;
+            if (editandoIdOrden) {
+                const idx = datos.mantenimiento.ordenes.findIndex(x => x.id === editandoIdOrden);
+                if (idx !== -1) {
+                    const prev = datos.mantenimiento.ordenes[idx];
+                    let egresoOrd = (datos.caja_chica || []).find(mo => prev.gasto_id && mo.id === prev.gasto_id && mo.tipo === 'egreso');
+                    if (egresoOrd) egresoOrd.monto = costo;
+                    datos.mantenimiento.ordenes[idx] = { ...prev, fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items };
+                    saveProyectoData(datos);
+                }
+                cancelarEdicionOrden();
+                estadoPaginacion.ordenes = 1;
+                cargarTablaOrdenes(); actualizarSaldoCajaChica(); cargarTablaCajaChica();
+                showToast('✅ Orden actualizada', 'success');
+                return;
+            }
+
+            // ── Nuevo registro ────────────────────────────────────────
             const descripcion = `${tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'} ${m ? m.nombre : ''}`;
-            if (costo > 0) { if (!procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Mantenimiento ${descripcion}`)) return; }
+            let movGastoOrden = null;
+            if (costo > 0) {
+                movGastoOrden = procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Mantenimiento ${descripcion}`);
+                if (!movGastoOrden) return;
+            }
             const datos2 = getProyectoData();
-            datos2.mantenimiento.ordenes.push({ id: generarId(), fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items });
+            const ordenObj = { id: generarId(), fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items };
+            if (movGastoOrden) ordenObj.gasto_id = movGastoOrden.id;
+            datos2.mantenimiento.ordenes.push(ordenObj);
             saveProyectoData(datos2);
             this.reset();
             document.getElementById('ord-fecha').value = new Date().toISOString().split('T')[0];
@@ -3776,14 +4142,20 @@
             showToast('Orden de mantenimiento guardada', 'success');
         });
 
+        estadoPaginacion.ordenes = 1;
+        function cambiarPaginaOrdenes(p) { estadoPaginacion.ordenes = p; cargarTablaOrdenes(); }
+
         function cargarTablaOrdenes() {
             const datos = getProyectoData();
             const tbody = document.getElementById('tabla-ordenes-cuerpo');
             if (!tbody) return;
             const ords = [...(datos.mantenimiento.ordenes || [])].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-            if (ords.length === 0) { tbody.innerHTML = filaVacia(5, 'No hay órdenes de mantenimiento'); return; }
+            if (ords.length === 0) { tbody.innerHTML = filaVacia(5, 'No hay órdenes de mantenimiento'); renderPaginacion('paginacion-ordenes', 0, 1, 'cambiarPaginaOrdenes'); return; }
+            const pag  = estadoPaginacion.ordenes;
+            const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
+            const pag_ = ords.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
             tbody.innerHTML = '';
-            ords.forEach(o => {
+            pag_.forEach(o => {
                 const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === o.maquinaria_id);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -3791,9 +4163,13 @@
                     <td>${m ? m.nombre : 'N/A'}</td>
                     <td>${o.tipo}</td>
                     <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(o.costo)}</td>
-                    <td><button onclick="eliminarOrden('${o.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar orden">🗑️</button></td>`;
+                    <td>
+                        <button onclick="editarOrden('${o.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar orden">✏️</button>
+                        <button onclick="eliminarOrden('${o.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar orden">🗑️</button>
+                    </td>`;
                 tbody.appendChild(tr);
             });
+            renderPaginacion('paginacion-ordenes', ords.length, pag, 'cambiarPaginaOrdenes');
         }
 
         function eliminarOrden(id) {
@@ -3801,7 +4177,19 @@
                 const datos = getProyectoData();
                 const o = datos.mantenimiento.ordenes.find(x => x.id === id);
                 if (o && o.costo > 0) {
-                    datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: 'Reversión mantenimiento', monto: o.costo, responsable: 'Sistema' });
+                    let egreso = (datos.caja_chica || []).find(m => o.gasto_id && m.id === o.gasto_id && m.tipo === 'egreso');
+                    if (!egreso) {
+                        egreso = (datos.caja_chica || []).find(m =>
+                            m.tipo === 'egreso' &&
+                            m.categoria === 'Combustible/Mantenimiento' &&
+                            m.monto === o.costo
+                        );
+                    }
+                    if (egreso) {
+                        datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
+                    } else {
+                        datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: 'Reversión mantenimiento', monto: o.costo, responsable: 'Sistema' });
+                    }
                 }
                 datos.mantenimiento.ordenes = datos.mantenimiento.ordenes.filter(x => x.id !== id);
                 saveProyectoData(datos);
@@ -3822,10 +4210,34 @@
             if (!articulo || articulo.length < 2) { showToast('Describa el artículo', 'error'); return; }
             if (cantidad < 1) { showToast('Cantidad inválida', 'error'); return; }
             if (costo <= 0) { showToast('Ingrese el costo', 'error'); return; }
+
+            // ── Modo edición ──────────────────────────────────────────
+            const editandoIdInsumo = this.dataset.editando;
+            if (editandoIdInsumo) {
+                const datos = getProyectoData();
+                const idx = datos.mantenimiento.compras_insumos.findIndex(x => x.id === editandoIdInsumo);
+                if (idx !== -1) {
+                    const prev = datos.mantenimiento.compras_insumos[idx];
+                    let egresoIns = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
+                    if (egresoIns) egresoIns.monto = costo;
+                    datos.mantenimiento.compras_insumos[idx] = { ...prev, fecha, tipo, articulo, cantidad, costo, stock_min: stockMin };
+                    saveProyectoData(datos);
+                }
+                cancelarEdicionInsumo();
+                estadoPaginacion.insumos = 1;
+                cargarTablaInsumos(); actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarResumen();
+                showToast('✅ Insumo actualizado', 'success');
+                return;
+            }
+
+            // ── Nuevo registro ────────────────────────────────────────
             const descripcion = `${tipo}: ${articulo} x${cantidad}`;
-            if (!procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Insumo ${descripcion}`)) return;
+            const movGastoInsumo = procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Insumo ${descripcion}`);
+            if (!movGastoInsumo) return;
             const datos = getProyectoData();
-            datos.mantenimiento.compras_insumos.push({ id: generarId(), fecha, tipo, articulo, cantidad, costo, stock_min: stockMin });
+            const insumoObj = { id: generarId(), fecha, tipo, articulo, cantidad, costo, stock_min: stockMin };
+            if (movGastoInsumo) insumoObj.gasto_id = movGastoInsumo.id;
+            datos.mantenimiento.compras_insumos.push(insumoObj);
             saveProyectoData(datos);
             this.reset();
             document.getElementById('insumo-fecha').value = new Date().toISOString().split('T')[0];
@@ -3835,14 +4247,20 @@
             showToast('Compra de insumo registrada', 'success');
         });
 
+        estadoPaginacion.insumos = 1;
+        function cambiarPaginaInsumos(p) { estadoPaginacion.insumos = p; cargarTablaInsumos(); }
+
         function cargarTablaInsumos() {
             const datos = getProyectoData();
             const tbody = document.getElementById('tabla-insumos-cuerpo');
             if (!tbody) return;
             const ins = [...(datos.mantenimiento.compras_insumos || [])].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-            if (ins.length === 0) { tbody.innerHTML = filaVacia(6, 'No hay compras de insumos'); return; }
+            if (ins.length === 0) { tbody.innerHTML = filaVacia(6, 'No hay compras de insumos'); renderPaginacion('paginacion-insumos', 0, 1, 'cambiarPaginaInsumos'); return; }
+            const pag  = estadoPaginacion.insumos;
+            const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
+            const pag_ = ins.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
             tbody.innerHTML = '';
-            ins.forEach(i => {
+            pag_.forEach(i => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${i.fecha}</td>
@@ -3850,17 +4268,33 @@
                     <td>${i.articulo}</td>
                     <td>${i.cantidad}</td>
                     <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(i.costo)}</td>
-                    <td><button onclick="eliminarInsumo('${i.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar insumo">🗑️</button></td>`;
+                    <td>
+                        <button onclick="editarInsumo('${i.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar insumo">✏️</button>
+                        <button onclick="eliminarInsumo('${i.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar insumo">🗑️</button>
+                    </td>`;
                 tbody.appendChild(tr);
             });
+            renderPaginacion('paginacion-insumos', ins.length, pag, 'cambiarPaginaInsumos');
         }
 
         function eliminarInsumo(id) {
             showConfirmModal('Eliminar Compra', 'Se revertirá el gasto del insumo. ¿Continuar?', () => {
                 const datos = getProyectoData();
                 const i = datos.mantenimiento.compras_insumos.find(x => x.id === id);
-                if (i) {
-                    datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: 'Reversión insumo', monto: i.costo, responsable: 'Sistema' });
+                if (i && i.costo > 0) {
+                    let egreso = (datos.caja_chica || []).find(m => i.gasto_id && m.id === i.gasto_id && m.tipo === 'egreso');
+                    if (!egreso) {
+                        egreso = (datos.caja_chica || []).find(m =>
+                            m.tipo === 'egreso' &&
+                            m.categoria === 'Combustible/Mantenimiento' &&
+                            m.monto === i.costo
+                        );
+                    }
+                    if (egreso) {
+                        datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
+                    } else {
+                        datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: 'Reversión insumo', monto: i.costo, responsable: 'Sistema' });
+                    }
                 }
                 datos.mantenimiento.compras_insumos = datos.mantenimiento.compras_insumos.filter(x => x.id !== id);
                 saveProyectoData(datos);
@@ -3924,7 +4358,7 @@
                         totalEgr += v.total || 0;
                         csv += `${v.fecha},${c.nombre},${v.material},${v.numero},${numToF(v.km_total)},${numToF(v.litros)},${numToF(v.costo_combustible)},${numToF(v.costo_alquiler)},${numToF(v.total)}\n`;
                     });
-                    csv += `,,,TOTAL VIAJES:,,${numToF(totalViajes)}\n`;
+                    csv += `,,,,,,,,TOTAL VIAJES (Q):,${numToF(totalViajes)}\n`;
                 }
                 /* ===== CONSOLIDADO: MANTENIMIENTO E INSUMOS ===== */
                 const ordsMT = (datos.mantenimiento.ordenes || []).filter(o => enRango(o.fecha));
@@ -3972,8 +4406,8 @@
                         csv += `${v.fecha},${cam?cam.nombre:'N/A'},${v.material},${v.numero},${v.km_total?numToF(v.km_total):0},${v.litros?numToF(v.litros):0},${v.costo_combustible?numToF(v.costo_combustible):'0.00'},${v.costo_alquiler?numToF(v.costo_alquiler):'0.00'},${v.total?numToF(v.total):'0.00'}\n`;
                     });
                 }
-                csv += `,,,,,,,,,\n`;
-                csv += `,,,,,,,,,TOTAL VIAJES:,${totalV.toFixed(2)}\n`;
+                csv += `,,,,,,,,\n`;
+                csv += `,,,,,,,,TOTAL VIAJES (Q):,${totalV.toFixed(2)}\n`;
             } else if (tipo === 'mantenimiento') {
                 csv += `Reporte de Mantenimiento e Insumos - ${empresa} - Proyecto: ${proyNombre}\n`;
                 csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
@@ -4350,29 +4784,27 @@
 
         function generarYCompartirReporte() { showLoading('Preparando reporte...'); compartirReporteWhatsApp(); }
 
+        // Navegar a un módulo por ID — función central reutilizada por tabs y atajos de teclado
+        function navegarAModulo(mid) {
+            const tab = document.querySelector(`[data-module="${mid}"]`);
+            if (tab) tab.click();
+        }
+
         // ============================================================
-        // ATAJOS DE TECLADO
+        // ATAJOS DE TECLADO — reutilizan navegarAModulo() en vez de duplicar
         // ============================================================
         document.addEventListener('keydown', function(e) {
             if (e.altKey && e.key >= '1' && e.key <= '9') {
                 e.preventDefault();
                 const mods = ['resumen','caja-chica','maquinaria','personal','adquisiciones','viajes','mantenimiento','reportes','configuracion'];
-                const mid  = mods[parseInt(e.key)-1];
-                document.querySelectorAll('.nav-tab').forEach(t => { t.classList.remove('active'); t.removeAttribute('aria-current'); });
-                document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
-                const tab = document.querySelector(`[data-module="${mid}"]`);
-                if (tab) { tab.classList.add('active'); tab.setAttribute('aria-current','page'); }
-                const modEl = document.getElementById(mid);
-                if (modEl) modEl.classList.add('active');
-                if (mid==='resumen') { cargarResumen(); }
-                if (mid==='personal') { cargarListaAsistencia(); cargarTablaAsistencia(); }
-                if (mid==='adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
-                if (mid==='viajes') { cargarCamiones(); cargarRutas(); cargarTablaViajes(); }
-                if (mid==='mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }
-                if (mid==='configuracion') cargarListaProyectosConfig();
-                if (tab) showToast(`📱 ${tab.textContent.trim()}`, 'info', 1200);
+                const mid  = mods[parseInt(e.key) - 1];
+                if (mid) {
+                    navegarAModulo(mid);
+                    const tab = document.querySelector(`[data-module="${mid}"]`);
+                    if (tab) showToast(`📱 ${tab.textContent.trim()}`, 'info', 1200);
+                }
             }
-            if (e.altKey && (e.key==='s'||e.key==='S')) {
+            if (e.altKey && (e.key === 's' || e.key === 'S')) {
                 e.preventDefault();
                 const form = document.querySelector('.module.active form');
                 if (form) { const btn = form.querySelector('button[type="submit"]'); if (btn) btn.click(); }
@@ -4438,6 +4870,7 @@
             // Paso 5: cargar todos los datos iniciales
             const fechaHoy = new Date().toISOString().split('T')[0];
             document.getElementById('caja-fecha').value          = fechaHoy;
+            document.getElementById('maq-fecha').value           = fechaHoy;
             document.getElementById('fecha-asistencia').value    = fechaHoy;
             document.getElementById('reporte-fecha').value       = fechaHoy;
             document.getElementById('viaje-fecha').value         = fechaHoy;
@@ -4452,6 +4885,7 @@
             cargarLogo();
             recargarTodosLosDatos();
             cargarListaProyectosConfig();
+            cargarDatosContacto();
 
             // Paso 6: registrar listeners de navegación por tabs
             inicializarNavTabs();
