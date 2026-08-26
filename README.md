@@ -139,6 +139,38 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 
 ## Historial de Cambios
 
+### v2.7.2 (2026-08-26) — Membrete oficial en exportaciones PDF
+- **Plantilla PDF**: rediseño completo fiel al membrete oficial de CONSTRURAMSA — logo centrado grande, nombre con letra-spacing amplio, slogan en azul bold, franja doble azul-cian divisoria
+- **Membrete**: estructura de 3 zonas — metadatos del reporte (izq.), logo + nombre + contacto (centro), recuadro de sello/timbre (der.)
+- **Firmas**: firma de Wilson y Juan alineadas al fondo de su celda (mismo nivel que la línea), espacio en blanco central para V°B° manuscrito
+- **CSS**: padding reducido de 20mm a 8mm/14mm para acomodar el membrete compacto; `h2`, `h3`, `p` con estilos propios dentro de `#plantilla-reporte-impresion` para consistencia tipográfica
+- **prepararContenedorImpresion()**: mejora — limpia el contenido previo antes de insertar, recarga imágenes de firma de forma forzada, y lee tel/email desde la configuración guardada con fallback a los datos corporativos
+
+### v2.7.1 (2026-08-26) — Correcciones de UI y refinamiento
+- **CSS - llave sobrante**: eliminada llave de cierre extra al final del bloque `@media (max-width: 360px)` que desbalanceaba el CSS
+- **CSS - .btn-row**: nueva clase reutilizable para filas de botones en formularios — `flex-wrap: wrap` garantiza que en pantallas ≤360px los botones no rebasen horizontalmente
+- **CSS - will-change**: `will-change: transform` en `.btn-primario:active`, `.btn-secundario:active` y `.nav-tab:active` para GPU layer en animaciones de escala
+- **CSS - .form-grid-1**: nueva clase para grids de 1 columna (reemplaza el último grid inline del HTML)
+- **CSS - modal consistente**: `max-height` en `.modal-content` unificado a `90dvh` en todos los breakpoints (era `85dvh` en 768px, inconsistente)
+- **HTML - btn-row**: los 5 divs de botones submit+cancelar en formularios ahora usan la clase `.btn-row`
+- **HTML - flex-wrap**: `flex-wrap: wrap` agregado a 2 contenedores de botones en templates JS (proyectos en config, botones de trabajador en personal)
+- **HTML - form-grid-1**: grid inline en formulario de insumos reemplazado con clase `.form-grid-1`
+
+### v2.7.0 (2026-08-26) — Optimizaciones móviles (Android / iOS)
+- **CSS - scroll global**: `html { scroll-behavior: smooth }` para scroll suave nativo en toda la app
+- **CSS - iOS auto-zoom**: `-webkit-text-size-adjust: 100%` en `body` previene el zoom automático de texto en landscape
+- **CSS - pull-to-refresh**: `overscroll-behavior-y: none` en `body` evita el gesto accidental de pull-to-refresh en Android Chrome
+- **CSS - tap delay**: `touch-action: manipulation` en todos los botones, tabs y controles interactivos elimina el retraso de 300ms en tap
+- **CSS - GPU animations**: `will-change: transform` en botones y tabs para capas GPU en animaciones de scale
+- **CSS - nav-tabs táctil**: scroll horizontal con `overflow-x: auto` + `scroll-snap-type` para deslizamiento suave entre tabs en móvil
+- **CSS - modales móvil**: `max-height: 90dvh + overflow-y: scroll` en `.modal-content` para modales correctamente scrollables en móvil
+- **CSS - breakpoint 768px**: mejorado — `td button` con `min-height: 36px` para touch targets en tablas
+- **CSS - breakpoint 480px (NUEVO)**: Android mid-range — grid a 1 columna, fuentes ajustadas, botones a `width: 100%`
+- **CSS - breakpoint 390px (NUEVO)**: iPhone 14/15 Pro — ajustes finos de tipografía y espaciado
+- **CSS - breakpoint 360px (NUEVO)**: Galaxy S / Moto G — reemplaza el breakpoint anterior de 375px con reglas más completas
+- **HTML - teclado decimal**: `inputmode="decimal"` agregado a los 24 inputs `type="number"` — iOS muestra teclado con punto decimal, Android mejora el teclado numérico
+- **HTML - autocomplete**: `autocomplete="off"` en los 11 formularios de campo/obra para evitar sugerencias no deseadas en los campos (código de equipo, responsable, descripción de trabajo, etc.)
+
 ### v2.6.0 (2026-08-24) — Más tipos de maquinaria y categorías de gasto
 - **Maquinaria**: nuevos tipos de unidad en el formulario (excavadora, minicargador, bobcat/cargadora frontal, grúa, motoniveladora/patrol, rodillos 8/10/12T, compactadora, vibrocompactadora, camión de carga) con medición correcta por horas o km
 - **Maquinaria**: catálogo de mantenimiento ampliado con `Minicargador` y `Bobcat / Cargadora Frontal` y sus formatos de inspección
@@ -247,6 +279,6 @@ La aplicación es una PWA instalable y 100% responsive, optimizada para uso en c
 
 ---
 
-**Versión**: 2.6.0  
+**Versión**: 2.7.2  
 **Desarrollado para**: CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura  
 **Moneda**: Quetzales (Q) — Guatemala

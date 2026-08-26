@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- viewport-fit=cover: respeta notch/Dynamic Island en iOS y Android
+         interactive-widget=resizes-content: en Android Chrome el teclado virtual
+         reajusta el layout en lugar de hacer zoom, evitando inputs tapados.
+         Se eliminaron maximum-scale y user-scalable=no (WCAG 1.4.4 compliance) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <title>CONSTRURAMSA - Control de Obra</title>
     <meta name="description" content="Sistema de control de gastos y gestión de obra para CONSTRURAMSA. 100% offline.">
     <meta name="theme-color" content="#090a0f">
@@ -23,7 +27,29 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CONSTRURAMSA">
     <link rel="apple-touch-icon" href="./icon-192.png">
-    <!-- Splash screens iOS (evita pantalla blanca al abrir) -->
+    <link rel="apple-touch-icon" sizes="152x152" href="./icon-192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="./icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon-192.png">
+    <!-- Splash screens iOS — previenen pantalla blanca al abrir la PWA desde home screen -->
+    <!-- iPhone SE (1a gen) / 5/5S: 320×568 -->
+    <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)" href="./icon-512.png">
+    <!-- iPhone 6/7/8: 375×667 -->
+    <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)" href="./icon-512.png">
+    <!-- iPhone 6+/7+/8+: 414×736 -->
+    <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)" href="./icon-512.png">
+    <!-- iPhone X/XS/11 Pro: 375×812 -->
+    <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)" href="./icon-512.png">
+    <!-- iPhone XR/11: 414×896 -->
+    <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)" href="./icon-512.png">
+    <!-- iPhone 12/13/14: 390×844 -->
+    <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)" href="./icon-512.png">
+    <!-- iPhone 14 Pro / 15 Pro: 393×852 -->
+    <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)" href="./icon-512.png">
+    <!-- iPhone 14 Plus / 15 Plus: 430×932 -->
+    <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)" href="./icon-512.png">
+    <!-- iPad mini: 768×1024 -->
+    <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="./icon-512.png">
+    <!-- Fallback general -->
     <meta name="apple-touch-fullscreen" content="yes">
 
     <!-- ═══ Windows / Edge — tile en menú inicio ═══ -->
@@ -70,6 +96,9 @@
 
         * { box-sizing: border-box; }
 
+        /* Scroll suave global — funciona en iOS Safari desde el elemento html */
+        html { scroll-behavior: smooth; }
+
         /* iOS standalone: respetar safe-area del notch/Dynamic Island */
         body {
             background-color: var(--bg-principal);
@@ -94,6 +123,12 @@
             /* Evitar selección de texto accidental en app */
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
+            /* iOS: prevenir auto-zoom de texto en landscape */
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            /* Android Chrome: prevenir pull-to-refresh accidental */
+            overscroll-behavior-y: none;
         }
 
         /* Granulado global del fondo — vidrio granulado desenfocado sobre el degradado */
@@ -221,6 +256,39 @@
         .btn-secundario:hover  { background: rgba(255, 255, 255, 0.15); border-color: rgba(0, 164, 228, 0.4); transform: translateY(-2px); }
         .btn-secundario:active { transform: scale(0.98); }
 
+        /* ── .btn-row — fila reutilizable de botones en formularios ─────────
+           flex-wrap:wrap garantiza que en 360px los botones no rebasen.
+           El botón submit se expande (flex:1), el cancelar mantiene su tamaño. */
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-row .btn-primario   { flex: 1; min-width: 140px; }
+        .btn-row .btn-secundario { flex: 0 0 auto; }
+
+        /* ── will-change en animaciones de escala ───────────────────────────
+           Crea un layer GPU propio en el momento del tap/click,
+           evitando el recálculo de composición en cada frame. */
+        .btn-primario:active,
+        .btn-secundario:active,
+        .nav-tab:active { will-change: transform; }
+
+        /* ── touch-action:manipulation ─────────────────────────────────────
+           Elimina delay 300ms en tap en iOS/Android en todos los controles.
+           "manipulation" permite pinch-zoom pero no double-tap-zoom. */
+        button, .nav-tab, .btn-primario, .btn-secundario,
+        a, label, .file-label, [role="button"],
+        .paginacion-container button {
+            touch-action: manipulation;
+        }
+
+        /* ── GPU acceleration en animaciones ────────────────────────────────
+           will-change crea un layer GPU propio para mayor fluidez. */
+        .tarjeta-glass:hover, .kpi-card:hover {
+            will-change: transform;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -307,10 +375,21 @@
 
         .nav-tabs {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
+            /* Scroll horizontal táctil — 9 tabs en fila única deslizable */
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            scroll-snap-type: x proximity;
+            /* Ocultar scrollbar visualmente */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 4px;
+            flex-wrap: nowrap;
         }
+        .nav-tabs::-webkit-scrollbar { display: none; }
 
         .nav-tab {
             background: rgba(255, 255, 255, 0.05);
@@ -322,6 +401,10 @@
             padding: 10px 20px;
             cursor: pointer;
             transition: all 0.3s;
+                    /* Scroll-snap: enclave al deslizar */
+            scroll-snap-align: start;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
         .nav-tab.active {
             background: linear-gradient(135deg, var(--acento-azul), var(--acento-cian));
@@ -381,10 +464,11 @@
             top: -9999px;
             width: 210mm;
             min-height: 297mm;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
             color: #111827;
             background: #ffffff;
-            padding: 20mm;
+            /* Padding reducido: el membrete ya incluye sus propios márgenes internos */
+            padding: 8mm 14mm 14mm 14mm;
             box-sizing: border-box;
             opacity: 0;
             pointer-events: none;
@@ -403,23 +487,23 @@
         #plantilla-reporte-impresion table.tabla-pdf {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 10px;
+            margin-top: 12px;
+            font-size: 9.5px;
         }
         #plantilla-reporte-impresion table.tabla-pdf th {
             background-color: #004B93;
             color: #ffffff;
-            font-size: 9px;
+            font-size: 8.5px;
             font-weight: 700;
             text-transform: uppercase;
-            padding: 8px 6px;
+            padding: 7px 6px;
             border: 1px solid #004B93;
             text-align: left;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.4px;
         }
         #plantilla-reporte-impresion table.tabla-pdf td {
-            font-size: 9.5px;
-            padding: 7px 6px;
+            font-size: 9px;
+            padding: 6px 6px;
             border: 1px solid #E5E7EB;
             color: #374151;
             vertical-align: middle;
@@ -428,43 +512,72 @@
             background-color: #F9FAFB;
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:hover {
-            background-color: #F0F4F8;
+            background-color: #EFF6FF;
         }
 
         /* Estilos para totales en tablas PDF */
-        #plantilla-reporte-impresion .total-destacado { 
-            font-weight: 700; 
-            color: #004B93; 
-            text-align: right; 
+        #plantilla-reporte-impresion .total-destacado {
+            font-weight: 700;
+            color: #004B93;
+            text-align: right;
             background-color: #EFF6FF !important;
         }
-        #plantilla-reporte-impresion .total-egreso { 
-            font-weight: 700; 
-            color: #DC2626; 
-            text-align: right; 
+        #plantilla-reporte-impresion .total-egreso {
+            font-weight: 700;
+            color: #DC2626;
+            text-align: right;
             background-color: #FEF2F2 !important;
         }
-        #plantilla-reporte-impresion .total-ingreso { 
-            font-weight: 700; 
-            color: #059669; 
-            text-align: right; 
+        #plantilla-reporte-impresion .total-ingreso {
+            font-weight: 700;
+            color: #059669;
+            text-align: right;
             background-color: #ECFDF5 !important;
+        }
+
+        /* Encabezados de sección en el contenido dinámico */
+        #plantilla-reporte-impresion h2 {
+            color: #004B93;
+            font-size: 13px;
+            font-weight: 800;
+            border-bottom: 2px solid #004B93;
+            padding-bottom: 6px;
+            margin: 0 0 10px 0;
+        }
+        #plantilla-reporte-impresion h3 {
+            font-size: 10.5px;
+            font-weight: 700;
+            margin: 12px 0 6px 0;
+        }
+        #plantilla-reporte-impresion p {
+            font-size: 9px;
+            color: #6B7280;
+            margin: 0 0 10px 0;
         }
 
         /* FIX #18: footer PDF usa color accesible (#6B7280 sobre blanco = 4.6:1, pasa AA) */
         .pdf-footer-text { color: #6B7280; }
 
-        /* FIX #22: clases CSS reales para grids de formularios (en vez de selectores de atributo frágiles) */
+        /* FIX #22: clases CSS reales para grids de formularios */
+        .form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
         .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .form-grid-2-sm { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 
-        /* FIX #23 + #13: breakpoints completos */
+        /* ══════════════════════════════════════════════════════════════
+           BREAKPOINTS RESPONSIVE — Android & iOS — Todos los rangos
+           ══════════════════════════════════════════════════════════════
+           768px  → tablets, móviles landscape
+           480px  → Android mid-range (Moto G, Xiaomi Redmi, Samsung A)
+           390px  → iPhone 14/15 Pro (393px lógico), Pixel 7
+           360px  → Galaxy S, Moto G4/G5, Android budget
+        */
+
+        /* ── 768px: base móvil ───────────────────────────────────────── */
         @media (max-width: 768px) {
             .header { flex-direction: column; text-align: center; }
             .header-actions { justify-content: center; }
             .header-actions select { min-width: 140px; max-width: 100%; width: auto; }
-            .nav-tabs { justify-content: center; }
             .company-name { font-size: 18px; }
             .tarjeta-glass { padding: 15px; }
             button { min-height: 44px; }
@@ -473,58 +586,94 @@
             .overflow-x-auto {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x proximity;
             }
-            /* FIX #22: clases reales responden correctamente */
-            .form-grid-2   { grid-template-columns: 1fr; }
-            .form-grid-2-sm{ grid-template-columns: 1fr; }
-            .form-grid-3   { grid-template-columns: 1fr; }
-
-            /* Tarjeta asistencia: fila horas extra apilada */
+            .form-grid-2, .form-grid-2-sm { grid-template-columns: 1fr; }
+            .form-grid-3 { grid-template-columns: 1fr 1fr; }
             .horas-extra-row { flex-wrap: wrap; }
-
-            /* Botones de acción en tablas: más separación vertical */
+            /* Botones de tabla: touch target mínimo 36px */
+            td button {
+                min-height: 36px !important;
+                padding: 6px 10px !important;
+                font-size: 12px !important;
+            }
             td button + button { margin-top: 4px; }
-
             th:nth-child(1), td:nth-child(1) { min-width: 80px; }
             th:nth-child(2), td:nth-child(2) { min-width: 100px; }
             th:nth-child(3), td:nth-child(3) { min-width: 80px; }
             th:nth-child(4), td:nth-child(4) { min-width: 120px; }
             th:nth-child(5), td:nth-child(5) { min-width: 80px; text-align: right; }
             th:nth-child(6), td:nth-child(6) { min-width: 120px; text-align: center; }
-
-            /* Paginacion compacta en movil */
             .paginacion-container { gap: 4px; }
             .paginacion-info { font-size: 11px; }
+            .kpi-value { font-size: 18px !important; }
+            /* Modal con scroll interno: el teclado virtual no tapa el contenido */
+            .modal-content { max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         }
 
-        /* FIX #23: breakpoint para pantallas muy pequeñas */
-        @media (max-width: 375px) {
-            .container { padding: 10px; }
-            .header { padding: 12px; }
-            .company-name { font-size: 15px; }
-            .slogan { font-size: 10px; }
-            .nav-tab { padding: 8px 12px; font-size: 12px; }
-            .tarjeta-glass { padding: 12px; border-radius: 12px; }
-            .btn-primario, .btn-secundario { padding: 10px 16px; font-size: 13px; }
-            /* FIX #14: toast no desborda en 320-375px */
-            .toast-container {
-                left: 8px !important;
-                right: 8px !important;
-                top: 10px !important;
-            }
+        /* ── 480px: Android mid-range (Moto G, Redmi, Samsung A series) ─ */
+        @media (max-width: 480px) {
+            .container { padding: 12px; }
+            .header { padding: 14px 12px; gap: 10px; }
+            .logo-img { max-height: 50px; }
+            .company-name { font-size: 17px; }
+            .nav-tab { padding: 9px 14px; font-size: 12.5px; }
+            .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+            .kpi-value { font-size: 16px !important; }
+            .kpi-label { font-size: 10px; }
+            .btn-primario, .btn-secundario { padding: 11px 18px; font-size: 13.5px; }
+            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); }
             .toast { max-width: 100% !important; }
-            /* Tarjetas de asistencia: radio buttons apilados en 3 columnas caben */
+        }
+
+        /* ── 390px: iPhone 14/15 Pro (393px lógico), Pixel 7 ────────── */
+        @media (max-width: 390px) {
+            .container { padding: 10px; }
+            .header { padding: 12px 10px; }
+            .company-name { font-size: 16px; }
+            .slogan { font-size: 10.5px; }
+            .logo-img { max-height: 46px; }
+            .nav-tab { padding: 8px 13px; font-size: 12px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .kpi-card { padding: 12px 10px; }
+            .kpi-value { font-size: 14px !important; word-break: break-all; }
+            .kpi-label { font-size: 9.5px; }
+            .tarjeta-glass { padding: 12px; border-radius: 14px; }
+            .btn-primario, .btn-secundario { padding: 10px 16px; font-size: 13px; }
+            label { font-size: 13px; }
+            input, select, textarea { padding: 10px; font-size: 14px; }
+            .modal-content { padding: 18px; max-height: 88dvh; }
+            .modal-title { font-size: 16px; }
+        }
+
+        /* ── 360px: Galaxy S, Moto G4/G5, Android budget market ──────── */
+        @media (max-width: 360px) {
+            .container { padding: 8px; }
+            .header { padding: 10px 8px; }
+            .company-name { font-size: 15px; letter-spacing: 0.5px; }
+            .slogan { font-size: 10px; }
+            .logo-img { max-height: 42px; }
+            .nav-tab { padding: 8px 11px; font-size: 11.5px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .kpi-card { padding: 10px 8px; border-radius: 10px; }
+            .kpi-value { font-size: 13px !important; word-break: break-all; }
+            .kpi-label { font-size: 9px; letter-spacing: 0; }
+            .kpi-sub { font-size: 9px; }
+            .tarjeta-glass { padding: 10px; border-radius: 12px; }
+            .btn-primario, .btn-secundario { padding: 10px 14px; font-size: 12.5px; }
+            label { font-size: 12.5px; }
+            input, select, textarea { padding: 9px 10px; font-size: 14px; }
+            #saldo-caja-chica { font-size: 18px !important; }
+            .form-grid-2, .form-grid-2-sm { grid-template-columns: 1fr; }
             .form-grid-3 { grid-template-columns: 1fr 1fr; }
-            /* Saldo grande: reducir font para evitar overflow */
-            #saldo-caja-chica { font-size: 20px !important; }
-            /* Panel metricas maquinaria: 1 columna en muy pequeño */
-            .form-grid-2 { grid-template-columns: 1fr; }
-            /* Tabla: reducir padding aun mas */
-            th, td { padding: 6px 3px; font-size: 10px; }
-            /* Modal: padding reducido */
-            .modal-content { padding: 16px; }
-            /* Logo más pequeño */
-            .logo-img { max-height: 45px; }
+            table { font-size: 10px; }
+            th, td { padding: 5px 3px; font-size: 10px; }
+            td button { min-height: 34px !important; padding: 5px 8px !important; font-size: 11px !important; }
+            .toast-container { left: 6px !important; right: 6px !important; top: 8px !important; }
+            .toast { max-width: 100% !important; font-size: 13px; padding: 12px 14px; }
+            .modal-content { padding: 14px; border-radius: 12px; max-height: 90dvh; }
+            .modal-title { font-size: 15px; }
+            .modal-message { font-size: 13px; }
         }
 
         .config-section { margin-top: 20px; padding: 15px; border-top: 1px solid var(--glass-border); }
@@ -751,6 +900,170 @@
         }
         /* Rangos semanales en la tarjeta de viajes */
         .viaje-resumen { font-size: 12px; color: var(--texto-secundario); margin-top: 6px; line-height: 1.5; }
+
+        /* ══════════════════════════════════════════════════════════
+           MODAL VISTA PREVIA DE REPORTES
+           Layout: overlay full-screen → panel editor (izq) + preview (der)
+           ══════════════════════════════════════════════════════════ */
+        #modal-vista-previa {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            background: rgba(7, 8, 19, 0.96);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            animation: vpFadeIn 0.25s ease;
+        }
+        #modal-vista-previa.hidden { display: none; }
+        @keyframes vpFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Barra superior del modal */
+        .vp-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: rgba(11, 63, 143, 0.35);
+            border-bottom: 1px solid rgba(0, 164, 228, 0.3);
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .vp-topbar-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--acento-cian);
+            white-space: nowrap;
+        }
+        .vp-topbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Cuerpo principal: editor + preview */
+        .vp-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 0;
+        }
+
+        /* Panel izquierdo — editor de portada */
+        .vp-editor {
+            width: 340px;
+            min-width: 280px;
+            flex-shrink: 0;
+            background: var(--glass-bg);
+            border-right: 1px solid var(--glass-border);
+            overflow-y: auto;
+            padding: 20px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .vp-editor-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--acento-cian);
+            margin: 0 0 2px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .vp-field label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--texto-secundario);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .vp-field input,
+        .vp-field textarea,
+        .vp-field select {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 8px;
+            color: #fff;
+            padding: 9px 11px;
+            font-size: 13px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            resize: vertical;
+        }
+        .vp-field input:focus,
+        .vp-field textarea:focus,
+        .vp-field select:focus {
+            border-color: var(--acento-cian);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,164,228,0.16);
+        }
+        .vp-tip {
+            font-size: 11px;
+            color: var(--texto-secundario);
+            background: rgba(255,255,255,0.04);
+            border-left: 3px solid var(--acento-cian);
+            border-radius: 0 6px 6px 0;
+            padding: 8px 10px;
+            line-height: 1.5;
+        }
+
+        /* Panel derecho — preview del documento */
+        .vp-preview {
+            flex: 1;
+            overflow: auto;
+            background: #4B5563;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+        }
+        .vp-preview-wrapper {
+            background: #ffffff;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+            border-radius: 4px;
+            /* Escala del preview para que entre en el viewport */
+            transform-origin: top center;
+            width: 794px; /* ~210mm a 96dpi */
+            min-height: 400px;
+            transition: none;
+        }
+        /* Contenido de la plantilla dentro del preview — mismo CSS */
+        #vp-plantilla-preview {
+            width: 100%;
+            min-height: 100%;
+            font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+            color: #111827;
+            background: #ffffff;
+            padding: 30px 52px 40px 52px;
+            box-sizing: border-box;
+            font-size: 13px;
+        }
+
+        /* ── Responsive del modal ─────────────────────────────── */
+        @media (max-width: 768px) {
+            .vp-body { flex-direction: column; }
+            .vp-editor {
+                width: 100%;
+                min-width: 0;
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+                max-height: 42vh;
+            }
+            .vp-preview { padding: 12px; }
+            .vp-preview-wrapper { width: 100%; }
+            #vp-plantilla-preview { padding: 16px 14px; font-size: 11px; }
+            .vp-topbar { padding: 10px 14px; }
+            .vp-topbar-title { font-size: 13px; }
+        }
+        @media (max-width: 480px) {
+            .vp-editor { max-height: 45vh; padding: 14px 12px; gap: 12px; }
+            .vp-topbar-actions .btn-primario,
+            .vp-topbar-actions .btn-secundario { padding: 8px 14px; font-size: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -791,7 +1104,7 @@
             </div>
             <div style="margin-bottom:20px;">
                 <label for="proyecto-presupuesto" style="display:block;margin-bottom:5px;color:var(--texto-principal);">Presupuesto Inicial (Q)</label>
-                <input type="number" id="proyecto-presupuesto" placeholder="0.00" step="0.01" min="0" max="99999999">
+                <input type="number" inputmode="decimal" id="proyecto-presupuesto" placeholder="0.00" step="0.01" min="0" max="99999999">
             </div>
             <div class="modal-buttons">
                 <button onclick="cerrarModalCrearProyecto()" class="btn-secundario">Cancelar</button>
@@ -799,6 +1112,113 @@
             </div>
         </div>
     </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MODAL VISTA PREVIA DE REPORTES
+         Panel editor izquierdo + Preview del documento derecho
+         ═══════════════════════════════════════════════════════════════ -->
+    <div id="modal-vista-previa" class="hidden" role="dialog" aria-modal="true" aria-labelledby="vp-titulo">
+
+        <!-- Barra superior -->
+        <div class="vp-topbar">
+            <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+                <span style="font-size:20px;">👁️</span>
+                <div>
+                    <div id="vp-titulo" class="vp-topbar-title">Vista Previa del Reporte</div>
+                    <div id="vp-subtitulo" style="font-size:11px;color:var(--texto-secundario);margin-top:1px;"></div>
+                </div>
+            </div>
+            <div class="vp-topbar-actions">
+                <button id="vp-btn-whatsapp" onclick="confirmarYGenerar('whatsapp')" class="btn-primario"
+                        style="padding:9px 18px;font-size:13px;"
+                        data-tooltip="Enviar por WhatsApp / Correo">
+                    📱 Enviar WhatsApp / Correo
+                </button>
+                <button id="vp-btn-descargar" onclick="confirmarYGenerar('local')" class="btn-secundario"
+                        style="padding:9px 18px;font-size:13px;"
+                        data-tooltip="Descargar PDF, CSV y XLSX">
+                    📥 Descargar
+                </button>
+                <button onclick="cerrarVistaPrevia()" class="btn-secundario"
+                        style="padding:9px 14px;font-size:13px;"
+                        aria-label="Cerrar vista previa" data-tooltip="Cerrar (Esc)">
+                    ✖
+                </button>
+            </div>
+        </div>
+
+        <!-- Cuerpo: editor + preview -->
+        <div class="vp-body">
+
+            <!-- ── Panel Editor (izquierda) ── -->
+            <div class="vp-editor" role="complementary" aria-label="Editor de portada del reporte">
+
+                <div class="vp-editor-title">✏️ Personalizar Portada</div>
+
+                <div class="vp-tip">
+                    Estos campos se mostrarán al inicio del informe, antes del contenido del reporte.
+                    Puedes dejarlos en blanco si no los necesitas.
+                </div>
+
+                <!-- Fecha del informe -->
+                <div class="vp-field">
+                    <label for="vp-fecha">📅 Fecha del Informe</label>
+                    <input type="date" id="vp-fecha" oninput="actualizarVistaPrevia()"
+                           aria-label="Fecha del informe" autocomplete="off">
+                </div>
+
+                <!-- Remitente -->
+                <div class="vp-field">
+                    <label for="vp-remitente">👤 Remitente / Elaborado por</label>
+                    <input type="text" id="vp-remitente" placeholder="Ej: Arq. Wilson Salazar"
+                           maxlength="100" oninput="actualizarVistaPrevia()"
+                           aria-label="Nombre del remitente" autocomplete="off">
+                </div>
+
+                <!-- Destinatario -->
+                <div class="vp-field">
+                    <label for="vp-destinatario">📋 Dirigido a / Destinatario</label>
+                    <input type="text" id="vp-destinatario" placeholder="Ej: Gerencia General"
+                           maxlength="100" oninput="actualizarVistaPrevia()"
+                           aria-label="Destinatario del informe" autocomplete="off">
+                </div>
+
+                <!-- Saludo -->
+                <div class="vp-field">
+                    <label for="vp-saludo">🤝 Saludo</label>
+                    <input type="text" id="vp-saludo"
+                           placeholder="Ej: Estimado equipo de gerencia:"
+                           maxlength="200" oninput="actualizarVistaPrevia()"
+                           aria-label="Saludo del informe" autocomplete="off">
+                </div>
+
+                <!-- Descripción / Introducción -->
+                <div class="vp-field">
+                    <label for="vp-descripcion">📝 Descripción / Introducción</label>
+                    <textarea id="vp-descripcion" rows="5"
+                              placeholder="Ej: Por medio del presente informe, se detallan los gastos y movimientos registrados durante el período indicado, correspondientes al proyecto en ejecución..."
+                              maxlength="600" oninput="actualizarVistaPrevia()"
+                              aria-label="Descripción o introducción del informe"></textarea>
+                </div>
+
+                <!-- Tipo y fecha del reporte (solo lectura, heredados del módulo) -->
+                <div class="vp-field">
+                    <label>📊 Tipo de reporte</label>
+                    <div id="vp-info-tipo" style="font-size:12px;color:var(--texto-principal);background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:8px;padding:8px 11px;"></div>
+                </div>
+
+            </div>
+
+            <!-- ── Panel Preview (derecha) ── -->
+            <div class="vp-preview" id="vp-preview-scroll" aria-label="Vista previa del documento">
+                <div class="vp-preview-wrapper" id="vp-preview-wrapper">
+                    <!-- Contenido del preview se inyecta dinámicamente -->
+                    <div id="vp-plantilla-preview"></div>
+                </div>
+            </div>
+
+        </div><!-- /.vp-body -->
+    </div><!-- /#modal-vista-previa -->
 
     <div class="container">
         <!-- Header -->
@@ -872,7 +1292,7 @@
                 </div>
             </div>
 
-            <form id="form-caja-chica" style="margin-bottom:25px;" aria-label="Formulario de registro de movimientos de caja chica">
+            <form id="form-caja-chica" style="margin-bottom:25px;" aria-label="Formulario de registro de movimientos de caja chica" autocomplete="off">
                 <!-- FIX #22: clase form-grid-2 en vez de style inline -->
                 <div class="form-grid-2">
                     <div>
@@ -941,9 +1361,9 @@
                 </div>
                 <div style="margin-bottom:15px;">
                     <label for="caja-monto">Monto (Q)</label>
-                    <input type="number" step="0.01" id="caja-monto" required aria-required="true" min="0.01" max="999999">
+                    <input type="number" inputmode="decimal" step="0.01" id="caja-monto" required aria-required="true" min="0.01" max="999999">
                 </div>
-                <div style="display:flex;gap:10px;">
+                <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar nuevo movimiento en caja chica">💾 Registrar Movimiento</button>
                     <button type="button" id="btn-cancelar-caja" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionCaja()">✖ Cancelar</button>
                 </div>
@@ -976,7 +1396,7 @@
             <div id="aviso-sin-proyecto-maq" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
             <p style="color:var(--texto-secundario);font-size:13px;">Registra el uso, consumo de combustible y mantenimiento de las unidades.</p>
 
-            <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()" aria-label="Formulario de registro de maquinaria">
+            <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()" aria-label="Formulario de registro de maquinaria" autocomplete="off">
                 <!-- Campo de fecha + tipo en primera fila -->
                 <div class="form-grid-2">
                     <div>
@@ -1009,11 +1429,11 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="maq-val-inicial">Horómetro/Odómetro Inicial</label>
-                        <input type="number" step="0.1" id="maq-val-inicial" required aria-required="true" min="0" max="999999">
+                        <input type="number" inputmode="decimal" step="0.1" id="maq-val-inicial" required aria-required="true" min="0" max="999999">
                     </div>
                     <div>
                         <label for="maq-val-final">Horómetro/Odómetro Final</label>
-                        <input type="number" step="0.1" id="maq-val-final" required aria-required="true" min="0" max="999999">
+                        <input type="number" inputmode="decimal" step="0.1" id="maq-val-final" required aria-required="true" min="0" max="999999">
                     </div>
                 </div>
                 <span id="maq-error-uso" style="color:var(--alerta);font-size:12px;display:block;margin-top:-10px;margin-bottom:10px;" role="alert"></span>
@@ -1022,11 +1442,11 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="maq-galones">Galones Suministrados</label>
-                        <input type="number" step="0.01" id="maq-galones" value="0" min="0" max="9999">
+                        <input type="number" inputmode="decimal" step="0.01" id="maq-galones" value="0" min="0" max="9999">
                     </div>
                     <div>
                         <label for="maq-precio-galon">Precio por Galón (Q)</label>
-                        <input type="number" step="0.01" id="maq-precio-galon" value="0" min="0" max="999">
+                        <input type="number" inputmode="decimal" step="0.01" id="maq-precio-galon" value="0" min="0" max="999">
                     </div>
                 </div>
 
@@ -1037,7 +1457,7 @@
                 </div>
                 <div style="margin-bottom:20px;">
                     <label for="maq-costo-mantenimiento">Costo del Mantenimiento (Q)</label>
-                    <input type="number" step="0.01" id="maq-costo-mantenimiento" value="0" min="0" max="999999">
+                    <input type="number" inputmode="decimal" step="0.01" id="maq-costo-mantenimiento" value="0" min="0" max="999999">
                 </div>
 
                 <!-- Panel en tiempo real -->
@@ -1052,7 +1472,7 @@
                     </div>
                 </div>
 
-                <div style="display:flex;gap:10px;">
+                <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Guardar registro de uso de maquinaria">💾 Guardar Registro de Maquinaria</button>
                     <button type="button" id="btn-cancelar-maq" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionMaquinaria()">✖ Cancelar</button>
                 </div>
@@ -1087,7 +1507,7 @@
 
             <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
                 <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">📝 Catálogo de Trabajadores</h3>
-                <form id="form-trabajador" style="margin-bottom:15px;" aria-label="Formulario de registro de trabajadores">
+                <form id="form-trabajador" style="margin-bottom:15px;" aria-label="Formulario de registro de trabajadores" autocomplete="off">
                     <!-- FIX #22: clases reales + FIX #9: labels explícitos para inputs numéricos -->
                     <div class="form-grid-2-sm">
                         <div>
@@ -1102,11 +1522,11 @@
                     <div class="form-grid-2-sm">
                         <div>
                             <label for="trab-pago-normal">Pago hora normal (Q/h)</label>
-                            <input type="number" step="0.01" id="trab-pago-normal" placeholder="0.00" required aria-required="true" min="0" max="9999">
+                            <input type="number" inputmode="decimal" step="0.01" id="trab-pago-normal" placeholder="0.00" required aria-required="true" min="0" max="9999">
                         </div>
                         <div>
                             <label for="trab-pago-extra">Pago hora extra (Q/h)</label>
-                            <input type="number" step="0.01" id="trab-pago-extra" placeholder="0.00" required aria-required="true" min="0" max="9999">
+                            <input type="number" inputmode="decimal" step="0.01" id="trab-pago-extra" placeholder="0.00" required aria-required="true" min="0" max="9999">
                         </div>
                     </div>
                     <button type="submit" class="btn-secundario" style="width:100%;font-size:12px;" data-tooltip="Agregar nuevo trabajador al catálogo">➕ Agregar Trabajador</button>
@@ -1154,7 +1574,7 @@
 
             <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
                 <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🏢 Directorio de Proveedores</h3>
-                <form id="form-proveedor" style="margin-bottom:15px;" aria-label="Formulario de registro de proveedores">
+                <form id="form-proveedor" style="margin-bottom:15px;" aria-label="Formulario de registro de proveedores" autocomplete="off">
                     <div class="form-grid-2-sm">
                         <div>
                             <label for="prov-nombre" class="visually-hidden">Nombre del proveedor</label>
@@ -1189,7 +1609,7 @@
             </div>
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">📝 Registrar Nueva Cotización</h3>
-            <form id="form-cotizacion" style="margin-bottom:25px;" aria-label="Formulario de registro de cotizaciones">
+            <form id="form-cotizacion" style="margin-bottom:25px;" aria-label="Formulario de registro de cotizaciones" autocomplete="off">
                 <div class="form-grid-2">
                     <div>
                         <label for="cot-proveedor">Proveedor</label>
@@ -1205,11 +1625,11 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="cot-precio">Precio Unitario (Q)</label>
-                        <input type="number" step="0.01" id="cot-precio" required aria-required="true" min="0.01" max="999999">
+                        <input type="number" inputmode="decimal" step="0.01" id="cot-precio" required aria-required="true" min="0.01" max="999999">
                     </div>
                     <div>
                         <label for="cot-cantidad">Cantidad</label>
-                        <input type="number" id="cot-cantidad" required aria-required="true" min="1" max="99999">
+                        <input type="number" inputmode="decimal" id="cot-cantidad" required aria-required="true" min="1" max="99999">
                     </div>
                 </div>
                 <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar nueva cotización de material">📊 Registrar Cotización</button>
@@ -1243,7 +1663,7 @@
 
             <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
                 <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🚚 Catálogo de Camiones y Equipo</h3>
-                <form id="form-camion" style="margin-bottom:15px;" aria-label="Formulario de registro de camión o equipo">
+                <form id="form-camion" style="margin-bottom:15px;" aria-label="Formulario de registro de camión o equipo" autocomplete="off">
                     <div class="form-grid-2-sm">
                         <div>
                             <label for="cam-nombre" class="visually-hidden">Nombre o placa</label>
@@ -1260,15 +1680,15 @@
                     <div class="form-grid-3">
                         <div>
                             <label for="cam-capacidad">Capacidad (m³)</label>
-                            <input type="number" step="0.1" id="cam-capacidad" value="12" min="1" max="100" aria-label="Capacidad en metros cúbicos">
+                            <input type="number" inputmode="decimal" step="0.1" id="cam-capacidad" value="12" min="1" max="100" aria-label="Capacidad en metros cúbicos">
                         </div>
                         <div>
                             <label for="cam-consumo">Consumo (L/km)</label>
-                            <input type="number" step="0.01" id="cam-consumo" value="0.35" min="0" max="10" aria-label="Consumo estimado en litros por kilómetro">
+                            <input type="number" inputmode="decimal" step="0.01" id="cam-consumo" value="0.35" min="0" max="10" aria-label="Consumo estimado en litros por kilómetro">
                         </div>
                         <div>
                             <label for="cam-tarifa">Tarifa Alquiler (Q)</label>
-                            <input type="number" step="0.01" id="cam-tarifa" value="0" min="0" max="999999" aria-label="Tarifa de alquiler por día o por viaje">
+                            <input type="number" inputmode="decimal" step="0.01" id="cam-tarifa" value="0" min="0" max="999999" aria-label="Tarifa de alquiler por día o por viaje">
                         </div>
                     </div>
                     <div class="form-grid-2-sm" style="margin-bottom:10px;">
@@ -1292,7 +1712,7 @@
 
             <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
                 <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🗺️ Rutas / Distancias al Botadero</h3>
-                <form id="form-ruta" style="margin-bottom:15px;" aria-label="Formulario de ruta al botadero">
+                <form id="form-ruta" style="margin-bottom:15px;" aria-label="Formulario de ruta al botadero" autocomplete="off">
                     <div class="form-grid-2">
                         <div>
                             <label for="ruta-nombre">Nombre / Destino</label>
@@ -1300,7 +1720,7 @@
                         </div>
                         <div>
                             <label for="ruta-distancia">Distancia (km ida)</label>
-                            <input type="number" step="0.1" id="ruta-distancia" placeholder="0.0" required aria-required="true" min="0.1" max="9999" aria-label="Distancia de ida en kilómetros">
+                            <input type="number" inputmode="decimal" step="0.1" id="ruta-distancia" placeholder="0.0" required aria-required="true" min="0.1" max="9999" aria-label="Distancia de ida en kilómetros">
                         </div>
                     </div>
                     <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar ruta">💾 Registrar Ruta</button>
@@ -1314,7 +1734,7 @@
             </div>
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:10px;">📦 Registrar Viaje</h3>
-            <form id="form-viaje" oninput="calcularMetricasViaje()" style="margin-bottom:25px;" aria-label="Formulario de registro de viaje de camión">
+            <form id="form-viaje" oninput="calcularMetricasViaje()" style="margin-bottom:25px;" aria-label="Formulario de registro de viaje de camión" autocomplete="off">
                 <div class="form-grid-2">
                     <div>
                         <label for="viaje-fecha">Fecha</label>
@@ -1350,15 +1770,15 @@
                 <div class="form-grid-3">
                     <div>
                         <label for="viaje-numero">No. de Viajes</label>
-                        <input type="number" id="viaje-numero" value="1" min="1" max="999" aria-label="Número de viajes realizados">
+                        <input type="number" inputmode="decimal" id="viaje-numero" value="1" min="1" max="999" aria-label="Número de viajes realizados">
                     </div>
                     <div id="div-viaje-diesel">
                         <label for="viaje-precio-diesel">Precio Diesel (Q/L)</label>
-                        <input type="number" step="0.01" id="viaje-precio-diesel" value="0" min="0" max="999" aria-label="Precio del diesel por litro">
+                        <input type="number" inputmode="decimal" step="0.01" id="viaje-precio-diesel" value="0" min="0" max="999" aria-label="Precio del diesel por litro">
                     </div>
                     <div>
                         <label for="viaje-extra">Tarifa Excedente (Q)</label>
-                        <input type="number" step="0.01" id="viaje-extra" value="0" min="0" max="999999" aria-label="Costo adicional o ajuste de tarifa">
+                        <input type="number" inputmode="decimal" step="0.01" id="viaje-extra" value="0" min="0" max="999999" aria-label="Costo adicional o ajuste de tarifa">
                     </div>
                 </div>
                 <!-- Indicador para camiones alquilados -->
@@ -1375,7 +1795,7 @@
                     </div>
                 </div>
                 <span id="viaje-aviso" style="color:var(--advertencia-texto);font-size:12px;display:block;margin-bottom:10px;" role="status"></span>
-                <div style="display:flex;gap:10px;">
+                <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar viaje y descontar de caja">📦 Registrar Viaje</button>
                     <button type="button" id="btn-cancelar-viaje" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionViaje()">✖ Cancelar</button>
                 </div>
@@ -1401,7 +1821,7 @@
 
             <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
                 <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🏗️ Catálogo de Maquinaria</h3>
-                <form id="form-maqcat" style="margin-bottom:15px;" aria-label="Formulario de catálogo de maquinaria">
+                <form id="form-maqcat" style="margin-bottom:15px;" aria-label="Formulario de catálogo de maquinaria" autocomplete="off">
                     <div class="form-grid-2-sm">
                         <div>
                             <label for="maqcat-nombre" class="visually-hidden">Nombre del equipo</label>
@@ -1438,7 +1858,7 @@
             </div>
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:10px;">🔩 Registrar Orden de Mantenimiento</h3>
-            <form id="form-orden" style="margin-bottom:25px;" aria-label="Formulario de orden de mantenimiento">
+            <form id="form-orden" style="margin-bottom:25px;" aria-label="Formulario de orden de mantenimiento" autocomplete="off">
                 <div class="form-grid-2">
                     <div>
                         <label for="ord-fecha">Fecha</label>
@@ -1461,7 +1881,7 @@
                     </div>
                     <div>
                         <label for="ord-costo">Costo (Q)</label>
-                        <input type="number" step="0.01" id="ord-costo" value="0" min="0" max="999999" aria-label="Costo del mantenimiento">
+                        <input type="number" inputmode="decimal" step="0.01" id="ord-costo" value="0" min="0" max="999999" aria-label="Costo del mantenimiento">
                     </div>
                 </div>
                 <div style="margin-bottom:10px;">
@@ -1469,7 +1889,7 @@
                     <textarea id="ord-observaciones" rows="2" maxlength="500" aria-label="Observaciones del mantenimiento"></textarea>
                 </div>
                 <div id="formatos-inspeccion" style="margin-bottom:15px;"></div>
-                <div style="display:flex;gap:10px;">
+                <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Guardar orden de mantenimiento">💾 Guardar Orden</button>
                     <button type="button" id="btn-cancelar-orden" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionOrden()">✖ Cancelar</button>
                 </div>
@@ -1485,7 +1905,7 @@
             <div id="paginacion-ordenes" class="paginacion-container"></div>
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">🛒 Compra de Repuestos, Aceites e Insumos</h3>
-            <form id="form-insumo" style="margin-bottom:25px;" aria-label="Formulario de compra de insumos">
+            <form id="form-insumo" style="margin-bottom:25px;" aria-label="Formulario de compra de insumos" autocomplete="off">
                 <div class="form-grid-2">
                     <div>
                         <label for="insumo-tipo">Tipo de Insumo</label>
@@ -1510,18 +1930,18 @@
                     </div>
                     <div>
                         <label for="insumo-cantidad">Cantidad</label>
-                        <input type="number" id="insumo-cantidad" value="1" min="1" max="99999" aria-label="Cantidad de insumo">
+                        <input type="number" inputmode="decimal" id="insumo-cantidad" value="1" min="1" max="99999" aria-label="Cantidad de insumo">
                     </div>
                     <div>
                         <label for="insumo-costo">Costo Total (Q)</label>
-                        <input type="number" step="0.01" id="insumo-costo" value="0" min="0" max="999999" aria-label="Costo total del insumo">
+                        <input type="number" inputmode="decimal" step="0.01" id="insumo-costo" value="0" min="0" max="999999" aria-label="Costo total del insumo">
                     </div>
                 </div>
                 <div style="margin-top:12px;">
                     <label for="insumo-stock-min">Stock mínimo de alerta (Qty) <span style="color:var(--texto-secundario);font-weight:normal;">— opcional. Se mostrará una alerta en el Resumen cuando la cantidad bajé de este valor.</span></label>
-                    <input type="number" id="insumo-stock-min" value="0" min="0" max="99999" aria-label="Stock mínimo de alerta">
+                    <input type="number" inputmode="decimal" id="insumo-stock-min" value="0" min="0" max="99999" aria-label="Stock mínimo de alerta">
                 </div>
-                <div style="display:flex;gap:10px;">
+                <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar compra y descontar de caja">💾 Registrar Compra</button>
                     <button type="button" id="btn-cancelar-insumo" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionInsumo()">✖ Cancelar</button>
                 </div>
@@ -1540,7 +1960,7 @@
         <div id="reportes" class="module tarjeta-glass" role="region" aria-labelledby="reportes-title">
             <h2 id="reportes-title" style="color:var(--acento-cian);margin-top:0;">📊 Generación de Reportes</h2>
 
-            <div style="display:grid;grid-template-columns:1fr;gap:15px;margin-bottom:25px;">
+            <div class="form-grid-1">
                 <div>
                     <label for="reporte-tipo">Tipo de Reporte</label>
                     <select id="reporte-tipo">
@@ -1556,11 +1976,16 @@
                     <input type="date" id="reporte-fecha" aria-label="Seleccionar fecha del reporte">
                 </div>
             </div>
-            <button onclick="generarYCompartirReporte()" class="btn-primario" style="width:100%;margin-bottom:15px;" data-tooltip="Generar y compartir reporte por WhatsApp o correo">
-                📱 Enviar Reporte por WhatsApp / Correo
-            </button>
-            <button onclick="generarReporteLocal()" class="btn-secundario" style="width:100%;" data-tooltip="Descargar reporte en PDF y CSV">
-                📥 Descargar Reporte Localmente
+            <div class="btn-row" style="margin-bottom:15px;">
+                <button onclick="abrirVistaPrevia('whatsapp')" class="btn-primario" style="flex:1;" data-tooltip="Ver preview antes de enviar por WhatsApp / Correo">
+                    📱 Enviar por WhatsApp / Correo
+                </button>
+                <button onclick="abrirVistaPrevia('local')" class="btn-secundario" style="flex:1;" data-tooltip="Ver preview antes de descargar PDF, CSV y XLSX">
+                    📥 Descargar Reporte
+                </button>
+            </div>
+            <button onclick="generarReporteLocal()" class="btn-secundario" style="width:100%;margin-bottom:8px;" data-tooltip="Descargar reporte directamente sin vista previa (PDF + CSV + XLSX)">
+                ⚡ Descarga Rápida (sin previa)
             </button>
         </div>
 
@@ -1582,7 +2007,7 @@
                 <h3 style="color:var(--texto-principal);font-size:16px;">Presupuesto Inicial de Caja Chica</h3>
                 <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
                     <label for="config-presupuesto" class="visually-hidden">Presupuesto inicial</label>
-                    <input type="number" step="0.01" id="config-presupuesto" placeholder="Monto inicial (Q)" aria-label="Monto inicial de caja chica" min="0" max="9999999" style="flex:1;min-width:120px;">
+                    <input type="number" inputmode="decimal" step="0.01" id="config-presupuesto" placeholder="Monto inicial (Q)" aria-label="Monto inicial de caja chica" min="0" max="9999999" style="flex:1;min-width:120px;">
                     <button onclick="guardarPresupuesto()" class="btn-primario" aria-label="Guardar presupuesto inicial">Guardar</button>
                 </div>
             </div>
@@ -1683,7 +2108,7 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.7.0 (Edición de registros en todos los módulos, datos de contacto en PDF, correcciones de UI)<br>
+                    Versión: 2.7.3 (Fix duplicidad en reportes consolidados: caja chica, viajes y mantenimiento; botones Vista Previa en módulo Reportes)<br>
                     Desarrollado para: CONSTRURAMSA<br>
                     Modo: Offline (LocalStorage)
                 </p>
@@ -1693,109 +2118,209 @@
 
     <!-- Plantilla de Impresión Oculta (solo para PDF) -->
     <div id="plantilla-reporte-impresion">
-        <!-- ========== MEMBRETE PROFESIONAL CONSTRURAMSA ========== -->
-        <!-- Encabezado con logo y datos de la empresa -->
-        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #004B93;">
-            <table style="width:100%; border-collapse: collapse;">
+
+        <!-- ══════════════════════════════════════════════════════════
+             MEMBRETE CONSTRURAMSA — fiel al membrete oficial
+             Logo centrado · Nombre · Slogan · Datos · Línea azul
+             ══════════════════════════════════════════════════════════ -->
+
+        <!-- Franja superior azul delgada -->
+        <div style="height: 5px; background: linear-gradient(90deg, #004B93 0%, #00A4E4 50%, #004B93 100%); margin-bottom: 0;"></div>
+
+        <!-- CABECERA DEL MEMBRETE -->
+        <div style="background: #ffffff; padding: 18px 20px 14px 20px; border-left: 1px solid #E5E7EB; border-right: 1px solid #E5E7EB;">
+
+            <!-- Fila principal: logo centrado + metadatos laterales -->
+            <table style="width: 100%; border-collapse: collapse; margin: 0;">
                 <tr>
-                    <!-- Logo a la izquierda -->
-                    <td style="width: 15%; padding: 10px; vertical-align: middle; text-align: center;">
-                        <img id="pdf-logo-membrete" src="./icon.png" alt="Logo CONSTRURAMSA" style="max-height: 80px; width: auto; object-fit: contain;">
-                    </td>
-                    
-                    <!-- Datos centrales de la empresa -->
-                    <td style="width: 70%; padding: 10px; vertical-align: middle; text-align: center; border-left: 2px solid #004B93; border-right: 2px solid #004B93;">
-                        <h1 style="margin: 0 0 4px 0; font-size: 26px; font-weight: 800; letter-spacing: 1.5px; color: #004B93; text-transform: uppercase; line-height: 1.2;">
-                            CONSTRURAMSA
-                        </h1>
-                        <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 600; color: #4B5563; text-transform: uppercase; letter-spacing: 1px; line-height: 1.3;">
-                            SOLUCIONES EN INGENIERÍA Y ARQUITECTURA
-                        </p>
-                        <p style="margin: 0 0 4px 0; font-size: 9.5px; color: #6B7280; line-height: 1.4;">
-                            <span id="pdf-direccion-empresa">17av. Villa Mariscal, Apartamento 116, Torre 2, Zona 11, Ciudad de Guatemala</span>
-                        </p>
-                        <p style="margin: 0; font-size: 9.5px; color: #6B7280; line-height: 1.4;">
-                            <span id="pdf-tel-email-empresa">Tel: +502 5997 9501 | Email: contacto@construramsa.com</span>
-                        </p>
-                    </td>
-                    
-                    <!-- Metadatos del reporte a la derecha -->
-                    <td style="width: 15%; padding: 10px; vertical-align: top; text-align: right; font-size: 9px; line-height: 1.6; color: #374151;">
-                        <div style="margin-bottom: 8px;">
-                            <strong style="font-size: 8px; text-transform: uppercase; color: #6B7280; letter-spacing: 0.5px;">TIPO DE REPORTE</strong><br>
-                            <span id="pdf-tipo-reporte" style="color: #004B93; font-weight: 700; font-size: 10px; text-transform: uppercase;">DIARIO DE GASTOS</span>
+                    <!-- Metadatos del reporte — izquierda -->
+                    <td style="width: 22%; vertical-align: top; padding: 4px 10px 0 0; border-right: 1px solid #E5E7EB;">
+                        <div style="margin-bottom: 7px;">
+                            <div style="font-size: 7.5px; font-weight: 700; text-transform: uppercase; color: #9CA3AF; letter-spacing: 0.8px; margin-bottom: 2px;">Tipo de Reporte</div>
+                            <div id="pdf-tipo-reporte" style="font-size: 9.5px; font-weight: 800; color: #004B93; text-transform: uppercase; letter-spacing: 0.3px;">DIARIO DE GASTOS</div>
                         </div>
-                        <div style="margin-bottom: 8px;">
-                            <strong style="font-size: 8px; text-transform: uppercase; color: #6B7280; letter-spacing: 0.5px;">FECHA DE EMISIÓN</strong><br>
-                            <span id="pdf-fecha-emision" style="font-size: 10px; font-weight: 500;"></span>
+                        <div style="margin-bottom: 7px;">
+                            <div style="font-size: 7.5px; font-weight: 700; text-transform: uppercase; color: #9CA3AF; letter-spacing: 0.8px; margin-bottom: 2px;">Fecha de Emisión</div>
+                            <div id="pdf-fecha-emision" style="font-size: 9.5px; font-weight: 600; color: #374151;"></div>
                         </div>
                         <div>
-                            <strong style="font-size: 8px; text-transform: uppercase; color: #6B7280; letter-spacing: 0.5px;">PROYECTO</strong><br>
-                            <span id="pdf-nombre-proyecto" style="font-size: 10px; font-weight: 600;">Control de Obra</span>
+                            <div style="font-size: 7.5px; font-weight: 700; text-transform: uppercase; color: #9CA3AF; letter-spacing: 0.8px; margin-bottom: 2px;">Proyecto</div>
+                            <div id="pdf-nombre-proyecto" style="font-size: 9.5px; font-weight: 600; color: #374151;">Control de Obra</div>
+                        </div>
+                    </td>
+
+                    <!-- Logo + Nombre empresa — centro -->
+                    <td style="width: 56%; vertical-align: middle; text-align: center; padding: 0 15px;">
+                        <!-- Logo grande centrado -->
+                        <div style="margin-bottom: 8px;">
+                            <img id="pdf-logo-membrete" src="./icon.png" alt="Logo CONSTRURAMSA"
+                                 style="max-height: 90px; max-width: 260px; width: auto; object-fit: contain; display: block; margin: 0 auto;">
+                        </div>
+                        <!-- Nombre corporativo — igual que el membrete: letras espaciadas en azul -->
+                        <div style="font-size: 22px; font-weight: 800; letter-spacing: 6px; color: #004B93; text-transform: uppercase; line-height: 1; margin-bottom: 5px; font-family: Arial, sans-serif;">
+                            CONSTRURAMSA
+                        </div>
+                        <!-- Slogan — en azul oscuro bold, igual que en el membrete -->
+                        <div style="font-size: 9px; font-weight: 700; color: #1D4ED8; text-transform: uppercase; letter-spacing: 1.5px; line-height: 1.3; margin-bottom: 6px;">
+                            SOLUCIONES EN INGENIERÍA Y ARQUITECTURA
+                        </div>
+                        <!-- Datos de contacto -->
+                        <div style="font-size: 8px; color: #6B7280; line-height: 1.6;">
+                            <span id="pdf-direccion-empresa">17av. Villa Mariscal, Apto. 116, Torre 2, Zona 11, Ciudad de Guatemala</span>
+                        </div>
+                        <div style="font-size: 8px; color: #6B7280; line-height: 1.6;">
+                            <span id="pdf-tel-email-empresa">Tel: +502 5997 9501 &nbsp;|&nbsp; contacto@construramsa.com</span>
+                        </div>
+                    </td>
+
+                    <!-- Espacio para sello / membrete físico — derecha -->
+                    <td style="width: 22%; vertical-align: top; padding: 4px 0 0 10px; border-left: 1px solid #E5E7EB; text-align: center;">
+                        <!-- Recuadro de sello -->
+                        <div style="border: 1.5px dashed #D1D5DB; border-radius: 6px; height: 70px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px;">
+                            <span style="font-size: 7.5px; color: #D1D5DB; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Sello / Timbre</span>
+                        </div>
+                        <div style="font-size: 7.5px; color: #9CA3AF; text-align: center; line-height: 1.4;">
+                            Documento oficial<br>CONSTRURAMSA
                         </div>
                     </td>
                 </tr>
             </table>
         </div>
 
-        <!-- Línea divisoria elegante -->
-        <div style="height: 2px; background: linear-gradient(90deg, #004B93, #00A4E4); margin-bottom: 20px; border-radius: 1px;"></div>
+        <!-- Franja divisoria azul-cian — igual que en el membrete -->
+        <div style="height: 4px; background: linear-gradient(90deg, #004B93 0%, #00A4E4 60%, #38BDF8 100%); margin-bottom: 0;"></div>
+        <!-- Franja fina gris inferior -->
+        <div style="height: 1px; background: #E5E7EB; margin-bottom: 18px;"></div>
 
-        <!-- Contenido dinámico del reporte -->
-        <div id="pdf-contenido-dinamico"></div>
+        <!-- ══════════════════════════════════════════════════════════
+             CONTENIDO DINÁMICO DEL REPORTE
+             ══════════════════════════════════════════════════════════ -->
 
-        <!-- ========== ÁREA DE FIRMAS AUTORIZADAS ========== -->
-        <div style="margin-top: 50px; page-break-inside: avoid;">
-            <table style="width: 100%; border-collapse: collapse;">
+        <!-- PORTADA PERSONALIZADA — se muestra sólo si tiene contenido -->
+        <div id="pdf-portada" style="display:none; margin-bottom: 18px; padding: 14px 16px; border: 1px solid #E5E7EB; border-left: 4px solid #004B93; border-radius: 4px; background: #F8FAFC;">
+
+            <!-- Fila: fecha + remitente -->
+            <table style="width:100%; border-collapse:collapse; margin-bottom: 10px;">
                 <tr>
-                    <!-- Firma Jefe de Proyectos -->
-                    <td style="width: 45%; text-align: center; vertical-align: top; padding: 0 15px;">
-                        <div style="margin-bottom: 12px;">
-                            <img id="pdf-firma-jefe-proyectos" src="wilson.png" alt="Firma Jefe de Proyectos" style="max-height: 65px; width: auto; object-fit: contain; opacity: 0.9;">
-                        </div>
-                        <div style="border-top: 1.5px solid #374151; width: 85%; margin: 0 auto; padding-top: 10px;">
-                            <div style="font-size: 11px; font-weight: 700; color: #111827; line-height: 1.4;">
-                                Arq. Wilson Dario Salazar Oliveros
-                            </div>
-                            <div style="font-size: 8.5px; color: #6B7280; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.6px; line-height: 1.3;">
-                                JEFE DE PROYECTOS
-                            </div>
-                        </div>
+                    <td style="width:50%; vertical-align:top; padding-right:12px;">
+                        <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:#9CA3AF; letter-spacing:0.6px; margin-bottom:2px;">Fecha</div>
+                        <div id="pdf-portada-fecha" style="font-size:10px; color:#374151; font-weight:600;"></div>
                     </td>
-                    
-                    <!-- Espacio central -->
-                    <td style="width: 10%;"></td>
-                    
-                    <!-- Firma Gerente Comercial -->
-                    <td style="width: 45%; text-align: center; vertical-align: top; padding: 0 15px;">
-                        <div style="margin-bottom: 12px;">
-                            <img id="pdf-firma-gerente-comercial" src="juan.png" alt="Firma Gerente Comercial" style="max-height: 65px; width: auto; object-fit: contain; opacity: 0.9;">
-                        </div>
-                        <div style="border-top: 1.5px solid #374151; width: 85%; margin: 0 auto; padding-top: 10px;">
-                            <div style="font-size: 11px; font-weight: 700; color: #111827; line-height: 1.4;">
-                                Ing. Juan LLuis Ramirez Jimenez
-                            </div>
-                            <div style="font-size: 8.5px; color: #6B7280; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.6px; line-height: 1.3;">
-                                GERENTE COMERCIAL
-                            </div>
-                        </div>
+                    <td style="width:50%; vertical-align:top; padding-left:12px; border-left:1px solid #E5E7EB;">
+                        <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:#9CA3AF; letter-spacing:0.6px; margin-bottom:2px;">Elaborado por</div>
+                        <div id="pdf-portada-remitente" style="font-size:10px; color:#374151; font-weight:600;"></div>
                     </td>
                 </tr>
             </table>
 
-            <!-- Pie de página oficial con información legal -->
-            <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #E5E7EB; text-align: center;">
-                <p style="margin: 0 0 4px 0; font-size: 8.5px; color: #6B7280; line-height: 1.4;">
-                    <strong style="color: #374151;">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura
-                </p>
-                <p style="margin: 0 0 4px 0; font-size: 8px; color: #9CA3AF; line-height: 1.4;">
-                    Documento generado digitalmente desde la App Oficial de CONSTRURAMSA
-                </p>
-                <p style="margin: 0; font-size: 8px; color: #9CA3AF; line-height: 1.4;">
-                    Confidencial — Uso interno autorizado
-                </p>
+            <!-- Destinatario -->
+            <div id="pdf-portada-destinatario-bloque" style="display:none; margin-bottom:8px;">
+                <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:#9CA3AF; letter-spacing:0.6px; margin-bottom:2px;">Dirigido a</div>
+                <div id="pdf-portada-destinatario" style="font-size:10px; color:#374151; font-weight:600;"></div>
+            </div>
+
+            <!-- Saludo -->
+            <div id="pdf-portada-saludo-bloque" style="display:none; margin-bottom:8px;">
+                <div id="pdf-portada-saludo" style="font-size:10.5px; color:#1F2937; font-style:italic;"></div>
+            </div>
+
+            <!-- Línea divisora fina -->
+            <div style="height:1px; background:#E5E7EB; margin: 8px 0;"></div>
+
+            <!-- Descripción / introducción -->
+            <div id="pdf-portada-descripcion-bloque" style="display:none;">
+                <div id="pdf-portada-descripcion" style="font-size:9.5px; color:#374151; line-height:1.65; text-align:justify; white-space:pre-wrap;"></div>
             </div>
         </div>
+
+        <div id="pdf-contenido-dinamico" style="padding: 0 4px;"></div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             ÁREA DE FIRMAS AUTORIZADAS
+             ══════════════════════════════════════════════════════════ -->
+        <div style="margin-top: 45px; page-break-inside: avoid;">
+
+            <!-- Línea divisoria antes de firmas -->
+            <div style="height: 1px; background: #E5E7EB; margin-bottom: 20px;"></div>
+
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <!-- ── Firma Jefe de Proyectos ── -->
+                    <td style="width: 32%; text-align: center; vertical-align: bottom; padding: 0 8px;">
+                        <!-- Imagen de firma sobre la línea -->
+                        <div style="height: 60px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 0;">
+                            <img id="pdf-firma-jefe-proyectos" src="wilson.png"
+                                 alt="Firma Arq. Wilson Dario Salazar"
+                                 style="max-height: 58px; max-width: 140px; width: auto; object-fit: contain; opacity: 0.88;">
+                        </div>
+                        <!-- Línea de firma -->
+                        <div style="border-top: 1.5px solid #374151; width: 88%; margin: 0 auto; padding-top: 7px;">
+                            <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
+                                Arq. Wilson Dario Salazar
+                            </div>
+                            <div style="font-size: 8px; color: #004B93; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Jefe de Proyectos
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- ── Visto Bueno (centro) — espacio en blanco para firma manuscrita ── -->
+                    <td style="width: 36%; text-align: center; vertical-align: bottom; padding: 0 8px;">
+                        <!-- Espacio vacío para firma manuscrita -->
+                        <div style="height: 60px; border-bottom: 1.5px solid #374151; width: 88%; margin: 0 auto;"></div>
+                        <div style="width: 88%; margin: 0 auto; padding-top: 7px;">
+                            <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
+                                &nbsp;
+                            </div>
+                            <div style="font-size: 9.5px; font-weight: 800; color: #374151; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px;">
+                                V°B° — Visto Bueno
+                            </div>
+                            <div style="font-size: 8px; color: #6B7280; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Encargado de Obra
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- ── Firma Gerente Comercial ── -->
+                    <td style="width: 32%; text-align: center; vertical-align: bottom; padding: 0 8px;">
+                        <div style="height: 60px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 0;">
+                            <img id="pdf-firma-gerente-comercial" src="juan.png"
+                                 alt="Firma Ing. Juan Luis Ramirez Jimenez"
+                                 style="max-height: 58px; max-width: 140px; width: auto; object-fit: contain; opacity: 0.88;">
+                        </div>
+                        <div style="border-top: 1.5px solid #374151; width: 88%; margin: 0 auto; padding-top: 7px;">
+                            <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
+                                Ing. Juan Luis Ramirez Jimenez
+                            </div>
+                            <div style="font-size: 8px; color: #004B93; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Gerente Comercial
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ── Pie de página oficial ── -->
+            <div style="margin-top: 22px; padding-top: 12px; border-top: 1px solid #E5E7EB;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: middle;">
+                            <div style="height: 3px; width: 60px; background: linear-gradient(90deg, #004B93, #00A4E4); border-radius: 2px; margin-bottom: 5px;"></div>
+                            <div style="font-size: 8px; color: #6B7280; line-height: 1.5;">
+                                <strong style="color: #374151; font-size: 8.5px;">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura<br>
+                                <span style="color: #9CA3AF;">Documento generado digitalmente · Confidencial — Uso interno autorizado</span>
+                            </div>
+                        </td>
+                        <td style="width: 50%; text-align: right; vertical-align: middle;">
+                            <img src="./icon.png" alt="CONSTRURAMSA"
+                                 style="max-height: 28px; width: auto; object-fit: contain; opacity: 0.35; vertical-align: middle; margin-right: 6px;">
+                            <span style="font-size: 7.5px; color: #D1D5DB; vertical-align: middle;">construramsa.com</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
     </div>
     <script>
         'use strict';
@@ -2125,7 +2650,7 @@
                         ${p.descripcion ? `<br><span style="font-size:11px;color:var(--texto-secundario);">${p.descripcion}</span>` : ''}
                         <br><span style="font-size:11px;color:var(--texto-secundario);">Presupuesto: ${formatearMoneda(p.presupuesto_inicial)} | Creado: ${p.fecha_creacion}</span>
                     </div>
-                    <div style="display:flex;gap:6px;">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
                         <button onclick="seleccionarProyecto('${p.id}')" class="btn-primario" style="padding:6px 12px;font-size:11px;" aria-label="Seleccionar proyecto ${p.nombre}">✅ Seleccionar</button>
                         <button onclick="eliminarProyecto('${p.id}')" class="btn-primario" style="padding:6px 12px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proyecto ${p.nombre}">🗑️</button>
                     </div>`;
@@ -3049,9 +3574,9 @@
                     </fieldset>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
                         <label for="horas-extra-${t.id}" style="font-size:12px;white-space:nowrap;color:var(--texto-secundario);">Horas Extra:</label>
-                        <input type="number" id="horas-extra-${t.id}" min="0" max="8" value="0" style="width:80px;min-width:70px;padding:6px;text-align:center;" aria-label="Horas extra de ${t.nombre}">
+                        <input type="number" inputmode="decimal" id="horas-extra-${t.id}" min="0" max="8" value="0" style="width:80px;min-width:70px;padding:6px;text-align:center;" aria-label="Horas extra de ${t.nombre}">
                     </div>
-                    <div style="display:flex;gap:8px;">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
                         <button onclick="editarTrabajador('${t.id}')" class="btn-secundario" style="padding:6px 8px;font-size:11px;flex:1;" aria-label="Editar trabajador ${t.nombre}">✏️ Editar</button>
                         <button onclick="eliminarTrabajador('${t.id}')" class="btn-primario" style="padding:6px 8px;font-size:11px;background:var(--alerta);flex:1;" aria-label="Eliminar trabajador ${t.nombre}">🗑️ Eliminar</button>
                     </div>`;
@@ -4343,12 +4868,23 @@
                 if (tipo === 'semanal') csv += `# Periodo: ${rango.inicio} al ${rango.fin}\n`;
                 csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
                 csv += `Fecha,Tipo,Categoria,Descripcion,Monto (Q)\n`;
-                const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha));
+                /* FIX DUPLICIDAD: armar un Set con los gasto_id de viajes y mantenimiento
+                   para excluir esos egresos de la sección de caja chica (ya se detallan abajo) */
+                const viajesAll = datos.viajes_camiones.viajes || [];
+                const ordsAll   = datos.mantenimiento.ordenes || [];
+                const insAll    = datos.mantenimiento.compras_insumos || [];
+                const idsExternos = new Set([
+                    ...viajesAll.map(v => v.gasto_id).filter(Boolean),
+                    ...ordsAll.map(o => o.gasto_id).filter(Boolean),
+                    ...insAll.map(i => i.gasto_id).filter(Boolean)
+                ]);
+                // Solo movimientos de caja chica propios (sin gasto_id externo)
+                const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha) && !idsExternos.has(g.id));
                 let totalIng = 0, totalEgr = 0;
                 if (movs.length === 0) { csv += `SIN MOVIMIENTOS DE CAJA EN EL PERIODO\n`; }
                 else { movs.forEach(g => { csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${numToF(g.monto)}\n`; if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto; }); }
                 /* ===== SECCION CONSOLIDADA: VIAJES ===== */
-                const viajes = (datos.viajes_camiones.viajes || []).filter(v => enRango(v.fecha));
+                const viajes = viajesAll.filter(v => enRango(v.fecha));
                 let totalViajes = 0;
                 if (viajes.length > 0) {
                     csv += `,,,,,,\n--- VIAJES DE CAMIONES ---\nFecha,Unidad,Material,No.,Km,Litros,Combustible (Q),Alquiler (Q),Total (Q)\n`;
@@ -4361,8 +4897,8 @@
                     csv += `,,,,,,,,TOTAL VIAJES (Q):,${numToF(totalViajes)}\n`;
                 }
                 /* ===== CONSOLIDADO: MANTENIMIENTO E INSUMOS ===== */
-                const ordsMT = (datos.mantenimiento.ordenes || []).filter(o => enRango(o.fecha));
-                const insMT = (datos.mantenimiento.compras_insumos || []).filter(i => enRango(i.fecha));
+                const ordsMT = ordsAll.filter(o => enRango(o.fecha));
+                const insMT  = insAll.filter(i => enRango(i.fecha));
                 let totalMT = 0;
                 if (ordsMT.length > 0 || insMT.length > 0) {
                     csv += '\n--- MANTENIMIENTO E INSUMOS ---\n';
@@ -4445,18 +4981,24 @@
                 const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rangoT.inicio && f <= rangoT.fin);
                 html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">${tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado'}</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + fecha) : ('Período: ' + rangoT.inicio + ' al ' + rangoT.fin)} | Proyecto: ${proyNombre}</p>`;
-                html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica</h3>`;
+                html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:#6B7280;">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
-                const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+                /* FIX DUPLICIDAD: armar Set de gasto_id vinculados a viajes y mantenimiento
+                   para excluirlos de la sección de caja chica y no contarlos dos veces */
+                const _idsViajesGasto = new Set((datos.viajes_camiones.viajes||[]).map(v=>v.gasto_id).filter(Boolean));
+                const _idsOrdsGasto   = new Set((datos.mantenimiento.ordenes||[]).map(o=>o.gasto_id).filter(Boolean));
+                const _idsInsGasto    = new Set((datos.mantenimiento.compras_insumos||[]).map(i=>i.gasto_id).filter(Boolean));
+                const _idsExternosHTML = new Set([..._idsViajesGasto, ..._idsOrdsGasto, ..._idsInsGasto]);
+                const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha) && !_idsExternosHTML.has(g.id)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
                     const esIng = g.tipo === 'ingreso';
                     html += `<tr><td>${g.fecha}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${g.tipo.toUpperCase()}</td><td>${etiquetaCategoria(g.categoria)}</td><td>${g.descripcion}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
                     if (esIng) totalIng += g.monto; else totalEgr += g.monto;
                 });
-                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos de caja en este período</td></tr>`;
+                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos de caja directos en este período</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#059669;">TOTAL INGRESOS:</td><td class="total-ingreso">${formatearMoneda(totalIng)}</td></tr>`;
-                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#dc2626;">TOTAL EGRESOS:</td><td class="total-egreso">${formatearMoneda(totalEgr)}</td></tr>`;
+                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#dc2626;">TOTAL EGRESOS DIRECTOS:</td><td class="total-egreso">${formatearMoneda(totalEgr)}</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;">SUBTOTAL CAJA:</td><td class="total-destacado">${formatearMoneda(totalIng-totalEgr)}</td></tr>`;
                 html += `</tbody></table>`;
                 /* VIAJES (consolidado) */
@@ -4495,7 +5037,7 @@
                     html += `</tbody></table>`;
                 }
                 if (movs.length === 0 && viajesC.length === 0 && ordsMT.length === 0 && insMT.length === 0) {
-                    html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin registros en este período</td></tr>`;
+                    html += `<p style="text-align:center;color:#6B7280;padding:20px;">Sin registros en este período</p>`;
                 }
                 html += `<div style="text-align:right;font-weight:bold;color:#004B93;background:#EFF6FF;padding:10px;margin-top:10px;">GRAN TOTAL EGRESOS: ${formatearMoneda(totalEgr)}</div>`;
                 html += `<div style="text-align:right;font-weight:bold;color:#059669;">SALDO NETO (ingresos − egresos): ${formatearMoneda(totalIng - totalEgr)}</div>`;
@@ -4578,26 +5120,46 @@
 
         function prepararContenedorImpresion(titulo, htmlData) {
             const db   = getDB();
-            const b64  = db.configuracion?.logo_base64;
+            const cfg  = db.configuracion || {};
+
+            // ── Logo: usar logo personalizado si existe, sino el corporativo ──
             const logo = document.getElementById('pdf-logo-membrete');
-            if (b64 && b64.length > 100 && b64.startsWith('data:image')) { 
-                logo.src = b64; 
-                logo.onerror = () => { logo.src='./icon.png'; }; 
-            } else { 
-                logo.src = './icon.png'; 
+            const b64  = cfg.logo_base64;
+            if (b64 && b64.length > 100 && b64.startsWith('data:image')) {
+                logo.src = b64;
+                logo.onerror = () => { logo.src = './icon.png'; };
+            } else {
+                logo.src = './icon.png';
             }
 
-            // Precargar imágenes de firmas para asegurar que estén listas
+            // ── Firmas: siempre recargar para que estén frescas ──
             const firma1 = document.getElementById('pdf-firma-jefe-proyectos');
             const firma2 = document.getElementById('pdf-firma-gerente-comercial');
-            if (firma1) firma1.src = 'wilson.png';
-            if (firma2) firma2.src = 'juan.png';
+            if (firma1) { firma1.src = ''; firma1.src = 'wilson.png'; }
+            if (firma2) { firma2.src = ''; firma2.src = 'juan.png'; }
 
-            const proy = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
+            // ── Datos de contacto: desde configuración si están guardados ──
+            const telEmail = cfg.telefono && cfg.email
+                ? `Tel: ${cfg.telefono} &nbsp;|&nbsp; ${cfg.email}`
+                : (cfg.telefono || cfg.email
+                    ? (cfg.telefono || '') + (cfg.email ? ' &nbsp;|&nbsp; ' + cfg.email : '')
+                    : 'Tel: +502 5997 9501 &nbsp;|&nbsp; contacto@construramsa.com');
+            const telEmailEl = document.getElementById('pdf-tel-email-empresa');
+            if (telEmailEl) telEmailEl.innerHTML = telEmail;
+
+            // ── Metadatos del reporte ──
+            const proy = db.proyectos.find(p => p.id === cfg.proyecto_actual);
             document.getElementById('pdf-nombre-proyecto').textContent = proy ? proy.nombre : 'General';
             document.getElementById('pdf-tipo-reporte').textContent    = titulo.toUpperCase();
-            document.getElementById('pdf-fecha-emision').textContent   = new Date().toLocaleDateString('es-GT');
-            document.getElementById('pdf-contenido-dinamico').innerHTML = htmlData;
+            document.getElementById('pdf-fecha-emision').textContent   = new Date().toLocaleDateString('es-GT', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            });
+
+            // ── Contenido dinámico: limpiar antes de insertar ──
+            const contenidoEl = document.getElementById('pdf-contenido-dinamico');
+            contenidoEl.innerHTML = '';
+            contenidoEl.innerHTML = htmlData;
+
             return document.getElementById('plantilla-reporte-impresion');
         }
 
@@ -4657,6 +5219,9 @@
 
                 const htmlData   = generarHTMLReporte(tipo, fecha);
                 const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
+
+                // Reaplicar portada si fue configurada desde la vista previa
+                aplicarPortadaPlantilla(_leerCamposPortada());
 
                 // Hacer visible el contenedor para html2canvas
                 contenedor.classList.add('pdf-generating');
@@ -4743,19 +5308,34 @@
                         if (tipo === 'diario' || tipo === 'semanal') {
                 const rangoX = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
                 const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rangoX.inicio && f <= rangoX.fin);
-                const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha));
                 const viajesX = (datos.viajes_camiones.viajes||[]).filter(v => enRango(v.fecha));
-                const ordsX = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
-                const insX = (datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha));
-                const filasCaja = movs.map(g => [g.fecha, g.tipo, etiquetaCategoria(g.categoria), g.descripcion, g.monto]);
+                const ordsX   = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
+                const insX    = (datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha));
+                /* FIX DUPLICIDAD: excluir de caja los movimientos vinculados a viajes/mantenimiento */
+                const _idsExtXLSX = new Set([
+                    ...(datos.viajes_camiones.viajes||[]).map(v=>v.gasto_id).filter(Boolean),
+                    ...(datos.mantenimiento.ordenes||[]).map(o=>o.gasto_id).filter(Boolean),
+                    ...(datos.mantenimiento.compras_insumos||[]).map(i=>i.gasto_id).filter(Boolean)
+                ]);
+                const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha) && !_idsExtXLSX.has(g.id));
+                const filasCaja   = movs.map(g => [g.fecha, g.tipo, etiquetaCategoria(g.categoria), g.descripcion, g.monto]);
                 const filasViajes = viajesX.map(v => { const c=(datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id)||{nombre:'N/A'}; return [v.fecha, 'Viaje', c.nombre+' ('+v.material+') x'+v.numero, (v.propiedad==='alquilado'?'Alquiler Equipo':'Combustible'), v.total]; });
                 const filasMT = ordsX.map(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id)||{nombre:'N/A'}; return [o.fecha, 'Mantenimiento '+o.tipo, m.nombre+' - '+(o.observaciones||''), 'Repuestos/Mantenimiento', o.costo]; });
                 const filasIn = insX.map(i => [i.fecha, 'Insumo '+i.tipo, i.articulo+' (x'+i.cantidad+')', 'Insumo', i.costo]);
+                const totalIngXLSX = movs.filter(g=>g.tipo==='ingreso').reduce((s,g)=>s+g.monto,0);
+                const totalEgrXLSX = movs.filter(g=>g.tipo!=='ingreso').reduce((s,g)=>s+g.monto,0)
+                    + viajesX.reduce((s,v)=>s+(v.total||0),0)
+                    + ordsX.reduce((s,o)=>s+(o.costo||0),0)
+                    + insX.reduce((s,i)=>s+(i.costo||0),0);
                 data = [...enc, [`Reporte ${tipo==='diario'?'Diario Consolidado':'Semanal Consolidado'} - Proyecto: ${proyNombre}`],
                     ['Fecha','Tipo','Descripción','Categoría','Monto (Q)'],
-                    ['--- CAJA CHICA ---'], ...filasCaja,
+                    ['--- CAJA CHICA (movimientos directos) ---'], ...filasCaja,
                     ['--- VIAJES DE CAMIONES ---'], ...filasViajes,
-                    ['--- MANTENIMIENTO E INSUMOS ---'], ...filasMT, ...filasIn];
+                    ['--- MANTENIMIENTO E INSUMOS ---'], ...filasMT, ...filasIn,
+                    [],
+                    ['', '', '', 'TOTAL INGRESOS', totalIngXLSX],
+                    ['', '', '', 'TOTAL EGRESOS', totalEgrXLSX],
+                    ['', '', '', 'SALDO NETO', totalIngXLSX - totalEgrXLSX]];
             } else if (tipo === 'viajes') {
                 const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha);
                 data = [...enc, [`Reporte de Viajes - Proyecto: ${proyNombre}`], ['Fecha','Unidad','Material','No. Viajes','Km Total','Litros','Costo Comb.(Q)','Alquiler (Q)','Total (Q)'],
@@ -4775,7 +5355,7 @@
                 return null;
             }
             const ws = XLSX.utils.aoa_to_sheet(data);
-            if (ws['!cols']) ws['!cols'] = data[0].map((c,i)=> ({ wch: 22 }));
+            ws['!cols'] = data[0] ? data[0].map(() => ({ wch: 22 })) : [];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
             XLSX.writeFile(wb, nombre + '.xlsx');
@@ -4783,6 +5363,388 @@
         }
 
         function generarYCompartirReporte() { showLoading('Preparando reporte...'); compartirReporteWhatsApp(); }
+
+        // ============================================================
+        // VISTA PREVIA DE REPORTES
+        // abrirVistaPrevia(modo)  → abre el modal con preview en vivo
+        // cerrarVistaPrevia()     → cierra el modal
+        // actualizarVistaPrevia() → re-renderiza el preview al editar
+        // confirmarYGenerar(modo) → aplica portada y ejecuta la exportación
+        // aplicarPortadaPlantilla() → escribe los datos de portada en #plantilla-reporte-impresion
+        // ============================================================
+
+        // Mapa de etiquetas legibles para cada tipo de reporte
+        const ETIQUETAS_REPORTE = {
+            diario:        'Reporte Diario de Gastos',
+            semanal:       'Informe Semanal Consolidado',
+            asistencia:    'Reporte de Asistencia y Horas Extra',
+            viajes:        'Reporte de Viajes de Camiones',
+            mantenimiento: 'Reporte de Mantenimiento e Insumos'
+        };
+
+        /**
+         * Abre el modal de vista previa.
+         * @param {string} modo  'whatsapp' | 'local'
+         */
+        function abrirVistaPrevia(modo) {
+            const tipo  = document.getElementById('reporte-tipo').value;
+            const fecha = document.getElementById('reporte-fecha').value;
+
+            // Validar fecha antes de abrir (excepto asistencia)
+            if (!fecha && tipo !== 'asistencia') {
+                showToast('⚠️ Seleccione una fecha para el reporte antes de continuar.', 'error');
+                return;
+            }
+
+            // Guardar el modo ('whatsapp' | 'local') en el botón confirmar y en data del modal
+            const modal = document.getElementById('modal-vista-previa');
+            modal.dataset.modo = modo;
+
+            // Texto del subtítulo
+            const etiqueta = ETIQUETAS_REPORTE[tipo] || tipo;
+            const fechaStr = fecha ? ` · ${fecha}` : '';
+            document.getElementById('vp-subtitulo').textContent = etiqueta + fechaStr;
+
+            // Poblar el campo de info tipo (solo lectura)
+            document.getElementById('vp-info-tipo').textContent = etiqueta + (fecha ? '  —  ' + fecha : '');
+
+            // Pre-llenar la fecha del informe con la del reporte si está vacía
+            const vpFecha = document.getElementById('vp-fecha');
+            if (!vpFecha.value && fecha) vpFecha.value = fecha;
+
+            // Pre-llenar remitente si la configuración tiene un nombre de empresa
+            const vpRem = document.getElementById('vp-remitente');
+            if (!vpRem.value) {
+                const cfg = getDB().configuracion || {};
+                vpRem.value = cfg.nombre_empresa ? cfg.nombre_empresa : '';
+            }
+
+            // Mostrar/ocultar botones según el modo
+            document.getElementById('vp-btn-whatsapp').style.display = modo === 'whatsapp' ? '' : 'none';
+            document.getElementById('vp-btn-descargar').style.display = modo === 'local'    ? '' : 'none';
+
+            // Mostrar el modal
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Evitar scroll del fondo
+
+            // Escalar el preview para que quepa en el panel
+            _escalarPreview();
+
+            // Renderizar el preview por primera vez
+            actualizarVistaPrevia();
+
+            // Enfocar el primer campo editable
+            setTimeout(() => {
+                const primer = document.getElementById('vp-fecha');
+                if (primer) primer.focus();
+            }, 150);
+        }
+
+        /** Cierra el modal de vista previa sin generar nada. */
+        function cerrarVistaPrevia() {
+            const modal = document.getElementById('modal-vista-previa');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        /**
+         * Escala el wrapper del preview para que quepa en el panel visible.
+         * Se llama al abrir y al redimensionar.
+         */
+        function _escalarPreview() {
+            const panel   = document.getElementById('vp-preview-scroll');
+            const wrapper = document.getElementById('vp-preview-wrapper');
+            if (!panel || !wrapper) return;
+            const panelW  = panel.clientWidth - 40; // 20px padding cada lado
+            const docW    = 794; // ancho natural del documento (~210mm)
+            const escala  = Math.min(1, panelW / docW);
+            wrapper.style.transform = `scale(${escala})`;
+            wrapper.style.marginBottom = `${(escala - 1) * wrapper.offsetHeight}px`;
+        }
+
+        // Re-escalar cuando cambia el tamaño de ventana
+        window.addEventListener('resize', _escalarPreview);
+
+        /**
+         * Re-renderiza el preview cada vez que el usuario edita un campo.
+         * Inyecta una copia del contenido real de la plantilla dentro de #vp-plantilla-preview.
+         */
+        function actualizarVistaPrevia() {
+            const tipo  = document.getElementById('reporte-tipo').value;
+            const fecha = document.getElementById('reporte-fecha').value;
+
+            // Leer campos de la portada
+            const portada = _leerCamposPortada();
+
+            // Generar el HTML del contenido del reporte
+            const htmlReporte = generarHTMLReporte(tipo, fecha);
+
+            // Construir el HTML completo del membrete + portada + contenido
+            const db  = getDB();
+            const cfg = db.configuracion || {};
+            const proy = (db.proyectos || []).find(p => p.id === cfg.proyecto_actual);
+            const proyNombre = proy ? proy.nombre : 'General';
+            const logoSrc = (cfg.logo_base64 && cfg.logo_base64.startsWith('data:image'))
+                ? cfg.logo_base64 : './icon.png';
+            const telEmail = cfg.telefono || cfg.email
+                ? (cfg.telefono || '') + (cfg.email ? (cfg.telefono ? ' | ' : '') + cfg.email : '')
+                : 'Tel: +502 5997 9501 | contacto@construramsa.com';
+            const fechaEmision = new Date().toLocaleDateString('es-GT', {day:'2-digit',month:'2-digit',year:'numeric'});
+
+            const htmlPreview = _construirHTMLPreview({
+                logoSrc, proyNombre, telEmail, fechaEmision,
+                tipoReporte: (ETIQUETAS_REPORTE[tipo] || tipo).toUpperCase(),
+                portada, htmlReporte
+            });
+
+            document.getElementById('vp-plantilla-preview').innerHTML = htmlPreview;
+
+            // Re-escalar después de renderizar (el alto puede haber cambiado)
+            setTimeout(_escalarPreview, 50);
+        }
+
+        /** Lee los campos del editor y devuelve un objeto portada. */
+        function _leerCamposPortada() {
+            return {
+                fecha:        (document.getElementById('vp-fecha')?.value        || '').trim(),
+                remitente:    (document.getElementById('vp-remitente')?.value    || '').trim(),
+                destinatario: (document.getElementById('vp-destinatario')?.value || '').trim(),
+                saludo:       (document.getElementById('vp-saludo')?.value       || '').trim(),
+                descripcion:  (document.getElementById('vp-descripcion')?.value  || '').trim()
+            };
+        }
+
+        /**
+         * Construye el HTML completo que se muestra en el panel de preview.
+         * Replica visualmente la plantilla real (membrete + portada + contenido).
+         */
+        function _construirHTMLPreview({ logoSrc, proyNombre, telEmail, fechaEmision, tipoReporte, portada, htmlReporte }) {
+            // ── Portada HTML ──
+            let portadaHTML = '';
+            const tienePortada = portada.fecha || portada.remitente || portada.destinatario
+                || portada.saludo || portada.descripcion;
+            if (tienePortada) {
+                portadaHTML = `
+                <div style="margin-bottom:14px;padding:12px 14px;border:1px solid #E5E7EB;border-left:4px solid #004B93;border-radius:4px;background:#F8FAFC;">
+                    ${(portada.fecha || portada.remitente) ? `
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
+                        <tr>
+                            ${portada.fecha ? `<td style="width:50%;vertical-align:top;padding-right:10px;">
+                                <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:1px;">Fecha</div>
+                                <div style="font-size:9.5px;color:#374151;font-weight:600;">${portada.fecha}</div>
+                            </td>` : '<td style="width:50%;"></td>'}
+                            ${portada.remitente ? `<td style="width:50%;vertical-align:top;padding-left:10px;border-left:1px solid #E5E7EB;">
+                                <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:1px;">Elaborado por</div>
+                                <div style="font-size:9.5px;color:#374151;font-weight:600;">${_esc(portada.remitente)}</div>
+                            </td>` : '<td style="width:50%;"></td>'}
+                        </tr>
+                    </table>` : ''}
+                    ${portada.destinatario ? `
+                    <div style="margin-bottom:7px;">
+                        <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:1px;">Dirigido a</div>
+                        <div style="font-size:9.5px;color:#374151;font-weight:600;">${_esc(portada.destinatario)}</div>
+                    </div>` : ''}
+                    ${portada.saludo ? `
+                    <div style="margin-bottom:7px;">
+                        <div style="font-size:10px;color:#1F2937;font-style:italic;">${_esc(portada.saludo)}</div>
+                    </div>` : ''}
+                    ${(portada.saludo || portada.fecha || portada.remitente) && portada.descripcion ? `<div style="height:1px;background:#E5E7EB;margin:7px 0;"></div>` : ''}
+                    ${portada.descripcion ? `
+                    <div style="font-size:9px;color:#374151;line-height:1.65;text-align:justify;white-space:pre-wrap;">${_esc(portada.descripcion)}</div>` : ''}
+                </div>`;
+            }
+
+            return `
+            <!-- Franja azul superior -->
+            <div style="height:5px;background:linear-gradient(90deg,#004B93 0%,#00A4E4 50%,#004B93 100%);"></div>
+
+            <!-- Membrete -->
+            <div style="background:#fff;padding:14px 18px 12px 18px;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td style="width:22%;vertical-align:top;padding:3px 10px 0 0;border-right:1px solid #E5E7EB;">
+                            <div style="margin-bottom:6px;">
+                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.7px;margin-bottom:1px;">Tipo de Reporte</div>
+                                <div style="font-size:9px;font-weight:800;color:#004B93;">${tipoReporte}</div>
+                            </div>
+                            <div style="margin-bottom:6px;">
+                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.7px;margin-bottom:1px;">Fecha de Emisión</div>
+                                <div style="font-size:9px;font-weight:600;color:#374151;">${fechaEmision}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.7px;margin-bottom:1px;">Proyecto</div>
+                                <div style="font-size:9px;font-weight:600;color:#374151;">${_esc(proyNombre)}</div>
+                            </div>
+                        </td>
+                        <td style="width:56%;text-align:center;vertical-align:middle;padding:0 12px;">
+                            <img src="${logoSrc}" alt="CONSTRURAMSA"
+                                 style="max-height:72px;max-width:200px;width:auto;object-fit:contain;display:block;margin:0 auto 6px auto;">
+                            <div style="font-size:17px;font-weight:800;letter-spacing:5px;color:#004B93;text-transform:uppercase;margin-bottom:3px;">CONSTRURAMSA</div>
+                            <div style="font-size:7.5px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;">SOLUCIONES EN INGENIERÍA Y ARQUITECTURA</div>
+                            <div style="font-size:7px;color:#6B7280;line-height:1.5;">${_esc(telEmail)}</div>
+                        </td>
+                        <td style="width:22%;vertical-align:top;padding:3px 0 0 10px;border-left:1px solid #E5E7EB;text-align:center;">
+                            <div style="border:1.5px dashed #D1D5DB;border-radius:4px;height:58px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;">
+                                <span style="font-size:7px;color:#D1D5DB;text-transform:uppercase;font-weight:600;">Sello / Timbre</span>
+                            </div>
+                            <div style="font-size:7px;color:#9CA3AF;line-height:1.4;">Documento oficial<br>CONSTRURAMSA</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Franja divisoria azul-cian -->
+            <div style="height:4px;background:linear-gradient(90deg,#004B93 0%,#00A4E4 60%,#38BDF8 100%);"></div>
+            <div style="height:1px;background:#E5E7EB;margin-bottom:14px;"></div>
+
+            <!-- Portada personalizada -->
+            ${portadaHTML}
+
+            <!-- Contenido del reporte -->
+            <div style="font-size:10px;">${htmlReporte}</div>
+
+            <!-- Separador firmas -->
+            <div style="margin-top:36px;padding-top:12px;border-top:1px solid #E5E7EB;"></div>
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td style="width:32%;text-align:center;vertical-align:bottom;padding:0 6px;">
+                        <div style="height:48px;background:url('wilson.png') center bottom/contain no-repeat;opacity:0.85;margin-bottom:0;"></div>
+                        <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
+                            <div style="font-size:9.5px;font-weight:700;color:#111827;">Arq. Wilson Dario Salazar</div>
+                            <div style="font-size:7.5px;color:#004B93;font-weight:600;text-transform:uppercase;margin-top:1px;">Jefe de Proyectos</div>
+                        </div>
+                    </td>
+                    <td style="width:36%;text-align:center;vertical-align:bottom;padding:0 6px;">
+                        <div style="height:48px;border-bottom:1.5px solid #374151;width:88%;margin:0 auto;"></div>
+                        <div style="width:88%;margin:0 auto;padding-top:5px;">
+                            <div style="font-size:9px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">V°B° — Visto Bueno</div>
+                            <div style="font-size:7.5px;color:#6B7280;text-transform:uppercase;margin-top:1px;">Encargado de Obra</div>
+                        </div>
+                    </td>
+                    <td style="width:32%;text-align:center;vertical-align:bottom;padding:0 6px;">
+                        <div style="height:48px;background:url('juan.png') center bottom/contain no-repeat;opacity:0.85;margin-bottom:0;"></div>
+                        <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
+                            <div style="font-size:9.5px;font-weight:700;color:#111827;">Ing. Juan Luis Ramirez Jimenez</div>
+                            <div style="font-size:7.5px;color:#004B93;font-weight:600;text-transform:uppercase;margin-top:1px;">Gerente Comercial</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <div style="margin-top:16px;padding-top:10px;border-top:1px solid #E5E7EB;">
+                <div style="font-size:7.5px;color:#9CA3AF;text-align:center;">
+                    <strong style="color:#6B7280;">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura &nbsp;·&nbsp; Confidencial — Uso interno autorizado
+                </div>
+            </div>`;
+        }
+
+        /** Escapa texto para insertar en HTML sin riesgo de XSS. */
+        function _esc(str) {
+            return String(str)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        /**
+         * Aplica los datos de la portada a la plantilla real de impresión (#plantilla-reporte-impresion).
+         * Se llama justo antes de generar el PDF real.
+         */
+        function aplicarPortadaPlantilla(portada) {
+            const mostrar = (id, valor) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = valor || '';
+            };
+            const bloque = (id, valor) => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = valor ? '' : 'none';
+            };
+
+            const tienePortada = portada.fecha || portada.remitente || portada.destinatario
+                || portada.saludo || portada.descripcion;
+
+            // Bloque raíz
+            const raiz = document.getElementById('pdf-portada');
+            if (raiz) raiz.style.display = tienePortada ? '' : 'none';
+
+            mostrar('pdf-portada-fecha', portada.fecha);
+            mostrar('pdf-portada-remitente', portada.remitente);
+
+            mostrar('pdf-portada-destinatario', portada.destinatario);
+            bloque('pdf-portada-destinatario-bloque', portada.destinatario);
+
+            mostrar('pdf-portada-saludo', portada.saludo);
+            bloque('pdf-portada-saludo-bloque', portada.saludo);
+
+            mostrar('pdf-portada-descripcion', portada.descripcion);
+            bloque('pdf-portada-descripcion-bloque', portada.descripcion);
+        }
+
+        /**
+         * Confirmación desde la vista previa: aplica portada y dispara la exportación real.
+         * @param {string} modo  'whatsapp' | 'local'
+         */
+        function confirmarYGenerar(modo) {
+            const portada = _leerCamposPortada();
+
+            // Cerrar el modal visual antes de iniciar la generación
+            cerrarVistaPrevia();
+
+            // Aplicar portada a la plantilla real de impresión
+            aplicarPortadaPlantilla(portada);
+
+            // Lanzar la generación según el modo
+            showLoading('Generando reporte...');
+            if (modo === 'whatsapp') {
+                compartirReporteWhatsApp();
+            } else {
+                const tipo  = document.getElementById('reporte-tipo').value;
+                const fecha = document.getElementById('reporte-fecha').value;
+                if (!fecha && tipo !== 'asistencia') {
+                    showToast('⚠️ Seleccione una fecha para el reporte.', 'error');
+                    hideLoading();
+                    return;
+                }
+                const nombre = `reporte_${tipo}_${fecha || 'asistencia'}`;
+                setTimeout(async () => {
+                    try {
+                        const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
+                        const proyNombreX = proyObj ? proyObj.nombre : 'General';
+                        generarXLSX(tipo, fecha, proyNombreX, nombre);
+
+                        const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type: 'text/csv;charset=utf-8;' });
+                        const urlCSV  = URL.createObjectURL(csvBlob);
+                        const aC = document.createElement('a'); aC.href = urlCSV; aC.download = `${nombre}.csv`; aC.click();
+
+                        const htmlData   = generarHTMLReporte(tipo, fecha);
+                        const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
+                        // Reaplicar portada sobre la plantilla recién preparada
+                        aplicarPortadaPlantilla(portada);
+
+                        contenedor.classList.add('pdf-generating');
+                        const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
+                        pdf.save(`${nombre}.pdf`);
+                        contenedor.classList.remove('pdf-generating');
+                        hideLoading();
+                        showToast('✅ Reporte generado y descargado', 'success');
+                    } catch (err) {
+                        const c = document.getElementById('plantilla-reporte-impresion');
+                        if (c) c.classList.remove('pdf-generating');
+                        hideLoading();
+                        showToast('❌ Error al generar reporte', 'error');
+                        console.error(err);
+                    }
+                }, 300);
+            }
+        }
+
+        // Cerrar la vista previa al presionar Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modal-vista-previa');
+                if (modal && !modal.classList.contains('hidden')) {
+                    cerrarVistaPrevia();
+                }
+            }
+        });
 
         // Navegar a un módulo por ID — función central reutilizada por tabs y atajos de teclado
         function navegarAModulo(mid) {
