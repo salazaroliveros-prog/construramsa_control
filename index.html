@@ -117,24 +117,22 @@
         /* Excepción: imágenes y videos pueden usar su dimensión natural */
         img, video, canvas { max-width: 100%; height: auto; }
 
-        /* Scroll suave global — funciona en iOS Safari desde el elemento html */
-        html {
-            scroll-behavior: smooth;
-            /* FIX global overflow: prevenir scroll horizontal, permitir scroll vertical */
+        /* ============================================================
+           SCROLL NATIVO PURO - Sin transformaciones ni GPU que interfieran
+           ============================================================ */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
             overflow-x: hidden;
             overflow-y: auto;
-            /* Mejora de rendimiento: GPU layer para scroll */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            /* Asegurar scroll nativo en todos los dispositivos */
-            height: 100%;
+            /* Scroll nativo puro en todos los dispositivos */
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
 
-        /* iOS standalone: respetar safe-area del notch/Dynamic Island */
         body {
-            /* FIX overflow: bloquear scroll horizontal en el body */
-            overflow-x: hidden;
-            overflow-y: auto;
             background-color: var(--bg-principal);
             background-image:
                 radial-gradient(at 12% 6%, rgba(11, 63, 143, 0.55) 0px, transparent 46%),
@@ -146,8 +144,6 @@
             background-attachment: fixed;
             color: var(--texto-principal);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
             /* safe-area padding para iPhone con notch */
             padding-top: env(safe-area-inset-top);
@@ -161,12 +157,8 @@
             -webkit-text-size-adjust: 100%;
             -moz-text-size-adjust: 100%;
             text-size-adjust: 100%;
-            /* Android Chrome: prevenir pull-to-refresh accidental solo en móviles */
+            /* Prevenir pull-to-refresh accidental */
             overscroll-behavior-y: contain;
-            /* Permitir scroll nativo con touchpad, mouse wheel y touch */
-            touch-action: pan-y pan-x pinch-zoom;
-            /* Asegurar que el scroll funcione en todos los dispositivos */
-            -webkit-overflow-scrolling: touch;
         }
 
         /* Granulado global del fondo — vidrio granulado desenfocado sobre el degradado */
@@ -339,10 +331,10 @@
         .nav-tab:active { will-change: transform; }
 
         /* ── touch-action:manipulation ─────────────────────────────────────
-           Elimina delay 300ms en tap en iOS/Android en todos los controles.
-           "manipulation" permite pinch-zoom pero no double-tap-zoom. */
+           Elimina delay 300ms en tap en iOS/Android en controles interactivos.
+           NO usar en body o contenedores de scroll para permitir scroll nativo. */
         button, .nav-tab, .btn-primario, .btn-secundario,
-        a, label, .file-label, [role="button"],
+        a, .file-label, [role="button"],
         .paginacion-container button {
             touch-action: manipulation;
         }
@@ -354,11 +346,10 @@
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             width: 100%;
             margin: 0 auto;
-            /* padding dinámico: mínimo 10px, preferido 20px, máximo 30px — sin desborde */
-            padding: 20px clamp(10px, 4vw, 30px);
+            padding: 16px 20px;
             /* FIX: evitar que contenidos internos desborden el container */
             overflow-x: hidden;
         }
@@ -367,10 +358,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
+            margin-bottom: 24px;
+            padding: 16px 20px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
             /* FIX: el header no puede desbordar su contenedor */
             width: 100%;
             min-width: 0;
@@ -529,92 +520,48 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Optimización de animaciones con GPU acceleration */
+        /* Simplificación: Eliminar will-change que puede interferir con scroll */
         .module {
-            will-change: opacity, transform;
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
         }
-        .module:not(.active) {
-            will-change: auto;
+        .module.active {
+            display: block;
         }
 
-        /* Contenedor principal con scroll optimizado */
+        /* Contenedor principal - Scroll nativo puro */
         .main-content {
-            /* Scroll vertical fluido */
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
-            /* GPU layer para mejor rendimiento */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            /* Evitar scroll horizontal accidental */
-            overscroll-behavior-x: none;
-            /* Permitir scroll con touchpad, mouse wheel y touch */
-            touch-action: pan-y pan-x pinch-zoom;
-            /* Asegurar altura mínima para scroll */
-            min-height: 100vh;
-            /* Mejorar respuesta al scroll en todos los dispositivos */
-            will-change: scroll-position;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            /* Sin touch-action para permitir scroll nativo completo */
         }
 
-        /* Scroll nativo para tablas en móviles y portátiles */
+        /* Scroll nativo para tablas - Simple y directo */
         .overflow-x-auto {
             overflow-x: auto;
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-x pan-y pinch-zoom;
-            scroll-behavior: smooth;
-            /* Scrollbar visible en desktop, invisible en móvil */
-            scrollbar-width: auto;
-            -ms-overflow-style: auto;
-        }
-        
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
-        
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-        }
-        
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: rgba(0, 164, 228, 0.4);
-            border-radius: 4px;
-        }
-        
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 164, 228, 0.6);
+            width: 100%;
         }
 
-        /* Scroll nativo para áreas de contenido largo */
-        .scroll-container {
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            touch-action: pan-y pan-x pinch-zoom;
-            scroll-behavior: smooth;
-            max-height: 400px;
-            scrollbar-width: auto;
-            -ms-overflow-style: auto;
-        }
-        
-        .scroll-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .scroll-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-        }
-        
-        .scroll-container::-webkit-scrollbar-thumb {
-            background: rgba(0, 164, 228, 0.4);
-            border-radius: 4px;
-        }
-        
-        .scroll-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 164, 228, 0.6);
+        /* Scrollbar styling - Desktop only */
+        @media (pointer: fine) {
+            .overflow-x-auto::-webkit-scrollbar {
+                height: 8px;
+            }
+            .overflow-x-auto::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+            }
+            .overflow-x-auto::-webkit-scrollbar-thumb {
+                background: rgba(0, 164, 228, 0.5);
+                border-radius: 4px;
+            }
+            .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+                background: rgba(0, 164, 228, 0.7);
+            }
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -910,13 +857,13 @@
 
         /* ── 768px: base móvil ───────────────────────────────────────── */
         @media (max-width: 768px) {
-            .header { flex-direction: column; text-align: center; align-items: center; }
-            /* FIX: logo-container centrado en móvil */
+            .header { flex-direction: column; text-align: center; align-items: center; padding: 12px 16px; }
             .logo-container { justify-content: center; min-width: 0; }
-            .header-actions { justify-content: center; width: 100%; }
+            .header-actions { justify-content: center; width: 100%; gap: 8px; }
             .header-actions select { min-width: 140px; max-width: 100%; width: auto; flex: 1; }
-            .company-name { font-size: 18px; }
-            .tarjeta-glass { padding: 15px; }
+            .company-name { font-size: 16px; }
+            .slogan { font-size: 11px; }
+            .tarjeta-glass { padding: 12px; }
             button { min-height: 44px; }
             table { font-size: 11px; }
             th, td { padding: 8px 4px; }
@@ -994,58 +941,58 @@
         /* ── 480px: Android mid-range (Moto G, Redmi, Samsung A series) ─ */
         @media (max-width: 480px) {
             .container { padding: 12px; }
-            .header { padding: 14px 12px; gap: 10px; }
-            .logo-img { max-height: 50px; }
-            .company-name { font-size: 17px; }
-            .nav-tab { padding: 9px 14px; font-size: 12.5px; }
-            .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-            .kpi-value { font-size: 16px !important; }
+            .header { padding: 12px; gap: 12px; }
+            .logo-img { max-height: 44px; }
+            .company-name { font-size: 15px; }
+            .slogan { font-size: 10px; }
+            .nav-tab { padding: 8px 12px; font-size: 12px; }
+            .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+            .kpi-value { font-size: 15px !important; }
             .kpi-label { font-size: 10px; }
-            .btn-primario, .btn-secundario { padding: 11px 18px; font-size: 13.5px; }
+            .btn-primario, .btn-secundario { padding: 10px 16px; font-size: 13px; }
             .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); }
             .toast { max-width: 100% !important; }
-            /* FIX 2: topbar del modal VP — cerrar queda al lado del título, no se desborda */
             .vp-topbar { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
             .vp-topbar > div:first-child { flex: 1 1 auto; min-width: 0; }
             .vp-topbar-actions { width: 100%; justify-content: flex-end; gap: 8px; }
             .vp-topbar-actions .btn-primario,
-            .vp-topbar-actions .btn-secundario { padding: 8px 14px; font-size: 12px; flex: 1 1 auto; }
+            .vp-topbar-actions .btn-secundario { padding: 8px 12px; font-size: 12px; flex: 1 1 auto; }
         }
 
         /* ── 390px: iPhone 14/15 Pro (393px lógico), Pixel 7 ────────── */
         @media (max-width: 390px) {
             .container { padding: 10px; }
-            .header { padding: 12px 10px; }
-            .company-name { font-size: 16px; }
-            .slogan { font-size: 10.5px; }
-            .logo-img { max-height: 46px; }
-            .nav-tab { padding: 8px 13px; font-size: 12px; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .kpi-card { padding: 12px 10px; min-height: 90px; }
-            .kpi-value { font-size: 14px !important; word-break: break-all; }
-            .kpi-label { font-size: 9.5px; }
-            .tarjeta-glass { padding: 12px; border-radius: 14px; }
-            .btn-primario, .btn-secundario { padding: 10px 16px; font-size: 13px; }
-            label { font-size: 13px; }
-            input, select, textarea { padding: 10px; font-size: 14px; }
-            .modal-content { padding: 18px; max-height: 88dvh; }
-            .modal-title { font-size: 16px; }
+            .header { padding: 10px; gap: 10px; }
+            .company-name { font-size: 14px; }
+            .slogan { font-size: 9px; }
+            .logo-img { max-height: 40px; }
+            .nav-tab { padding: 7px 11px; font-size: 11px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .kpi-card { padding: 10px 8px; min-height: 85px; }
+            .kpi-value { font-size: 13px !important; word-break: break-all; }
+            .kpi-label { font-size: 9px; }
+            .tarjeta-glass { padding: 10px; border-radius: 12px; }
+            .btn-primario, .btn-secundario { padding: 9px 14px; font-size: 12px; }
+            label { font-size: 12px; }
+            input, select, textarea { padding: 9px; font-size: 13px; }
+            .modal-content { padding: 16px; max-height: 88dvh; }
+            .modal-title { font-size: 15px; }
         }
 
         /* ── 360px: Galaxy S, Moto G4/G5, Android budget market ──────── */
         @media (max-width: 360px) {
             .container { padding: 8px; }
-            .header { padding: 10px 8px; }
-            .company-name { font-size: 15px; letter-spacing: 0.5px; }
-            .slogan { font-size: 10px; }
-            .logo-img { max-height: 42px; }
-            .nav-tab { padding: 8px 11px; font-size: 11.5px; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .kpi-card { padding: 10px 8px; border-radius: 10px; min-height: 85px; }
-            .kpi-value { font-size: 13px !important; word-break: break-all; }
-            .kpi-label { font-size: 9px; letter-spacing: 0; }
-            .kpi-sub { font-size: 9px; }
-            .tarjeta-glass { padding: 10px; border-radius: 12px; }
+            .header { padding: 8px; gap: 8px; }
+            .company-name { font-size: 13px; letter-spacing: 0.3px; }
+            .slogan { font-size: 8px; }
+            .logo-img { max-height: 36px; }
+            .nav-tab { padding: 6px 10px; font-size: 10px; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 4px; }
+            .kpi-card { padding: 8px 6px; border-radius: 8px; min-height: 80px; }
+            .kpi-value { font-size: 12px !important; word-break: break-all; }
+            .kpi-label { font-size: 8px; letter-spacing: 0; }
+            .kpi-sub { font-size: 8px; }
+            .tarjeta-glass { padding: 8px; border-radius: 10px; }
             .btn-primario, .btn-secundario { padding: 10px 14px; font-size: 12.5px; width: 100%; }
             .btn-row { flex-direction: column; }
             .btn-row .btn-primario, .btn-row .btn-secundario { flex: none; }
