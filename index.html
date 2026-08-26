@@ -126,12 +126,15 @@
             /* Mejora de rendimiento: GPU layer para scroll */
             transform: translateZ(0);
             -webkit-transform: translateZ(0);
+            /* Asegurar scroll nativo en todos los dispositivos */
+            height: 100%;
         }
 
         /* iOS standalone: respetar safe-area del notch/Dynamic Island */
         body {
             /* FIX overflow: bloquear scroll horizontal en el body */
             overflow-x: hidden;
+            overflow-y: auto;
             background-color: var(--bg-principal);
             background-image:
                 radial-gradient(at 12% 6%, rgba(11, 63, 143, 0.55) 0px, transparent 46%),
@@ -158,8 +161,12 @@
             -webkit-text-size-adjust: 100%;
             -moz-text-size-adjust: 100%;
             text-size-adjust: 100%;
-            /* Android Chrome: prevenir pull-to-refresh accidental */
-            overscroll-behavior-y: none;
+            /* Android Chrome: prevenir pull-to-refresh accidental solo en móviles */
+            overscroll-behavior-y: contain;
+            /* Permitir scroll nativo con touchpad, mouse wheel y touch */
+            touch-action: pan-y pan-x pinch-zoom;
+            /* Asegurar que el scroll funcione en todos los dispositivos */
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Granulado global del fondo — vidrio granulado desenfocado sobre el degradado */
@@ -542,6 +549,72 @@
             -webkit-transform: translateZ(0);
             /* Evitar scroll horizontal accidental */
             overscroll-behavior-x: none;
+            /* Permitir scroll con touchpad, mouse wheel y touch */
+            touch-action: pan-y pan-x pinch-zoom;
+            /* Asegurar altura mínima para scroll */
+            min-height: 100vh;
+            /* Mejorar respuesta al scroll en todos los dispositivos */
+            will-change: scroll-position;
+        }
+
+        /* Scroll nativo para tablas en móviles y portátiles */
+        .overflow-x-auto {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x pan-y pinch-zoom;
+            scroll-behavior: smooth;
+            /* Scrollbar visible en desktop, invisible en móvil */
+            scrollbar-width: auto;
+            -ms-overflow-style: auto;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: rgba(0, 164, 228, 0.4);
+            border-radius: 4px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 164, 228, 0.6);
+        }
+
+        /* Scroll nativo para áreas de contenido largo */
+        .scroll-container {
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y pan-x pinch-zoom;
+            scroll-behavior: smooth;
+            max-height: 400px;
+            scrollbar-width: auto;
+            -ms-overflow-style: auto;
+        }
+        
+        .scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scroll-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 164, 228, 0.4);
+            border-radius: 4px;
+        }
+        
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 164, 228, 0.6);
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
