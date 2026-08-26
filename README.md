@@ -71,7 +71,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 | `icon.svg` | Icono vectorial corporativo |
 | `wilson.png` | Firma Arq. Wilson Dario Salazar Oliveros |
 | `juan.png` | Firma Ing. Juan LLuis Ramirez Jimenez |
-| `construramsa_db.json` | Base de datos inicial de ejemplo |
+| `construramsa_db.json` | Base de datos inicial vacía para datos reales |
 | `README.md` | Esta documentación |
 
 ## Estructura de Base de Datos
