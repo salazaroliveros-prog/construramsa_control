@@ -918,7 +918,7 @@
             .logo-img { max-height: 46px; }
             .nav-tab { padding: 8px 13px; font-size: 12px; }
             .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .kpi-card { padding: 12px 10px; }
+            .kpi-card { padding: 12px 10px; min-height: 90px; }
             .kpi-value { font-size: 14px !important; word-break: break-all; }
             .kpi-label { font-size: 9.5px; }
             .tarjeta-glass { padding: 12px; border-radius: 14px; }
@@ -938,7 +938,7 @@
             .logo-img { max-height: 42px; }
             .nav-tab { padding: 8px 11px; font-size: 11.5px; }
             .kpi-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .kpi-card { padding: 10px 8px; border-radius: 10px; }
+            .kpi-card { padding: 10px 8px; border-radius: 10px; min-height: 85px; }
             .kpi-value { font-size: 13px !important; word-break: break-all; }
             .kpi-label { font-size: 9px; letter-spacing: 0; }
             .kpi-sub { font-size: 9px; }
@@ -949,7 +949,7 @@
             label { font-size: 12.5px; }
             input, select, textarea { padding: 9px 10px; font-size: 14px; }
             /* FIX 4: saldo caja chica no desborda en 360px */
-            #saldo-caja-chica { font-size: 16px !important; word-break: break-all; }
+            #saldo-caja-chica { font-size: 16px !important; word-break: break-word; overflow-wrap: break-word; }
             /* FIX 3: form-grid-3 a 1 columna en 360px */
             .form-grid-2, .form-grid-2-sm, .form-grid-3 { grid-template-columns: 1fr; }
             table { font-size: 10px; }
@@ -971,15 +971,18 @@
             .modal-message { font-size: 13px; }
         }
 
-        /* FIX 7: landscape en móvil — editor más compacto, preview ocupa más espacio */
+        /* FIX 7: landscape en móvil — layout stacked para mejor usabilidad */
         @media (max-height: 500px) and (orientation: landscape) {
-            .vp-body { flex-direction: row; }
+            .vp-body { flex-direction: column; }
             .vp-editor {
-                width: 260px;
-                min-width: 220px;
-                max-height: 100%;
-                border-right: 1px solid var(--glass-border);
-                border-bottom: none;
+                width: 100%;
+                min-width: 280px;
+                max-height: 45%;
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+            }
+            .vp-preview {
+                min-height: 55%;
             }
             .vp-topbar { padding: 8px 14px; }
             .vp-topbar-title { font-size: 13px; }
@@ -1179,6 +1182,10 @@
             border-radius: 14px;
             padding: 16px;
             text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
@@ -1643,43 +1650,57 @@
                     <div>
                         <label for="caja-categoria">Categoría</label>
                         <select id="caja-categoria" required aria-required="true">
-                            <option value="apertura">Apertura de Caja</option>
-                            <option value="comida">Comida</option>
-                            <option value="ferreteria">Ferretería</option>
-                            <option value="imprevistos">Imprevistos</option>
-                            <option value="combustible">Combustible</option>
-                            <option value="materiales">Materiales</option>
-                            <option value="repuestos">Repuestos</option>
-                            <option value="mano_obra">Mano de Obra / Jornales</option>
-                            <option value="salarios">Salarios / Sueldos</option>
-                            <option value="herramientas">Herramientas</option>
-                            <option value="epi">Equipo de Protección Personal (EPI)</option>
-                            <option value="seguridad">Seguridad e Higiene</option>
-                            <option value="alquiler_equipo">Alquiler de Maquinaria/Equipo</option>
-                            <option value="fletes">Fletes y Transporte</option>
-                            <option value="acarreo">Acarreos / Cargos</option>
-                            <option value="agua">Agua Potable</option>
-                            <option value="energia">Energía Eléctrica</option>
-                            <option value="comunicaciones">Comunicaciones / Teléfono</option>
-                            <option value="viaticos">Viáticos / Gastos de Viaje</option>
-                            <option value="hospedaje">Hospedaje</option>
-                            <option value="material_oficina">Material de Oficina</option>
-                            <option value="senalizacion">Señalización de Obra</option>
-                            <option value="demolicion">Demolición</option>
-                            <option value="instalaciones_electricas">Instalaciones Eléctricas</option>
-                            <option value="instalaciones_hidra">Instalaciones Hidrosanitarias</option>
-                            <option value="limpieza">Limpieza de Obra</option>
-                            <option value="desechos">Disposición de Desechos/Escombros</option>
-                            <option value="andamios">Renta de Andamios</option>
-                            <option value="botiquin">Botiquín / Primeros Auxilios</option>
-                            <option value="vigilancia">Vigilancia / Seguridad</option>
-                            <option value="seguros">Seguros</option>
-                            <option value="lubricantes">Lubricantes y Aceites</option>
-                            <option value="neumaticos">Neumáticos</option>
-                            <option value="laboratorio">Laboratorio / Ensayos</option>
-                            <option value="planos">Impresiones / Planos</option>
-                            <option value="permisos">Permisos y Licencias</option>
-                            <option value="impuestos">Impuestos / Tasas</option>
+                            <optgroup label="💰 Gestión Financiera">
+                                <option value="apertura">Apertura de Caja</option>
+                                <option value="salarios">Salarios / Sueldos</option>
+                                <option value="impuestos">Impuestos / Tasas</option>
+                            </optgroup>
+                            <optgroup label="🔨 Materiales y Suministros">
+                                <option value="materiales">Materiales</option>
+                                <option value="ferreteria">Ferretería</option>
+                                <option value="herramientas">Herramientas</option>
+                                <option value="repuestos">Repuestos</option>
+                            </optgroup>
+                            <optgroup label="👷 Personal y Seguridad">
+                                <option value="mano_obra">Mano de Obra / Jornales</option>
+                                <option value="comida">Comida</option>
+                                <option value="epi">Equipo de Protección Personal (EPI)</option>
+                                <option value="seguridad">Seguridad e Higiene</option>
+                                <option value="vigilancia">Vigilancia / Seguridad</option>
+                            </optgroup>
+                            <optgroup label="⚡ Servicios y Utilidades">
+                                <option value="agua">Agua Potable</option>
+                                <option value="energia">Energía Eléctrica</option>
+                                <option value="comunicaciones">Comunicaciones / Teléfono</option>
+                                <option value="viaticos">Viáticos / Gastos de Viaje</option>
+                                <option value="hospedaje">Hospedaje</option>
+                            </optgroup>
+                            <optgroup label="🚜 Maquinaria y Transporte">
+                                <option value="combustible">Combustible</option>
+                                <option value="alquiler_equipo">Alquiler de Maquinaria/Equipo</option>
+                                <option value="fletes">Fletes y Transporte</option>
+                                <option value="acarreo">Acarreos / Cargos</option>
+                                <option value="lubricantes">Lubricantes y Aceites</option>
+                                <option value="neumaticos">Neumáticos</option>
+                            </optgroup>
+                            <optgroup label="🏗️ Construcción e Instalaciones">
+                                <option value="demolicion">Demolición</option>
+                                <option value="instalaciones_electricas">Instalaciones Eléctricas</option>
+                                <option value="instalaciones_hidra">Instalaciones Hidrosanitarias</option>
+                                <option value="senalizacion">Señalización de Obra</option>
+                                <option value="limpieza">Limpieza de Obra</option>
+                                <option value="desechos">Disposición de Desechos/Escombros</option>
+                                <option value="andamios">Renta de Andamios</option>
+                            </optgroup>
+                            <optgroup label="📋 Administración y Servicios">
+                                <option value="material_oficina">Material de Oficina</option>
+                                <option value="botiquin">Botiquín / Primeros Auxilios</option>
+                                <option value="seguros">Seguros</option>
+                                <option value="laboratorio">Laboratorio / Ensayos</option>
+                                <option value="planos">Impresiones / Planos</option>
+                                <option value="permisos">Permisos y Licencias</option>
+                                <option value="imprevistos">Imprevistos</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div>
@@ -2058,7 +2079,7 @@
                     <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar ruta">💾 Registrar Ruta</button>
                 </form>
                 <div class="overflow-x-auto">
-                    <table id="tabla-rutas" aria-label="Rutas al botadero">
+                    <table id="tabla-rutas" class="table-responsive-cards" aria-label="Rutas al botadero">
                         <thead><tr><th>Botadero</th><th>Distancia Ida</th><th>Acciones</th></tr></thead>
                         <tbody id="tabla-rutas-cuerpo"></tbody>
                     </table>
@@ -2118,7 +2139,7 @@
                     🔑 Camión alquilado — se aplicará la tarifa configurada en el catálogo
                 </div>
                 <div style="background:rgba(255,255,255,0.02);border:1px dashed var(--acento-cian);border-radius:8px;padding:15px;margin-bottom:20px;" aria-live="polite" aria-label="Cálculo del viaje en tiempo real">
-                    <div class="form-grid-2" style="margin-bottom:0;">
+                    <div class="form-grid-2" style="margin-bottom:0;gap:12px;">
                         <div>Distancia Total: <strong id="lbl-viaje-km" style="color:var(--acento-cian);">0.0 km</strong></div>
                         <div>Combustible Estimado: <strong id="lbl-viaje-litros">0.0 L</strong></div>
                         <div>Costo Combustible: <strong id="lbl-viaje-costo-comb">Q0.00</strong></div>
@@ -2270,8 +2291,8 @@
                     </div>
                 </div>
                 <div style="margin-top:12px;">
-                    <label for="insumo-stock-min">Stock mínimo de alerta (Qty) <span style="color:var(--texto-secundario);font-weight:normal;">— opcional. Se mostrará una alerta en el Resumen cuando la cantidad bajé de este valor.</span></label>
-                    <input type="number" inputmode="decimal" id="insumo-stock-min" value="0" min="0" max="99999" aria-label="Stock mínimo de alerta">
+                    <label for="insumo-stock-min">Stock Mínimo (Alerta)</label>
+                    <input type="number" inputmode="decimal" id="insumo-stock-min" value="0" min="0" max="99999" placeholder="Opcional: alerta al bajar de este valor" aria-label="Stock mínimo de alerta">
                 </div>
                 <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar compra y descontar de caja">💾 Registrar Compra</button>
@@ -2339,7 +2360,7 @@
                 <h3 style="color:var(--texto-principal);font-size:16px;">Presupuesto Inicial de Caja Chica</h3>
                 <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
                     <label for="config-presupuesto" class="visually-hidden">Presupuesto inicial</label>
-                    <input type="number" inputmode="decimal" step="0.01" id="config-presupuesto" placeholder="Monto inicial (Q)" aria-label="Monto inicial de caja chica" min="0" max="9999999" style="flex:1;min-width:120px;">
+                    <input type="number" inputmode="decimal" step="0.01" id="config-presupuesto" placeholder="Monto inicial (Q)" aria-label="Monto inicial de caja chica" min="0" max="9999999" style="flex:1;min-width:150px;">
                     <button onclick="guardarPresupuesto()" class="btn-primario" aria-label="Guardar presupuesto inicial">Guardar</button>
                 </div>
             </div>
@@ -2370,7 +2391,7 @@
                 <h3 style="color:var(--texto-principal);font-size:16px;">Respaldo de Datos</h3>
                 <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
                     <button onclick="exportarBaseDatos()" class="btn-primario" aria-label="Exportar base de datos en formato JSON">📤 Exportar JSON</button>
-                    <label class="file-label">
+                    <label class="file-label" id="import-label">
                         📥 Importar JSON
                         <input type="file" id="import-json" class="file-input" accept=".json" aria-label="Importar base de datos desde archivo JSON">
                     </label>
@@ -2440,7 +2461,7 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.7.4 (Auditoría UI completa: tooltips con flecha, clases CSS .lista-asistencia-item/.proyecto-card/.horas-extra-row, focus-visible accesible en botones, VP preview scale mejorado, limpieza de CSS duplicado)<br>
+                    Versión: 2.7.6 (Correcciones completas UI/UX: KPI cards altura uniforme, panel cálculo viajes espaciado, label stock mínimo acortado, modal landscape stacked, input presupuesto 150px, badge saldo word-break mejorado, feedback visual file import)<br>
                     Desarrollado para: CONSTRURAMSA<br>
                     Modo: Offline (LocalStorage) · Sin autenticación multiusuario; no usar como sistema público hasta conectar un proveedor de identidad.
                 </p>
@@ -3941,7 +3962,7 @@ tbody.innerHTML = '';
                     </fieldset>
                     <div class="horas-extra-row">
                         <label for="horas-extra-${t.id}" style="font-size:12px;white-space:nowrap;color:var(--texto-secundario);">Horas Extra:</label>
-                        <input type="number" inputmode="decimal" id="horas-extra-${_esc(t.id)}" min="0" max="8" value="0" style="width:80px;min-width:70px;padding:6px;text-align:center;" aria-label="Horas extra de ${_esc(t.nombre)}">
+                        <input type="number" inputmode="decimal" id="horas-extra-${_esc(t.id)}" min="0" max="8" value="0" style="width:100px;min-width:90px;padding:10px;text-align:center;" aria-label="Horas extra de ${_esc(t.nombre)}">
                     </div>
 <div class="lista-asistencia-item-acciones">
                         <button onclick="editarTrabajador('${_esc(t.id)}')" class="btn-secundario" style="padding:6px 8px;font-size:11px;flex:1;" aria-label="Editar trabajador ${_esc(t.nombre)}">✏️ Editar</button>
@@ -4438,6 +4459,13 @@ pag_.forEach(c => {
         document.getElementById('import-json').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
+            // Feedback visual del archivo seleccionado
+            const label = document.getElementById('import-label');
+            if (label) {
+                label.textContent = `📥 ${file.name}`;
+                label.style.background = 'rgba(16, 185, 129, 0.15)';
+                label.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            }
             showLoading('Importando base de datos...');
             const reader = new FileReader();
             reader.onload = function(ev) {
@@ -4463,7 +4491,18 @@ pag_.forEach(c => {
                             setTimeout(() => location.reload(), 1500);
                         }
                     );
-                } catch (err) { hideLoading(); showToast('❌ Archivo JSON inválido', 'error'); console.error(err); }
+                } catch (err) {
+                    hideLoading();
+                    showToast('❌ Archivo JSON inválido', 'error');
+                    console.error(err);
+                    // Resetear label del input
+                    const label = document.getElementById('import-label');
+                    if (label) {
+                        label.textContent = '📥 Importar JSON';
+                        label.style.background = '';
+                        label.style.borderColor = '';
+                    }
+                }
             };
             reader.readAsText(file);
             this.value = '';
@@ -4770,9 +4809,9 @@ function cargarTablaCamiones() {
             rutas.forEach(r => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${_esc(r.nombre)}</td>
-                    <td>${r.distancia} km</td>
-                    <td><button onclick="eliminarRuta('${r.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar ruta">🗑️</button></td>`;
+                    <td data-label="Botadero">${_esc(r.nombre)}</td>
+                    <td data-label="Distancia Ida">${r.distancia} km</td>
+                    <td class="actions-cell"><button onclick="eliminarRuta('${r.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar ruta">🗑️</button></td>`;
                 tbody.appendChild(tr);
             });
         }
