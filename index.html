@@ -37,11 +37,19 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
-            /* Paleta Construramsa */
-            --bg-principal: #090a0f;
-            --glass-bg: rgba(20, 24, 35, 0.45);
-            --glass-border: rgba(0, 164, 228, 0.15);
-            --glass-glow: rgba(111, 45, 189, 0.1);
+            /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */
+            --bg-principal: #0a0c14;
+            --brand-azul: #0b3f8f;
+            --brand-azul-2: #0057b8;
+            --brand-cian: #00A4E4;
+            --brand-cian-brillo: #33d2ff;
+            --brand-purpura: #a855f7;
+            --brand-purpura-2: #8b5cf6;
+            --glass-bg: rgba(19, 24, 40, 0.42);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-highlight: rgba(255, 255, 255, 0.08);
+            --glass-glow: rgba(0, 164, 228, 0.16);
+            --glass-glow-purpura: rgba(139, 92, 246, 0.18);
 
             /* Colores de Acento */
             --acento-cian: #00A4E4;
@@ -64,8 +72,13 @@
         body {
             background-color: var(--bg-principal);
             background-image:
-                radial-gradient(at 0% 0%, rgba(0, 75, 147, 0.2) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(111, 45, 189, 0.15) 0px, transparent 50%);
+                radial-gradient(at 12% 6%, rgba(11, 63, 143, 0.55) 0px, transparent 46%),
+                radial-gradient(at 50% 0%, rgba(0, 164, 228, 0.28) 0px, transparent 54%),
+                radial-gradient(at 88% 12%, rgba(51, 210, 255, 0.30) 0px, transparent 44%),
+                radial-gradient(at 82% 88%, rgba(139, 92, 246, 0.36) 0px, transparent 48%),
+                radial-gradient(at 18% 86%, rgba(11, 63, 143, 0.34) 0px, transparent 48%),
+                linear-gradient(160deg, #070813 0%, #0a0c14 40%, #0b1530 74%, #121b3a 100%);
+            background-attachment: fixed;
             color: var(--texto-principal);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
@@ -81,6 +94,20 @@
             -webkit-touch-callout: none;
         }
 
+        /* Granulado global del fondo — vidrio granulado desenfocado sobre el degradado */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 180px 180px;
+            opacity: 0.05;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .container { position: relative; z-index: 1; }
+
         /* Permitir selección en inputs y textareas */
         input, select, textarea, [contenteditable] {
             -webkit-user-select: text;
@@ -89,35 +116,68 @@
         }
 
         .tarjeta-glass {
+            position: relative;
             background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(22px) saturate(150%);
+            backdrop-filter: blur(22px) saturate(150%);
             border: 1px solid var(--glass-border);
+            border-top-color: var(--glass-highlight);
             border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37), inset 0 0 12px var(--glass-glow);
+            box-shadow:
+                0 8px 32px 0 rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07),
+                inset 0 0 24px var(--glass-glow);
             transition: all 0.3s ease;
         }
+        .tarjeta-glass::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background:
+                radial-gradient(120px circle at 12% 8%, rgba(0, 164, 228, 0.20), transparent 65%),
+                radial-gradient(150px circle at 90% 92%, rgba(139, 92, 246, 0.18), transparent 62%);
+            pointer-events: none;
+        }
+        .tarjeta-glass::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            pointer-events: none;
+        }
+        .tarjeta-glass > * { position: relative; }
 
         .tarjeta-glass:hover {
-            border-color: rgba(0, 164, 228, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(0, 164, 228, 0.1);
+            border-color: rgba(0, 164, 228, 0.4);
+            box-shadow:
+                0 12px 40px -6px rgba(0, 164, 228, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.10);
         }
 
         input, select, textarea {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
             color: #fff;
             padding: 12px;
             width: 100%;
             box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.42);
+            opacity: 1;
         }
 
         input:focus, select:focus, textarea:focus {
             border-color: var(--acento-cian);
+            background: rgba(0, 164, 228, 0.07);
             outline: none;
-            box-shadow: 0 0 8px rgba(0, 164, 228, 0.4);
+            box-shadow: 0 0 0 3px rgba(0, 164, 228, 0.16), 0 0 14px rgba(0, 164, 228, 0.45);
         }
 
         /* Fix: opciones de select legibles en modo oscuro en todos los SO */
@@ -130,29 +190,33 @@
         }
 
         .btn-primario {
-            background: linear-gradient(135deg, var(--acento-azul), var(--acento-cian));
+            background: linear-gradient(135deg, var(--acento-azul) 0%, var(--acento-cian) 55%, var(--brand-cian-brillo) 130%);
             border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 700;
             padding: 12px 24px;
             cursor: pointer;
-            transition: transform 0.2s;
+            box-shadow: 0 6px 18px -4px rgba(0, 164, 228, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
         }
         .btn-primario:active  { transform: scale(0.98); }
-        .btn-primario:hover   { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,164,228,0.3); }
+        .btn-primario:hover   { transform: translateY(-2px); filter: brightness(1.07); box-shadow: 0 10px 26px -6px rgba(0, 164, 228, 0.6); }
 
         .btn-secundario {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
             border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            color: white;
+            border-radius: 10px;
+            color: #fff;
             font-weight: 600;
             padding: 12px 24px;
             cursor: pointer;
-            transition: transform 0.2s;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            transition: transform 0.2s, background 0.2s, border-color 0.2s;
         }
-        .btn-secundario:hover  { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .btn-secundario:hover  { background: rgba(255, 255, 255, 0.15); border-color: rgba(0, 164, 228, 0.4); transform: translateY(-2px); }
         .btn-secundario:active { transform: scale(0.98); }
 
         .container {
@@ -248,8 +312,10 @@
 
         .nav-tab {
             background: rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
             border: 1px solid var(--glass-border);
-            border-radius: 8px;
+            border-radius: 10px;
             color: var(--texto-secundario);
             padding: 10px 20px;
             cursor: pointer;
@@ -257,10 +323,11 @@
         }
         .nav-tab.active {
             background: linear-gradient(135deg, var(--acento-azul), var(--acento-cian));
-            color: white;
+            color: #fff;
             border-color: var(--acento-cian);
+            box-shadow: 0 4px 16px -4px rgba(0, 164, 228, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
-        .nav-tab:hover:not(.active) { background: rgba(255,255,255,0.1); }
+        .nav-tab:hover:not(.active) { background: rgba(255, 255, 255, 0.12); border-color: rgba(0, 164, 228, 0.35); }
 
         .module { display: none; animation: fadeIn 0.3s ease-in-out; }
         .module.active { display: block; }
@@ -273,7 +340,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
 
         th {
-            background: rgba(0, 164, 228, 0.1);
+            background: linear-gradient(135deg, rgba(11, 63, 143, 0.45), rgba(0, 164, 228, 0.25));
             color: var(--acento-cian);
             font-size: 12px;
             font-weight: 700;
@@ -623,13 +690,36 @@
             margin-bottom: 20px;
         }
         .kpi-card {
-            background: linear-gradient(145deg, rgba(0,75,147,0.25), rgba(0,164,228,0.12));
+            position: relative;
+            background: linear-gradient(145deg, rgba(11, 63, 143, 0.5), rgba(0, 164, 228, 0.18));
+            -webkit-backdrop-filter: blur(14px) saturate(150%);
+            backdrop-filter: blur(14px) saturate(150%);
             border: 1px solid var(--glass-border);
+            border-top-color: rgba(51, 210, 255, 0.45);
             border-radius: 14px;
             padding: 16px;
             text-align: center;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
+        .kpi-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        .kpi-card > * { position: relative; }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 164, 228, 0.5);
+            box-shadow: 0 12px 32px -8px rgba(0, 164, 228, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .kpi-card.positivo { background: linear-gradient(145deg, rgba(6, 95, 70, 0.42), rgba(16, 185, 129, 0.16)); border-top-color: rgba(52, 211, 153, 0.4); }
+        .kpi-card.negativo { background: linear-gradient(145deg, rgba(153, 27, 27, 0.42), rgba(220, 38, 38, 0.14)); border-top-color: rgba(248, 113, 113, 0.5); }
+        .kpi-card.purpura { background: linear-gradient(145deg, rgba(109, 45, 189, 0.42), rgba(168, 85, 247, 0.18)); border-top-color: rgba(192, 132, 252, 0.5); }
         .kpi-card .kpi-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -1432,6 +1522,55 @@
                 </div>
             </div>
 
+            <div style="margin-bottom:25px;padding:16px;border:1px solid var(--glass-border);border-radius:12px;background:linear-gradient(145deg,rgba(11,63,143,0.25),rgba(139,92,246,0.12));">
+                <h3 style="color:var(--acento-cian);font-size:16px;margin-top:0;">☁️ Respaldo en la Nube (Google Drive / OneDrive)</h3>
+                <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">
+                    Tus datos se respaldan en tu propia cuenta (Google Drive/OneDrive). Si borras la app y la reinstalas, podrás <strong>restaurar</strong> toda tu información.
+                </p>
+
+                <label for="nube-proveedor" style="font-size:12px;color:var(--texto-principal);">Método de respaldo</label>
+                <select id="nube-proveedor" style="margin-bottom:12px;">
+                    <option value="gas">Google Apps Script (Google Drive) — recomendado</option>
+                    <option value="gdrive">Google Drive API (avanzado)</option>
+                    <option value="onedrive">OneDrive / Microsoft Graph (avanzado)</option>
+                </select>
+
+                <!-- Campos: Google Apps Script -->
+                <div id="nube-cfg-gas">
+                    <label for="nube-gas-url" style="font-size:12px;color:var(--texto-principal);">URL del Web App (Google Apps Script)</label>
+                    <input type="text" id="nube-gas-url" placeholder="https://script.google.com/macros/s/.../exec" aria-label="URL del Web App de Google Apps Script">
+                    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                        <button type="button" onclick="nubeCopiarScript()" class="btn-secundario" style="font-size:12px;">📋 Copiar Script (Apps Script)</button>
+                        <button type="button" onclick="nubeAbrirGuia()" class="btn-secundario" style="font-size:12px;">📖 Ver guía de instalación</button>
+                    </div>
+                </div>
+
+                <!-- Campos: Google Drive OAuth -->
+                <div id="nube-cfg-gred" style="display:none;">
+                    <label for="nube-gd-client" style="font-size:12px;color:var(--texto-principal);">Google Client ID</label>
+                    <input type="text" id="nube-gd-client" placeholder="xxxx.apps.googleusercontent.com" aria-label="Google OAuth Client ID">
+                    <label for="nube-gd-token" style="font-size:12px;color:var(--texto-principal);margin-top:8px;">Access Token (opcional, pegar desde la URL luego de autorizar)</label>
+                    <input type="text" id="nube-gd-token" placeholder="ya29..." aria-label="Google acceso token">
+                </div>
+
+                <!-- Campos: OneDrive OAuth -->
+                <div id="nube-cfg-onedrive" style="display:none;">
+                    <label for="nube-od-client" style="font-size:12px;color:var(--texto-principal);">OneDrive Application (Client) ID</label>
+                    <input type="text" id="nube-od-client" placeholder="00000000-0000-0000-0000-000000000000" aria-label="OneDrive OAuth Client ID">
+                    <label for="nube-od-token" style="font-size:12px;color:var(--texto-principal);margin-top:8px;">Access Token (opcional)</label>
+                    <input type="text" id="nube-od-token" placeholder="EwA..." aria-label="OneDrive access token">
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                    <button type="button" onclick="nubeGuardarConfig()" class="btn-primario" style="margin-top:0;">💾 Guardar Configuración</button>
+                    <button type="button" onclick="nubeSubirAhora()" class="btn-primario" style="margin-top:0;">⬆️ Subir a la Nube ahora</button>
+                    <button type="button" onclick="nubeRestaurar()" class="btn-secundario" style="margin-top:0;">⬇️ Restaurar desde la Nube</button>
+                </div>
+
+                <div id="nube-estado" role="status" aria-live="polite" style="margin-top:12px;font-size:12px;color:var(--texto-principal);">— Sin configurar —</div>
+                <div id="nube-ulima" style="margin-top:6px;font-size:11px;color:var(--texto-secundario);">Último respaldo: nunca</div>
+            </div>
+
             <div style="margin-bottom:25px;">
                 <h3 style="color:var(--texto-principal);font-size:16px;">Gestión de Logo</h3>
                 <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:center;">
@@ -1446,7 +1585,7 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.1.0 (Panel de Resumen, viajes, mantenimiento, export XLSX)<br>
+                    Versión: 2.4.0 (Panel de Resumen, viajes, mantenimiento, export XLSX, respaldo en la nube)<br>
                     Desarrollado para: CONSTRURAMSA<br>
                     Modo: Offline (LocalStorage)
                 </p>
@@ -1588,6 +1727,8 @@
             try {
                 _dbCache = db;
                 localStorage.setItem(DB_KEY, JSON.stringify(db));
+                // Auto-respaldo a la nube (si está configurado), con debounce
+                scheduleNubeAuto();
             } catch (e) {
                 console.error('Error al guardar DB:', e);
                 showToast('❌ Error al guardar. Verifique espacio en localStorage.', 'error');
@@ -1601,6 +1742,7 @@
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
             if (!db.configuracion.nombre_empresa) db.configuracion.nombre_empresa = 'CONSTRURAMSA';
             if (!db.configuracion.eslogan) db.configuracion.eslogan = 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            if (!db.configuracion.nube) db.configuracion.nube = { proveedor:'gas', url:'', auto:true, ultimo:null };
             if (db.configuracion.proyecto_actual === undefined) db.configuracion.proyecto_actual = null;
             if (!db.proyectos) db.proyectos = [];
             if (!db.proyectos_data) db.proyectos_data = {};
@@ -2123,10 +2265,12 @@
                 return false;
             }
             const datos = getProyectoData();
-            datos.caja_chica.push({ id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'egreso', categoria, descripcion, monto, responsable:'Sistema Automático' });
+            const mov = { id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'egreso', categoria, descripcion, monto, responsable:'Sistema Automático' };
+            datos.caja_chica.push(mov);
             saveProyectoData(datos);
             actualizarSaldoCajaChica();
-            return true;
+            // Devuelve el movimiento creado (truthy) para poder vincular el gasto_id
+            return mov;
         }
 
         estadoPaginacion.cajaChica = 1;
@@ -2349,7 +2493,12 @@
                 showConfirmModal('Actualizar Registro', '¿Guardar los cambios en este registro de maquinaria?', () => {
                     const idx = datos.maquinaria_flota.registros.findIndex(r => r.id === editandoId);
                     if (idx !== -1) {
-                        datos.maquinaria_flota.registros[idx] = { ...datos.maquinaria_flota.registros[idx], odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas: tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
+                        const prev = datos.maquinaria_flota.registros[idx];
+                        const gastoPrev = (prev.combustible_costo || 0) + (prev.mantenimiento_costo || 0);
+                        const gastoNuevo = costoComb + mantCosto;
+                        datos.maquinaria_flota.registros[idx] = { ...prev, odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas: tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
+                        // Recalcular el gasto vinculado en caja chica si cambió
+                        ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo);
                         saveProyectoData(datos);
                     }
                     delete this.dataset.editando;
@@ -2362,7 +2511,11 @@
             }
 
             // Nuevo registro: descontar gasto de caja chica del proyecto activo
-            if (gastoTotal > 0 && !procesarGastoCajaChica(gastoTotal, 'Combustible/Mantenimiento', `Maquinaria ${codigo}${mantDet ? ' - ' + mantDet : ''}`)) return;
+            let movGasto = null;
+            if (gastoTotal > 0) {
+                movGasto = procesarGastoCajaChica(gastoTotal, 'Combustible/Mantenimiento', `Maquinaria ${codigo}${mantDet ? ' - ' + mantDet : ''}`);
+                if (!movGasto) return;
+            }
 
             // Recargar datos tras procesarGastoCajaChica que ya guardó
             const datosAct = getProyectoData();
@@ -2371,7 +2524,10 @@
                 veh = { id:generarId(), tipo: tipo==='retroexcavadora'?'Retroexcavadora':'Camión de Volteo', codigo, marca_modelo: tipo==='retroexcavadora'?'Retroexcavadora':'Camión de Volteo' };
                 datosAct.maquinaria_flota.vehiculos.push(veh);
             }
-            datosAct.maquinaria_flota.registros.push({ id:generarId(), vehiculo_id:veh.id, fecha:new Date().toISOString().split('T')[0], odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas:tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto });
+            const regObj = { id:generarId(), vehiculo_id:veh.id, fecha:new Date().toISOString().split('T')[0], odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas:tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
+            // Vincular el egreso de caja con este registro para ajuste/reversión exactos
+            if (movGasto) regObj.gasto_id = movGasto.id;
+            datosAct.maquinaria_flota.registros.push(regObj);
             saveProyectoData(datosAct);
             this.reset(); resetPanelMaquinaria();
             estadoPaginacion.maquinaria = 1;
@@ -2384,6 +2540,41 @@
             getDomElement('lbl-costo-combustible').textContent = formatearMoneda(0);
             getDomElement('lbl-rendimiento').textContent      = 'N/A';
             getDomElement('lbl-gasto-total').textContent      = formatearMoneda(0);
+        }
+
+        /**
+         * Ajusta el egreso de caja vinculado a un registro de maquinaria.
+         * Busca el egreso por gasto_id o (fallback) por la descripción que contiene el código.
+         * - Si el nuevo gasto > 0 y existe egreso: actualiza su monto (y descripción).
+         * - Si el nuevo gasto > 0 y NO existe (antes era 0): crea un egreso y lo vincula.
+         * - Si el nuevo gasto === 0: elimina el egreso vinculado (revierte).
+         */
+        function ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo) {
+            // localizar el egreso vinculado
+            let egreso = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
+            if (!egreso) {
+                egreso = (datos.caja_chica || []).find(m => m.tipo === 'egreso' && m.categoria === 'Combustible/Mantenimiento' && m.descripcion && m.descripcion.indexOf('Maquinaria ' + codigo) === 0);
+            }
+            const reg = datos.maquinaria_flota.registros.find(r => r.id === prev.id);
+
+            if (gastoNuevo > 0) {
+                if (egreso) {
+                    // Ajustar el monto del egreso vinculado al nuevo gasto
+                    egreso.monto = gastoNuevo;
+                    if (reg) reg.gasto_id = egreso.id;
+                } else {
+                    // No había egreso (se pasó de 0 a gasto); crear uno. Validar saldo.
+                    const saldo = actualizarSaldoCajaChica();
+                    if (gastoNuevo > saldo) { showToast(`❌ Fondos insuficientes. Saldo: ${formatearMoneda(saldo)}. Gasto: ${formatearMoneda(gastoNuevo)}`, 'error', 5000); return; }
+                    const mov = { id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'egreso', categoria:'Combustible/Mantenimiento', descripcion:`Maquinaria ${codigo}`, monto:gastoNuevo, responsable:'Sistema Automático' };
+                    datos.caja_chica.push(mov);
+                    if (reg) reg.gasto_id = mov.id;
+                }
+            } else if (egreso) {
+                // Gasto bajó a 0: eliminar el egreso vinculado (revierte en caja)
+                datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
+                if (reg) delete reg.gasto_id;
+            }
         }
 
         function editarRegistroMaquinaria(id) {
@@ -2413,10 +2604,20 @@
                 const reg     = datos.maquinaria_flota.registros.find(r => r.id === id);
                 const veh     = datos.maquinaria_flota.vehiculos.find(v => v.id === reg?.vehiculo_id);
                 if (reg) {
-                    const gasto = (reg.combustible_costo || 0) + (reg.mantenimiento_costo || 0);
-                    // Revertir gasto: agregar ingreso de reembolso en caja chica del proyecto
-                    if (gasto > 0) {
-                        datos.caja_chica.push({ id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'ingreso', categoria:'Reembolso', descripcion:`Reversión gasto maquinaria: ${veh?.codigo || 'N/A'}`, monto:gasto, responsable:'Sistema' });
+                    let gasto = (reg.combustible_costo || 0) + (reg.mantenimiento_costo || 0);
+                    // Buscar el egreso vinculado exacto (por gasto_id o por descripción)
+                    let egreso = (datos.caja_chica || []).find(m => reg.gasto_id && m.id === reg.gasto_id && m.tipo === 'egreso');
+                    const vehCodigo = veh?.codigo || 'N/A';
+                    if (!egreso) {
+                        egreso = (datos.caja_chica || []).find(m => m.tipo === 'egreso' && m.categoria === 'Combustible/Mantenimiento' && m.descripcion && m.descripcion.indexOf('Maquinaria ' + vehCodigo) === 0);
+                    }
+                    if (egreso) {
+                        // Revertir eliminando el egreso vinculado exacto (evita doble reembolso)
+                        gasto = egreso.monto;
+                        datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
+                    } else if (gasto > 0) {
+                        // Fallback (datos migrados sin vínculo): agregar ingreso de reembolso
+                        datos.caja_chica.push({ id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'ingreso', categoria:'Reembolso', descripcion:`Reversión gasto maquinaria: ${vehCodigo}`, monto:gasto, responsable:'Sistema Automatico' });
                     }
                     datos.maquinaria_flota.registros = datos.maquinaria_flota.registros.filter(r => r.id !== id);
                     saveProyectoData(datos);
@@ -2950,8 +3151,173 @@
         });
 
         // ============================================================
+        // MÓDULO RESPALDO EN LA NUBE (Google Drive / OneDrive)
+        // ============================================================
+        // saveDB() dispara scheduleNubeAuto(). Método funcional: Google Apps
+        // Script (store en tu Drive) sin registrar app de OAuth.
+        let _nubeTimer = null;
+        function scheduleNubeAuto() {
+            if (_nubeTimer) clearTimeout(_nubeTimer);
+            _nubeTimer = setTimeout(() => { _nubeTimer = null; nubeSubirAhora(true); }, 4000);
+        }
+        function _nubeCfg() {
+            const db = getDB();
+            if (!db.configuracion.nube) db.configuracion.nube = { proveedor:'gas', url:'', auto:true, ultimo:null, gd_client:'', gd_token:'', od_client:'', od_token:'' };
+            return db.configuracion.nube;
+        }
+        function _nubeSetEstado(msg, ok) {
+            const el = document.getElementById('nube-estado');
+            if (!el) return;
+            el.textContent = msg;
+            el.style.color = ok ? 'var(--exito)' : (ok === false ? 'var(--alerta-texto)' : 'var(--texto-principal)');
+        }
+        function _nubeSetUltimo(t) {
+            const el = document.getElementById('nube-ulima');
+            if (!el) return;
+            el.textContent = t ? ('Último respaldo: ' + new Date(t).toLocaleString()) : 'Último respaldo: nunca';
+        }
+        function nubeRenderUI() {
+            const c = _nubeCfg();
+            const prov = document.getElementById('nube-proveedor'); if (prov) prov.value = c.proveedor || 'gas';
+            const u = document.getElementById('nube-gas-url'); if (u) u.value = c.url || '';
+            const gd1 = document.getElementById('nube-gd-client'); if (gd1) gd1.value = c.gd_client || '';
+            const gd2 = document.getElementById('nube-gd-token'); if (gd2) gd2.value = c.gd_token || '';
+            const od1 = document.getElementById('nube-od-client'); if (od1) od1.value = c.od_client || '';
+            const od2 = document.getElementById('nube-od-token'); if (od2) od2.value = c.od_token || '';
+            _nubeSetEstado(c.url || c.gd_token || c.od_token ? 'Configurado — auto-respaldo ' + (c.auto ? 'ACTIVO' : 'desactivado') : '— Sin configurar —', true);
+            _nubeSetUltimo(c.ultimo);
+            nubeCambiarProveedor2();
+        }
+        function nubeCambiarProveedor2() {
+            const prov = document.getElementById('nube-proveedor');
+            if (!prov) return;
+            const p = prov.value;
+            document.getElementById('nube-cfg-gas').style.display = p === 'gas' ? '' : 'none';
+            document.getElementById('nube-cfg-gred').style.display = p === 'gdrive' ? '' : 'none';
+            document.getElementById('nube-cfg-onedrive').style.display = p === 'onedrive' ? '' : 'none';
+        }
+        function nubeGuardarConfig() {
+            const db = getDB();
+            const c = db.configuracion.nube;
+            c.proveedor = document.getElementById('nube-proveedor').value;
+            c.url = document.getElementById('nube-gas-url').value.trim();
+            c.gd_client = document.getElementById('nube-gd-client').value.trim();
+            c.gd_token = document.getElementById('nube-gd-token').value.trim();
+            c.od_client = document.getElementById('nube-od-client').value.trim();
+            c.od_token = document.getElementById('nube-od-token').value.trim();
+            c.auto = true;
+            saveDB(db);
+            _nubeSetEstado('Configuración de nube guardada', true);
+            showToast('⚙️ Configuración de nube guardada', 'success');
+        }
+        function nubeCopiarScript() {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(NUBE_SCRIPT).then(() => showToast('📋 Script Apps Script copiado', 'success'));
+            } else {
+                const ta = document.createElement('textarea'); ta.value = NUBE_SCRIPT; document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+                showToast('📋 Script copiado', 'success');
+            }
+        }
+        function nubeAbrirGuia() {
+            showConfirmModal('☁️ Respaldar en la Nube',
+                '1. Ve a https://script.google.com · crea un proyecto nuevo.\n2. Borra el contenido y pega el script («Copiar Script»).\n3. Guarda y luego «Ver → Implementar como App Web».\n4. Ejecutar como: Tú · Quién puede acceder: Cualquiera.\n5. Implementar y autoriza. Copia la URL que termina en /exec.\n6. Pega esa URL en el campo y pulsa 💾 Guardar y ⬆️ Subir.\n\nSe creará la carpeta CONSTRURAMSA_Backups en tu Google Drive\n(un archivo por día + latest.json). 100% offline.',
+                () => {}, 'Cerrar');
+        }
+
+        // ============================================================
         // MÓDULO VIAJES DE CAMIONES
         // ============================================================
+
+        // Script de Google Apps Script para respaldar a tu Google Drive.
+        // Definido aquí (se usa al pulsar "Copiar Script" y en la guía).
+        const NUBE_SCRIPT = [
+            "/** Respaldador CONSTRURAMSA (Google Apps Script) — guarda en tu Drive */",
+            "var CARPETA = 'CONSTRURAMSA_Backups';",
+            "function buscarCarpeta(){",
+            "  var it = DriveApp.getFoldersByName(CARPETA);",
+            "  return it.hasNext() ? it.next() : DriveApp.createFolder(CARPETA);",
+            "}",
+            "function guardarArchivo(nom, contenido){",
+            "  var folder = buscarCarpeta();",
+            "  var files = folder.getFilesByName(nom);",
+            "  if (files.hasNext()) { files.next().setContent(contenido); }",
+            "  else { folder.createFile(Utilities.newBlob(contenido, 'application/json', nom)); }",
+            "}",
+            "function doPost(e){",
+            "  try {",
+            "    var body = JSON.parse(e.postData.contents);",
+            "    var ts = new Date(), dia = ts.toISOString().slice(0,10);",
+            "    var hoy = dia + '-' + ts.toTimeString().slice(0,2) + 'h';",
+            "    guardarArchivo('construramsa_latest.json', JSON.stringify(body.data));",
+            "    guardarArchivo('construramsa_' + dia + '.json', JSON.stringify(body.data));",
+            "    return ContentService.createTextOutput(JSON.stringify({ok:true}));",
+            "  } catch(err){ return ContentService.createTextOutput(JSON.stringify({ok:false,error:String(err)})); }",
+            "}",
+            "function doGet(e){",
+            "  try {",
+            "    var folder = buscarCarpeta();",
+            "    var f = folder.getFilesByName('construramsa_latest.json');",
+            "    if (!f.hasNext()) return ContentService.createTextOutput(JSON.stringify({ok:false,error:'Sin respaldo'}));",
+            "    var contenido = f.next().getBlob().getDataAsString();",
+            "    return ContentService.createTextOutput(JSON.stringify({ok:true,data:JSON.parse(contenido)}));",
+            "  } catch(err){ return ContentService.createTextOutput(JSON.stringify({ok:false,error:String(err)})); }",
+            "}",
+            "/** Solo para autorizar permisos la primera vez */",
+            "function crearCarpetaPrueba(){ buscarCarpeta(); return 'Carpeta CONSTRURAMSA lista'; }"
+        ].join('\n');
+
+        async function nubeSubirAhora(auto) {
+            const db = getDB();
+            const c = _nubeCfg();
+            if (c.proveedor !== 'gas') {
+                _nubeSetEstado('ℹ️ Método ' + c.proveedor + ': pega tus credenciales OAuth y Guarda', false);
+                if (!auto) showToast('ℹ️ Configura tus credenciales OAuth primero', 'info');
+                return;
+            }
+            if (!c.url) { if (!auto) { _nubeSetEstado('⚠️ Configura la URL del Web App primero', false); showToast('⚠️ Sin URL de Web App', 'info'); } return; }
+            try {
+                if (!auto) _nubeSetEstado('⬆️ Subiendo a Google Drive...', );
+                const body = JSON.stringify({ data: db });
+                const res = await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                // Persistir timestamp SIN pasar por saveDB (evita bucle de auto-sync)
+                c.ultimo = new Date().toISOString();
+                _dbCache = db;
+                localStorage.setItem(DB_KEY, JSON.stringify(db));
+                _nubeSetEstado('✅ Respaldo subido a la nube correctamente', true);
+                _nubeSetUltimo(c.ultimo);
+                if (!auto) showToast('✅ Datos subidos a tu Google Drive', 'success');
+            } catch (err) {
+                _nubeSetEstado('❌ Error al subir: ' + err.message, false);
+                if (!auto) showToast('❌ No se pudo subir: ' + err.message, 'error');
+            }
+        }
+        function nubeRestaurar() {
+            const c = _nubeCfg();
+            if (c.proveedor !== 'gas' || !c.url) { showToast('⚠️ Configura un respaldo en la nube primero', 'info'); return; }
+            showLoading('Descargando respaldo de la nube...');
+            fetch(c.url, { method: 'GET' })
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(r => {
+                    if (!r.ok) throw new Error(r.error || 'sin respaldo');
+                    hideLoading();
+                    showConfirmModal('Restaurar desde la nube',
+                        'Se FUSIONARÁ el respaldo remoto con tus datos actuales. Los registros nuevos se agregan y los existentes se actualizan. ¿Continuar?',
+                        () => {
+                            showLoading('Restaurando...');
+                            const fusionado = importarBaseDatosConFusion(r.data);
+                            invalidarCacheDB(); saveDB(fusionado);
+                            hideLoading();
+                            _nubeSetEstado('✅ ¡Restaurado! Recargando...', true);
+                            showToast('✅ Datos restaurados desde la nube', 'success', 5000);
+                            setTimeout(() => location.reload(), 1400);
+                        });
+                })
+                .catch(err => { hideLoading(); _nubeSetEstado('❌ Error al descargar: ' + err.message, false); showToast('❌ Error al restaurar: ' + err.message, 'error'); });
+        }
+        document.addEventListener('DOMContentLoaded', function () { setTimeout(nubeRenderUI, 600); });
+        document.addEventListener('change', function (e) { if (e.target && e.target.id === 'nube-proveedor') nubeCambiarProveedor2(); });
         function cargarCamiones() {
             const datos = getProyectoData();
             const sel = document.getElementById('viaje-cam');

@@ -21,7 +21,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 - **Respaldo de Datos**: Exportación e importación con fusión inteligente
 - **Accesibilidad WCAG 2.1 AA**: Contraste de colores corregido, aria-live, aria-label en todos los controles
 - **Paginación**: Tablas de historial paginadas a 20 registros por página
-- **PWA Completa**: Service Worker v2.1.0 con activación inmediata y cache robusto
+- **PWA Completa**: Service Worker v2.4.0 con activación inmediata y cache robusto
 
 ## Instalación
 
@@ -63,7 +63,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 | Archivo | Descripción |
 |---------|-------------|
 | `index.html` | Aplicación principal (HTML + CSS + JavaScript) |
-| `sw.js` | Service Worker v2.1.0 para funcionalidad offline |
+| `sw.js` | Service Worker v2.4.0 para funcionalidad offline |
 | `manifest.json` | Configuración PWA con shortcuts de módulos |
 | `icon.png` | Icono corporativo (192×192px) |
 | `icon.svg` | Icono vectorial corporativo |
@@ -137,6 +137,25 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 
 ## Historial de Cambios
 
+### v2.4.0 (2026-08-24) — Corrección de consistencia en Maquinaria (QA)
+- **Bug**: Al editar un registro de maquinaria ya no se desbalancea la caja: el egreso vinculado se ajusta al nuevo gasto (o se crea/elimina según corresponda)
+- **Bug**: Al eliminar un registro de maquinaria se revierte el monto EXACTO del egreso vinculado (eliminándolo directamente) en lugar de crear un reembolso duplicado
+- **Mejora**: `procesarGastoCajaChica()` devuelve el movimiento creado para vincular el `gasto_id` del egreso con cada registro de maquinaria (con fallback por descripción para datos migrados)
+- **Arquitectura**: nueva función `ajustarGastoMaquinaria()` para recalcular el gasto en ediciones
+
+### v2.3.0 (2026-08-24) — Respaldo en la Nube
+- **Nuevo**: Módulo «☁️ Respaldo en la Nube» en Configuración
+- **Nuevo**: Google Apps Script (recomendado, sin registro de OAuth) guarda en tu propia Google Drive: un archivo por día + `latest.json`, con auto-subida (debounce) tras cada guardado y botón «Restaurar desde la Nube» (fusión con tus datos)
+- **Nuevo**: Estructura de credenciales para métodos avanzados (Google Drive API y OneDrive/Microsoft Graph con Client ID + token)
+- **Arquitectura**: `saveDB()` (punto único de escritura) dispara el auto-respaldo en la nube
+- **DB**: `configuracion.nube` con proveedor, URL guardada y última fecha de respaldo
+
+### v2.2.0 (2026-08-24) — Rediseño visual corporativo
+- **UI**: Fondo con degradado del logotipo (azul profundo → cian → púrpura) sobre oscuro, con granulado global (vidrio granulado desenfocado)
+- **UI**: Tarjetas, KPIs, botones, formularios y navegación con glassmorphism translúcido, `backdrop-filter` + desenfoque y halo de gradiente corporativo
+- **UI**: Contraste reforzado en placeholders, estados de foco, encabezados de tabla, tab activo y botones
+- **SW**: Service Worker y caché actualizados a v2.2.0 para propagar el rediseño a usuarios instalados
+
 ### v2.1.0 (2026-08-24) — Panel de Resumen y optimizaciones
 - **Nuevo**: 📊 Panel de Resumen Ejecutivo con KPIs (saldo, ingresos/egresos, viajes, km, mantenimiento, nómina), alertas de fondos bajos/negativos, alertas de stock mínimo de insumos y lista de pendientes del día
 - **Nuevo**: Atajo de teclado Alt+1..9 y shortcut PWA al Panel de Resumen
@@ -179,6 +198,23 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 ### v1.0.0 — Versión inicial
 - Lanzamiento inicial con módulos de Caja Chica, Maquinaria, Personal y Adquisiciones
 
+## Respaldo en la Nube (Google Drive / OneDrive)
+
+La app puede respaldar **automáticamente** tus datos en tu propia cuenta para que no se pierdan aunque desinstales y reinstales la app.
+
+### Método recomendado: Google Apps Script (sin credenciales OAuth)
+1. Ve a [https://script.google.com](https://script.google.com) → crea un proyecto nuevo.
+2. En la app: **Configuración → ☁️ Respaldo en la Nube** → pulsa **«📋 Copiar Script»**.
+3. Pega el script en el proyecto, Guarda y ejecuta `crearCarpetaPrueba` (autoriza).
+4. **Ver → Implementar como App Web**: *Ejecutar como* = tú · *Quién puede acceder* = Cualquiera. Copia la URL que termina en `/exec`.
+5. Pega esa URL en el campo **URL del Web App**, pulsa **💾 Guardar Configuración** y luego **⬆️ Subir a la Nube**.
+6. De ahí en adelante, **cada vez que guardes datos se respaldan solos** (auto-subida con debounce). Para recuperar tras reinstalar: **⬇️ Restaurar desde la Nube** (fusiona con tus datos).
+
+Se crea en tu Google Drive la carpeta **`CONSTRURAMSA_Backups`** con un archivo por día (`construramsa_AAAA-MM-DD.json`) y el más reciente (`construramsa_latest.json`).
+
+### Métodos avanzados (OAuth)
+El módulo también admite **Google Drive API** y **OneDrive / Microsoft Graph**, ingresando un *Client ID (y token)* de una app registrada con un Redirect URI configurado. Requiere registrar la aplicación en Google Cloud / Azure; por simplicidad y 100% offline se recomienda Google Apps Script.
+
 ## Soporte
 
 Para soporte técnico o reporte de problemas, contacte al equipo de desarrollo de CONSTRURAMSA.
@@ -197,6 +233,6 @@ La aplicación es una PWA instalable y 100% responsive, optimizada para uso en c
 
 ---
 
-**Versión**: 2.1.0  
+**Versión**: 2.4.0  
 **Desarrollado para**: CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura  
 **Moneda**: Quetzales (Q) — Guatemala
