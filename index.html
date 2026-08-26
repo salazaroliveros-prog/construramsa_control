@@ -87,6 +87,17 @@
             /* FIX #17: --acento-purpura corregido de #6F2DBD a #a855f7 para pasar WCAG AA (~4.6:1) */
             --acento-purpura: #a855f7;
             --texto-principal: #f3f4f6;
+            
+            /* Colores para plantillas PDF - variables CSS para consistencia */
+            --pdf-azul-oscuro: #004B93;
+            --pdf-azul-claro: #00A4E4;
+            --pdf-gris-oscuro: #374151;
+            --pdf-gris-medio: #6B7280;
+            --pdf-gris-claro: #9CA3AF;
+            --pdf-rojo: #DC2626;
+            --pdf-verde: #059669;
+            --pdf-blanco: #ffffff;
+            --pdf-fondo-claro: #F9FAFB;
             --texto-secundario: #9ca3af;
             --exito: #10b981;
             --alerta: #ef4444;
@@ -646,13 +657,13 @@
             font-size: 9.5px;
         }
         #plantilla-reporte-impresion table.tabla-pdf th {
-            background-color: #004B93;
+            background-color: var(--pdf-azul-oscuro);
             color: #ffffff;
             font-size: 8.5px;
             font-weight: 700;
             text-transform: uppercase;
             padding: 7px 6px;
-            border: 1px solid #004B93;
+            border: 1px solid var(--pdf-azul-oscuro);
             text-align: left;
             letter-spacing: 0.4px;
         }
@@ -660,7 +671,7 @@
             font-size: 9px;
             padding: 6px 6px;
             border: 1px solid #E5E7EB;
-            color: #374151;
+            color: var(--pdf-gris-oscuro);
             vertical-align: middle;
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:nth-child(even) {
@@ -673,29 +684,29 @@
         /* Estilos para totales en tablas PDF */
         #plantilla-reporte-impresion .total-destacado {
             font-weight: 700;
-            color: #004B93;
+            color: var(--pdf-azul-oscuro);
             text-align: right;
             background-color: #EFF6FF !important;
         }
         #plantilla-reporte-impresion .total-egreso {
             font-weight: 700;
-            color: #DC2626;
+            color: var(--pdf-rojo);
             text-align: right;
             background-color: #FEF2F2 !important;
         }
         #plantilla-reporte-impresion .total-ingreso {
             font-weight: 700;
-            color: #059669;
+            color: var(--pdf-verde);
             text-align: right;
             background-color: #ECFDF5 !important;
         }
 
         /* Encabezados de sección en el contenido dinámico */
         #plantilla-reporte-impresion h2 {
-            color: #004B93;
+            color: var(--pdf-azul-oscuro);
             font-size: 13px;
             font-weight: 800;
-            border-bottom: 2px solid #004B93;
+            border-bottom: 2px solid var(--pdf-azul-oscuro);
             padding-bottom: 6px;
             margin: 0 0 10px 0;
         }
@@ -706,12 +717,12 @@
         }
         #plantilla-reporte-impresion p {
             font-size: 9px;
-            color: #6B7280;
+            color: var(--pdf-gris-medio);
             margin: 0 0 10px 0;
         }
 
         /* FIX #18: footer PDF usa color accesible (#6B7280 sobre blanco = 4.6:1, pasa AA) */
-        .pdf-footer-text { color: #6B7280; }
+        .pdf-footer-text { color: var(--pdf-gris-medio); }
 
         /* FIX #22: clases CSS reales para grids de formularios */
         .form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
@@ -839,7 +850,7 @@
         /* FIX secciones internas de módulos: contenedores sin desborde */
         .modulo-seccion {
             margin-bottom: 25px;
-            padding: 15px;
+            padding: 20px;
             background: rgba(255,255,255,0.02);
             border-radius: 12px;
             border: 1px solid var(--glass-border);
@@ -2570,7 +2581,7 @@
              ══════════════════════════════════════════════════════════ -->
 
         <!-- Franja superior azul delgada -->
-        <div style="height: 5px; background: linear-gradient(90deg, #004B93 0%, #00A4E4 50%, #004B93 100%); margin-bottom: 0;"></div>
+        <div style="height: 5px; background: linear-gradient(90deg, var(--pdf-azul-oscuro) 0%, var(--pdf-azul-claro) 50%, var(--pdf-azul-oscuro) 100%); margin-bottom: 0;"></div>
 
         <!-- CABECERA DEL MEMBRETE -->
         <div style="background: #ffffff; padding: 18px 20px 14px 20px; border-left: 1px solid #E5E7EB; border-right: 1px solid #E5E7EB;">
@@ -2582,15 +2593,15 @@
                     <td style="width: 22%; vertical-align: top; padding: 4px 10px 0 0; border-right: 1px solid #E5E7EB;">
                         <div style="margin-bottom: 7px;">
                             <div style="font-size: 7.5px; font-weight: 700; text-transform: uppercase; color: #9CA3AF; letter-spacing: 0.8px; margin-bottom: 2px;">Tipo de Reporte</div>
-                            <div id="pdf-tipo-reporte" style="font-size: 9.5px; font-weight: 800; color: #004B93; text-transform: uppercase; letter-spacing: 0.3px;">DIARIO DE GASTOS</div>
+                            <div id="pdf-tipo-reporte" style="font-size: 9.5px; font-weight: 800; color: var(--pdf-azul-oscuro); text-transform: uppercase; letter-spacing: 0.3px;">DIARIO DE GASTOS</div>
                         </div>
                         <div style="margin-bottom: 7px;">
                             <div style="font-size: 7.5px; font-weight: 700; text-transform: uppercase; color: #9CA3AF; letter-spacing: 0.8px; margin-bottom: 2px;">Fecha de Emisión</div>
-                            <div id="pdf-fecha-emision" style="font-size: 9.5px; font-weight: 600; color: #374151;"></div>
+                            <div id="pdf-fecha-emision" style="font-size: 9.5px; font-weight: 600; color: var(--pdf-gris-oscuro);"></div>
                         </div>
                         <div>
                             <div style="font-size: 7.5px; font-weight: 700; text-transform: uppercase; color: #9CA3AF; letter-spacing: 0.8px; margin-bottom: 2px;">Proyecto</div>
-                            <div id="pdf-nombre-proyecto" style="font-size: 9.5px; font-weight: 600; color: #374151;">Control de Obra</div>
+                            <div id="pdf-nombre-proyecto" style="font-size: 9.5px; font-weight: 600; color: var(--pdf-gris-oscuro);">Control de Obra</div>
                         </div>
                     </td>
 
@@ -2602,7 +2613,7 @@
                                  style="max-height: 90px; max-width: 260px; width: auto; object-fit: contain; display: block; margin: 0 auto;">
                         </div>
                         <!-- Nombre corporativo — dinámico desde configuración -->
-                        <div id="pdf-nombre-empresa" style="font-size: 22px; font-weight: 800; letter-spacing: 6px; color: #004B93; text-transform: uppercase; line-height: 1; margin-bottom: 5px; font-family: Arial, sans-serif;">
+                        <div id="pdf-nombre-empresa" style="font-size: 22px; font-weight: 800; letter-spacing: 6px; color: var(--pdf-azul-oscuro); text-transform: uppercase; line-height: 1; margin-bottom: 5px; font-family: Arial, sans-serif;">
                             CONSTRURAMSA
                         </div>
                         <!-- Slogan — dinámico desde configuración -->
@@ -2610,13 +2621,13 @@
                             SOLUCIONES EN INGENIERÍA Y ARQUITECTURA
                         </div>
                         <!-- Datos de contacto -->
-                        <div style="font-size: 8px; color: #6B7280; line-height: 1.6;">
+                        <div style="font-size: 8px; color: var(--pdf-gris-medio); line-height: 1.6;">
                             <span id="pdf-direccion-empresa">17av. Villa Mariscal, Apto. 116, Torre 2, Zona 11, Ciudad de Guatemala</span>
                         </div>
-                        <div style="font-size: 8px; color: #6B7280; line-height: 1.6;">
+                        <div style="font-size: 8px; color: var(--pdf-gris-medio); line-height: 1.6;">
                             <span id="pdf-tel-email-empresa">Tel: +502 5997 9501 &nbsp;|&nbsp; contacto@construramsa.com</span>
                         </div>
-                        <div style="font-size: 8px; color: #6B7280; line-height: 1.6;">
+                        <div style="font-size: 8px; color: var(--pdf-gris-medio); line-height: 1.6;">
                             <span id="pdf-website-empresa">construramsa.com</span>
                         </div>
                     </td>
@@ -2636,7 +2647,7 @@
         </div>
 
         <!-- Franja divisoria azul-cian — igual que en el membrete -->
-        <div style="height: 4px; background: linear-gradient(90deg, #004B93 0%, #00A4E4 60%, #38BDF8 100%); margin-bottom: 0;"></div>
+        <div style="height: 4px; background: linear-gradient(90deg, var(--pdf-azul-oscuro) 0%, #00A4E4 60%, #38BDF8 100%); margin-bottom: 0;"></div>
         <!-- Franja fina gris inferior -->
         <div style="height: 1px; background: #E5E7EB; margin-bottom: 18px;"></div>
 
@@ -2645,7 +2656,7 @@
              ══════════════════════════════════════════════════════════ -->
 
         <!-- PORTADA PERSONALIZADA — se muestra sólo si tiene contenido -->
-        <div id="pdf-portada" style="display:none; margin-bottom: 18px; padding: 14px 16px; border: 1px solid #E5E7EB; border-left: 4px solid #004B93; border-radius: 4px; background: #F8FAFC;">
+        <div id="pdf-portada" style="display:none; margin-bottom: 18px; padding: 14px 16px; border: 1px solid #E5E7EB; border-left: 4px solid var(--pdf-azul-oscuro); border-radius: 4px; background: #F8FAFC;">
 
             <!-- Fila: fecha + remitente -->
             <table style="width:100%; border-collapse:collapse; margin-bottom: 10px;">
@@ -2706,7 +2717,7 @@
                             <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
                                 Arq. Wilson Dario Salazar
                             </div>
-                            <div style="font-size: 8px; color: #004B93; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <div style="font-size: 8px; color: var(--pdf-azul-oscuro); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                                 Jefe de Proyectos
                             </div>
                         </div>
@@ -2720,10 +2731,10 @@
                             <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
                                 &nbsp;
                             </div>
-                            <div style="font-size: 9.5px; font-weight: 800; color: #374151; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px;">
+                            <div style="font-size: 9.5px; font-weight: 800; color: var(--pdf-gris-oscuro); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px;">
                                 V°B° — Visto Bueno
                             </div>
-                            <div style="font-size: 8px; color: #6B7280; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <div style="font-size: 8px; color: var(--pdf-gris-medio); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px;">
                                 Encargado de Obra
                             </div>
                         </div>
@@ -2740,7 +2751,7 @@
                             <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
                                 Ing. Juan Luis Ramirez Jimenez
                             </div>
-                            <div style="font-size: 8px; color: #004B93; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <div style="font-size: 8px; color: var(--pdf-azul-oscuro); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                                 Gerente Comercial
                             </div>
                         </div>
@@ -2753,9 +2764,9 @@
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="width: 50%; vertical-align: middle;">
-                            <div style="height: 3px; width: 60px; background: linear-gradient(90deg, #004B93, #00A4E4); border-radius: 2px; margin-bottom: 5px;"></div>
-                            <div style="font-size: 8px; color: #6B7280; line-height: 1.5;">
-                                <strong style="color: #374151; font-size: 8.5px;">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura<br>
+                            <div style="height: 3px; width: 60px; background: linear-gradient(90deg, var(--pdf-azul-oscuro), #00A4E4); border-radius: 2px; margin-bottom: 5px;"></div>
+                            <div style="font-size: 8px; color: var(--pdf-gris-medio); line-height: 1.5;">
+                                <strong style="color: var(--pdf-gris-oscuro); font-size: 8.5px;">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura<br>
                                 <span style="color: #9CA3AF;">Documento generado digitalmente · Confidencial — Uso interno autorizado</span>
                             </div>
                         </td>
@@ -2783,11 +2794,16 @@
             if (_dbCache) return _dbCache;
             try {
                 const raw = localStorage.getItem(DB_KEY);
-                if (!raw) { _dbCache = inicializarDB(); return _dbCache; }
+                if (!raw) { 
+                    console.log('DB no encontrada en localStorage, inicializando nueva DB');
+                    _dbCache = inicializarDB(); 
+                    return _dbCache; 
+                }
                 _dbCache = migrarDB(JSON.parse(raw));
+                console.log('DB cargada exitosamente desde localStorage');
                 return _dbCache;
             } catch (e) {
-                console.error('Error al obtener DB:', e);
+                console.error('Error al obtener DB:', e.message, e.stack);
                 showToast('❌ Error al cargar datos. Base de datos vacía.', 'error');
                 _dbCache = inicializarDB();
                 return _dbCache;
@@ -2797,17 +2813,32 @@
         function saveDB(db) {
             try {
                 _dbCache = db;
-                localStorage.setItem(DB_KEY, JSON.stringify(db));
+                const serialized = JSON.stringify(db);
+                localStorage.setItem(DB_KEY, serialized);
+                console.log('DB guardada exitosamente en localStorage');
                 // Auto-respaldo a la nube (si está configurado), con debounce
                 scheduleNubeAuto();
             } catch (e) {
-                console.error('Error al guardar DB:', e);
-                showToast('❌ Error al guardar. Verifique espacio en localStorage.', 'error');
+                console.error('Error al guardar DB:', e.message, e.stack);
+                if (e.name === 'QuotaExceededError') {
+                    showToast('❌ localStorage lleno. Exporte datos y limpie para continuar.', 'error');
+                } else {
+                    showToast('❌ Error al guardar. Verifique espacio en localStorage.', 'error');
+                }
                 throw e;
             }
         }
 
-        function invalidarCacheDB() { _dbCache = null; }
+        function invalidarCacheDB() { 
+            _dbCache = null; 
+            console.log('Cache de DB invalidado - próxima lectura será desde localStorage');
+        }
+        
+        // Wrapper para modificaciones directas que invalidan cache automáticamente
+        function guardarDBConInvalidacion(db) {
+            invalidarCacheDB();
+            return saveDB(db);
+        }
 
         function migrarDB(db) {
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
@@ -3731,7 +3762,7 @@ tbody.innerHTML = '';
             const unidad = esHorasMaquinaria(tipo) ? 'Hrs' : 'Km';
             const uso    = fin - ini;
             const errEl  = getDomElement('maq-error-uso');
-            if (uso < 0) { errEl.textContent = 'El valor final no puede ser menor al inicial'; return; }
+            if (uso < 0) { errEl.textContent = 'El valor final debe ser mayor o igual al inicial'; return; }
             errEl.textContent = '';
             const costoComb = gal * precio;
             // FIX #21: N/A si galones=0
@@ -3775,7 +3806,7 @@ tbody.innerHTML = '';
                     <td data-label="Trabajado">${uso.toFixed(2)} ${unidad}</td>
                     <td data-label="Combustible">${reg.combustible_galones} gal</td>
                     <td data-label="Rendimiento">${rend}</td>
-                    <td data-label="Gasto Total" style="font-weight:bold;color:var(--alerta);">${formatearMoneda(gasto)}</td>
+                    <td data-label="Gasto Total" style="font-weight:bold;color:var(--alerta-texto);">${formatearMoneda(gasto)}</td>
                     <td class="actions-cell">
                         <button onclick="editarRegistroMaquinaria('${_esc(reg.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar registro maquinaria ${_esc(codigo_)}">✏️ Editar</button>
                         <button onclick="eliminarRegistroMaquinaria('${_esc(reg.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar registro maquinaria ${_esc(codigo_)}">🗑️ Eliminar</button>
@@ -3804,7 +3835,7 @@ tbody.innerHTML = '';
             if (gal < 0 || precio < 0 || mantCosto < 0) { showToast('❌ Los valores no pueden ser negativos', 'error'); return; }
 
             const uso = valFin - valIni;
-            if (uso < 0) { showToast('❌ El valor final no puede ser menor al inicial', 'error'); return; }
+            if (uso < 0) { showToast('❌ El valor final debe ser mayor o igual al inicial', 'error'); return; }
             if (uso === 0 && gal === 0 && mantCosto === 0) { showToast('❌ Registre al menos un cambio en odómetro/horómetro o un gasto', 'error'); return; }
 
             const costoComb = gal * precio;
@@ -3937,19 +3968,43 @@ tbody.innerHTML = '';
                 const veh     = datos.maquinaria_flota.vehiculos.find(v => v.id === reg?.vehiculo_id);
                 if (reg) {
                     let gasto = (reg.combustible_costo || 0) + (reg.mantenimiento_costo || 0);
-                    // Buscar el egreso vinculado exacto (por gasto_id o por descripción)
+                    // Buscar el egreso vinculado exacto por gasto_id (prioridad alta)
                     let egreso = (datos.caja_chica || []).find(m => reg.gasto_id && m.id === reg.gasto_id && m.tipo === 'egreso');
                     const vehCodigo = veh?.codigo || 'N/A';
-                    if (!egreso) {
-                        egreso = (datos.caja_chica || []).find(m => m.tipo === 'egreso' && m.categoria === 'Combustible/Mantenimiento' && m.descripcion && m.descripcion.indexOf('Maquinaria ' + vehCodigo) === 0);
+                    
+                    if (!egreso && reg.gasto_id) {
+                        // Si tiene gasto_id pero no se encontró, loggear warning
+                        console.warn(`Gasto vinculado ${reg.gasto_id} no encontrado en caja chica`);
                     }
+                    
+                    if (!egreso) {
+                        // Fallback: buscar por descripción y monto exacto (datos migrados)
+                        egreso = (datos.caja_chica || []).find(m => 
+                            m.tipo === 'egreso' && 
+                            m.categoria === 'Combustible/Mantenimiento' && 
+                            m.descripcion && 
+                            m.descripcion.includes('Maquinaria ' + vehCodigo) &&
+                            Math.abs(m.monto - gasto) < 0.01 // Coincidencia de monto exacta
+                        );
+                    }
+                    
                     if (egreso) {
                         // Revertir eliminando el egreso vinculado exacto (evita doble reembolso)
-                        gasto = egreso.monto;
+                        console.log(`Eliminando egreso vinculado ${egreso.id} de maquinaria ${id}`);
                         datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
                     } else if (gasto > 0) {
                         // Fallback (datos migrados sin vínculo): agregar ingreso de reembolso
-                        datos.caja_chica.push({ id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'ingreso', categoria:'Reembolso', descripcion:`Reversión gasto maquinaria: ${vehCodigo}`, monto:gasto, responsable:'Sistema Automatico' });
+                        console.log(`Creando reembolso por gasto no vinculado: ${gasto}`);
+                        datos.caja_chica.push({ 
+                            id: generarId(), 
+                            fecha: new Date().toISOString().split('T')[0], 
+                            tipo:'ingreso', 
+                            categoria:'Reembolso', 
+                            descripcion:`Reversión gasto maquinaria: ${vehCodigo}`, 
+                            monto: gasto, 
+                            responsable:'Sistema Automatico',
+                            nota: 'reembolso_sin_vinculo'
+                        });
                     }
                     datos.maquinaria_flota.registros = datos.maquinaria_flota.registros.filter(r => r.id !== id);
                     saveProyectoData(datos);
@@ -3980,7 +4035,7 @@ tbody.innerHTML = '';
             if (!nombre || nombre.length < 3)   { showToast('❌ El nombre debe tener al menos 3 caracteres', 'error'); return; }
             if (!puesto || puesto.length < 2)    { showToast('❌ El puesto debe tener al menos 2 caracteres', 'error'); return; }
             if (isNaN(pagNormal) || pagNormal <= 0) { showToast('❌ El pago normal debe ser positivo', 'error'); return; }
-            if (isNaN(pagExtra)  || pagExtra  < 0)  { showToast('❌ El pago extra no puede ser negativo', 'error'); return; }
+            if (isNaN(pagExtra)  || pagExtra  < 0)  { showToast('❌ El pago extra debe ser cero o positivo', 'error'); return; }
             if (pagNormal > 9999 || pagExtra > 9999) { showToast('❌ Los pagos exceden el límite permitido', 'error'); return; }
 
             const datos = getProyectoData();
@@ -4658,6 +4713,46 @@ pag_.forEach(c => {
             return ex;
         }
 
+        // Validación de esquema para importación JSON - Prevenir corrupción de datos
+        function validarEsquemaJSON(data) {
+            const esquemaEsperado = {
+                version: 'string',
+                configuracion: 'object',
+                proyectos: 'array',
+                proyectos_data: 'object',
+                caja_chica: 'array',
+                maquinaria_flota: 'object',
+                personal: 'object',
+                adquisiciones: 'object',
+                viajes_camiones: 'object',
+                mantenimiento: 'object'
+            };
+            
+            for (const [campo, tipo] of Object.entries(esquemaEsperado)) {
+                if (!(campo in data)) {
+                    throw new Error(`Campo faltante: ${campo}`);
+                }
+                if (typeof data[campo] !== tipo) {
+                    throw new Error(`Campo ${campo} debe ser ${tipo}, es ${typeof data[campo]}`);
+                }
+            }
+            
+            // Validar estructura anidada de configuracion
+            if (!data.configuracion.nombre_empresa || typeof data.configuracion.nombre_empresa !== 'string') {
+                throw new Error('configuracion.nombre_empresa es requerido y debe ser string');
+            }
+            
+            // Validar que proyectos_data tenga claves válidas
+            const proyectosIds = data.proyectos.map(p => p.id);
+            const dataIds = Object.keys(data.proyectos_data);
+            const idsOrfanos = dataIds.filter(id => !proyectosIds.includes(id));
+            if (idsOrfanos.length > 0) {
+                console.warn('IDs huérfanos en proyectos_data:', idsOrfanos);
+            }
+            
+            return true;
+        }
+
         document.getElementById('import-json').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -4673,9 +4768,14 @@ pag_.forEach(c => {
             reader.onload = function(ev) {
                 try {
                     const imp = JSON.parse(ev.target.result);
-                    if (!imp || typeof imp !== 'object' || !Array.isArray(imp.proyectos) || typeof imp.proyectos_data !== 'object') {
-                        throw new Error('El archivo no tiene una estructura CONSTRURAMSA válida.');
+                    
+                    // Validación de esquema robusta
+                    if (!imp || typeof imp !== 'object') {
+                        throw new Error('El archivo debe ser un objeto JSON válido');
                     }
+                    
+                    validarEsquemaJSON(imp);
+                    
                     hideLoading();
                     showConfirmModal('Importar Base de Datos',
                         'Se FUSIONARÁN los datos importados con los existentes. Registros nuevos se agregan; los existentes se actualizan. No se perderá información. ¿Continuar?',
@@ -4695,8 +4795,8 @@ pag_.forEach(c => {
                     );
                 } catch (err) {
                     hideLoading();
-                    showToast('❌ Archivo JSON inválido', 'error');
-                    console.error(err);
+                    showToast('❌ ' + err.message, 'error');
+                    console.error('Error de validación JSON:', err);
                     // Resetear label del input
                     const label = document.getElementById('import-label');
                     if (label) {
@@ -5587,7 +5687,7 @@ pag_.forEach(v => {
                     <td data-label="Viajes">${v.numero}</td>
                     <td data-label="Km">${numToF(v.km_total)} km</td>
                     <td data-label="Combustible">${numToF(v.litros)} L</td>
-                    <td data-label="Total (Q)" style="font-weight:bold;color:var(--alerta);">${formatearMoneda(v.total)}</td>
+                    <td data-label="Total (Q)" style="font-weight:bold;color:var(--alerta-texto);">${formatearMoneda(v.total)}</td>
                     <td class="actions-cell">
                         <button onclick="editarViaje('${_esc(v.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar viaje">✏️</button>
                         <button onclick="eliminarViaje('${_esc(v.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar viaje">🗑️</button>
@@ -5602,20 +5702,38 @@ pag_.forEach(v => {
                 const datos = getProyectoData();
                 const v = datos.viajes_camiones.viajes.find(x => x.id === id);
                 if (v && v.total > 0) {
-                    // Buscar y eliminar egreso vinculado exacto (igual que maquinaria)
+                    // Buscar y eliminar egreso vinculado exacto por gasto_id (prioridad alta)
                     let egreso = (datos.caja_chica || []).find(m => v.gasto_id && m.id === v.gasto_id && m.tipo === 'egreso');
+                    
+                    if (!egreso && v.gasto_id) {
+                        // Si tiene gasto_id pero no se encontró, loggear warning
+                        console.warn(`Gasto vinculado ${v.gasto_id} no encontrado en caja chica`);
+                    }
+                    
                     if (!egreso) {
-                        // Fallback para viajes migrados sin gasto_id
+                        // Fallback: buscar por categoría y monto exacto (datos migrados)
                         egreso = (datos.caja_chica || []).find(m =>
                             m.tipo === 'egreso' &&
                             (m.categoria === 'Alquiler de Equipo' || m.categoria === 'Combustible') &&
-                            m.monto === v.total
+                            Math.abs(m.monto - v.total) < 0.01 // Coincidencia de monto exacta
                         );
                     }
+                    
                     if (egreso) {
+                        console.log(`Eliminando egreso vinculado ${egreso.id} de viaje ${id}`);
                         datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
                     } else {
-                        datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: `Reversión viaje: ${v.material}`, monto: v.total, responsable: 'Sistema' });
+                        console.log(`Creando reembolso por gasto no vinculado: ${v.total}`);
+                        datos.caja_chica.push({ 
+                            id: generarId(), 
+                            fecha: new Date().toISOString().split('T')[0], 
+                            tipo:'ingreso', 
+                            categoria:'Reembolso', 
+                            descripcion: `Reversión viaje: ${v.material}`, 
+                            monto: v.total, 
+                            responsable:'Sistema',
+                            nota: 'reembolso_sin_vinculo'
+                        });
                     }
                 }
                 datos.viajes_camiones.viajes = datos.viajes_camiones.viajes.filter(x => x.id !== id);
@@ -5800,7 +5918,7 @@ tbody.innerHTML = '';
                     <td data-label="Fecha">${o.fecha}</td>
                     <td data-label="Equipo">${_esc(m ? m.nombre : 'N/A')}</td>
                     <td data-label="Tipo">${_esc(o.tipo)}</td>
-                    <td data-label="Costo (Q)" style="font-weight:bold;color:var(--alerta);">${formatearMoneda(o.costo)}</td>
+                    <td data-label="Costo (Q)" style="font-weight:bold;color:var(--alerta-texto);">${formatearMoneda(o.costo)}</td>
                     <td class="actions-cell">
                         <button onclick="editarOrden('${o.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar orden">✏️</button>
                         <button onclick="eliminarOrden('${o.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar orden">🗑️</button>
@@ -6104,9 +6222,9 @@ tbody.innerHTML = '';
             if (tipo === 'diario' || tipo === 'semanal') {
                 const rangoT = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
                 const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rangoT.inicio && f <= rangoT.fin);
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">${tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado'}</h2>`;
+                html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">${tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado'}</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(fecha)) : ('Período: ' + _esc(rangoT.inicio) + ' al ' + _esc(rangoT.fin))} | Proyecto: ${_esc(proyNombre)}</p>`;
-                html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:#6B7280;">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
+                html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:#6B7280;">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
                 /* FIX DUPLICIDAD: armar Set de gasto_id vinculados a viajes y mantenimiento
                    para excluirlos de la sección de caja chica y no contarlos dos veces */
@@ -6145,7 +6263,7 @@ tbody.innerHTML = '';
                 const ordsMT = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
                 if (ordsMT.length > 0) {
                     let totalMTmp = 0;
-                    html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">🔩 Mantenimiento</h3>`;
+                    html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">🔩 Mantenimiento</h3>`;
                     html += `<table class="tabla-pdf"><thead><tr><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
                     ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMTmp += o.costo||0; totalEgr += o.costo||0; html += `<tr><td>${_esc(m.nombre)}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`; });
                     html += `<tr><td colspan="3" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMTmp)}</td></tr>`;
@@ -6164,10 +6282,10 @@ tbody.innerHTML = '';
                 if (movs.length === 0 && viajesC.length === 0 && ordsMT.length === 0 && insMT.length === 0) {
                     html += `<p style="text-align:center;color:#6B7280;padding:20px;">Sin registros en este período</p>`;
                 }
-                html += `<div style="text-align:right;font-weight:bold;color:#004B93;background:#EFF6FF;padding:10px;margin-top:10px;">GRAN TOTAL EGRESOS: ${formatearMoneda(totalEgr)}</div>`;
+                html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:#EFF6FF;padding:10px;margin-top:10px;">GRAN TOTAL EGRESOS: ${formatearMoneda(totalEgr)}</div>`;
                 html += `<div style="text-align:right;font-weight:bold;color:#059669;">SALDO NETO (ingresos − egresos): ${formatearMoneda(totalIng - totalEgr)}</div>`;
             } else if (tipo === 'asistencia') {
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Asistencia y Horas Extra</h2>`;
+                html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Asistencia y Horas Extra</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Generado: ${new Date().toLocaleDateString('es-GT')} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Trabajador</th><th>Puesto</th><th>Estado</th><th>H. Extra</th><th style="text-align:right;">Sueldo (Q)</th></tr></thead><tbody>`;
                 let totalNomina = 0;
@@ -6190,7 +6308,7 @@ tbody.innerHTML = '';
                 html += `<tr><td colspan="5" style="text-align:right;font-weight:bold;">TOTAL NÓMINA:</td><td class="total-destacado">${formatearMoneda(totalNomina)}</td></tr>`;
                 html += `</tbody></table>`;
             } else if (tipo === 'viajes') {
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
+                html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${_esc(fecha)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                 const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha).sort((a,b) => a.fecha.localeCompare(b.fecha));
@@ -6208,13 +6326,13 @@ tbody.innerHTML = '';
                 html += `<tr><td colspan="8" style="text-align:right;font-weight:bold;">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalV)}</td></tr>`;
                 html += `</tbody></table>`;
             } else if (tipo === 'mantenimiento') {
-                html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Mantenimiento e Insumos</h2>`;
+                html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Mantenimiento e Insumos</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${_esc(fecha)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
                 const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
                 let totalM = 0;
                 // Órdenes de mantenimiento
-                html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">🔩 Órdenes de Mantenimiento</h3>`;
+                html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">🔩 Órdenes de Mantenimiento</h3>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
                 if (ords.length === 0) {
                     html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:15px;">Sin órdenes en esta fecha</td></tr>`;
@@ -6238,7 +6356,7 @@ tbody.innerHTML = '';
                     });
                 }
                 html += `</tbody></table>`;
-                html += `<div style="text-align:right;font-weight:bold;color:#004B93;background:#EFF6FF;padding:10px;margin-top:10px;">TOTAL MANTENIMIENTO E INSUMOS: ${formatearMoneda(totalM)}</div>`;
+                html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:#EFF6FF;padding:10px;margin-top:10px;">TOTAL MANTENIMIENTO E INSUMOS: ${formatearMoneda(totalM)}</div>`;
             }
             return html;
         }
@@ -6663,7 +6781,7 @@ function validarDependenciasExportacion() {
                 || portada.saludo || portada.descripcion;
             if (tienePortada) {
                 portadaHTML = `
-                <div style="margin-bottom:14px;padding:12px 14px;border:1px solid #E5E7EB;border-left:4px solid #004B93;border-radius:4px;background:#F8FAFC;">
+                <div style="margin-bottom:14px;padding:12px 14px;border:1px solid #E5E7EB;border-left:4px solid var(--pdf-azul-oscuro);border-radius:4px;background:#F8FAFC;">
                     ${(portada.fecha || portada.remitente) ? `
                     <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
                         <tr>
@@ -6694,7 +6812,7 @@ function validarDependenciasExportacion() {
 
             return `
             <!-- Franja azul superior -->
-            <div style="height:5px;background:linear-gradient(90deg,#004B93 0%,#00A4E4 50%,#004B93 100%);"></div>
+            <div style="height:5px;background:linear-gradient(90deg,var(--pdf-azul-oscuro) 0%,#00A4E4 50%,var(--pdf-azul-oscuro) 100%);"></div>
 
             <!-- Membrete -->
             <div style="background:#fff;padding:14px 18px 12px 18px;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">
@@ -6703,7 +6821,7 @@ function validarDependenciasExportacion() {
                         <td style="width:22%;vertical-align:top;padding:3px 10px 0 0;border-right:1px solid #E5E7EB;">
                             <div style="margin-bottom:6px;">
                                 <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.7px;margin-bottom:1px;">Tipo de Reporte</div>
-                                <div style="font-size:9px;font-weight:800;color:#004B93;">${tipoReporte}</div>
+                                <div style="font-size:9px;font-weight:800;color:var(--pdf-azul-oscuro);">${tipoReporte}</div>
                             </div>
                             <div style="margin-bottom:6px;">
                                 <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.7px;margin-bottom:1px;">Fecha de Emisión</div>
@@ -6717,7 +6835,7 @@ function validarDependenciasExportacion() {
                         <td style="width:56%;text-align:center;vertical-align:middle;padding:0 12px;">
                             <img src="${logoSrc}" alt="${_esc(nombreEmpresa)}"
                                  style="max-height:72px;max-width:200px;width:auto;object-fit:contain;display:block;margin:0 auto 6px auto;">
-                            <div style="font-size:17px;font-weight:800;letter-spacing:5px;color:#004B93;text-transform:uppercase;margin-bottom:3px;">${_esc(nombreEmpresa)}</div>
+                            <div style="font-size:17px;font-weight:800;letter-spacing:5px;color:var(--pdf-azul-oscuro);text-transform:uppercase;margin-bottom:3px;">${_esc(nombreEmpresa)}</div>
                             <div style="font-size:7.5px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;">${_esc(esloganEmpresa)}</div>
                             <div style="font-size:7px;color:#6B7280;line-height:1.5;">${_esc(telEmail)}</div>
                         </td>
@@ -6732,7 +6850,7 @@ function validarDependenciasExportacion() {
             </div>
 
             <!-- Franja divisoria azul-cian -->
-            <div style="height:4px;background:linear-gradient(90deg,#004B93 0%,#00A4E4 60%,#38BDF8 100%);"></div>
+            <div style="height:4px;background:linear-gradient(90deg,var(--pdf-azul-oscuro) 0%,#00A4E4 60%,#38BDF8 100%);"></div>
             <div style="height:1px;background:#E5E7EB;margin-bottom:14px;"></div>
 
             <!-- Portada personalizada -->
@@ -6749,7 +6867,7 @@ function validarDependenciasExportacion() {
                         <div style="height:48px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:8px;opacity:0.85;margin-bottom:0;">Firma Jefe de Proyectos</div>
                         <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
                             <div style="font-size:9.5px;font-weight:700;color:#111827;">Arq. Wilson Dario Salazar</div>
-                            <div style="font-size:7.5px;color:#004B93;font-weight:600;text-transform:uppercase;margin-top:1px;">Jefe de Proyectos</div>
+                            <div style="font-size:7.5px;color:var(--pdf-azul-oscuro);font-weight:600;text-transform:uppercase;margin-top:1px;">Jefe de Proyectos</div>
                         </div>
                     </td>
                     <td style="width:36%;text-align:center;vertical-align:bottom;padding:0 6px;">
@@ -6763,7 +6881,7 @@ function validarDependenciasExportacion() {
                         <div style="height:48px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:8px;opacity:0.85;margin-bottom:0;">Firma Gerente Comercial</div>
                         <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
                             <div style="font-size:9.5px;font-weight:700;color:#111827;">Ing. Juan Luis Ramirez Jimenez</div>
-                            <div style="font-size:7.5px;color:#004B93;font-weight:600;text-transform:uppercase;margin-top:1px;">Gerente Comercial</div>
+                            <div style="font-size:7.5px;color:var(--pdf-azul-oscuro);font-weight:600;text-transform:uppercase;margin-top:1px;">Gerente Comercial</div>
                         </div>
                     </td>
                 </tr>
