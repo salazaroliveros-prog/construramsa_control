@@ -94,13 +94,23 @@
             --advertencia-texto: #fbbf24;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* Asegurar que ningún elemento rompa la caja del documento */
+        *, *::before, *::after { max-width: 100%; }
+        /* Excepción: imágenes y videos pueden usar su dimensión natural */
+        img, video, canvas { max-width: 100%; height: auto; }
 
         /* Scroll suave global — funciona en iOS Safari desde el elemento html */
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+            /* FIX global overflow: prevenir scroll horizontal en toda la página */
+            overflow-x: hidden;
+        }
 
         /* iOS standalone: respetar safe-area del notch/Dynamic Island */
         body {
+            /* FIX overflow: bloquear scroll horizontal en el body */
+            overflow-x: hidden;
             background-color: var(--bg-principal);
             background-image:
                 radial-gradient(at 12% 6%, rgba(11, 63, 143, 0.55) 0px, transparent 46%),
@@ -255,6 +265,32 @@
         }
         .btn-secundario:hover  { background: rgba(255, 255, 255, 0.15); border-color: rgba(0, 164, 228, 0.4); transform: translateY(-2px); }
         .btn-secundario:active { transform: scale(0.98); }
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none !important;
+            filter: none !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ── focus-visible accesible en botones (WCAG 2.4.11 / 2.4.7) ─────────
+           :focus-visible solo activa el outline en navegación por teclado,
+           no en clics de ratón/tap (evita el anillo en uso táctil). */
+        .btn-primario:focus-visible,
+        .btn-secundario:focus-visible,
+        .nav-tab:focus-visible,
+        button:focus-visible {
+            outline: 2px solid var(--acento-cian);
+            outline-offset: 3px;
+        }
 
         /* ── .btn-row — fila reutilizable de botones en formularios ─────────
            flex-wrap:wrap garantiza que en 360px los botones no rebasen.
@@ -291,8 +327,12 @@
 
         .container {
             max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            /* padding dinámico: mínimo 10px, preferido 20px, máximo 30px — sin desborde */
+            padding: 20px clamp(10px, 4vw, 30px);
+            /* FIX: evitar que contenidos internos desborden el container */
+            overflow-x: hidden;
         }
 
         .header {
@@ -303,6 +343,9 @@
             padding: 20px;
             flex-wrap: wrap;
             gap: 15px;
+            /* FIX: el header no puede desbordar su contenedor */
+            width: 100%;
+            min-width: 0;
         }
 
         .logo-container {
@@ -388,8 +431,24 @@
             -ms-overflow-style: none;
             padding-bottom: 4px;
             flex-wrap: nowrap;
+            position: relative;
         }
         .nav-tabs::-webkit-scrollbar { display: none; }
+        @media (max-width: 768px) {
+            .nav-tabs::after {
+                content: 'Desliza para ver módulos →';
+                display: flex;
+                align-items: center;
+                position: sticky;
+                right: 0;
+                flex: 0 0 auto;
+                padding: 0 10px;
+                color: var(--texto-secundario);
+                font-size: 10px;
+                pointer-events: none;
+                background: linear-gradient(90deg, transparent, var(--bg-principal) 25%);
+            }
+        }
 
         .nav-tab {
             background: rgba(255, 255, 255, 0.05);
@@ -564,6 +623,139 @@
         .form-grid-2-sm { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 
+        /* FIX overflow-x-auto: min-width:0 evita que flex/grid stretchen el wrapper */
+        .overflow-x-auto {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            min-width: 0;
+            width: 100%;
+            /* scroll-snap táctil en todas las resoluciones */
+            scroll-snap-type: x proximity;
+            /* Ocultar scrollbar en Webkit pero mantener funcionalidad */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,164,228,0.3) transparent;
+        }
+        .overflow-x-auto::-webkit-scrollbar { height: 4px; }
+        .overflow-x-auto::-webkit-scrollbar-track { background: transparent; }
+        .overflow-x-auto::-webkit-scrollbar-thumb { background: rgba(0,164,228,0.3); border-radius: 2px; }
+
+        /* FIX contraste: labels con font-weight 600 para distinguirse del fondo glass */
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--texto-principal);
+            margin-bottom: 6px;
+            letter-spacing: 0.2px;
+        }
+
+        /* ── .horas-extra-row — fila de horas extra en pase de lista ────────
+           Base: flex + gap. En 768px se añade flex-wrap:wrap (ver @media abajo). */
+        .horas-extra-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* ── .lista-asistencia-item — tarjeta de trabajador en el pase de lista ─
+           Generada dinámicamente en cargarListaAsistencia(). */
+        .lista-asistencia-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            transition: border-color 0.2s;
+        }
+        .lista-asistencia-item:focus-within {
+            border-color: rgba(0, 164, 228, 0.35);
+        }
+        .lista-asistencia-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .lista-asistencia-item-nombre {
+            margin: 0;
+            font-size: 15px;
+            color: #fff;
+        }
+        .lista-asistencia-item-puesto {
+            font-size: 11px;
+            color: var(--texto-secundario);
+        }
+        .lista-asistencia-item-tarifa {
+            text-align: right;
+            font-size: 11px;
+            color: var(--acento-cian);
+        }
+        .lista-asistencia-item-acciones {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ── .proyecto-card — tarjeta de proyecto en la lista de Configuración ──
+           Generada dinámicamente en cargarListaProyectosConfig(). */
+        .proyecto-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .proyecto-card:hover {
+            border-color: rgba(0, 164, 228, 0.35);
+            background: rgba(255,255,255,0.05);
+        }
+        .proyecto-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .proyecto-card-nombre {
+            color: var(--texto-principal);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .proyecto-card-desc {
+            font-size: 11px;
+            color: var(--texto-secundario);
+        }
+        .proyecto-card-meta {
+            font-size: 11px;
+            color: var(--texto-secundario);
+        }
+        .proyecto-card-acciones {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        /* FIX secciones internas de módulos: contenedores sin desborde */
+        .modulo-seccion {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+        }
+
+        /* ─── breakpoint intermedio 600px: form-grid-3 pasa a 2 columnas ─── */
+        @media (max-width: 600px) {
+            .form-grid-3 { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .container { padding: 14px clamp(8px, 3vw, 20px); }
+        }
+
         /* ══════════════════════════════════════════════════════════════
            BREAKPOINTS RESPONSIVE — Android & iOS — Todos los rangos
            ══════════════════════════════════════════════════════════════
@@ -575,19 +767,19 @@
 
         /* ── 768px: base móvil ───────────────────────────────────────── */
         @media (max-width: 768px) {
-            .header { flex-direction: column; text-align: center; }
-            .header-actions { justify-content: center; }
-            .header-actions select { min-width: 140px; max-width: 100%; width: auto; }
+            .header { flex-direction: column; text-align: center; align-items: center; }
+            /* FIX: logo-container centrado en móvil */
+            .logo-container { justify-content: center; min-width: 0; }
+            .header-actions { justify-content: center; width: 100%; }
+            .header-actions select { min-width: 140px; max-width: 100%; width: auto; flex: 1; }
             .company-name { font-size: 18px; }
             .tarjeta-glass { padding: 15px; }
             button { min-height: 44px; }
             table { font-size: 11px; }
             th, td { padding: 8px 4px; }
-            .overflow-x-auto {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                scroll-snap-type: x proximity;
-            }
+            /* FIX 8: word-break en celdas con texto largo (descripciones, observaciones) */
+            td { word-break: break-word; overflow-wrap: anywhere; max-width: 200px; }
+            /* overflow-x-auto: scroll-snap ya activado en la regla global */
             .form-grid-2, .form-grid-2-sm { grid-template-columns: 1fr; }
             .form-grid-3 { grid-template-columns: 1fr 1fr; }
             .horas-extra-row { flex-wrap: wrap; }
@@ -596,19 +788,29 @@
                 min-height: 36px !important;
                 padding: 6px 10px !important;
                 font-size: 12px !important;
+                white-space: nowrap;
+                max-width: none;
             }
             td button + button { margin-top: 4px; }
+            /* FIX 5: min-width por columna para tablas de 9 columnas (Viajes/Mant.) */
             th:nth-child(1), td:nth-child(1) { min-width: 80px; }
-            th:nth-child(2), td:nth-child(2) { min-width: 100px; }
+            th:nth-child(2), td:nth-child(2) { min-width: 110px; }
             th:nth-child(3), td:nth-child(3) { min-width: 80px; }
-            th:nth-child(4), td:nth-child(4) { min-width: 120px; }
-            th:nth-child(5), td:nth-child(5) { min-width: 80px; text-align: right; }
-            th:nth-child(6), td:nth-child(6) { min-width: 120px; text-align: center; }
-            .paginacion-container { gap: 4px; }
-            .paginacion-info { font-size: 11px; }
+            th:nth-child(4), td:nth-child(4) { min-width: 60px; }
+            th:nth-child(5), td:nth-child(5) { min-width: 70px; }
+            th:nth-child(6), td:nth-child(6) { min-width: 70px; }
+            th:nth-child(7), td:nth-child(7) { min-width: 90px; }
+            th:nth-child(8), td:nth-child(8) { min-width: 90px; }
+            th:nth-child(9), td:nth-child(9) { min-width: 90px; }
+            .paginacion-container { gap: 4px; flex-wrap: wrap; justify-content: center; }
+            .paginacion-info { font-size: 11px; width: 100%; text-align: center; order: -1; }
             .kpi-value { font-size: 18px !important; }
             /* Modal con scroll interno: el teclado virtual no tapa el contenido */
             .modal-content { max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+            /* FIX nav-tabs: en móvil ocupar todo el ancho disponible */
+            .nav-tabs { padding-left: 0; padding-right: 0; }
+            /* FIX: tarjeta-glass sin padding horizontal excesivo */
+            .tarjeta-glass { border-radius: 12px; }
         }
 
         /* ── 480px: Android mid-range (Moto G, Redmi, Samsung A series) ─ */
@@ -624,6 +826,12 @@
             .btn-primario, .btn-secundario { padding: 11px 18px; font-size: 13.5px; }
             .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); }
             .toast { max-width: 100% !important; }
+            /* FIX 2: topbar del modal VP — cerrar queda al lado del título, no se desborda */
+            .vp-topbar { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+            .vp-topbar > div:first-child { flex: 1 1 auto; min-width: 0; }
+            .vp-topbar-actions { width: 100%; justify-content: flex-end; gap: 8px; }
+            .vp-topbar-actions .btn-primario,
+            .vp-topbar-actions .btn-secundario { padding: 8px 14px; font-size: 12px; flex: 1 1 auto; }
         }
 
         /* ── 390px: iPhone 14/15 Pro (393px lógico), Pixel 7 ────────── */
@@ -660,20 +868,42 @@
             .kpi-label { font-size: 9px; letter-spacing: 0; }
             .kpi-sub { font-size: 9px; }
             .tarjeta-glass { padding: 10px; border-radius: 12px; }
-            .btn-primario, .btn-secundario { padding: 10px 14px; font-size: 12.5px; }
+            .btn-primario, .btn-secundario { padding: 10px 14px; font-size: 12.5px; width: 100%; }
+            .btn-row { flex-direction: column; }
+            .btn-row .btn-primario, .btn-row .btn-secundario { flex: none; }
             label { font-size: 12.5px; }
             input, select, textarea { padding: 9px 10px; font-size: 14px; }
-            #saldo-caja-chica { font-size: 18px !important; }
-            .form-grid-2, .form-grid-2-sm { grid-template-columns: 1fr; }
-            .form-grid-3 { grid-template-columns: 1fr 1fr; }
+            /* FIX 4: saldo caja chica no desborda en 360px */
+            #saldo-caja-chica { font-size: 16px !important; word-break: break-all; }
+            /* FIX 3: form-grid-3 a 1 columna en 360px */
+            .form-grid-2, .form-grid-2-sm, .form-grid-3 { grid-template-columns: 1fr; }
             table { font-size: 10px; }
             th, td { padding: 5px 3px; font-size: 10px; }
             td button { min-height: 34px !important; padding: 5px 8px !important; font-size: 11px !important; }
+            /* FIX 6: paginación en móvil extremo — centrada y sin desborde */
+            .paginacion-container { gap: 3px; }
+            .paginacion-container button { padding: 5px 10px !important; font-size: 11px !important; min-height: 32px !important; }
             .toast-container { left: 6px !important; right: 6px !important; top: 8px !important; }
             .toast { max-width: 100% !important; font-size: 13px; padding: 12px 14px; }
             .modal-content { padding: 14px; border-radius: 12px; max-height: 90dvh; }
             .modal-title { font-size: 15px; }
             .modal-message { font-size: 13px; }
+        }
+
+        /* FIX 7: landscape en móvil — editor más compacto, preview ocupa más espacio */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .vp-body { flex-direction: row; }
+            .vp-editor {
+                width: 260px;
+                min-width: 220px;
+                max-height: 100%;
+                border-right: 1px solid var(--glass-border);
+                border-bottom: none;
+            }
+            .vp-topbar { padding: 8px 14px; }
+            .vp-topbar-title { font-size: 13px; }
+            .vp-topbar-actions .btn-primario,
+            .vp-topbar-actions .btn-secundario { padding: 7px 12px; font-size: 12px; }
         }
 
         .config-section { margin-top: 20px; padding: 15px; border-top: 1px solid var(--glass-border); }
@@ -746,26 +976,44 @@
         @keyframes slideIn  { from{transform:translateX(100%);opacity:0;} to{transform:translateX(0);opacity:1;} }
         @keyframes slideOut { from{transform:translateX(0);opacity:1;} to{transform:translateX(100%);opacity:0;} }
 
-        /* Tooltips */
-        [data-tooltip] { position: relative; cursor: help; }
+        /* ── Tooltips ──────────────────────────────────────────────────────
+           FIX: z-index explícito · max-width con clamp · flecha indicadora
+           Se usa ::after para la burbuja y ::before para la flecha. */
+        [data-tooltip] { position: relative; }
+        /* Burbuja del tooltip */
         [data-tooltip]:hover::after {
             content: attr(data-tooltip);
             position: absolute;
-            bottom: 100%;
+            bottom: calc(100% + 8px);
             left: 50%;
             transform: translateX(-50%);
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
+            /* Evita desborde horizontal en pantallas estrechas */
+            max-width: min(260px, calc(100vw - 24px));
+            background: rgba(10, 14, 30, 0.95);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 164, 228, 0.45);
             border-radius: 6px;
-            padding: 8px 12px;
+            padding: 7px 11px;
             font-size: 12px;
+            line-height: 1.5;
             color: var(--texto-principal);
-            white-space: nowrap;
-            z-index: 1000;
-            margin-bottom: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            white-space: normal;
+            word-break: break-word;
+            z-index: 9000;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+        /* Flecha apuntando hacia abajo (hacia el elemento) */
+        [data-tooltip]:hover::before {
+            content: "";
+            position: absolute;
+            bottom: calc(100% + 2px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 164, 228, 0.45);
+            z-index: 9001;
             pointer-events: none;
         }
 
@@ -935,6 +1183,10 @@
             font-weight: 700;
             color: var(--acento-cian);
             white-space: nowrap;
+            /* FIX 1: evitar desborde del título en pantallas muy pequeñas */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
         }
         .vp-topbar-actions {
             display: flex;
@@ -1057,6 +1309,7 @@
             .vp-preview-wrapper { width: 100%; }
             #vp-plantilla-preview { padding: 16px 14px; font-size: 11px; }
             .vp-topbar { padding: 10px 14px; }
+            .vp-topbar > div:first-child { min-width: 0; flex: 1 1 auto; }
             .vp-topbar-title { font-size: 13px; }
         }
         @media (max-width: 480px) {
@@ -2048,14 +2301,14 @@
             <div style="margin-bottom:25px;padding:16px;border:1px solid var(--glass-border);border-radius:12px;background:linear-gradient(145deg,rgba(11,63,143,0.25),rgba(139,92,246,0.12));">
                 <h3 style="color:var(--acento-cian);font-size:16px;margin-top:0;">☁️ Respaldo en la Nube (Google Drive / OneDrive)</h3>
                 <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">
-                    Tus datos se respaldan en tu propia cuenta (Google Drive/OneDrive). Si borras la app y la reinstalas, podrás <strong>restaurar</strong> toda tu información.
+                    El respaldo funcional disponible actualmente es Google Apps Script. Los conectores OAuth avanzados se habilitarán cuando tengan integración completa.
                 </p>
 
                 <label for="nube-proveedor" style="font-size:12px;color:var(--texto-principal);">Método de respaldo</label>
                 <select id="nube-proveedor" style="margin-bottom:12px;">
                     <option value="gas">Google Apps Script (Google Drive) — recomendado</option>
-                    <option value="gdrive">Google Drive API (avanzado)</option>
-                    <option value="onedrive">OneDrive / Microsoft Graph (avanzado)</option>
+                    <option value="gdrive" disabled>Google Drive API (próximamente)</option>
+                    <option value="onedrive" disabled>OneDrive / Microsoft Graph (próximamente)</option>
                 </select>
 
                 <!-- Campos: Google Apps Script -->
@@ -2073,7 +2326,7 @@
                     <label for="nube-gd-client" style="font-size:12px;color:var(--texto-principal);">Google Client ID</label>
                     <input type="text" id="nube-gd-client" placeholder="xxxx.apps.googleusercontent.com" aria-label="Google OAuth Client ID">
                     <label for="nube-gd-token" style="font-size:12px;color:var(--texto-principal);margin-top:8px;">Access Token (opcional, pegar desde la URL luego de autorizar)</label>
-                    <input type="text" id="nube-gd-token" placeholder="ya29..." aria-label="Google acceso token">
+                    <input type="password" id="nube-gd-token" placeholder="ya29..." aria-label="Token de acceso de Google">
                 </div>
 
                 <!-- Campos: OneDrive OAuth -->
@@ -2081,7 +2334,7 @@
                     <label for="nube-od-client" style="font-size:12px;color:var(--texto-principal);">OneDrive Application (Client) ID</label>
                     <input type="text" id="nube-od-client" placeholder="00000000-0000-0000-0000-000000000000" aria-label="OneDrive OAuth Client ID">
                     <label for="nube-od-token" style="font-size:12px;color:var(--texto-principal);margin-top:8px;">Access Token (opcional)</label>
-                    <input type="text" id="nube-od-token" placeholder="EwA..." aria-label="OneDrive access token">
+                    <input type="password" id="nube-od-token" placeholder="EwA..." aria-label="Token de acceso de OneDrive">
                 </div>
 
                 <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
@@ -2108,9 +2361,9 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.7.3 (Fix duplicidad en reportes consolidados: caja chica, viajes y mantenimiento; botones Vista Previa en módulo Reportes)<br>
+                    Versión: 2.7.4 (Auditoría UI completa: tooltips con flecha, clases CSS .lista-asistencia-item/.proyecto-card/.horas-extra-row, focus-visible accesible en botones, VP preview scale mejorado, limpieza de CSS duplicado)<br>
                     Desarrollado para: CONSTRURAMSA<br>
-                    Modo: Offline (LocalStorage)
+                    Modo: Offline (LocalStorage) · Sin autenticación multiusuario; no usar como sistema público hasta conectar un proveedor de identidad.
                 </p>
             </div>
         </div>
@@ -2497,8 +2750,8 @@
             let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
         }
 
-        function numToF(v) { return (isNaN(parseFloat(v)) ? 0 : parseFloat(v)).toFixed(2); }
-        function formatearMoneda(v) { return 'Q' + (parseFloat(v || 0)).toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function numToF(v) { const n = parseFloat(v); return (Number.isFinite(n) ? n : 0).toFixed(2); }
+        function formatearMoneda(v) { const n = parseFloat(v); return 'Q' + (Number.isFinite(n) ? n : 0).toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
         function generarId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
 
@@ -2545,16 +2798,29 @@
         }
         function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
 
+        let modalPreviousFocus = null;
         function showConfirmModal(title, message, onConfirm) {
             const ov = document.getElementById('modal-overlay');
+            modalPreviousFocus = document.activeElement;
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').textContent = message;
+            ov.setAttribute('aria-describedby', 'modal-message');
             ov.classList.remove('hidden');
             const btnOk  = document.getElementById('modal-confirm');
             const btnCan = document.getElementById('modal-cancel');
-            const ok  = () => { ov.classList.add('hidden'); cleanup(); onConfirm(); };
-            const can = () => { ov.classList.add('hidden'); cleanup(); };
-            const esc = (e) => { if (e.key === 'Escape') can(); };
+            const focusables = () => [...ov.querySelectorAll('button:not([disabled]), [href], input, select, textarea')];
+            const restoreFocus = () => { if (modalPreviousFocus && typeof modalPreviousFocus.focus === 'function') modalPreviousFocus.focus(); };
+            const ok  = () => { ov.classList.add('hidden'); cleanup(); onConfirm(); restoreFocus(); };
+            const can = () => { ov.classList.add('hidden'); cleanup(); restoreFocus(); };
+            const esc = (e) => {
+                if (e.key === 'Escape') can();
+                if (e.key === 'Tab') {
+                    const items = focusables(); if (!items.length) return;
+                    const first = items[0], last = items[items.length - 1];
+                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                }
+            };
             function cleanup() {
                 btnOk.removeEventListener('click', ok);
                 btnCan.removeEventListener('click', can);
@@ -2563,6 +2829,7 @@
             btnOk.addEventListener('click', ok);
             btnCan.addEventListener('click', can);
             document.addEventListener('keydown', esc);
+            btnCan.focus();
         }
 
         // ============================================================
@@ -2643,16 +2910,16 @@
             }
             db.proyectos.forEach(p => {
                 const div = document.createElement('div');
-                div.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;padding:10px 15px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:8px;';
+                div.className = 'proyecto-card';
                 div.innerHTML = `
-                    <div>
-                        <strong style="color:var(--texto-principal);font-size:13px;">${p.nombre}</strong>
-                        ${p.descripcion ? `<br><span style="font-size:11px;color:var(--texto-secundario);">${p.descripcion}</span>` : ''}
-                        <br><span style="font-size:11px;color:var(--texto-secundario);">Presupuesto: ${formatearMoneda(p.presupuesto_inicial)} | Creado: ${p.fecha_creacion}</span>
+                    <div class="proyecto-card-info">
+                        <strong class="proyecto-card-nombre">${_esc(p.nombre)}</strong>
+                        ${p.descripcion ? `<br><span class="proyecto-card-desc">${_esc(p.descripcion)}</span>` : ''}
+                        <br><span class="proyecto-card-meta">Presupuesto: ${formatearMoneda(p.presupuesto_inicial)} | Creado: ${_esc(p.fecha_creacion)}</span>
                     </div>
-                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                        <button onclick="seleccionarProyecto('${p.id}')" class="btn-primario" style="padding:6px 12px;font-size:11px;" aria-label="Seleccionar proyecto ${p.nombre}">✅ Seleccionar</button>
-                        <button onclick="eliminarProyecto('${p.id}')" class="btn-primario" style="padding:6px 12px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proyecto ${p.nombre}">🗑️</button>
+                    <div class="proyecto-card-acciones">
+                        <button onclick="seleccionarProyecto('${_esc(p.id)}')" class="btn-primario" style="padding:6px 12px;font-size:11px;" aria-label="Seleccionar proyecto ${_esc(p.nombre)}">✅ Seleccionar</button>
+                        <button onclick="eliminarProyecto('${_esc(p.id)}')" class="btn-primario" style="padding:6px 12px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proyecto ${_esc(p.nombre)}">🗑️</button>
                     </div>`;
                 cont.appendChild(div);
             });
@@ -2889,15 +3156,15 @@
                 { clase: 'purpura', label: 'Mtto y Insumos', valor: formatearMoneda(totalMTTO), sub: `${ords.length} órdenes · ${ins.length} insumos` },
                 { clase: 'ciano', label: 'Nómina', valor: formatearMoneda(totalNomina), sub: `${regsAsist.length} registros` }
             ];
-            grid.innerHTML = kpis.map(k => `<div class="kpi-card ${k.clase}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.valor}</div><div class="kpi-sub">${k.sub || ''}</div></div>`).join('');
+            grid.innerHTML = kpis.map(k => `<div class="kpi-card ${_esc(k.clase)}"><div class="kpi-label">${_esc(k.label)}</div><div class="kpi-value">${_esc(k.valor)}</div><div class="kpi-sub">${_esc(k.sub || '')}</div></div>`).join('');
 
             const insLow = ins.filter(i => typeof i.stock_min === 'number' && i.cantidad < i.stock_min);
             let avisosHtml = '';
             if (insLow.length > 0) {
-                avisosHtml += `<div class="kpi-aviso">⚠️ <strong>Stock bajo:</strong> ${insLow.map(i => `${i.articulo} (quedan ${i.cantidad}, mín. ${i.stock_min})`).join(' · ')}</div>`;
+                avisosHtml += `<div class="kpi-aviso">⚠️ <strong>Stock bajo:</strong> ${insLow.map(i => `${_esc(i.articulo)} (quedan ${i.cantidad}, mín. ${i.stock_min})`).join(' · ')}</div>`;
             }
             if (saldo < 0) {
-                avisosHtml += `<div class="kpi-aviso">🚨 <strong>Fondos negativos:</strong> saldo de ${proyNombre} es negativo (${formatearMoneda(saldo)}).</div>`;
+                avisosHtml += `<div class="kpi-aviso">🚨 <strong>Fondos negativos:</strong> saldo de ${_esc(proyNombre)} es negativo (${formatearMoneda(saldo)}).</div>`;
             } else if (presupuesto > 0 && saldo / presupuesto < 0.15) {
                 avisosHtml += `<div class="kpi-aviso">⚠️ <strong>Fondos bajos:</strong> queda menos del 15% del presupuesto (${formatearMoneda(saldo)}).</div>`;
             }
@@ -2906,7 +3173,7 @@
             if (pending.length === 0) {
                 pendEl.innerHTML = '<li style="color:var(--texto-secundario);">✅ Sin registros pendientes para hoy.</li>';
             } else {
-                pendEl.innerHTML = pending.slice(0, 8).map(p => `<li>${p.texto}</li>`).join('') +
+                pendEl.innerHTML = pending.slice(0, 8).map(p => `<li>${_esc(p.texto)}</li>`).join('') +
                     (pending.length > 8 ? `<li style="color:var(--texto-secundario);">+${pending.length - 8} más...</li>` : '');
             }
         }
@@ -3032,6 +3299,17 @@
             return mov;
         }
 
+        // Valida ediciones de gastos vinculados sin contar dos veces el egreso anterior.
+        function validarAjusteGasto(gastoAnterior, gastoNuevo) {
+            const saldoActual = actualizarSaldoCajaChica();
+            const saldoDisponible = saldoActual + Math.max(0, Number(gastoAnterior) || 0);
+            if (gastoNuevo > saldoDisponible) {
+                showToast(`❌ Fondos insuficientes. Saldo disponible: ${formatearMoneda(saldoDisponible)}`, 'error', 5000);
+                return false;
+            }
+            return true;
+        }
+
         // Mapeo de categorías de caja chica (value -> etiqueta legible)
         const CATEGORIAS_CAJA = {
             'apertura': 'Apertura de Caja', 'comida': 'Comida', 'ferreteria': 'Ferretería',
@@ -3075,14 +3353,14 @@
                 const row = document.createElement('tr');
                 // FIX #19: aria-label en botones de acción
                 row.innerHTML = `
-                    <td>${mov.fecha}</td>
+                    <td>${_esc(mov.fecha)}</td>
                     <td style="color:${color};font-weight:600;">${mov.tipo.toUpperCase()}</td>
-                    <td>${etiquetaCategoria(mov.categoria)}</td>
-                    <td>${mov.descripcion}${mov.responsable && mov.responsable !== 'Usuario' && mov.responsable !== 'Sistema Automático' ? `<br><span style="font-size:10px;color:var(--texto-secundario);">👤 ${mov.responsable}</span>` : ''}</td>
+                    <td>${_esc(etiquetaCategoria(mov.categoria))}</td>
+                    <td>${_esc(mov.descripcion)}${mov.responsable && mov.responsable !== 'Usuario' && mov.responsable !== 'Sistema Automático' ? `<br><span style="font-size:10px;color:var(--texto-secundario);">👤 ${_esc(mov.responsable)}</span>` : ''}</td>
                     <td style="font-weight:bold;color:${color};">${signo}${formatearMoneda(mov.monto)}</td>
                     <td>
-                        <button onclick="editarMovimientoCaja('${mov.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar movimiento ${mov.descripcion}">✏️ Editar</button>
-                        <button onclick="eliminarMovimientoCaja('${mov.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar movimiento ${mov.descripcion}">🗑️ Eliminar</button>
+                        <button onclick="editarMovimientoCaja('${_esc(mov.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar movimiento ${_esc(mov.descripcion)}">✏️ Editar</button>
+                        <button onclick="eliminarMovimientoCaja('${_esc(mov.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar movimiento ${_esc(mov.descripcion)}">🗑️ Eliminar</button>
                     </td>`;
                 tbody.appendChild(row);
             });
@@ -3269,16 +3547,16 @@
                 const gasto   = (reg.combustible_costo || 0) + (reg.mantenimiento_costo || 0);
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${reg.fecha}</td>
-                    <td>${tipo_}</td>
-                    <td>${codigo_}</td>
+                    <td>${_esc(reg.fecha)}</td>
+                    <td>${_esc(tipo_)}</td>
+                    <td>${_esc(codigo_)}</td>
                     <td>${uso.toFixed(2)} ${unidad}</td>
                     <td>${reg.combustible_galones} gal</td>
                     <td>${rend}</td>
                     <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(gasto)}</td>
                     <td>
-                        <button onclick="editarRegistroMaquinaria('${reg.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar registro maquinaria ${codigo_}">✏️ Editar</button>
-                        <button onclick="eliminarRegistroMaquinaria('${reg.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar registro maquinaria ${codigo_}">🗑️ Eliminar</button>
+                        <button onclick="editarRegistroMaquinaria('${_esc(reg.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar registro maquinaria ${_esc(codigo_)}">✏️ Editar</button>
+                        <button onclick="eliminarRegistroMaquinaria('${_esc(reg.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar registro maquinaria ${_esc(codigo_)}">🗑️ Eliminar</button>
                     </td>`;
                 tbody.appendChild(row);
             });
@@ -3320,9 +3598,10 @@
                         const prev = datos.maquinaria_flota.registros[idx];
                         const gastoPrev = (prev.combustible_costo || 0) + (prev.mantenimiento_costo || 0);
                         const gastoNuevo = costoComb + mantCosto;
+                        if (!validarAjusteGasto(gastoPrev, gastoNuevo)) return;
                         datos.maquinaria_flota.registros[idx] = { ...prev, fecha: fechaMaq, odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas: tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
                         // Recalcular el gasto vinculado en caja chica si cambió
-                        ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo);
+                        ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo, fechaMaq);
                         saveProyectoData(datos);
                     }
                     delete this.dataset.editando;
@@ -3376,7 +3655,7 @@
          * - Si el nuevo gasto > 0 y NO existe (antes era 0): crea un egreso y lo vincula.
          * - Si el nuevo gasto === 0: elimina el egreso vinculado (revierte).
          */
-        function ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo) {
+        function ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo, fecha = new Date().toISOString().split('T')[0]) {
             // localizar el egreso vinculado
             let egreso = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
             if (!egreso) {
@@ -3388,6 +3667,7 @@
                 if (egreso) {
                     // Ajustar el monto del egreso vinculado al nuevo gasto
                     egreso.monto = gastoNuevo;
+                    egreso.fecha = fecha;
                     if (reg) reg.gasto_id = egreso.id;
                 } else {
                     // No había egreso (se pasó de 0 a gasto); crear uno. Validar saldo.
@@ -3546,20 +3826,20 @@
             }
             datos.personal.trabajadores.forEach(t => {
                 const card = document.createElement('div');
-                card.style.cssText = 'background:rgba(255,255,255,0.02);border:1px solid var(--glass-border);border-radius:12px;padding:15px;';
+                card.className = 'lista-asistencia-item';
                 // FIX #22: clase form-grid-3 para los radio buttons
                 card.innerHTML = `
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+                    <div class="lista-asistencia-item-header">
                         <div>
-                            <h4 style="margin:0;font-size:15px;color:#fff;">${t.nombre}</h4>
-                            <span style="font-size:11px;color:var(--texto-secundario);">${t.puesto}</span>
+                            <h4 class="lista-asistencia-item-nombre">${_esc(t.nombre)}</h4>
+                            <span class="lista-asistencia-item-puesto">${_esc(t.puesto)}</span>
                         </div>
-                        <div style="text-align:right;font-size:11px;color:var(--acento-cian);">
-                            Normal: Q${t.pago_hora_normal}/h | Extra: Q${t.pago_hora_extra}/h
+                        <div class="lista-asistencia-item-tarifa">
+                            Normal: Q${_esc(t.pago_hora_normal)}/h | Extra: Q${_esc(t.pago_hora_extra)}/h
                         </div>
                     </div>
                     <fieldset style="border:none;padding:0;margin:0 0 10px 0;">
-                        <legend class="visually-hidden">Estado de asistencia de ${t.nombre}</legend>
+                        <legend class="visually-hidden">Estado de asistencia de ${_esc(t.nombre)}</legend>
                         <div class="form-grid-3">
                             <label style="background:rgba(16,185,129,0.1);border:1px solid var(--exito);border-radius:6px;padding:8px;text-align:center;font-size:12px;cursor:pointer;display:block;">
                                 <input type="radio" name="asistencia-${t.id}" value="asistio" checked style="width:auto;margin-right:5px;" aria-label="Asistió"> Asistió
@@ -3572,13 +3852,13 @@
                             </label>
                         </div>
                     </fieldset>
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                    <div class="horas-extra-row">
                         <label for="horas-extra-${t.id}" style="font-size:12px;white-space:nowrap;color:var(--texto-secundario);">Horas Extra:</label>
-                        <input type="number" inputmode="decimal" id="horas-extra-${t.id}" min="0" max="8" value="0" style="width:80px;min-width:70px;padding:6px;text-align:center;" aria-label="Horas extra de ${t.nombre}">
+                        <input type="number" inputmode="decimal" id="horas-extra-${_esc(t.id)}" min="0" max="8" value="0" style="width:80px;min-width:70px;padding:6px;text-align:center;" aria-label="Horas extra de ${_esc(t.nombre)}">
                     </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <button onclick="editarTrabajador('${t.id}')" class="btn-secundario" style="padding:6px 8px;font-size:11px;flex:1;" aria-label="Editar trabajador ${t.nombre}">✏️ Editar</button>
-                        <button onclick="eliminarTrabajador('${t.id}')" class="btn-primario" style="padding:6px 8px;font-size:11px;background:var(--alerta);flex:1;" aria-label="Eliminar trabajador ${t.nombre}">🗑️ Eliminar</button>
+                    <div class="lista-asistencia-item-acciones">
+                        <button onclick="editarTrabajador('${_esc(t.id)}')" class="btn-secundario" style="padding:6px 8px;font-size:11px;flex:1;" aria-label="Editar trabajador ${_esc(t.nombre)}">✏️ Editar</button>
+                        <button onclick="eliminarTrabajador('${_esc(t.id)}')" class="btn-primario" style="padding:6px 8px;font-size:11px;background:var(--alerta);flex:1;" aria-label="Eliminar trabajador ${_esc(t.nombre)}">🗑️ Eliminar</button>
                     </div>`;
                 cont.appendChild(card);
             });
@@ -3593,7 +3873,12 @@
             datos.personal.trabajadores.forEach(t => {
                 const estadoInput = document.querySelector(`input[name="asistencia-${t.id}"]:checked`);
                 const estado      = estadoInput ? estadoInput.value : 'falto';
-                const horasExtra  = parseFloat(document.getElementById(`horas-extra-${t.id}`)?.value) || 0;
+                const horasExtraRaw = document.getElementById(`horas-extra-${t.id}`)?.value ?? '';
+                const horasExtra = horasExtraRaw === '' ? 0 : Number(horasExtraRaw);
+                if (!Number.isFinite(horasExtra) || horasExtra < 0 || horasExtra > 8) {
+                    showToast(`❌ Las horas extra de ${t.nombre} deben estar entre 0 y 8.`, 'error');
+                    return;
+                }
                 let pagNorm = 0, pagExt = 0;
                 if (estado === 'asistio') {
                     pagNorm = 8 * (parseFloat(t.pago_hora_normal) || 0);
@@ -3647,7 +3932,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${r.fecha}</td>
-                    <td>${r.nombre}</td>
+                    <td>${_esc(r.nombre)}</td>
                     <td style="color:${colEst};font-weight:600;">${r.estado.toUpperCase()}</td>
                     <td>${r.horasExtra}h</td>
                     <td style="font-weight:bold;color:var(--acento-cian);">${formatearMoneda(r.sueldo)}</td>
@@ -3739,9 +4024,9 @@
             datos.adquisiciones.proveedores.forEach(p => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${p.nombre}</td>
-                    <td>${p.telefono}</td>
-                    <td>${p.especialidad}</td>
+                    <td>${_esc(p.nombre)}</td>
+                    <td>${_esc(p.telefono)}</td>
+                    <td>${_esc(p.especialidad)}</td>
                     <td>
                         <button onclick="editarProveedor('${p.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar proveedor ${p.nombre}">✏️</button>
                         <button onclick="eliminarProveedor('${p.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proveedor ${p.nombre}">🗑️</button>
@@ -3827,16 +4112,16 @@
                 const color  = c.estado==='aprobada'?'var(--exito)':c.estado==='rechazada'?'var(--alerta-texto)':'var(--advertencia-texto)';
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${c.material_descripcion}</td>
-                    <td style="color:var(--texto-secundario);">${pNomb}</td>
+                    <td>${_esc(c.material_descripcion)}</td>
+                    <td style="color:var(--texto-secundario);">${_esc(pNomb)}</td>
                     <td style="text-align:right;font-weight:bold;">${formatearMoneda(c.total)}</td>
                     <td style="text-align:center;"><span style="color:${color};font-weight:600;">${c.estado.toUpperCase()}</span></td>
                     <td style="text-align:center;">
                         ${c.estado==='pendiente'?`
-                            <button onclick="editarCotizacion('${c.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar cotización ${c.material_descripcion}">✏️</button>
-                            <button onclick="aprobarCotizacion('${c.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--exito);" aria-label="Aprobar cotización ${c.material_descripcion}">✅ Aprobar</button>
-                            <button onclick="rechazarCotizacion('${c.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Rechazar cotización ${c.material_descripcion}">❌ Rechazar</button>
-                        `:`<button onclick="eliminarCotizacion('${c.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar cotización ${c.material_descripcion}">🗑️ Eliminar</button>`}
+                        <button onclick="editarCotizacion('${_esc(c.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar cotización ${_esc(c.material_descripcion)}">✏️</button>
+                            <button onclick="aprobarCotizacion('${_esc(c.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--exito);" aria-label="Aprobar cotización ${_esc(c.material_descripcion)}">✅ Aprobar</button>
+                            <button onclick="rechazarCotizacion('${_esc(c.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Rechazar cotización ${_esc(c.material_descripcion)}">❌ Rechazar</button>
+                        `:`<button onclick="eliminarCotizacion('${_esc(c.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar cotización ${_esc(c.material_descripcion)}">🗑️ Eliminar</button>`}
                     </td>`;
                 tbody.appendChild(row);
             });
@@ -3848,11 +4133,12 @@
             const c    = datos.adquisiciones.cotizaciones_compras.find(c => c.id === id);
             const prov = datos.adquisiciones.proveedores.find(p => p.id === c?.proveedor_id);
             if (!c) return;
-            if (!procesarGastoCajaChica(c.total, 'Materiales', `Compra: ${c.material_descripcion} - ${prov?prov.nombre:'N/A'}`)) return;
+            const movGasto = procesarGastoCajaChica(c.total, 'Materiales', `Compra: ${c.material_descripcion} - ${prov?prov.nombre:'N/A'}`);
+            if (!movGasto) return;
             // procesarGastoCajaChica ya guardó; recargar y actualizar estado
             const datos2 = getProyectoData();
             const c2 = datos2.adquisiciones.cotizaciones_compras.find(x => x.id === id);
-            if (c2) { c2.estado = 'aprobada'; saveProyectoData(datos2); }
+            if (c2) { c2.estado = 'aprobada'; c2.gasto_id = movGasto.id; saveProyectoData(datos2); }
             cargarTablaCotizaciones();
             showToast('✅ Cotización aprobada y compra procesada', 'success');
         }
@@ -3876,7 +4162,9 @@
                 const datos2 = getProyectoData();
                 const c2 = datos2.adquisiciones.cotizaciones_compras.find(c => c.id === id);
                 if (c2?.estado === 'aprobada') {
-                    datos2.caja_chica.push({ id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'ingreso', categoria:'Reembolso', descripcion:`Reversión cotización: ${c2.material_descripcion}`, monto:c2.total, responsable:'Sistema' });
+                    const egreso = (datos2.caja_chica || []).find(m => c2.gasto_id && m.id === c2.gasto_id && m.tipo === 'egreso');
+                    if (egreso) datos2.caja_chica = datos2.caja_chica.filter(m => m.id !== egreso.id);
+                    else datos2.caja_chica.push({ id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'ingreso', categoria:'Reembolso', descripcion:`Reversión cotización: ${c2.material_descripcion}`, monto:c2.total, responsable:'Sistema' });
                 }
                 datos2.adquisiciones.cotizaciones_compras = datos2.adquisiciones.cotizaciones_compras.filter(c => c.id !== id);
                 saveProyectoData(datos2);
@@ -3969,7 +4257,8 @@
                 b.forEach(i => { m.set(i[key], { ...(m.get(i[key])||{}), ...i }); });
                 return Array.from(m.values());
             }
-            ex.configuracion = { ...ex.configuracion, ...imp.configuracion };
+            const proyectoActualLocal = ex.configuracion?.proyecto_actual || null;
+            ex.configuracion = { ...ex.configuracion, ...imp.configuracion, proyecto_actual: proyectoActualLocal };
             ex.caja_chica    = fusionarArrays(ex.caja_chica||[], imp.caja_chica||[], 'id');
             ex.maquinaria_flota.vehiculos = fusionarArrays(ex.maquinaria_flota.vehiculos||[], imp.maquinaria_flota?.vehiculos||[], 'id');
             ex.maquinaria_flota.registros = fusionarArrays(ex.maquinaria_flota.registros||[], imp.maquinaria_flota?.registros||[], 'id');
@@ -4046,11 +4335,18 @@
             reader.onload = function(ev) {
                 try {
                     const imp = JSON.parse(ev.target.result);
+                    if (!imp || typeof imp !== 'object' || !Array.isArray(imp.proyectos) || typeof imp.proyectos_data !== 'object') {
+                        throw new Error('El archivo no tiene una estructura CONSTRURAMSA válida.');
+                    }
                     hideLoading();
                     showConfirmModal('Importar Base de Datos',
                         'Se FUSIONARÁN los datos importados con los existentes. Registros nuevos se agregan; los existentes se actualizan. No se perderá información. ¿Continuar?',
                         () => {
                             showLoading('Procesando fusión...');
+                            // Copia local recuperable antes de cualquier fusión.
+                            localStorage.setItem('construramsa_preimport_backup', JSON.stringify({
+                                created_at: new Date().toISOString(), data: getDB()
+                            }));
                             const fusionado = importarBaseDatosConFusion(imp);
                             invalidarCacheDB();
                             saveDB(fusionado);
@@ -4302,6 +4598,9 @@
             const tarifa = parseFloat(document.getElementById('cam-tarifa').value) || 0;
             const modalidad = document.getElementById('cam-modalidad').value;
             if (!nombre || nombre.length < 2) { showToast('Escriba el nombre del camión', 'error'); return; }
+            if (!Number.isFinite(capacidad) || capacidad < 1 || capacidad > 100) { showToast('La capacidad debe estar entre 1 y 100 m³', 'error'); return; }
+            if (!Number.isFinite(consumo) || consumo < 0 || consumo > 10) { showToast('El consumo debe estar entre 0 y 10 L/km', 'error'); return; }
+            if (!Number.isFinite(tarifa) || tarifa < 0 || tarifa > 999999) { showToast('La tarifa de alquiler no es válida', 'error'); return; }
             const datos = getProyectoData();
             datos.viajes_camiones.camiones.push({ id: generarId(), nombre, propiedad, capacidad, consumo, tarifa, modalidad });
             saveProyectoData(datos);
@@ -4321,9 +4620,9 @@
                 const tar = c.propiedad === 'alquilado' ? `${formatearMoneda(c.tarifa)}/${c.modalidad}` : '—';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${c.nombre}</td>
+                    <td>${_esc(c.nombre)}</td>
                     <td>${prop}</td>
-                    <td>${tar}</td>
+                    <td>${_esc(tar)}</td>
                     <td>${c.consumo} L/km</td>
                     <td><button onclick="eliminarCamion('${c.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar camión">🗑️</button></td>`;
                 tbody.appendChild(tr);
@@ -4345,7 +4644,7 @@
             const nombre = document.getElementById('ruta-nombre').value.trim();
             const distancia = parseFloat(document.getElementById('ruta-distancia').value);
             if (!nombre || nombre.length < 2) { showToast('Ingrese el nombre', 'error'); return; }
-            if (!distancia || distancia <= 0) { showToast('Distancia inválida', 'error'); return; }
+            if (!Number.isFinite(distancia) || distancia <= 0 || distancia > 10000) { showToast('La distancia debe estar entre 0 y 10,000 km', 'error'); return; }
             const datos = getProyectoData();
             datos.viajes_camiones.rutas_botadero.push({ id: generarId(), nombre, distancia });
             saveProyectoData(datos);
@@ -4363,7 +4662,7 @@
             rutas.forEach(r => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${r.nombre}</td>
+                    <td>${_esc(r.nombre)}</td>
                     <td>${r.distancia} km</td>
                     <td><button onclick="eliminarRuta('${r.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar ruta">🗑️</button></td>`;
                 tbody.appendChild(tr);
@@ -4386,13 +4685,15 @@
             const rutaId = document.getElementById('viaje-ruta').value;
             const fecha = document.getElementById('viaje-fecha').value;
             const material = document.getElementById('viaje-material').value;
-            const numero = parseInt(document.getElementById('viaje-numero').value) || 0;
-            const precio = parseFloat(document.getElementById('viaje-precio-diesel').value) || 0;
-            const extra = parseFloat(document.getElementById('viaje-extra').value) || 0;
+            const numero = Number(document.getElementById('viaje-numero').value);
+            const precio = Number(document.getElementById('viaje-precio-diesel').value) || 0;
+            const extra = Number(document.getElementById('viaje-extra').value) || 0;
             if (!fecha) { showToast('Seleccione la fecha', 'error'); return; }
             if (!camId) { showToast('Seleccione un camión', 'error'); return; }
             if (!rutaId) { showToast('Seleccione una ruta/botadero', 'error'); return; }
-            if (numero < 1) { showToast('Número de viajes inválido', 'error'); return; }
+            if (!Number.isInteger(numero) || numero < 1 || numero > 1000) { showToast('El número de viajes debe ser un entero entre 1 y 1,000', 'error'); return; }
+            if (!Number.isFinite(precio) || precio < 0 || precio > 999999) { showToast('El precio del diésel no es válido', 'error'); return; }
+            if (!Number.isFinite(extra) || extra < 0 || extra > 999999) { showToast('El costo adicional no es válido', 'error'); return; }
             const datos = getProyectoData();
             const cam = datos.viajes_camiones.camiones.find(c => c.id === camId);
             const ruta = datos.viajes_camiones.rutas_botadero.find(r => r.id === rutaId);
@@ -4405,6 +4706,7 @@
                 costoAlq = (parseFloat(cam.tarifa) || 0) * (cam.modalidad === 'viaje' ? numero : 1);
             }
             const total = costoComb + costoAlq + extra;
+            if (!Number.isFinite(total) || total <= 0) { showToast('El viaje debe generar un costo mayor que cero', 'error'); return; }
 
             // ── Modo edición ──────────────────────────────────────────
             const editandoIdViaje = this.dataset.editando;
@@ -4412,10 +4714,12 @@
                 const idx = datos.viajes_camiones.viajes.findIndex(x => x.id === editandoIdViaje);
                 if (idx !== -1) {
                     const prev = datos.viajes_camiones.viajes[idx];
+                    if (!validarAjusteGasto(prev.total || 0, total)) return;
                     // Ajustar egreso vinculado si cambió el monto
                     let egresoV = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
                     if (egresoV) {
                         egresoV.monto = total;
+                        egresoV.fecha = fecha;
                     }
                     datos.viajes_camiones.viajes[idx] = { ...prev, fecha, vehiculo_id: camId, ruta_id: rutaId, material, numero, km_total: kmTotal, litros, costo_combustible: costoComb, costo_alquiler: costoAlq, extra, total };
                     saveProyectoData(datos);
@@ -4470,15 +4774,15 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${v.fecha}</td>
-                    <td>${nombre}</td>
-                    <td>${v.material}</td>
+                    <td>${_esc(nombre)}</td>
+                    <td>${_esc(v.material)}</td>
                     <td>${v.numero}</td>
                     <td>${numToF(v.km_total)} km</td>
                     <td>${numToF(v.litros)} L</td>
                     <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(v.total)}</td>
                     <td>
-                        <button onclick="editarViaje('${v.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar viaje">✏️</button>
-                        <button onclick="eliminarViaje('${v.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar viaje">🗑️</button>
+                        <button onclick="editarViaje('${_esc(v.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar viaje">✏️</button>
+                        <button onclick="eliminarViaje('${_esc(v.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar viaje">🗑️</button>
                     </td>`;
                 tbody.appendChild(tr);
             });
@@ -4561,8 +4865,8 @@
             lista.forEach(m => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${m.nombre}</td>
-                    <td>${m.tipo}</td>
+                    <td>${_esc(m.nombre)}</td>
+                    <td>${_esc(m.tipo)}</td>
                     <td><button onclick="eliminarMaquinaCatalogo('${m.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar maquinaria">🗑️</button></td>`;
                 tbody.appendChild(tr);
             });
@@ -4600,11 +4904,11 @@
             const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === maqId);
             if (!m) { cont.innerHTML = '<p style="color:var(--texto-secundario);font-size:12px;">Seleccione una maquinaria para ver su formato de inspección.</p>'; return; }
             let items = FORMATOS_BASE[m.tipo] || FORMATOS_BASE['Otro'];
-            cont.innerHTML = `<h4 style="color:var(--acento-cian);font-size:13px;margin:0 0 8px 0;">📋 Formato de Inspección — ${m.tipo}</h4>`;
+            cont.innerHTML = `<h4 style="color:var(--acento-cian);font-size:13px;margin:0 0 8px 0;">📋 Formato de Inspección — ${_esc(m.tipo)}</h4>`;
             items.forEach((it, i) => {
                 const d = document.createElement('label');
                 d.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:12px;color:var(--texto-principal);cursor:pointer;';
-                d.innerHTML = `<input type="checkbox" class="fmt-inspeccion" value="Bien" data-idx="${i}" style="width:auto;margin-top:2px;" aria-label="${it}"> <span>${it}</span>`;
+                d.innerHTML = `<input type="checkbox" class="fmt-inspeccion" value="Bien" data-idx="${i}" style="width:auto;margin-top:2px;" aria-label="${_esc(it)}"> <span>${_esc(it)}</span>`;
                 cont.appendChild(d);
             });
         }
@@ -4636,8 +4940,9 @@
                 const idx = datos.mantenimiento.ordenes.findIndex(x => x.id === editandoIdOrden);
                 if (idx !== -1) {
                     const prev = datos.mantenimiento.ordenes[idx];
+                    if (!validarAjusteGasto(prev.costo || 0, costo)) return;
                     let egresoOrd = (datos.caja_chica || []).find(mo => prev.gasto_id && mo.id === prev.gasto_id && mo.tipo === 'egreso');
-                    if (egresoOrd) egresoOrd.monto = costo;
+                    if (egresoOrd) { egresoOrd.monto = costo; egresoOrd.fecha = fecha; }
                     datos.mantenimiento.ordenes[idx] = { ...prev, fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items };
                     saveProyectoData(datos);
                 }
@@ -4685,8 +4990,8 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${o.fecha}</td>
-                    <td>${m ? m.nombre : 'N/A'}</td>
-                    <td>${o.tipo}</td>
+                    <td>${_esc(m ? m.nombre : 'N/A')}</td>
+                    <td>${_esc(o.tipo)}</td>
                     <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(o.costo)}</td>
                     <td>
                         <button onclick="editarOrden('${o.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar orden">✏️</button>
@@ -4743,8 +5048,9 @@
                 const idx = datos.mantenimiento.compras_insumos.findIndex(x => x.id === editandoIdInsumo);
                 if (idx !== -1) {
                     const prev = datos.mantenimiento.compras_insumos[idx];
+                    if (!validarAjusteGasto(prev.costo || 0, costo)) return;
                     let egresoIns = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
-                    if (egresoIns) egresoIns.monto = costo;
+                    if (egresoIns) { egresoIns.monto = costo; egresoIns.fecha = fecha; }
                     datos.mantenimiento.compras_insumos[idx] = { ...prev, fecha, tipo, articulo, cantidad, costo, stock_min: stockMin };
                     saveProyectoData(datos);
                 }
@@ -4789,8 +5095,8 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${i.fecha}</td>
-                    <td>${i.tipo}</td>
-                    <td>${i.articulo}</td>
+                    <td>${_esc(i.tipo)}</td>
+                    <td>${_esc(i.articulo)}</td>
                     <td>${i.cantidad}</td>
                     <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(i.costo)}</td>
                     <td>
@@ -4853,18 +5159,24 @@
             const config = db.configuracion || {};
             const empresa = config.nombre_empresa || 'CONSTRURAMSA';
             const eslogan = config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            const csvCell = value => {
+                const text = String(value ?? '').replace(/\r?\n/g, ' ');
+                const safeText = /^[=+\-@]/.test(text.trim()) ? "'" + text : text;
+                return '"' + safeText.replace(/"/g, '""') + '"';
+            };
+            const csvRow = values => values.map(value => typeof value === 'number' ? numToF(value) : csvCell(value)).join(',');
             let csv = '\uFEFF'; // BOM UTF-8 para Excel
             
             // Encabezado con información de la empresa (como comentarios para Excel)
-            csv += `# ${empresa}\n`;
-            csv += `# ${eslogan}\n`;
+            csv += `# ${csvCell(empresa)}\n`;
+            csv += `# ${csvCell(eslogan)}\n`;
             csv += `# Guatemala, C.A. | Tel: +502 5997 9501 | Email: contacto@construramsa.com\n`;
             csv += `# \n`;
 
             if (tipo === 'diario' || tipo === 'semanal') {
                 const rango = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
                 const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rango.inicio && f <= rango.fin);
-                csv += `# ${tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado'} - ${empresa} - Proyecto: ${proyNombre}\n`;
+                csv += `# ${csvCell(tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado')} - ${csvCell(empresa)} - Proyecto: ${csvCell(proyNombre)}\n`;
                 if (tipo === 'semanal') csv += `# Periodo: ${rango.inicio} al ${rango.fin}\n`;
                 csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
                 csv += `Fecha,Tipo,Categoria,Descripcion,Monto (Q)\n`;
@@ -4882,7 +5194,7 @@
                 const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha) && !idsExternos.has(g.id));
                 let totalIng = 0, totalEgr = 0;
                 if (movs.length === 0) { csv += `SIN MOVIMIENTOS DE CAJA EN EL PERIODO\n`; }
-                else { movs.forEach(g => { csv += `${g.fecha},${g.tipo},${g.categoria},"${g.descripcion}",${numToF(g.monto)}\n`; if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto; }); }
+                else { movs.forEach(g => { csv += `${csvRow([g.fecha, g.tipo, g.categoria, g.descripcion, g.monto])}\n`; if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto; }); }
                 /* ===== SECCION CONSOLIDADA: VIAJES ===== */
                 const viajes = viajesAll.filter(v => enRango(v.fecha));
                 let totalViajes = 0;
@@ -4892,7 +5204,7 @@
                         const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A'};
                         totalViajes += v.total || 0;
                         totalEgr += v.total || 0;
-                        csv += `${v.fecha},${c.nombre},${v.material},${v.numero},${numToF(v.km_total)},${numToF(v.litros)},${numToF(v.costo_combustible)},${numToF(v.costo_alquiler)},${numToF(v.total)}\n`;
+                        csv += `${csvRow([v.fecha, c.nombre, v.material, v.numero, numToF(v.km_total), numToF(v.litros), numToF(v.costo_combustible), numToF(v.costo_alquiler), numToF(v.total)])}\n`;
                     });
                     csv += `,,,,,,,,TOTAL VIAJES (Q):,${numToF(totalViajes)}\n`;
                 }
@@ -4902,13 +5214,13 @@
                 let totalMT = 0;
                 if (ordsMT.length > 0 || insMT.length > 0) {
                     csv += '\n--- MANTENIMIENTO E INSUMOS ---\n';
-                    ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMT += o.costo||0; totalEgr += o.costo||0; csv += `${o.fecha},Mantenimiento ${o.tipo},"${o.observaciones||'N/A'} - ${m.nombre}",${numToF(o.costo)}\n`; });
-                    insMT.forEach(i => { totalMT += i.costo||0; totalEgr += i.costo||0; csv += `${i.fecha},Insumo ${i.tipo},"${i.articulo} (x${i.cantidad})",${numToF(i.costo)}\n`; });
+                    ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMT += o.costo||0; totalEgr += o.costo||0; csv += `${csvRow([o.fecha, 'Mantenimiento ' + o.tipo, (o.observaciones||'N/A') + ' - ' + m.nombre, o.costo])}\n`; });
+                    insMT.forEach(i => { totalMT += i.costo||0; totalEgr += i.costo||0; csv += `${csvRow([i.fecha, 'Insumo ' + i.tipo, i.articulo + ' (x' + i.cantidad + ')', i.costo])}\n`; });
                     csv += `,,TOTAL MTTO E INSUMOS:,${numToF(totalMT)}\n`;
                 }
                 csv += `,,,,\n,,,TOTAL INGRESOS:,${numToF(totalIng)}\n,,,TOTAL EGRESOS:,${numToF(totalEgr)}\n,,,SALDO NETO:,${numToF(totalIng - totalEgr)}\n`;
             } else if (tipo === 'asistencia') {
-                csv += `Reporte de Asistencia - ${empresa} - Proyecto: ${proyNombre}\n`;
+                csv += `${csvRow(['Reporte de Asistencia - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Fecha,Trabajador,Puesto,Estado,Horas Extra,Sueldo Diario (Q)\n`;
                 let total = 0;
                 const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
@@ -4924,12 +5236,12 @@
                             sueldo = 8*(parseFloat(t.pago_hora_normal)||0) + he*(parseFloat(t.pago_hora_extra)||0);
                         }
                         total += sueldo;
-                        csv += `${reg.fecha},${t?t.nombre:'Desconocido'},${t?t.puesto:'N/A'},${reg.estado},${reg.horas_extras||0},${sueldo.toFixed(2)}\n`;
+                        csv += `${csvRow([reg.fecha, t?t.nombre:'Desconocido', t?t.puesto:'N/A', reg.estado, reg.horas_extras||0, sueldo])}\n`;
                     });
                 }
                 csv += `,,,,TOTAL NÓMINA:,${total.toFixed(2)}\n`;
             } else if (tipo === 'viajes') {
-                csv += `Reporte de Viajes de Camiones - ${empresa} - Proyecto: ${proyNombre}\n`;
+                csv += `${csvRow(['Reporte de Viajes de Camiones - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Fecha,Unidad,Material,No. Viajes,Km Total,Litros,Costo Combustible (Q),Costo Alquiler (Q),Total (Q)\n`;
                 const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha);
                 let totalV = 0;
@@ -4939,13 +5251,13 @@
                     viajes.forEach(v => {
                         const cam = (datos.viajes_camiones.camiones||[]).find(c => c.id === v.vehiculo_id);
                         totalV += v.total || 0;
-                        csv += `${v.fecha},${cam?cam.nombre:'N/A'},${v.material},${v.numero},${v.km_total?numToF(v.km_total):0},${v.litros?numToF(v.litros):0},${v.costo_combustible?numToF(v.costo_combustible):'0.00'},${v.costo_alquiler?numToF(v.costo_alquiler):'0.00'},${v.total?numToF(v.total):'0.00'}\n`;
+                        csv += `${csvRow([v.fecha, cam?cam.nombre:'N/A', v.material, v.numero, numToF(v.km_total || 0), numToF(v.litros || 0), numToF(v.costo_combustible || 0), numToF(v.costo_alquiler || 0), numToF(v.total || 0)])}\n`;
                     });
                 }
                 csv += `,,,,,,,,\n`;
                 csv += `,,,,,,,,TOTAL VIAJES (Q):,${totalV.toFixed(2)}\n`;
             } else if (tipo === 'mantenimiento') {
-                csv += `Reporte de Mantenimiento e Insumos - ${empresa} - Proyecto: ${proyNombre}\n`;
+                csv += `${csvRow(['Reporte de Mantenimiento e Insumos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
                 let totalM = 0;
                 const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
@@ -4956,11 +5268,11 @@
                     ords.forEach(o => {
                         const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
                         totalM += o.costo || 0;
-                        csv += `${o.fecha},Mantenimiento ${o.tipo},${m?m.nombre:'N/A'},${(o.costo||0).toFixed(2)}\n`;
+                        csv += `${csvRow([o.fecha, 'Mantenimiento ' + o.tipo, m?m.nombre:'N/A', o.costo || 0])}\n`;
                     });
                     ins.forEach(i => {
                         totalM += i.costo || 0;
-                        csv += `${i.fecha},Insumo ${i.tipo},${i.articulo},${(i.costo||0).toFixed(2)}\n`;
+                        csv += `${csvRow([i.fecha, 'Insumo ' + i.tipo, i.articulo, i.costo || 0])}\n`;
                     });
                 }
                 csv += `,,,\n`;
@@ -4980,7 +5292,7 @@
                 const rangoT = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
                 const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rangoT.inicio && f <= rangoT.fin);
                 html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">${tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado'}</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + fecha) : ('Período: ' + rangoT.inicio + ' al ' + rangoT.fin)} | Proyecto: ${proyNombre}</p>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(fecha)) : ('Período: ' + _esc(rangoT.inicio) + ' al ' + _esc(rangoT.fin))} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:#6B7280;">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
                 /* FIX DUPLICIDAD: armar Set de gasto_id vinculados a viajes y mantenimiento
@@ -4993,7 +5305,7 @@
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
                     const esIng = g.tipo === 'ingreso';
-                    html += `<tr><td>${g.fecha}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${g.tipo.toUpperCase()}</td><td>${etiquetaCategoria(g.categoria)}</td><td>${g.descripcion}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
+                    html += `<tr><td>${_esc(g.fecha)}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${_esc(g.tipo.toUpperCase())}</td><td>${_esc(etiquetaCategoria(g.categoria))}</td><td>${_esc(g.descripcion)}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
                     if (esIng) totalIng += g.monto; else totalEgr += g.monto;
                 });
                 if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos de caja directos en este período</td></tr>`;
@@ -5011,7 +5323,7 @@
                         const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A',propiedad:'propio'};
                         const prop = c.propiedad==='alquilado' ? ' (Alq.)' : '';
                         totalVTmp += v.total || 0; totalEgr += v.total || 0;
-                        html += `<tr><td>${c.nombre}${prop}</td><td>${v.material}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:#dc2626;">${formatearMoneda(v.total)}</td></tr>`;
+                        html += `<tr><td>${_esc(c.nombre)}${_esc(prop)}</td><td>${_esc(v.material)}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:#dc2626;">${formatearMoneda(v.total)}</td></tr>`;
                     });
                     html += `<tr><td colspan="7" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalVTmp)}</td></tr>`;
                     html += `</tbody></table>`;
@@ -5022,7 +5334,7 @@
                     let totalMTmp = 0;
                     html += `<h3 style="color:#004B93;font-size:13px;margin:15px 0 8px 0;">🔩 Mantenimiento</h3>`;
                     html += `<table class="tabla-pdf"><thead><tr><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
-                    ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMTmp += o.costo||0; totalEgr += o.costo||0; html += `<tr><td>${m.nombre}</td><td>${o.tipo}</td><td>${o.observaciones||'—'}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`; });
+                    ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMTmp += o.costo||0; totalEgr += o.costo||0; html += `<tr><td>${_esc(m.nombre)}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`; });
                     html += `<tr><td colspan="3" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMTmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
@@ -5032,7 +5344,7 @@
                     let totalITmp = 0;
                     html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
                     html += `<table class="tabla-pdf"><thead><tr><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
-                    insMT.forEach(i => { totalITmp += i.costo||0; totalEgr += i.costo||0; html += `<tr><td>${i.tipo}</td><td>${i.articulo}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td></tr>`; });
+                    insMT.forEach(i => { totalITmp += i.costo||0; totalEgr += i.costo||0; html += `<tr><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td></tr>`; });
                     html += `<tr><td colspan="3" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalITmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
@@ -5043,7 +5355,7 @@
                 html += `<div style="text-align:right;font-weight:bold;color:#059669;">SALDO NETO (ingresos − egresos): ${formatearMoneda(totalIng - totalEgr)}</div>`;
             } else if (tipo === 'asistencia') {
                 html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Asistencia y Horas Extra</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Generado: ${new Date().toLocaleDateString('es-GT')} | Proyecto: ${proyNombre}</p>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">Generado: ${new Date().toLocaleDateString('es-GT')} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Trabajador</th><th>Puesto</th><th>Estado</th><th>H. Extra</th><th style="text-align:right;">Sueldo (Q)</th></tr></thead><tbody>`;
                 let totalNomina = 0;
                 const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
@@ -5059,14 +5371,14 @@
                             sueldo = 8*(parseFloat(t.pago_hora_normal)||0)+he*(parseFloat(t.pago_hora_extra)||0);
                         }
                         totalNomina += sueldo;
-                        html += `<tr><td>${reg.fecha}</td><td>${t?t.nombre:'Desconocido'}</td><td>${t?t.puesto:'N/A'}</td><td style="color:${reg.estado==='asistio'?'#059669':reg.estado==='falto'?'#dc2626':'#6B7280'};font-weight:600;">${reg.estado.toUpperCase()}</td><td>${reg.horas_extras||0}h</td><td style="text-align:right;">${formatearMoneda(sueldo)}</td></tr>`;
+                        html += `<tr><td>${_esc(reg.fecha)}</td><td>${_esc(t?t.nombre:'Desconocido')}</td><td>${_esc(t?t.puesto:'N/A')}</td><td style="color:${reg.estado==='asistio'?'#059669':reg.estado==='falto'?'#dc2626':'#6B7280'};font-weight:600;">${_esc(reg.estado.toUpperCase())}</td><td>${reg.horas_extras||0}h</td><td style="text-align:right;">${formatearMoneda(sueldo)}</td></tr>`;
                     });
                 }
                 html += `<tr><td colspan="5" style="text-align:right;font-weight:bold;">TOTAL NÓMINA:</td><td class="total-destacado">${formatearMoneda(totalNomina)}</td></tr>`;
                 html += `</tbody></table>`;
             } else if (tipo === 'viajes') {
                 html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${fecha} | Proyecto: ${proyNombre}</p>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${_esc(fecha)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                 const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha).sort((a,b) => a.fecha.localeCompare(b.fecha));
                 let totalV = 0;
@@ -5077,14 +5389,14 @@
                         const cam = (datos.viajes_camiones.camiones||[]).find(c => c.id === v.vehiculo_id);
                         const prop = (cam&&cam.propiedad==='alquilado')?' (Alq.)':'';
                         totalV += v.total || 0;
-                        html += `<tr><td>${v.fecha}</td><td>${cam?cam.nombre:'N/A'}${prop}</td><td>${v.material}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:#dc2626;">${formatearMoneda(v.total)}</td></tr>`;
+                        html += `<tr><td>${_esc(v.fecha)}</td><td>${_esc(cam?cam.nombre:'N/A')}${_esc(prop)}</td><td>${_esc(v.material)}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:#dc2626;">${formatearMoneda(v.total)}</td></tr>`;
                     });
                 }
                 html += `<tr><td colspan="8" style="text-align:right;font-weight:bold;">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalV)}</td></tr>`;
                 html += `</tbody></table>`;
             } else if (tipo === 'mantenimiento') {
                 html += `<h2 style="color:#004B93;border-bottom:2px solid #004B93;padding-bottom:10px;margin-top:0;">Reporte de Mantenimiento e Insumos</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${fecha} | Proyecto: ${proyNombre}</p>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${_esc(fecha)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
                 const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
                 let totalM = 0;
@@ -5097,7 +5409,7 @@
                     ords.forEach(o => {
                         const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
                         totalM += o.costo || 0;
-                        html += `<tr><td>${o.fecha}</td><td>${m?m.nombre:'N/A'}</td><td>${o.tipo}</td><td>${o.observaciones||'—'}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`;
+                        html += `<tr><td>${_esc(o.fecha)}</td><td>${_esc(m?m.nombre:'N/A')}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`;
                     });
                 }
                 html += `</tbody></table>`;
@@ -5109,7 +5421,7 @@
                 } else {
                     ins.forEach(i => {
                         totalM += i.costo || 0;
-                        html += `<tr><td>${i.fecha}</td><td>${i.tipo}</td><td>${i.articulo}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td></tr>`;
+                        html += `<tr><td>${_esc(i.fecha)}</td><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td></tr>`;
                     });
                 }
                 html += `</tbody></table>`;
@@ -5145,7 +5457,7 @@
                     ? (cfg.telefono || '') + (cfg.email ? ' &nbsp;|&nbsp; ' + cfg.email : '')
                     : 'Tel: +502 5997 9501 &nbsp;|&nbsp; contacto@construramsa.com');
             const telEmailEl = document.getElementById('pdf-tel-email-empresa');
-            if (telEmailEl) telEmailEl.innerHTML = telEmail;
+            if (telEmailEl) telEmailEl.textContent = telEmail.replace(/&nbsp;/g, ' ');
 
             // ── Metadatos del reporte ──
             const proy = db.proyectos.find(p => p.id === cfg.proyecto_actual);
@@ -5178,7 +5490,19 @@
         }
 
         // Generar el PDF del reporte y estampar "Página i de N" en cada hoja
+        function validarDependenciasExportacion() {
+            const faltantes = [];
+            if (typeof XLSX === 'undefined') faltantes.push('XLSX');
+            if (typeof html2pdf !== 'function') faltantes.push('PDF');
+            if (faltantes.length > 0) {
+                showToast(`⚠️ No se puede exportar: falta ${faltantes.join(' y ')}. Conéctese a internet y recargue la aplicación.`, 'error', 6000);
+                return false;
+            }
+            return true;
+        }
+
         async function generarPDFPlantilla(contenedor, filename) {
+            if (!validarDependenciasExportacion()) throw new Error('Dependencias de exportación no disponibles');
             await esperarImagenesPlantilla();
             const opts = {
                 margin: 10,
@@ -5212,6 +5536,7 @@
 
                 const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
                 const proyNombreX = proyObj ? proyObj.nombre : 'General';
+                if (!validarDependenciasExportacion()) { hideLoading(); return; }
                 generarXLSX(tipo, fecha, proyNombreX, nombre);
 
                 const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
@@ -5240,7 +5565,7 @@
                     showToast('✅ Reporte compartido', 'success');
                 } else {
                     showToast('ℹ️ El navegador no soporta compartir archivos. Se descargarán localmente.', 'info');
-                    archivos.forEach(f => { const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;a.click(); });
+                    archivos.forEach(f => { const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;a.click();setTimeout(() => URL.revokeObjectURL(u), 1000); });
                 }
             } catch (err) {
                 // Asegurar que se remueva la clase en caso de error
@@ -5262,6 +5587,7 @@
                 return;
             }
             const nombre= `reporte_${tipo}_${fecha || 'asistencia'}`;
+            if (!validarDependenciasExportacion()) { hideLoading(); return; }
             setTimeout(async () => {
                 try {
                     const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
@@ -5270,7 +5596,7 @@
 
                     const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
                     const urlCSV  = URL.createObjectURL(csvBlob);
-                    const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click();
+                    const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
 
                     const htmlData   = generarHTMLReporte(tipo, fecha);
                     const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
@@ -5449,21 +5775,32 @@
 
         /**
          * Escala el wrapper del preview para que quepa en el panel visible.
-         * Se llama al abrir y al redimensionar.
+         * transform-origin:top center → el doc se achica desde arriba hacia abajo.
+         * margin-bottom negativo compensa el espacio vacío que deja el scale.
+         * Se llama al abrir el modal y al redimensionar la ventana.
          */
         function _escalarPreview() {
             const panel   = document.getElementById('vp-preview-scroll');
             const wrapper = document.getElementById('vp-preview-wrapper');
             if (!panel || !wrapper) return;
-            const panelW  = panel.clientWidth - 40; // 20px padding cada lado
-            const docW    = 794; // ancho natural del documento (~210mm)
+            // Ancho disponible = panel menos padding de 20px a cada lado
+            const panelW  = Math.max(panel.clientWidth - 40, 100);
+            const docW    = 794; // ~210mm a 96 dpi
             const escala  = Math.min(1, panelW / docW);
+            wrapper.style.transformOrigin = 'top center';
             wrapper.style.transform = `scale(${escala})`;
-            wrapper.style.marginBottom = `${(escala - 1) * wrapper.offsetHeight}px`;
+            // Compensar el espacio que "sobra" debajo cuando escala < 1
+            // offsetHeight refleja la altura ANTES del scale
+            const alturaReal = wrapper.offsetHeight;
+            if (escala < 1) {
+                wrapper.style.marginBottom = `${(alturaReal * escala - alturaReal)}px`;
+            } else {
+                wrapper.style.marginBottom = '0px';
+            }
         }
 
-        // Re-escalar cuando cambia el tamaño de ventana
-        window.addEventListener('resize', _escalarPreview);
+        // Re-escalar en cada resize (debounced para no saturar)
+        window.addEventListener('resize', debounce(_escalarPreview, 120));
 
         /**
          * Re-renderiza el preview cada vez que el usuario edita un campo.
@@ -5531,7 +5868,7 @@
                         <tr>
                             ${portada.fecha ? `<td style="width:50%;vertical-align:top;padding-right:10px;">
                                 <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:1px;">Fecha</div>
-                                <div style="font-size:9.5px;color:#374151;font-weight:600;">${portada.fecha}</div>
+                                <div style="font-size:9.5px;color:#374151;font-weight:600;">${_esc(portada.fecha)}</div>
                             </td>` : '<td style="width:50%;"></td>'}
                             ${portada.remitente ? `<td style="width:50%;vertical-align:top;padding-left:10px;border-left:1px solid #E5E7EB;">
                                 <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:1px;">Elaborado por</div>
@@ -5641,7 +5978,7 @@
         function _esc(str) {
             return String(str)
                 .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         }
 
         /**
@@ -5708,11 +6045,12 @@
                     try {
                         const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
                         const proyNombreX = proyObj ? proyObj.nombre : 'General';
+                        if (!validarDependenciasExportacion()) throw new Error('Dependencias de exportación no disponibles');
                         generarXLSX(tipo, fecha, proyNombreX, nombre);
 
                         const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type: 'text/csv;charset=utf-8;' });
                         const urlCSV  = URL.createObjectURL(csvBlob);
-                        const aC = document.createElement('a'); aC.href = urlCSV; aC.download = `${nombre}.csv`; aC.click();
+                        const aC = document.createElement('a'); aC.href = urlCSV; aC.download = `${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
 
                         const htmlData   = generarHTMLReporte(tipo, fecha);
                         const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);

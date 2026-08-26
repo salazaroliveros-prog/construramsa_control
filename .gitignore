@@ -34,7 +34,8 @@ _*.ps1
 
 # Tests automatizados (solo para desarrollo local, no van a Vercel)
 test_*.js
-package.json
+!test_smoke.js
+!package.json
 package-lock.json
 
 # Archivo fuente del logo (no se sube; las variantes icon-*.png sí)

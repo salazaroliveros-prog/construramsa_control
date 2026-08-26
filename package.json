@@ -1,0 +1,25 @@
+{
+  "name": "construramsa_control_gastos",
+  "version": "1.0.0",
+  "description": "Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de CONSTRURAMSA.",
+  "main": "server.js",
+  "scripts": {
+    "test": "node test_smoke.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salazaroliveros-prog/construramsa_control.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/salazaroliveros-prog/construramsa_control/issues"
+  },
+  "homepage": "https://github.com/salazaroliveros-prog/construramsa_control#readme",
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}
