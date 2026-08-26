@@ -63,6 +63,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- SheetJS para exportar reportes a XLSX -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.0/purify.min.js"></script>
     <style>
         :root {
             /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */
@@ -92,6 +94,21 @@
             --alerta-texto: #f87171;
             /* Estado pendiente: #f59e0b falla AA; usar #fbbf24 (~4.8:1 sobre #090a0f) */
             --advertencia-texto: #fbbf24;
+
+            /* Espaciado (spacing tokens) */
+            --space-xs: 8px;
+            --space-sm: 12px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            /* Tipografía fluida (clamp) */
+            --text-xs: clamp(11px, 2.5vw, 12px);
+            --text-sm: clamp(12px, 2.8vw, 13px);
+            --text-base: clamp(13px, 3vw, 14px);
+            --text-lg: clamp(15px, 3.5vw, 18px);
+            --text-xl: clamp(18px, 4vw, 22px);
+            --text-2xl: clamp(22px, 5vw, 28px);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -216,7 +233,7 @@
             transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
         }
         input::placeholder, textarea::placeholder {
-            color: rgba(255, 255, 255, 0.42);
+            color: rgba(255, 255, 255, 0.55);
             opacity: 1;
         }
 
@@ -394,7 +411,7 @@
         .proyecto-badge.sin-proyecto {
             background: rgba(239, 68, 68, 0.15);
             border: 1px solid var(--alerta);
-            color: #fca5a5;
+            color: var(--alerta-texto);
             animation: pulse-warning 2s infinite;
         }
         @keyframes pulse-warning {
@@ -516,6 +533,13 @@
         }
 
         tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* Visual edit state: highlight row being edited in table */
+        tr.editing {
+            background: rgba(0, 164, 228, 0.1);
+            border-left: 3px solid var(--acento-cian);
+        }
+        tr.editing td { background: transparent; }
 
         .saldo-positivo { color: var(--exito); font-weight: bold; }
         /* Fix contraste: --alerta-texto (#f87171) ratio ~5.8:1 sobre fondo oscuro, pasa AA */
@@ -657,7 +681,7 @@
         /* FIX contraste: labels con font-weight 600 para distinguirse del fondo glass */
         label {
             display: block;
-            font-size: 13px;
+            font-size: var(--text-sm);
             font-weight: 600;
             color: var(--texto-principal);
             margin-bottom: 6px;
@@ -826,6 +850,41 @@
             .nav-tabs { padding-left: 0; padding-right: 0; }
             /* FIX: tarjeta-glass sin padding horizontal excesivo */
             .tarjeta-glass { border-radius: 12px; }
+            /* Tablas responsivas: convertir a tarjetas apiladas en móvil */
+            .table-responsive-cards thead { display: none; }
+            .table-responsive-cards tbody { display: block; }
+            .table-responsive-cards tr {
+                display: block;
+                background: var(--glass-bg);
+                border: 1px solid var(--glass-border);
+                border-radius: 10px;
+                padding: 12px;
+                margin-bottom: 10px;
+                backdrop-filter: blur(12px);
+            }
+            .table-responsive-cards td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 6px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                font-size: 13px;
+            }
+            .table-responsive-cards td:last-child { border-bottom: none; }
+            .table-responsive-cards td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--acento-cian);
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            }
+            .table-responsive-cards td.actions-cell {
+                justify-content: flex-end;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .table-responsive-cards td.actions-cell::before { display: none; }
         }
 
         /* ── 480px: Android mid-range (Moto G, Redmi, Samsung A series) ─ */
@@ -898,7 +957,13 @@
             /* FIX 6: paginación en móvil extremo — centrada y sin desborde */
             .paginacion-container { gap: 3px; }
             .paginacion-container button { padding: 5px 10px !important; font-size: 11px !important; min-height: 32px !important; }
-            .toast-container { left: 6px !important; right: 6px !important; top: 8px !important; }
+            /* Toast container con safe-area para notch/Dynamic Island */
+            .toast-container {
+                left: env(safe-area-inset-left, 6px) !important;
+                right: env(safe-area-inset-right, 6px) !important;
+                top: env(safe-area-inset-top, 8px) !important;
+                max-width: calc(100vw - env(safe-area-inset-left, 6px) - env(safe-area-inset-right, 6px)) !important;
+            }
             .toast { max-width: 100% !important; font-size: 13px; padding: 12px 14px; }
             .modal-content { padding: 14px; border-radius: 12px; max-height: 90dvh; }
             .modal-title { font-size: 15px; }
@@ -1142,7 +1207,7 @@
             margin-bottom: 6px;
         }
         .kpi-card .kpi-value {
-            font-size: 22px;
+            font-size: var(--text-xl);
             font-weight: 800;
             color: var(--texto-principal);
             word-break: break-word;
@@ -1292,11 +1357,9 @@
             background: #ffffff;
             box-shadow: 0 8px 40px rgba(0,0,0,0.6);
             border-radius: 4px;
-            /* Escala del preview para que entre en el viewport */
-            transform-origin: top center;
-            width: 794px; /* ~210mm a 96dpi */
+            width: 100%;
+            max-width: 794px; /* ~210mm a 96dpi */
             min-height: 400px;
-            transition: none;
         }
         /* Contenido de la plantilla dentro del preview — mismo CSS */
         #vp-plantilla-preview {
@@ -1318,7 +1381,7 @@
                 min-width: 0;
                 border-right: none;
                 border-bottom: 1px solid var(--glass-border);
-                max-height: 42vh;
+                max-height: calc(100dvh - 140px);
             }
             .vp-preview { padding: 12px; }
             .vp-preview-wrapper { width: 100%; }
@@ -1328,7 +1391,7 @@
             .vp-topbar-title { font-size: 13px; }
         }
         @media (max-width: 480px) {
-            .vp-editor { max-height: 45vh; padding: 14px 12px; gap: 12px; }
+            .vp-editor { max-height: calc(100dvh - 140px); padding: 14px 12px; gap: 12px; }
             .vp-topbar-actions .btn-primario,
             .vp-topbar-actions .btn-secundario { padding: 8px 14px; font-size: 12px; }
         }
@@ -1565,7 +1628,7 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="caja-fecha">Fecha del Movimiento</label>
-                        <input type="date" id="caja-fecha" required aria-required="true">
+                        <input type="date" id="caja-fecha" required aria-required="true" autocomplete="off">
                     </div>
                     <div>
                         <label for="caja-tipo">Tipo de Movimiento</label>
@@ -1639,7 +1702,7 @@
 
             <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Movimientos</h3>
             <div class="overflow-x-auto">
-                <table id="tabla-caja-chica" aria-label="Historial de movimientos de caja chica">
+                <table id="tabla-caja-chica" class="table-responsive-cards" aria-label="Historial de movimientos de caja chica">
                     <thead>
                         <tr>
                             <th scope="col">Fecha</th>
@@ -1669,7 +1732,7 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="maq-fecha">Fecha del Registro</label>
-                        <input type="date" id="maq-fecha" required aria-required="true">
+                        <input type="date" id="maq-fecha" required aria-required="true" autocomplete="off">
                     </div>
                     <div>
                         <label for="maq-tipo">Tipo de Unidad</label>
@@ -1748,7 +1811,7 @@
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">📜 Historial de Maquinaria</h3>
             <div class="overflow-x-auto">
-                <table id="tabla-maquinaria" aria-label="Historial de registros de maquinaria">
+                <table id="tabla-maquinaria" class="table-responsive-cards" aria-label="Historial de registros de maquinaria">
                     <thead>
                         <tr>
                             <th scope="col">Fecha</th>
@@ -1805,7 +1868,7 @@
                 <h3 style="color:var(--texto-principal);font-size:16px;margin:0;">📋 Pase de Lista</h3>
                 <div>
                     <label for="fecha-asistencia" style="font-size:12px;color:var(--texto-secundario);margin-right:6px;">Fecha:</label>
-                    <input type="date" id="fecha-asistencia" style="width:auto;padding:6px 12px;" aria-label="Seleccionar fecha para pase de lista">
+                    <input type="date" id="fecha-asistencia" style="width:auto;padding:6px 12px;" aria-label="Seleccionar fecha para pase de lista" autocomplete="off">
                 </div>
             </div>
 
@@ -1817,7 +1880,7 @@
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">📜 Historial de Asistencia</h3>
             <div class="overflow-x-auto">
-                <table id="tabla-asistencia" aria-label="Historial de asistencia de trabajadores">
+                <table id="tabla-asistencia" class="table-responsive-cards" aria-label="Historial de asistencia de trabajadores">
                     <thead>
                         <tr>
                             <th scope="col">Fecha</th>
@@ -1863,7 +1926,7 @@
 
             <h3 style="color:var(--texto-principal);font-size:16px;margin-top:15px;">📋 Lista de Proveedores</h3>
             <div class="overflow-x-auto">
-                <table id="tabla-proveedores" aria-label="Lista de proveedores registrados">
+                <table id="tabla-proveedores" class="table-responsive-cards" aria-label="Lista de proveedores registrados">
                     <thead>
                         <tr>
                             <th scope="col">Nombre</th>
@@ -1905,7 +1968,7 @@
 
             <h3 style="color:var(--texto-principal);font-size:16px;">🔍 Cuadro Comparativo de Ofertas</h3>
             <div class="overflow-x-auto">
-                <table id="tabla-cotizaciones" aria-label="Cuadro comparativo de cotizaciones">
+                <table id="tabla-cotizaciones" class="table-responsive-cards" aria-label="Cuadro comparativo de cotizaciones">
                     <thead>
                         <tr>
                             <th scope="col">Material</th>
@@ -1971,7 +2034,7 @@
                     </div>
                 </form>
                 <div class="overflow-x-auto">
-                    <table id="tabla-camiones" aria-label="Lista de camiones y equipos">
+                    <table id="tabla-camiones" class="table-responsive-cards" aria-label="Lista de camiones y equipos">
                         <thead><tr><th scope="col">Unidad</th><th scope="col">Propiedad</th><th scope="col">Tarifa</th><th scope="col">Consumo</th><th scope="col">Acciones</th></tr></thead>
                         <tbody id="tabla-camiones-cuerpo"></tbody>
                     </table>
@@ -2006,7 +2069,7 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="viaje-fecha">Fecha</label>
-                        <input type="date" id="viaje-fecha" required aria-required="true">
+                        <input type="date" id="viaje-fecha" required aria-required="true" autocomplete="off">
                     </div>
                     <div>
                         <label for="viaje-cam">Camión / Equipo</label>
@@ -2071,7 +2134,7 @@
 
             <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Viajes</h3>
             <div class="overflow-x-auto">
-                <table id="tabla-viajes" aria-label="Historial de viajes de camiones">
+                <table id="tabla-viajes" class="table-responsive-cards" aria-label="Historial de viajes de camiones">
                     <thead><tr><th scope="col">Fecha</th><th scope="col">Unidad</th><th scope="col">Material</th><th scope="col">Viajes</th><th scope="col">Km</th><th scope="col">Combustible</th><th scope="col">Total (Q)</th><th scope="col">Acciones</th></tr></thead>
                     <tbody id="tabla-viajes-cuerpo"></tbody>
                 </table>
@@ -2118,7 +2181,7 @@
                     <button type="submit" class="btn-secundario" style="width:100%;font-size:12px;">➕ Agregar Maquinaria</button>
                 </form>
                 <div class="overflow-x-auto">
-                    <table id="tabla-maqcat" aria-label="Catálogo de maquinaria">
+                    <table id="tabla-maqcat" class="table-responsive-cards" aria-label="Catálogo de maquinaria">
                         <thead><tr><th>Equipo</th><th>Tipo</th><th>Acciones</th></tr></thead>
                         <tbody id="tabla-maqcat-cuerpo"></tbody>
                     </table>
@@ -2130,7 +2193,7 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="ord-fecha">Fecha</label>
-                        <input type="date" id="ord-fecha" required aria-required="true">
+                        <input type="date" id="ord-fecha" required aria-required="true" autocomplete="off">
                     </div>
                     <div>
                         <label for="ord-maquina">Maquinaria</label>
@@ -2165,7 +2228,7 @@
 
             <h3 style="color:var(--texto-principal);font-size:16px;">📜 Órdenes de Mantenimiento</h3>
             <div class="overflow-x-auto">
-                <table id="tabla-ordenes" aria-label="Historial de órdenes de mantenimiento">
+                <table id="tabla-ordenes" class="table-responsive-cards" aria-label="Historial de órdenes de mantenimiento">
                     <thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Costo (Q)</th><th>Acciones</th></tr></thead>
                     <tbody id="tabla-ordenes-cuerpo"></tbody>
                 </table>
@@ -2194,7 +2257,7 @@
                 <div class="form-grid-3">
                     <div>
                         <label for="insumo-fecha">Fecha</label>
-                        <input type="date" id="insumo-fecha" required aria-required="true">
+                        <input type="date" id="insumo-fecha" required aria-required="true" autocomplete="off">
                     </div>
                     <div>
                         <label for="insumo-cantidad">Cantidad</label>
@@ -2217,7 +2280,7 @@
 
             <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Compras de Insumos</h3>
             <div class="overflow-x-auto">
-                <table id="tabla-insumos" aria-label="Historial de compras de insumos">
+                <table id="tabla-insumos" class="table-responsive-cards" aria-label="Historial de compras de insumos">
                     <thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th>Costo (Q)</th><th>Acciones</th></tr></thead>
                     <tbody id="tabla-insumos-cuerpo"></tbody>
                 </table>
@@ -2241,7 +2304,7 @@
                 </div>
                 <div>
                     <label for="reporte-fecha">Fecha</label>
-                    <input type="date" id="reporte-fecha" aria-label="Seleccionar fecha del reporte">
+                    <input type="date" id="reporte-fecha" aria-label="Seleccionar fecha del reporte" autocomplete="off">
                 </div>
             </div>
             <div class="btn-row" style="margin-bottom:15px;">
@@ -3360,7 +3423,7 @@
             const ini  = (pag - 1) * REGISTROS_POR_PAGINA;
             const pag_ = movs.slice(ini, ini + REGISTROS_POR_PAGINA);
 
-            tbody.innerHTML = '';
+tbody.innerHTML = '';
             pag_.forEach(mov => {
                 const esIngreso = mov.tipo === 'ingreso';
                 const color = esIngreso ? 'var(--exito)' : 'var(--alerta-texto)';
@@ -3368,12 +3431,12 @@
                 const row = document.createElement('tr');
                 // FIX #19: aria-label en botones de acción
                 row.innerHTML = `
-                    <td>${_esc(mov.fecha)}</td>
-                    <td style="color:${color};font-weight:600;">${mov.tipo.toUpperCase()}</td>
-                    <td>${_esc(etiquetaCategoria(mov.categoria))}</td>
-                    <td>${_esc(mov.descripcion)}${mov.responsable && mov.responsable !== 'Usuario' && mov.responsable !== 'Sistema Automático' ? `<br><span style="font-size:10px;color:var(--texto-secundario);">👤 ${_esc(mov.responsable)}</span>` : ''}</td>
-                    <td style="font-weight:bold;color:${color};">${signo}${formatearMoneda(mov.monto)}</td>
-                    <td>
+                    <td data-label="Fecha">${_esc(mov.fecha)}</td>
+                    <td data-label="Tipo" style="color:${color};font-weight:600;">${mov.tipo.toUpperCase()}</td>
+                    <td data-label="Categoría">${_esc(etiquetaCategoria(mov.categoria))}</td>
+                    <td data-label="Descripción">${_esc(mov.descripcion)}${mov.responsable && mov.responsable !== 'Usuario' && mov.responsable !== 'Sistema Automático' ? `<br><span style="font-size:10px;color:var(--texto-secundario);">👤 ${_esc(mov.responsable)}</span>` : ''}</td>
+                    <td data-label="Monto" style="font-weight:bold;color:${color};">${signo}${formatearMoneda(mov.monto)}</td>
+                    <td class="actions-cell">
                         <button onclick="editarMovimientoCaja('${_esc(mov.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar movimiento ${_esc(mov.descripcion)}">✏️ Editar</button>
                         <button onclick="eliminarMovimientoCaja('${_esc(mov.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar movimiento ${_esc(mov.descripcion)}">🗑️ Eliminar</button>
                     </td>`;
@@ -3550,7 +3613,7 @@
             const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
             const pag_ = regs.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
 
-            tbody.innerHTML = '';
+tbody.innerHTML = '';
             pag_.forEach(reg => {
                 const veh     = (datos.maquinaria_flota.vehiculos || []).find(v => v.id === reg.vehiculo_id);
                 const tipo_   = veh ? veh.tipo : 'Desconocido';
@@ -3562,14 +3625,14 @@
                 const gasto   = (reg.combustible_costo || 0) + (reg.mantenimiento_costo || 0);
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${_esc(reg.fecha)}</td>
-                    <td>${_esc(tipo_)}</td>
-                    <td>${_esc(codigo_)}</td>
-                    <td>${uso.toFixed(2)} ${unidad}</td>
-                    <td>${reg.combustible_galones} gal</td>
-                    <td>${rend}</td>
-                    <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(gasto)}</td>
-                    <td>
+                    <td data-label="Fecha">${_esc(reg.fecha)}</td>
+                    <td data-label="Unidad">${_esc(tipo_)}</td>
+                    <td data-label="Código">${_esc(codigo_)}</td>
+                    <td data-label="Trabajado">${uso.toFixed(2)} ${unidad}</td>
+                    <td data-label="Combustible">${reg.combustible_galones} gal</td>
+                    <td data-label="Rendimiento">${rend}</td>
+                    <td data-label="Gasto Total" style="font-weight:bold;color:var(--alerta);">${formatearMoneda(gasto)}</td>
+                    <td class="actions-cell">
                         <button onclick="editarRegistroMaquinaria('${_esc(reg.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar registro maquinaria ${_esc(codigo_)}">✏️ Editar</button>
                         <button onclick="eliminarRegistroMaquinaria('${_esc(reg.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar registro maquinaria ${_esc(codigo_)}">🗑️ Eliminar</button>
                     </td>`;
@@ -3839,6 +3902,14 @@
                 cont.innerHTML = '<p style="color:var(--texto-secundario);font-size:13px;text-align:center;padding:20px;">No hay trabajadores registrados. Agrégalos en el catálogo de arriba.</p>';
                 return;
             }
+            // Contador de trabajadores marcados
+            const totalTrabajadores = datos.personal.trabajadores.length;
+            const counterHtml = `
+                <div id="asistencia-counter" style="margin-bottom:12px;padding:10px 12px;background:rgba(0,164,228,0.1);border:1px solid var(--acento-cian);border-radius:8px;font-size:13px;color:var(--acento-cian);display:flex;justify-content:space-between;align-items:center;">
+                    <span>👷 Trabajadores: <strong id="counter-marcados">0</strong> / ${totalTrabajadores} marcados</span>
+                    <button type="button" id="btn-guardar-asistencia" class="btn-primario" style="padding:8px 16px;font-size:12px;" disabled>✅ Guardar Planilla</button>
+                </div>`;
+            cont.insertAdjacentHTML('beforeend', counterHtml);
             datos.personal.trabajadores.forEach(t => {
                 const card = document.createElement('div');
                 card.className = 'lista-asistencia-item';
@@ -3871,12 +3942,33 @@
                         <label for="horas-extra-${t.id}" style="font-size:12px;white-space:nowrap;color:var(--texto-secundario);">Horas Extra:</label>
                         <input type="number" inputmode="decimal" id="horas-extra-${_esc(t.id)}" min="0" max="8" value="0" style="width:80px;min-width:70px;padding:6px;text-align:center;" aria-label="Horas extra de ${_esc(t.nombre)}">
                     </div>
-                    <div class="lista-asistencia-item-acciones">
+<div class="lista-asistencia-item-acciones">
                         <button onclick="editarTrabajador('${_esc(t.id)}')" class="btn-secundario" style="padding:6px 8px;font-size:11px;flex:1;" aria-label="Editar trabajador ${_esc(t.nombre)}">✏️ Editar</button>
                         <button onclick="eliminarTrabajador('${_esc(t.id)}')" class="btn-primario" style="padding:6px 8px;font-size:11px;background:var(--alerta);flex:1;" aria-label="Eliminar trabajador ${_esc(t.nombre)}">🗑️ Eliminar</button>
                     </div>`;
                 cont.appendChild(card);
             });
+            // Contador y botón guardar
+            const counterEl = document.getElementById('counter-marcados');
+            const btnGuardar = document.getElementById('btn-guardar-asistencia');
+            const fechaInput = document.getElementById('fecha-asistencia');
+            function actualizarContador() {
+                let marcados = 0;
+                datos.personal.trabajadores.forEach(t => {
+                    const checked = document.querySelector(`input[name="asistencia-${t.id}"]:checked`);
+                    if (checked) marcados++;
+                });
+                counterEl.textContent = marcados;
+                btnGuardar.disabled = marcados !== totalTrabajadores || !fechaInput.value;
+            }
+            datos.personal.trabajadores.forEach(t => {
+                document.querySelectorAll(`input[name="asistencia-${t.id}"]`).forEach(radio => {
+                    radio.addEventListener('change', actualizarContador);
+                });
+            });
+            fechaInput.addEventListener('change', actualizarContador);
+            btnGuardar.addEventListener('click', () => guardarAsistenciaDiaria(fechaInput.value));
+            actualizarContador();
         }
 
         function guardarAsistenciaDiaria(fecha) {
@@ -3941,17 +4033,17 @@
             const ini_ = (pag-1)*REGISTROS_POR_PAGINA;
             const pag_ = registros_flat.slice(ini_, ini_+REGISTROS_POR_PAGINA);
 
-            tbody.innerHTML = '';
+tbody.innerHTML = '';
             pag_.forEach(r => {
                 const colEst = r.estado==='asistio'?'var(--exito)':r.estado==='falto'?'var(--alerta-texto)':'var(--texto-secundario)';
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${r.fecha}</td>
-                    <td>${_esc(r.nombre)}</td>
-                    <td style="color:${colEst};font-weight:600;">${r.estado.toUpperCase()}</td>
-                    <td>${r.horasExtra}h</td>
-                    <td style="font-weight:bold;color:var(--acento-cian);">${formatearMoneda(r.sueldo)}</td>
-                    <td><button onclick="eliminarRegistroAsistencia('${r.fecha}','${r.trabajador_id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar asistencia ${r.nombre} del ${r.fecha}">🗑️ Eliminar</button></td>`;
+                    <td data-label="Fecha">${r.fecha}</td>
+                    <td data-label="Trabajador">${_esc(r.nombre)}</td>
+                    <td data-label="Estado" style="color:${colEst};font-weight:600;">${r.estado.toUpperCase()}</td>
+                    <td data-label="Horas Extra">${r.horasExtra}h</td>
+                    <td data-label="Sueldo Diario" style="font-weight:bold;color:var(--acento-cian);">${formatearMoneda(r.sueldo)}</td>
+                    <td class="actions-cell"><button onclick="eliminarRegistroAsistencia('${r.fecha}','${r.trabajador_id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar asistencia ${r.nombre} del ${r.fecha}">🗑️ Eliminar</button></td>`;
                 tbody.appendChild(row);
             });
             renderPaginacion('paginacion-asistencia', registros_flat.length, pag, 'cambiarPaginaAsistencia');
@@ -4029,7 +4121,7 @@
             });
         }
 
-        function cargarTablaProveedores() {
+function cargarTablaProveedores() {
             const datos = getProyectoData();
             const tbody = document.getElementById('tabla-proveedores-cuerpo');
             if (!tbody) return;
@@ -4039,10 +4131,10 @@
             datos.adquisiciones.proveedores.forEach(p => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${_esc(p.nombre)}</td>
-                    <td>${_esc(p.telefono)}</td>
-                    <td>${_esc(p.especialidad)}</td>
-                    <td>
+                    <td data-label="Nombre">${_esc(p.nombre)}</td>
+                    <td data-label="Teléfono">${_esc(p.telefono)}</td>
+                    <td data-label="Especialidad">${_esc(p.especialidad)}</td>
+                    <td class="actions-cell">
                         <button onclick="editarProveedor('${p.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar proveedor ${p.nombre}">✏️</button>
                         <button onclick="eliminarProveedor('${p.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proveedor ${p.nombre}">🗑️</button>
                     </td>`;
@@ -4121,17 +4213,17 @@
             const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
             const pag_ = cots.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
             tbody.innerHTML = '';
-            pag_.forEach(c => {
+pag_.forEach(c => {
                 const prov   = datos.adquisiciones.proveedores.find(p => p.id === c.proveedor_id);
                 const pNomb  = prov ? prov.nombre : 'Desconocido';
                 const color  = c.estado==='aprobada'?'var(--exito)':c.estado==='rechazada'?'var(--alerta-texto)':'var(--advertencia-texto)';
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${_esc(c.material_descripcion)}</td>
-                    <td style="color:var(--texto-secundario);">${_esc(pNomb)}</td>
-                    <td style="text-align:right;font-weight:bold;">${formatearMoneda(c.total)}</td>
-                    <td style="text-align:center;"><span style="color:${color};font-weight:600;">${c.estado.toUpperCase()}</span></td>
-                    <td style="text-align:center;">
+                    <td data-label="Material">${_esc(c.material_descripcion)}</td>
+                    <td data-label="Proveedor" style="color:var(--texto-secundario);">${_esc(pNomb)}</td>
+                    <td data-label="Total (Q)" style="text-align:right;font-weight:bold;">${formatearMoneda(c.total)}</td>
+                    <td data-label="Estado" style="text-align:center;"><span style="color:${color};font-weight:600;">${c.estado.toUpperCase()}</span></td>
+                    <td class="actions-cell" style="text-align:center;">
                         ${c.estado==='pendiente'?`
                         <button onclick="editarCotizacion('${_esc(c.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar cotización ${_esc(c.material_descripcion)}">✏️</button>
                             <button onclick="aprobarCotizacion('${_esc(c.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--exito);" aria-label="Aprobar cotización ${_esc(c.material_descripcion)}">✅ Aprobar</button>
@@ -4623,7 +4715,7 @@
             showToast('Camión/equipo guardado', 'success');
         }
 
-        function cargarTablaCamiones() {
+function cargarTablaCamiones() {
             const datos = getProyectoData();
             const tbody = document.getElementById('tabla-camiones-cuerpo');
             if (!tbody) return;
@@ -4635,11 +4727,11 @@
                 const tar = c.propiedad === 'alquilado' ? `${formatearMoneda(c.tarifa)}/${c.modalidad}` : '—';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${_esc(c.nombre)}</td>
-                    <td>${prop}</td>
-                    <td>${_esc(tar)}</td>
-                    <td>${c.consumo} L/km</td>
-                    <td><button onclick="eliminarCamion('${c.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar camión">🗑️</button></td>`;
+                    <td data-label="Unidad">${_esc(c.nombre)}</td>
+                    <td data-label="Propiedad">${prop}</td>
+                    <td data-label="Tarifa">${_esc(tar)}</td>
+                    <td data-label="Consumo">${c.consumo} L/km</td>
+                    <td class="actions-cell"><button onclick="eliminarCamion('${c.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar camión">🗑️</button></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -4783,19 +4875,19 @@
             const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
             const pag_ = viajes.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
             tbody.innerHTML = '';
-            pag_.forEach(v => {
+pag_.forEach(v => {
                 const cam = (datos.viajes_camiones.camiones || []).find(c => c.id === v.vehiculo_id);
                 const nombre = cam ? cam.nombre : 'N/A';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${v.fecha}</td>
-                    <td>${_esc(nombre)}</td>
-                    <td>${_esc(v.material)}</td>
-                    <td>${v.numero}</td>
-                    <td>${numToF(v.km_total)} km</td>
-                    <td>${numToF(v.litros)} L</td>
-                    <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(v.total)}</td>
-                    <td>
+                    <td data-label="Fecha">${v.fecha}</td>
+                    <td data-label="Unidad">${_esc(nombre)}</td>
+                    <td data-label="Material">${_esc(v.material)}</td>
+                    <td data-label="Viajes">${v.numero}</td>
+                    <td data-label="Km">${numToF(v.km_total)} km</td>
+                    <td data-label="Combustible">${numToF(v.litros)} L</td>
+                    <td data-label="Total (Q)" style="font-weight:bold;color:var(--alerta);">${formatearMoneda(v.total)}</td>
+                    <td class="actions-cell">
                         <button onclick="editarViaje('${_esc(v.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar viaje">✏️</button>
                         <button onclick="eliminarViaje('${_esc(v.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar viaje">🗑️</button>
                     </td>`;
@@ -4877,12 +4969,12 @@
             const lista = datos.mantenimiento.maquinaria || [];
             if (lista.length === 0) { tbody.innerHTML = filaVacia(3, 'No hay maquinaria registrada'); return; }
             tbody.innerHTML = '';
-            lista.forEach(m => {
+lista.forEach(m => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${_esc(m.nombre)}</td>
-                    <td>${_esc(m.tipo)}</td>
-                    <td><button onclick="eliminarMaquinaCatalogo('${m.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar maquinaria">🗑️</button></td>`;
+                    <td data-label="Equipo">${_esc(m.nombre)}</td>
+                    <td data-label="Tipo">${_esc(m.tipo)}</td>
+                    <td class="actions-cell"><button onclick="eliminarMaquinaCatalogo('${m.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar maquinaria">🗑️</button></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -4999,16 +5091,16 @@
             const pag  = estadoPaginacion.ordenes;
             const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
             const pag_ = ords.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
-            tbody.innerHTML = '';
+tbody.innerHTML = '';
             pag_.forEach(o => {
                 const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === o.maquinaria_id);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${o.fecha}</td>
-                    <td>${_esc(m ? m.nombre : 'N/A')}</td>
-                    <td>${_esc(o.tipo)}</td>
-                    <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(o.costo)}</td>
-                    <td>
+                    <td data-label="Fecha">${o.fecha}</td>
+                    <td data-label="Equipo">${_esc(m ? m.nombre : 'N/A')}</td>
+                    <td data-label="Tipo">${_esc(o.tipo)}</td>
+                    <td data-label="Costo (Q)" style="font-weight:bold;color:var(--alerta);">${formatearMoneda(o.costo)}</td>
+                    <td class="actions-cell">
                         <button onclick="editarOrden('${o.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar orden">✏️</button>
                         <button onclick="eliminarOrden('${o.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar orden">🗑️</button>
                     </td>`;
@@ -5105,16 +5197,16 @@
             const pag  = estadoPaginacion.insumos;
             const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
             const pag_ = ins.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
-            tbody.innerHTML = '';
+tbody.innerHTML = '';
             pag_.forEach(i => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${i.fecha}</td>
-                    <td>${_esc(i.tipo)}</td>
-                    <td>${_esc(i.articulo)}</td>
-                    <td>${i.cantidad}</td>
-                    <td style="font-weight:bold;color:var(--alerta);">${formatearMoneda(i.costo)}</td>
-                    <td>
+                    <td data-label="Fecha">${i.fecha}</td>
+                    <td data-label="Tipo">${_esc(i.tipo)}</td>
+                    <td data-label="Artículo">${_esc(i.articulo)}</td>
+                    <td data-label="Cant.">${i.cantidad}</td>
+                    <td data-label="Costo (Q)" style="font-weight:bold;color:var(--alerta);">${formatearMoneda(i.costo)}</td>
+                    <td class="actions-cell">
                         <button onclick="editarInsumo('${i.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar insumo">✏️</button>
                         <button onclick="eliminarInsumo('${i.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar insumo">🗑️</button>
                     </td>`;
@@ -5482,10 +5574,10 @@
                 day: '2-digit', month: '2-digit', year: 'numeric'
             });
 
-            // ── Contenido dinámico: limpiar antes de insertar ──
+            // ── Contenido dinámico: limpiar antes de insertar (sanitizar XSS) ──
             const contenidoEl = document.getElementById('pdf-contenido-dinamico');
             contenidoEl.innerHTML = '';
-            contenidoEl.innerHTML = htmlData;
+            contenidoEl.innerHTML = DOMPurify.sanitize(htmlData, {USE_PROFILES: {html: true}});
 
             return document.getElementById('plantilla-reporte-impresion');
         }
@@ -5505,10 +5597,11 @@
         }
 
         // Generar el PDF del reporte y estampar "Página i de N" en cada hoja
-        function validarDependenciasExportacion() {
+function validarDependenciasExportacion() {
             const faltantes = [];
             if (typeof XLSX === 'undefined') faltantes.push('XLSX');
             if (typeof html2pdf !== 'function') faltantes.push('PDF');
+            if (typeof DOMPurify === 'undefined') console.warn('DOMPurify no disponible; sanitización desactivada (solo offline)');
             if (faltantes.length > 0) {
                 showToast(`⚠️ No se puede exportar: falta ${faltantes.join(' y ')}. Conéctese a internet y recargue la aplicación.`, 'error', 6000);
                 return false;
@@ -5768,9 +5861,6 @@
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden'; // Evitar scroll del fondo
 
-            // Escalar el preview para que quepa en el panel
-            _escalarPreview();
-
             // Renderizar el preview por primera vez
             actualizarVistaPrevia();
 
@@ -5794,28 +5884,8 @@
          * margin-bottom negativo compensa el espacio vacío que deja el scale.
          * Se llama al abrir el modal y al redimensionar la ventana.
          */
-        function _escalarPreview() {
-            const panel   = document.getElementById('vp-preview-scroll');
-            const wrapper = document.getElementById('vp-preview-wrapper');
-            if (!panel || !wrapper) return;
-            // Ancho disponible = panel menos padding de 20px a cada lado
-            const panelW  = Math.max(panel.clientWidth - 40, 100);
-            const docW    = 794; // ~210mm a 96 dpi
-            const escala  = Math.min(1, panelW / docW);
-            wrapper.style.transformOrigin = 'top center';
-            wrapper.style.transform = `scale(${escala})`;
-            // Compensar el espacio que "sobra" debajo cuando escala < 1
-            // offsetHeight refleja la altura ANTES del scale
-            const alturaReal = wrapper.offsetHeight;
-            if (escala < 1) {
-                wrapper.style.marginBottom = `${(alturaReal * escala - alturaReal)}px`;
-            } else {
-                wrapper.style.marginBottom = '0px';
-            }
-        }
-
-        // Re-escalar en cada resize (debounced para no saturar)
-        window.addEventListener('resize', debounce(_escalarPreview, 120));
+        // Re-renderizar preview en resize (debounced)
+        window.addEventListener('resize', debounce(actualizarVistaPrevia, 120));
 
         /**
          * Re-renderiza el preview cada vez que el usuario edita un campo.
@@ -5849,10 +5919,7 @@
                 portada, htmlReporte
             });
 
-            document.getElementById('vp-plantilla-preview').innerHTML = htmlPreview;
-
-            // Re-escalar después de renderizar (el alto puede haber cambiado)
-            setTimeout(_escalarPreview, 50);
+            document.getElementById('vp-plantilla-preview').innerHTML = DOMPurify.sanitize(htmlPreview, {USE_PROFILES: {html: true}});
         }
 
         /** Lee los campos del editor y devuelve un objeto portada. */

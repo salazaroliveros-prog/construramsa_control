@@ -17,7 +17,8 @@ const urlsToCache = [
     './wilson.png',
     './juan.png',
     'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
-    'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js'
+    'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.0/purify.min.js'
 ];
 
 // ── Instalación ───────────────────────────────────────────────
@@ -49,18 +50,17 @@ self.addEventListener('activate', function (event) {
     );
 });
 
-// ── Fetch: Network First, fallback a Cache ────────────────────
+// ── Fetch: Stale-While-Revalidate para CDN, Network First para locales ──
 self.addEventListener('fetch', function (event) {
     if (event.request.method !== 'GET') return;
     if (event.request.url.startsWith('chrome-extension://')) return;
 
-    // Normalizar URLs con query params de shortcuts PWA al index.html cacheado
     const url = new URL(event.request.url);
     const esNavegacion = event.request.mode === 'navigate' ||
                          event.request.destination === 'document';
+    const esCDN = url.hostname.includes('cdnjs.cloudflare.com') ||
+                  url.hostname.includes('cdn.sheetjs.com');
 
-    // Si es navegación al index con ?module= o ?source=, servir index.html del cache
-    // (los parámetros los lee el JS en el cliente, no el servidor)
     if (esNavegacion && url.pathname.endsWith('index.html')) {
         event.respondWith(
             fetch(event.request)
@@ -74,6 +74,25 @@ self.addEventListener('fetch', function (event) {
                 .catch(function () {
                     return caches.match('./index.html');
                 })
+        );
+        return;
+    }
+
+    if (esCDN) {
+        event.respondWith(
+            caches.open(CACHE_NAME).then(function (cache) {
+                return cache.match(event.request).then(function (cached) {
+                    const fetchPromise = fetch(event.request).then(function (response) {
+                        if (response && response.status === 200) {
+                            cache.put(event.request, response.clone());
+                        }
+                        return response;
+                    }).catch(function () {
+                        return cached || new Response('', { status: 503, statusText: 'Offline' });
+                    });
+                    return cached || fetchPromise;
+                });
+            })
         );
         return;
     }
@@ -92,7 +111,6 @@ self.addEventListener('fetch', function (event) {
                 return caches.match(event.request)
                     .then(function (cached) {
                         if (cached) return cached;
-                        // Fallback: cualquier navegación sin red → index.html
                         if (esNavegacion) return caches.match('./index.html');
                     });
             })
