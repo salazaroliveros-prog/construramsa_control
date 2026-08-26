@@ -7,8 +7,8 @@
          reajusta el layout en lugar de hacer zoom, evitando inputs tapados.
          Se eliminaron maximum-scale y user-scalable=no (WCAG 1.4.4 compliance) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-    <title>CONSTRURAMSA - Control de Obra</title>
-    <meta name="description" content="Sistema de control de gastos y gestión de obra para CONSTRURAMSA. 100% offline.">
+    <title>Control de Obra - Sistema de Gestión</title>
+    <meta name="description" content="Sistema de control de gastos y gestión de obra 100% offline. Personalizable para cualquier empresa.">
     <meta name="theme-color" content="#090a0f">
 
     <!-- PWA Manifest -->
@@ -25,7 +25,7 @@
          el icono es una captura de pantalla y el nombre es la URL -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CONSTRURAMSA">
+    <meta name="apple-mobile-web-app-title" content="Control Obra">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <link rel="apple-touch-icon" sizes="152x152" href="./icon-192.png">
     <link rel="apple-touch-icon" sizes="167x167" href="./icon-192.png">
@@ -2600,9 +2600,9 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.7.6 (Correcciones completas UI/UX: KPI cards altura uniforme, panel cálculo viajes espaciado, label stock mínimo acortado, modal landscape stacked, input presupuesto 150px, badge saldo word-break mejorado, feedback visual file import)<br>
-                    Desarrollado para: CONSTRURAMSA<br>
-                    Modo: Offline (LocalStorage) · Sin autenticación multiusuario; no usar como sistema público hasta conectar un proveedor de identidad.
+                    Versión: 2.8.0 (Sistema de gestión personalizable para cualquier empresa con OneDrive)<br>
+                    Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV/XLSX<br>
+                    Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
             </div>
         </div>
@@ -4621,7 +4621,7 @@ pag_.forEach(c => {
                 const str = JSON.stringify(db, null, 2);
                 const uri = 'data:application/json;charset=utf-8,' + encodeURIComponent(str);
                 const a   = document.createElement('a');
-                a.href = uri; a.download = 'construramsa_backup_' + new Date().toISOString().split('T')[0] + '.json';
+                a.href = uri; a.download = 'control_obra_backup_' + new Date().toISOString().split('T')[0] + '.json';
                 a.click();
                 hideLoading();
                 showToast('✅ Base de datos exportada', 'success');
@@ -4788,6 +4788,9 @@ pag_.forEach(c => {
             };
             return db.configuracion.nube;
         }
+        
+        // Versión de la aplicación para control de caché
+        const APP_VERSION = '2.8.0';
         function _nubeSetEstado(msg, ok) {
             const el = document.getElementById('nube-estado');
             if (!el) return;
@@ -4869,7 +4872,7 @@ pag_.forEach(c => {
         }
         function nubeAbrirGuia() {
             showConfirmModal('☁️ Respaldar en la Nube',
-                '1. Ve a https://script.google.com · crea un proyecto nuevo.\n2. Borra el contenido y pega el script («Copiar Script»).\n3. Guarda y luego «Ver → Implementar como App Web».\n4. Ejecutar como: Tú · Quién puede acceder: Cualquiera.\n5. Implementar y autoriza. Copia la URL que termina en /exec.\n6. Pega esa URL en el campo y pulsa 💾 Guardar y ⬆️ Subir.\n\nSe creará la carpeta CONSTRURAMSA_Backups en tu Google Drive\n(un archivo por día + latest.json). 100% offline.',
+                '1. Ve a https://script.google.com · crea un proyecto nuevo.\n2. Borra el contenido y pega el script («Copiar Script»).\n3. Guarda y luego «Ver → Implementar como App Web».\n4. Ejecutar como: Tú · Quién puede acceder: Cualquiera.\n5. Implementar y autoriza. Copia la URL que termina en /exec.\n6. Pega esa URL en el campo y pulsa 💾 Guardar y ⬆️ Subir.\n\nSe creará la carpeta ControlObra_Backups en tu Google Drive\n(un archivo por día + latest.json). 100% offline.',
                 () => {}, 'Cerrar');
         }
 
@@ -4880,8 +4883,8 @@ pag_.forEach(c => {
         // Script de Google Apps Script para respaldar a tu Google Drive.
         // Definido aquí (se usa al pulsar "Copiar Script" y en la guía).
         const NUBE_SCRIPT = [
-            "/** Respaldador CONSTRURAMSA (Google Apps Script) — guarda en tu Drive */",
-            "var CARPETA = 'CONSTRURAMSA_Backups';",
+            "/** Respaldador Control de Obra (Google Apps Script) — guarda en tu Drive */",
+            "var CARPETA = 'ControlObra_Backups';",
             "function buscarCarpeta(){",
             "  var it = DriveApp.getFoldersByName(CARPETA);",
             "  return it.hasNext() ? it.next() : DriveApp.createFolder(CARPETA);",
@@ -4897,22 +4900,22 @@ pag_.forEach(c => {
             "    var body = JSON.parse(e.postData.contents);",
             "    var ts = new Date(), dia = ts.toISOString().slice(0,10);",
             "    var hoy = dia + '-' + ts.toTimeString().slice(0,2) + 'h';",
-            "    guardarArchivo('construramsa_latest.json', JSON.stringify(body.data));",
-            "    guardarArchivo('construramsa_' + dia + '.json', JSON.stringify(body.data));",
+            "    guardarArchivo('control_obra_latest.json', JSON.stringify(body.data));",
+            "    guardarArchivo('control_obra_' + dia + '.json', JSON.stringify(body.data));",
             "    return ContentService.createTextOutput(JSON.stringify({ok:true}));",
             "  } catch(err){ return ContentService.createTextOutput(JSON.stringify({ok:false,error:String(err)})); }",
             "}",
             "function doGet(e){",
             "  try {",
             "    var folder = buscarCarpeta();",
-            "    var f = folder.getFilesByName('construramsa_latest.json');",
+            "    var f = folder.getFilesByName('control_obra_latest.json');",
             "    if (!f.hasNext()) return ContentService.createTextOutput(JSON.stringify({ok:false,error:'Sin respaldo'}));",
             "    var contenido = f.next().getBlob().getDataAsString();",
             "    return ContentService.createTextOutput(JSON.stringify({ok:true,data:JSON.parse(contenido)}));",
             "  } catch(err){ return ContentService.createTextOutput(JSON.stringify({ok:false,error:String(err)})); }",
             "}",
             "/** Solo para autorizar permisos la primera vez */",
-            "function crearCarpetaPrueba(){ buscarCarpeta(); return 'Carpeta CONSTRURAMSA lista'; }"
+            "function crearCarpetaPrueba(){ buscarCarpeta(); return 'Carpeta ControlObra lista'; }"
         ].join('\n');
 
         async function nubeSubirAhora(auto) {
@@ -4971,7 +4974,7 @@ pag_.forEach(c => {
         // ONE DRIVE / MICROSOFT GRAPH - Sincronización Bidireccional
         // ============================================================
         let _onedriveSyncTimer = null;
-        const ONEDRIVE_APP_FOLDER = 'CONSTRURAMSA_ControlGastos';
+        const ONEDRIVE_APP_FOLDER = 'ControlObra_Gastos';
         const ONEDRIVE_BASE_URL = 'https://graph.microsoft.com/v1.0';
         
         function onedriveConectar() {
@@ -5146,7 +5149,7 @@ pag_.forEach(c => {
                 if (!auto) _nubeSetEstado('⬆️ Subiendo a OneDrive...', true);
                 
                 const db = getDB();
-                const fileName = `construramsa_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
+                const fileName = `control_obra_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
                 const fileContent = JSON.stringify(db, null, 2);
                 
                 // Subir archivo
@@ -5162,7 +5165,14 @@ pag_.forEach(c => {
                 if (!uploadResponse.ok) throw new Error('HTTP ' + uploadResponse.status);
                 
                 // Actualizar archivo latest
-                await onedriveActualizarLatest(db);
+                await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}:/control_obra_latest.json:/content`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${c.od_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(db, null, 2)
+                });
                 
                 // Actualizar timestamp
                 c.ultimo = new Date().toISOString();
@@ -5193,7 +5203,7 @@ pag_.forEach(c => {
             const c = _nubeCfg();
             
             try {
-                await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}:/construramsa_latest.json:/content`, {
+                await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}:/control_obra_latest.json:/content`, {
                     method: 'PUT',
                     headers: { 
                         'Authorization': `Bearer ${c.od_token}`,

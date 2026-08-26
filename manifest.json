@@ -1,7 +1,7 @@
 {
-  "name": "CONSTRURAMSA Control de Obra",
-  "short_name": "CONSTRURAMSA",
-  "description": "Sistema de control de gastos y gestión de obra para CONSTRURAMSA. 100% offline.",
+  "name": "Control de Obra - Sistema de Gestión",
+  "short_name": "Control Obra",
+  "description": "Sistema de control de gastos y gestión de obra 100% offline. Personalizable para cualquier empresa.",
   "start_url": "./index.html?source=pwa",
   "id": "./index.html",
   "display": "standalone",

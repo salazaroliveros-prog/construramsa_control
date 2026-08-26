@@ -40,4 +40,6 @@ package-lock.json
 
 # Archivo fuente del logo (no se sube; las variantes icon-*.png sí)
 logocr.png
-.vercel
+
+# Directorio de screenshots de pruebas (solo desarrollo local)
+scroll_validation_screenshots/
