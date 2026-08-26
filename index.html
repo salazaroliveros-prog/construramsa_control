@@ -123,6 +123,9 @@
             /* FIX global overflow: prevenir scroll horizontal, permitir scroll vertical */
             overflow-x: hidden;
             overflow-y: auto;
+            /* Mejora de rendimiento: GPU layer para scroll */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
         }
 
         /* iOS standalone: respetar safe-area del notch/Dynamic Island */
@@ -450,6 +453,11 @@
             padding-bottom: 4px;
             flex-wrap: nowrap;
             position: relative;
+            /* Mejora de rendimiento: GPU layer para scroll horizontal */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            /* Mejorar la respuesta al touch en móviles */
+            touch-action: pan-x;
         }
         .nav-tabs::-webkit-scrollbar { display: none; }
         @media (min-width: 769px) {
@@ -512,6 +520,28 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Optimización de animaciones con GPU acceleration */
+        .module {
+            will-change: opacity, transform;
+        }
+        .module:not(.active) {
+            will-change: auto;
+        }
+
+        /* Contenedor principal con scroll optimizado */
+        .main-content {
+            /* Scroll vertical fluido */
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            /* GPU layer para mejor rendimiento */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            /* Evitar scroll horizontal accidental */
+            overscroll-behavior-x: none;
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -1559,7 +1589,7 @@
         </div><!-- /.vp-body -->
     </div><!-- /#modal-vista-previa -->
 
-    <div class="container">
+    <div class="container main-content">
         <!-- Header -->
         <header class="header tarjeta-glass" role="banner">
             <div class="logo-container">
@@ -2366,6 +2396,22 @@
             </div>
 
             <div style="margin-bottom:25px;">
+                <h3 style="color:var(--texto-principal);font-size:16px;">🏢 Identidad de la Empresa</h3>
+                <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">Personaliza el nombre y eslogan de tu empresa. Estos datos aparecerán en toda la aplicación y en los reportes.</p>
+                <div style="margin-top:10px;">
+                    <label for="cfg-nombre-empresa" style="font-size:12px;color:var(--texto-principal);">Nombre de la Empresa</label>
+                    <input type="text" id="cfg-nombre-empresa" placeholder="Nombre de tu empresa" aria-label="Nombre de la empresa" maxlength="60">
+                </div>
+                <div style="margin-top:10px;">
+                    <label for="cfg-eslogan" style="font-size:12px;color:var(--texto-principal);">Eslogan</label>
+                    <input type="text" id="cfg-eslogan" placeholder="Eslogan o descripción corta" aria-label="Eslogan de la empresa" maxlength="80">
+                </div>
+                <div style="margin-top:12px;">
+                    <button onclick="guardarIdentidadEmpresa()" class="btn-primario" aria-label="Guardar identidad de la empresa">💾 Guardar Identidad</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom:25px;">
                 <h3 style="color:var(--texto-principal);font-size:16px;">📇 Datos de Contacto de la Empresa</h3>
                 <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">Estos datos aparecerán en la cabecera de los reportes PDF.</p>
                 <div class="form-grid-2" style="margin-top:10px;">
@@ -2381,6 +2427,10 @@
                 <div style="margin-top:10px;">
                     <label for="cfg-direccion" style="font-size:12px;color:var(--texto-principal);">Dirección</label>
                     <input type="text" id="cfg-direccion" placeholder="Dirección completa de la empresa" aria-label="Dirección de la empresa" maxlength="120">
+                </div>
+                <div style="margin-top:10px;">
+                    <label for="cfg-website" style="font-size:12px;color:var(--texto-principal);">Sitio Web</label>
+                    <input type="text" id="cfg-website" placeholder="www.miempresa.com" aria-label="Sitio web de la empresa" maxlength="50">
                 </div>
                 <div style="margin-top:12px;">
                     <button onclick="guardarDatosContacto()" class="btn-primario" aria-label="Guardar datos de contacto">💾 Guardar Datos de Contacto</button>
@@ -2506,15 +2556,15 @@
                     <td style="width: 56%; vertical-align: middle; text-align: center; padding: 0 15px;">
                         <!-- Logo grande centrado -->
                         <div style="margin-bottom: 8px;">
-                            <img id="pdf-logo-membrete" src="./icon.png" alt="Logo CONSTRURAMSA"
+                            <img id="pdf-logo-membrete" src="./icon.png" alt="Logo Empresa"
                                  style="max-height: 90px; max-width: 260px; width: auto; object-fit: contain; display: block; margin: 0 auto;">
                         </div>
-                        <!-- Nombre corporativo — igual que el membrete: letras espaciadas en azul -->
-                        <div style="font-size: 22px; font-weight: 800; letter-spacing: 6px; color: #004B93; text-transform: uppercase; line-height: 1; margin-bottom: 5px; font-family: Arial, sans-serif;">
+                        <!-- Nombre corporativo — dinámico desde configuración -->
+                        <div id="pdf-nombre-empresa" style="font-size: 22px; font-weight: 800; letter-spacing: 6px; color: #004B93; text-transform: uppercase; line-height: 1; margin-bottom: 5px; font-family: Arial, sans-serif;">
                             CONSTRURAMSA
                         </div>
-                        <!-- Slogan — en azul oscuro bold, igual que en el membrete -->
-                        <div style="font-size: 9px; font-weight: 700; color: #1D4ED8; text-transform: uppercase; letter-spacing: 1.5px; line-height: 1.3; margin-bottom: 6px;">
+                        <!-- Slogan — dinámico desde configuración -->
+                        <div id="pdf-eslogan-empresa" style="font-size: 9px; font-weight: 700; color: #1D4ED8; text-transform: uppercase; letter-spacing: 1.5px; line-height: 1.3; margin-bottom: 6px;">
                             SOLUCIONES EN INGENIERÍA Y ARQUITECTURA
                         </div>
                         <!-- Datos de contacto -->
@@ -2523,6 +2573,9 @@
                         </div>
                         <div style="font-size: 8px; color: #6B7280; line-height: 1.6;">
                             <span id="pdf-tel-email-empresa">Tel: +502 5997 9501 &nbsp;|&nbsp; contacto@construramsa.com</span>
+                        </div>
+                        <div style="font-size: 8px; color: #6B7280; line-height: 1.6;">
+                            <span id="pdf-website-empresa">construramsa.com</span>
                         </div>
                     </td>
 
@@ -2718,6 +2771,11 @@
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
             if (!db.configuracion.nombre_empresa) db.configuracion.nombre_empresa = 'CONSTRURAMSA';
             if (!db.configuracion.eslogan) db.configuracion.eslogan = 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            // Nuevos campos para personalización completa
+            if (!db.configuracion.telefono) db.configuracion.telefono = '+502 5997 9501';
+            if (!db.configuracion.email) db.configuracion.email = 'contacto@construramsa.com';
+            if (!db.configuracion.direccion) db.configuracion.direccion = '17av. Villa Mariscal, Apto. 116, Torre 2, Zona 11, Ciudad de Guatemala';
+            if (!db.configuracion.website) db.configuracion.website = 'construramsa.com';
             if (!db.configuracion.nube) db.configuracion.nube = { proveedor:'gas', url:'', auto:true, ultimo:null };
             if (db.configuracion.proyecto_actual === undefined) db.configuracion.proyecto_actual = null;
             if (!db.proyectos) db.proyectos = [];
@@ -2751,7 +2809,17 @@
 
         function inicializarDB() {
             const db = {
-                configuracion: { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0, proyecto_actual:null },
+                configuracion: { 
+                    nombre_empresa:'CONSTRURAMSA', 
+                    eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', 
+                    logo_base64:'', 
+                    presupuesto_inicial_caja:0, 
+                    proyecto_actual:null,
+                    telefono:'+502 5997 9501',
+                    email:'contacto@construramsa.com',
+                    direccion:'17av. Villa Mariscal, Apto. 116, Torre 2, Zona 11, Ciudad de Guatemala',
+                    website:'construramsa.com'
+                },
                 proyectos: [], proyectos_data: {},
                 caja_chica: [],
                 maquinaria_flota: { vehiculos:[], registros:[] },
@@ -3023,6 +3091,9 @@
                     </div>`;
                 cont.appendChild(div);
             });
+            
+            // Cargar identidad de la empresa cuando se abre configuración
+            cargarIdentidadEmpresa();
         }
 
         function mostrarModalCrearProyecto() {
@@ -3348,7 +3419,16 @@
                     this.classList.add('active');
                     this.setAttribute('aria-current', 'page');
                     const mid = this.dataset.module;
-                    document.getElementById(mid).classList.add('active');
+                    const moduleElement = document.getElementById(mid);
+                    
+                    if (moduleElement) {
+                        moduleElement.classList.add('active');
+                        // Smooth scroll al inicio del módulo para mejor UX
+                        requestAnimationFrame(() => {
+                            moduleElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        });
+                    }
+                    
                     if (mid === 'resumen') { cargarResumen(); }
                     if (mid === 'personal') { cargarListaAsistencia(); cargarTablaAsistencia(); }
                     if (mid === 'adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
@@ -4324,16 +4404,81 @@ pag_.forEach(c => {
             showToast('✅ Presupuesto guardado', 'success');
         }
 
+        function guardarIdentidadEmpresa() {
+            const nombre  = (document.getElementById('cfg-nombre-empresa').value || '').trim();
+            const eslogan = (document.getElementById('cfg-eslogan').value        || '').trim();
+            
+            if (!nombre || nombre.length < 2) {
+                showToast('❌ El nombre de la empresa debe tener al menos 2 caracteres', 'error');
+                return;
+            }
+            
+            const db = getDB();
+            db.configuracion.nombre_empresa = nombre;
+            db.configuracion.eslogan = eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            saveDB(db);
+            actualizarNombreEmpresaUI();
+            actualizarTituloPagina();
+            showToast('✅ Identidad de la empresa actualizada', 'success');
+        }
+
+        function cargarIdentidadEmpresa() {
+            const db = getDB();
+            const nombre  = db.configuracion.nombre_empresa || 'CONSTRURAMSA';
+            const eslogan = db.configuracion.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            
+            const elNombre = document.getElementById('cfg-nombre-empresa');
+            const elEslogan = document.getElementById('cfg-eslogan');
+            
+            if (elNombre) elNombre.value = nombre;
+            if (elEslogan) elEslogan.value = eslogan;
+            
+            actualizarNombreEmpresaUI();
+            actualizarTituloPagina();
+        }
+
+        function actualizarNombreEmpresaUI() {
+            const db = getDB();
+            const nombre  = db.configuracion.nombre_empresa || 'CONSTRURAMSA';
+            const eslogan = db.configuracion.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            
+            // Actualizar header
+            const companyNameEl = document.querySelector('.company-name');
+            const sloganEl = document.querySelector('.slogan');
+            
+            if (companyNameEl) companyNameEl.textContent = nombre;
+            if (sloganEl) sloganEl.textContent = eslogan;
+            
+            // Actualizar logo alt text
+            const logoEl = document.getElementById('header-logo');
+            if (logoEl) logoEl.alt = `Logo ${nombre}`;
+        }
+
+        function actualizarTituloPagina() {
+            const db = getDB();
+            const nombre = db.configuracion.nombre_empresa || 'CONSTRURAMSA';
+            document.title = `${nombre} - Control de Obra`;
+            
+            // Actualizar meta description
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                metaDesc.content = `Sistema de control de gastos y gestión de obra para ${nombre}. 100% offline.`;
+            }
+        }
+
         function guardarDatosContacto() {
             const telefono  = (document.getElementById('cfg-telefono').value  || '').trim();
             const email     = (document.getElementById('cfg-email').value     || '').trim();
             const direccion = (document.getElementById('cfg-direccion').value || '').trim();
+            const website   = (document.getElementById('cfg-website').value   || '').trim();
             const db = getDB();
             db.configuracion.telefono  = telefono;
             db.configuracion.email     = email;
             db.configuracion.direccion = direccion;
+            db.configuracion.website   = website;
             saveDB(db);
             actualizarDatosContactoPDF();
+            actualizarNombreEmpresaUI();
             showToast('✅ Datos de contacto guardados', 'success');
         }
 
@@ -4342,12 +4487,15 @@ pag_.forEach(c => {
             const tel  = db.configuracion.telefono  || '';
             const eml  = db.configuracion.email     || '';
             const dir  = db.configuracion.direccion || '';
+            const web  = db.configuracion.website   || '';
             const elTel = document.getElementById('cfg-telefono');
             const elEml = document.getElementById('cfg-email');
             const elDir = document.getElementById('cfg-direccion');
+            const elWeb = document.getElementById('cfg-website');
             if (elTel) elTel.value = tel;
             if (elEml) elEml.value = eml;
             if (elDir) elDir.value = dir;
+            if (elWeb) elWeb.value = web;
             actualizarDatosContactoPDF();
         }
 
@@ -4356,13 +4504,25 @@ pag_.forEach(c => {
             const tel  = db.configuracion.telefono  || '+502 5997 9501';
             const eml  = db.configuracion.email     || 'contacto@construramsa.com';
             const dir  = db.configuracion.direccion || '17av. Villa Mariscal, Apartamento 116, Torre 2, Zona 11, Ciudad de Guatemala';
+            const web  = db.configuracion.website   || 'construramsa.com';
+            const nombre = db.configuracion.nombre_empresa || 'CONSTRURAMSA';
+            const eslogan = db.configuracion.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            
             const elDir = document.getElementById('pdf-direccion-empresa');
             const elTE  = document.getElementById('pdf-tel-email-empresa');
+            const elNombre = document.getElementById('pdf-nombre-empresa');
+            const elEslogan = document.getElementById('pdf-eslogan-empresa');
+            const elWebsite = document.getElementById('pdf-website-empresa');
+            
             const parts = [];
             if (tel) parts.push('Tel: ' + tel);
             if (eml) parts.push('Email: ' + eml);
+            
             if (elDir) elDir.textContent = dir;
             if (elTE)  elTE.textContent  = parts.join(' | ');
+            if (elNombre) elNombre.textContent = nombre;
+            if (elEslogan) elEslogan.textContent = eslogan;
+            if (elWebsite) elWebsite.textContent = web;
         }
 
         function exportarBaseDatos() {
@@ -5306,6 +5466,11 @@ tbody.innerHTML = '';
             const config = db.configuracion || {};
             const empresa = config.nombre_empresa || 'CONSTRURAMSA';
             const eslogan = config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            const telefono = config.telefono || '+502 5997 9501';
+            const email = config.email || 'contacto@construramsa.com';
+            const direccion = config.direccion || 'Guatemala, C.A.';
+            const website = config.website || 'construramsa.com';
+            
             const csvCell = value => {
                 const text = String(value ?? '').replace(/\r?\n/g, ' ');
                 const safeText = /^[=+\-@]/.test(text.trim()) ? "'" + text : text;
@@ -5317,7 +5482,7 @@ tbody.innerHTML = '';
             // Encabezado con información de la empresa (como comentarios para Excel)
             csv += `# ${csvCell(empresa)}\n`;
             csv += `# ${csvCell(eslogan)}\n`;
-            csv += `# Guatemala, C.A. | Tel: +502 5997 9501 | Email: contacto@construramsa.com\n`;
+            csv += `# ${csvCell(direccion)} | Tel: ${csvCell(telefono)} | Email: ${csvCell(email)} | ${csvCell(website)}\n`;
             csv += `# \n`;
 
             if (tipo === 'diario' || tipo === 'semanal') {
@@ -5776,8 +5941,18 @@ function validarDependenciasExportacion() {
             const db = getDB();
             const config = db.configuracion || {};
             const empresa = config.nombre_empresa || 'CONSTRURAMSA';
+            const telefono = config.telefono || '+502 5997 9501';
+            const email = config.email || 'contacto@construramsa.com';
+            const direccion = config.direccion || 'Guatemala, C.A.';
+            const website = config.website || 'construramsa.com';
+            
             let data = [];
-            const enc = [['CONSTRURAMSA'], [config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA'], ['Guatemala, C.A. | Tel: +502 5997 9501 | contacto@construramsa.com'], []];
+            const enc = [
+                [empresa], 
+                [config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA'], 
+                [`${direccion} | Tel: ${telefono} | Email: ${email} | ${website}`], 
+                []
+            ];
 
                         if (tipo === 'diario' || tipo === 'semanal') {
                 const rangoX = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
@@ -5956,7 +6131,9 @@ function validarDependenciasExportacion() {
             const htmlPreview = _construirHTMLPreview({
                 logoSrc, proyNombre, telEmail, fechaEmision,
                 tipoReporte: (ETIQUETAS_REPORTE[tipo] || tipo).toUpperCase(),
-                portada, htmlReporte
+                portada, htmlReporte,
+                nombreEmpresa: cfg.nombre_empresa || 'CONSTRURAMSA',
+                esloganEmpresa: cfg.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA'
             });
 
             document.getElementById('vp-plantilla-preview').innerHTML = DOMPurify.sanitize(htmlPreview, {USE_PROFILES: {html: true}});
@@ -5977,7 +6154,7 @@ function validarDependenciasExportacion() {
          * Construye el HTML completo que se muestra en el panel de preview.
          * Replica visualmente la plantilla real (membrete + portada + contenido).
          */
-        function _construirHTMLPreview({ logoSrc, proyNombre, telEmail, fechaEmision, tipoReporte, portada, htmlReporte }) {
+        function _construirHTMLPreview({ logoSrc, proyNombre, telEmail, fechaEmision, tipoReporte, portada, htmlReporte, nombreEmpresa, esloganEmpresa }) {
             // ── Portada HTML ──
             let portadaHTML = '';
             const tienePortada = portada.fecha || portada.remitente || portada.destinatario
@@ -6036,17 +6213,17 @@ function validarDependenciasExportacion() {
                             </div>
                         </td>
                         <td style="width:56%;text-align:center;vertical-align:middle;padding:0 12px;">
-                            <img src="${logoSrc}" alt="CONSTRURAMSA"
+                            <img src="${logoSrc}" alt="${_esc(nombreEmpresa)}"
                                  style="max-height:72px;max-width:200px;width:auto;object-fit:contain;display:block;margin:0 auto 6px auto;">
-                            <div style="font-size:17px;font-weight:800;letter-spacing:5px;color:#004B93;text-transform:uppercase;margin-bottom:3px;">CONSTRURAMSA</div>
-                            <div style="font-size:7.5px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;">SOLUCIONES EN INGENIERÍA Y ARQUITECTURA</div>
+                            <div style="font-size:17px;font-weight:800;letter-spacing:5px;color:#004B93;text-transform:uppercase;margin-bottom:3px;">${_esc(nombreEmpresa)}</div>
+                            <div style="font-size:7.5px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;">${_esc(esloganEmpresa)}</div>
                             <div style="font-size:7px;color:#6B7280;line-height:1.5;">${_esc(telEmail)}</div>
                         </td>
                         <td style="width:22%;vertical-align:top;padding:3px 0 0 10px;border-left:1px solid #E5E7EB;text-align:center;">
                             <div style="border:1.5px dashed #D1D5DB;border-radius:4px;height:58px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;">
                                 <span style="font-size:7px;color:#D1D5DB;text-transform:uppercase;font-weight:600;">Sello / Timbre</span>
                             </div>
-                            <div style="font-size:7px;color:#9CA3AF;line-height:1.4;">Documento oficial<br>CONSTRURAMSA</div>
+                            <div style="font-size:7px;color:#9CA3AF;line-height:1.4;">Documento oficial<br>${_esc(nombreEmpresa)}</div>
                         </td>
                     </tr>
                 </table>
@@ -6308,6 +6485,9 @@ function validarDependenciasExportacion() {
             recargarTodosLosDatos();
             cargarListaProyectosConfig();
             cargarDatosContacto();
+            cargarIdentidadEmpresa();
+            actualizarNombreEmpresaUI();
+            actualizarTituloPagina();
 
             // Paso 6: registrar listeners de navegación por tabs
             inicializarNavTabs();
