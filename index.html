@@ -326,7 +326,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1600px;
             width: 100%;
             margin: 0 auto;
             /* padding dinámico: mínimo 10px, preferido 20px, máximo 30px — sin desborde */
@@ -434,6 +434,16 @@
             position: relative;
         }
         .nav-tabs::-webkit-scrollbar { display: none; }
+        @media (min-width: 769px) {
+            .nav-tabs {
+                overflow-x: visible;
+                flex-wrap: wrap;
+            }
+            .nav-tab {
+                flex: 1 1 auto;
+                min-width: max-content;
+            }
+        }
         @media (max-width: 768px) {
             .nav-tabs::after {
                 content: '→';
