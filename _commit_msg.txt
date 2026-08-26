@@ -1,6 +1,0 @@
-deploy: DB vacía para datos reales + corrección QA maquinaria + rediseño v2.4.0
-
-- Vaciados datos de prueba del proyecto (quedó base de datos con estructura completa y vacía)
-- Corregida inconsistencia: configuracion.nube ahora presente en la DB semilla
-- Corrección QA: editar/eliminar maquinaria ajusta el egreso de caja exacto (sin desbalance ni reembolso duplicado)
-- Rediseño visual corporativo (fondo degradado + vidrio granulado) y respaldo en la nube

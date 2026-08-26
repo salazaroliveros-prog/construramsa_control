@@ -29,3 +29,4 @@ build/
 server.js
 server_log.txt
 _*.js
+_*.txt
