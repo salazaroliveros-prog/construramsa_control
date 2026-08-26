@@ -2553,7 +2553,7 @@
             <div>
                 <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.8.0 (Sistema de gestión personalizable para cualquier empresa con OneDrive)<br>
+                    Versión: 2.8.1 (Corrección de errores 404 y Service Worker)<br>
                     Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV/XLSX<br>
                     Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
@@ -2697,9 +2697,9 @@
                     <td style="width: 32%; text-align: center; vertical-align: bottom; padding: 0 8px;">
                         <!-- Imagen de firma sobre la línea -->
                         <div style="height: 60px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 0;">
-                            <img id="pdf-firma-jefe-proyectos" src="wilson.png"
-                                 alt="Firma Arq. Wilson Dario Salazar"
-                                 style="max-height: 58px; max-width: 140px; width: auto; object-fit: contain; opacity: 0.88;">
+                            <div id="pdf-firma-jefe-proyectos" style="max-height: 58px; max-width: 140px; width: auto; display: flex; align-items: center; justify-content: center; color: #9CA3AF; font-size: 10px; opacity: 0.88;">
+                                Firma Jefe de Proyectos
+                            </div>
                         </div>
                         <!-- Línea de firma -->
                         <div style="border-top: 1.5px solid #374151; width: 88%; margin: 0 auto; padding-top: 7px;">
@@ -2732,9 +2732,9 @@
                     <!-- ── Firma Gerente Comercial ── -->
                     <td style="width: 32%; text-align: center; vertical-align: bottom; padding: 0 8px;">
                         <div style="height: 60px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 0;">
-                            <img id="pdf-firma-gerente-comercial" src="juan.png"
-                                 alt="Firma Ing. Juan Luis Ramirez Jimenez"
-                                 style="max-height: 58px; max-width: 140px; width: auto; object-fit: contain; opacity: 0.88;">
+                            <div id="pdf-firma-gerente-comercial" style="max-height: 58px; max-width: 140px; width: auto; display: flex; align-items: center; justify-content: center; color: #9CA3AF; font-size: 10px; opacity: 0.88;">
+                                Firma Gerente Comercial
+                            </div>
                         </div>
                         <div style="border-top: 1.5px solid #374151; width: 88%; margin: 0 auto; padding-top: 7px;">
                             <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
@@ -4743,7 +4743,7 @@ pag_.forEach(c => {
         }
         
         // Versión de la aplicación para control de caché
-        const APP_VERSION = '2.8.0';
+        const APP_VERSION = '2.8.1';
         function _nubeSetEstado(msg, ok) {
             const el = document.getElementById('nube-estado');
             if (!el) return;
@@ -6257,11 +6257,12 @@ tbody.innerHTML = '';
                 logo.src = './icon.png';
             }
 
-            // ── Firmas: siempre recargar para que estén frescas ──
+            // ── Firmas: placeholders por defecto (configurable por usuario) ──
             const firma1 = document.getElementById('pdf-firma-jefe-proyectos');
             const firma2 = document.getElementById('pdf-firma-gerente-comercial');
-            if (firma1) { firma1.src = ''; firma1.src = 'wilson.png'; }
-            if (firma2) { firma2.src = ''; firma2.src = 'juan.png'; }
+            // Firmas por defecto como texto placeholder
+            if (firma1) firma1.textContent = 'Firma Jefe de Proyectos';
+            if (firma2) firma2.textContent = 'Firma Gerente Comercial';
 
             // ── Datos de contacto: desde configuración si están guardados ──
             const telEmail = cfg.telefono && cfg.email
@@ -6745,7 +6746,7 @@ function validarDependenciasExportacion() {
             <table style="width:100%;border-collapse:collapse;">
                 <tr>
                     <td style="width:32%;text-align:center;vertical-align:bottom;padding:0 6px;">
-                        <div style="height:48px;background:url('wilson.png') center bottom/contain no-repeat;opacity:0.85;margin-bottom:0;"></div>
+                        <div style="height:48px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:8px;opacity:0.85;margin-bottom:0;">Firma Jefe de Proyectos</div>
                         <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
                             <div style="font-size:9.5px;font-weight:700;color:#111827;">Arq. Wilson Dario Salazar</div>
                             <div style="font-size:7.5px;color:#004B93;font-weight:600;text-transform:uppercase;margin-top:1px;">Jefe de Proyectos</div>
@@ -6759,7 +6760,7 @@ function validarDependenciasExportacion() {
                         </div>
                     </td>
                     <td style="width:32%;text-align:center;vertical-align:bottom;padding:0 6px;">
-                        <div style="height:48px;background:url('juan.png') center bottom/contain no-repeat;opacity:0.85;margin-bottom:0;"></div>
+                        <div style="height:48px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:8px;opacity:0.85;margin-bottom:0;">Firma Gerente Comercial</div>
                         <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
                             <div style="font-size:9.5px;font-weight:700;color:#111827;">Ing. Juan Luis Ramirez Jimenez</div>
                             <div style="font-size:7.5px;color:#004B93;font-weight:600;text-transform:uppercase;margin-top:1px;">Gerente Comercial</div>

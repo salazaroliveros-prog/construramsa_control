@@ -1,23 +1,19 @@
 // ============================================================
-// SERVICE WORKER — Control de Obra v2.8.0
+// SERVICE WORKER — Control de Obra v2.8.1
 // Estrategia: Network First con fallback a Cache
 // ============================================================
 
-const CACHE_NAME = 'control-obra-v2.8.0';
+const CACHE_NAME = 'control-obra-v2.8.1';
 
 const urlsToCache = [
     './',
     './index.html',
     './manifest.json',
     './onedrive-callback.html',
-    './construramsa_db.json',
     './icon.png',
     './icon-512.png',
     './icon-192.png',
     './icon.svg',
-    './logocr.png',
-    './wilson.png',
-    './juan.png',
     'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
     'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.0/purify.min.js'
