@@ -120,8 +120,9 @@
         /* Scroll suave global — funciona en iOS Safari desde el elemento html */
         html {
             scroll-behavior: smooth;
-            /* FIX global overflow: prevenir scroll horizontal en toda la página */
+            /* FIX global overflow: prevenir scroll horizontal, permitir scroll vertical */
             overflow-x: hidden;
+            overflow-y: auto;
         }
 
         /* iOS standalone: respetar safe-area del notch/Dynamic Island */
@@ -786,7 +787,7 @@
             background: rgba(255,255,255,0.02);
             border-radius: 12px;
             border: 1px solid var(--glass-border);
-            overflow: hidden;
+            overflow: visible;
         }
 
         /* ─── breakpoint intermedio 600px: form-grid-3 pasa a 2 columnas ─── */
