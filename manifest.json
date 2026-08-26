@@ -18,25 +18,31 @@
   "icons": [
     {
       "src": "./icon.png",
-      "sizes": "192x192",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icon.png",
-      "sizes": "192x192",
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "./icon.png",
-      "sizes": "512x512",
+      "src": "./icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icon.png",
-      "sizes": "512x512",
+      "src": "./icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
@@ -54,28 +60,28 @@
       "short_name": "Resumen",
       "description": "Ver el resumen ejecutivo de la obra",
       "url": "./index.html?module=resumen&source=shortcut",
-      "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Caja Chica",
       "short_name": "Caja",
       "description": "Registrar movimientos de caja chica",
       "url": "./index.html?module=caja-chica&source=shortcut",
-      "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Maquinaria",
       "short_name": "Maquinaria",
       "description": "Registrar uso de maquinaria y flota",
       "url": "./index.html?module=maquinaria&source=shortcut",
-      "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Reportes",
       "short_name": "Reportes",
       "description": "Generar reportes PDF y CSV",
       "url": "./index.html?module=reportes&source=shortcut",
-      "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

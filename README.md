@@ -21,7 +21,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 - **Respaldo de Datos**: Exportación e importación con fusión inteligente
 - **Accesibilidad WCAG 2.1 AA**: Contraste de colores corregido, aria-live, aria-label en todos los controles
 - **Paginación**: Tablas de historial paginadas a 20 registros por página
-- **PWA Completa**: Service Worker v2.4.0 con activación inmediata y cache robusto
+- **PWA Completa**: Service Worker v2.5.0 con activación inmediata y cache robusto
 
 ## Instalación
 
@@ -63,9 +63,11 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 | Archivo | Descripción |
 |---------|-------------|
 | `index.html` | Aplicación principal (HTML + CSS + JavaScript) |
-| `sw.js` | Service Worker v2.4.0 para funcionalidad offline |
+| `sw.js` | Service Worker v2.5.0 para funcionalidad offline |
 | `manifest.json` | Configuración PWA con shortcuts de módulos |
-| `icon.png` | Icono corporativo (192×192px) |
+| `icon.png` | Icono corporativo 1024×1024 (instalación/PWA) |
+| `icon-512.png` | Icono PWA 512×512 |
+| `icon-192.png` | Icono PWA 192×192 (instalación pantalla de inicio) |
 | `icon.svg` | Icono vectorial corporativo |
 | `wilson.png` | Firma Arq. Wilson Dario Salazar Oliveros |
 | `juan.png` | Firma Ing. Juan LLuis Ramirez Jimenez |
@@ -136,6 +138,11 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 | Footer PDF | `#6B7280` | `#ffffff` | ~4.6:1 | ✅ AA |
 
 ## Historial de Cambios
+
+### v2.5.0 (2026-08-24) — Nuevo icono de instalación (logocr.png)
+- **Nuevo icono**: se reemplazó el icono de la app por `logocr.png` (1024×1024)
+- **PWA**: se generaron variantes `icon-512.png` y `icon-192.png` y se declararon en `manifest.json` (any + maskable) y en los shortcuts
+- **PWA**: favicon, `apple-touch-icon` y `msapplication-TileImage` apuntan al nuevo logo; Service Worker cachea las variantes y se bumpeó a v2.5.0 para que los instalados actualicen el icono
 
 ### v2.4.0 (2026-08-24) — Corrección de consistencia en Maquinaria (QA)
 - **Bug**: Al editar un registro de maquinaria ya no se desbalancea la caja: el egreso vinculado se ajusta al nuevo gasto (o se crea/elimina según corresponda)
@@ -233,6 +240,6 @@ La aplicación es una PWA instalable y 100% responsive, optimizada para uso en c
 
 ---
 
-**Versión**: 2.4.0  
+**Versión**: 2.5.0  
 **Desarrollado para**: CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura  
 **Moneda**: Quetzales (Q) — Guatemala

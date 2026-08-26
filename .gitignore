@@ -30,3 +30,7 @@ server.js
 server_log.txt
 _*.js
 _*.txt
+_*.ps1
+
+# Archivo fuente del logo (no se sube; las variantes icon-*.png sí)
+logocr.png
