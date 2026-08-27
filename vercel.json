@@ -9,6 +9,12 @@
     {
       "src": "/sw.js",
       "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+        "Content-Security-Policy": "base-uri 'self'; default-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://login.microsoftonline.com https://graph.microsoft.com; font-src 'self' data:; frame-ancestors 'none'; img-src 'self' data: blob:; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
         "Cache-Control": "public, max-age=0, must-revalidate",
         "Service-Worker-Allowed": "/"
       }
@@ -16,18 +22,36 @@
     {
       "src": "/manifest.json",
       "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+        "Content-Security-Policy": "base-uri 'self'; default-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://login.microsoftonline.com https://graph.microsoft.com; font-src 'self' data:; frame-ancestors 'none'; img-src 'self' data: blob:; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
         "Cache-Control": "public, max-age=86400, must-revalidate"
       }
     },
     {
       "src": "/onedrive-callback.html",
       "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+        "Content-Security-Policy": "base-uri 'self'; default-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://login.microsoftonline.com https://graph.microsoft.com; font-src 'self' data:; frame-ancestors 'none'; img-src 'self' data: blob:; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
         "Cache-Control": "public, max-age=0, must-revalidate"
       }
     },
     {
       "src": "/(.*)",
       "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
+        "Content-Security-Policy": "base-uri 'self'; default-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://login.microsoftonline.com https://graph.microsoft.com; font-src 'self' data:; frame-ancestors 'none'; img-src 'self' data: blob:; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
         "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"
       }
     }
