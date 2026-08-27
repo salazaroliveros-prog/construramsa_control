@@ -25,8 +25,9 @@ build/
 *.md
 !README.md
 
-# Servidor local de desarrollo (no parte de la app / no va a Vercel)
+# Servidor local usado por las pruebas; Vercel no lo incluye en builds estáticos.
 server.js
+!server.js
 server_log.txt
 _*.js
 _*.txt
