@@ -1,8 +1,23 @@
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
+const http = require('http');
 
 const port = 8091;
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function waitForServer(url, timeout = 15000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    try {
+      await new Promise((resolve, reject) => {
+        const req = http.get(url, response => { response.resume(); response.statusCode < 500 ? resolve() : reject(new Error('HTTP ' + response.statusCode)); });
+        req.on('error', reject);
+        req.setTimeout(1000, () => { req.destroy(); reject(new Error('timeout')); });
+      });
+      return;
+    } catch { await wait(150); }
+  }
+  throw new Error(`Servidor no disponible en ${url}`);
+}
 
 (async () => {
   const server = spawn(process.execPath, ['server.js'], {
@@ -11,7 +26,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   });
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
   try {
-    await wait(300);
+    await waitForServer(`http://127.0.0.1:${port}/`);
     const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));

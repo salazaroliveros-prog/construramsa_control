@@ -5,6 +5,7 @@
  */
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
+const http = require('http');
 
 // Por defecto valida el servidor local; APP_URL permite ejecutar la misma suite
 // contra un preview o producción cuando ese despliegue ya contiene los cambios.
@@ -20,6 +21,20 @@ function log(modulo, accion, ok, detalle = '') {
 }
 
 async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+async function waitForServer(url, timeout = 15000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    try {
+      await new Promise((resolve, reject) => {
+        const req = http.get(url, response => { response.resume(); response.statusCode < 500 ? resolve() : reject(new Error('HTTP ' + response.statusCode)); });
+        req.on('error', reject);
+        req.setTimeout(1000, () => { req.destroy(); reject(new Error('timeout')); });
+      });
+      return;
+    } catch { await sleep(150); }
+  }
+  throw new Error(`Servidor no disponible en ${url}`);
+}
 
 async function confirmar(page) {
   await sleep(400);
@@ -52,7 +67,7 @@ async function getDatos(page) {
     env: { ...process.env, PORT, NODE_OPTIONS: '' },
     stdio: 'ignore'
   });
-  if (localServer) await sleep(600);
+  if (localServer) await waitForServer(`${URL}/`);
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
