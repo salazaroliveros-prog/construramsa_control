@@ -60,11 +60,11 @@
     <!-- ═══ Android Chrome — color barra de estado ═══ -->
     <meta name="mobile-web-app-capable" content="yes">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="./vendor/html2pdf.bundle.min.js"></script>
     <!-- SheetJS para exportar reportes a XLSX -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="./vendor/xlsx.full.min.js"></script>
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.0/purify.min.js"></script>
+    <script src="./vendor/purify.min.js"></script>
     <style>
         :root {
             /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */
@@ -132,6 +132,7 @@
            SCROLL NATIVO PURO - Sin transformaciones ni GPU que interfieran
            ============================================================ */
         html {
+            color-scheme: dark;
             margin: 0;
             padding: 0;
             width: 100%;
@@ -213,7 +214,7 @@
                 0 8px 32px 0 rgba(0, 0, 0, 0.45),
                 inset 0 1px 0 rgba(255, 255, 255, 0.07),
                 inset 0 0 24px var(--glass-glow);
-            transition: all 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .tarjeta-glass::before {
             content: "";
@@ -448,6 +449,7 @@
         .header-actions select {
             width: auto;
             min-width: 160px;
+            min-height: 44px;
             max-width: 240px;
             padding: 8px 12px;
         }
@@ -515,7 +517,7 @@
             color: var(--texto-secundario);
             padding: 10px 20px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: background 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
                     /* Scroll-snap: enclave al deslizar */
             scroll-snap-align: start;
             flex-shrink: 0;
@@ -730,6 +732,85 @@
         .form-grid-2-sm { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 
+        /* ── S-01: sub-sección de catálogo dentro de módulo (camiones, proveedores, trabajadores…) */
+        .modulo-catalogo {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* ── S-02: fila de saldo (Caja Chica) */
+        .saldo-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* ── S-03: panel de métricas en tiempo real (bordes punteados cian) */
+        .panel-metricas {
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed var(--acento-cian);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* ── S-04: tarjeta de lista interna (Resumen - pendientes) */
+        .tarjeta-lista {
+            margin-top: 5px;
+            padding: 14px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* ── T-01/T-02: jerarquía de encabezados de módulo estandarizada ── */
+        /* h2 principal de módulo */
+        .modulo-titulo {
+            color: var(--acento-cian);
+            font-size: var(--text-xl);
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+        /* h3 de sub-sección con línea divisoria (Combustible, Mantenimiento…) */
+        .modulo-subtitulo {
+            color: var(--acento-purpura);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 5px;
+            margin-top: 18px;
+            margin-bottom: 12px;
+        }
+        /* h3 de sección de catálogo dentro de modulo-catalogo */
+        .catalogo-titulo {
+            color: var(--acento-purpura);
+            font-size: var(--text-base);
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        /* h3 de historial / tabla de datos */
+        .historial-titulo {
+            color: var(--texto-principal);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        /* h3 de sub-sección de pendientes en Resumen */
+        .pendientes-titulo {
+            color: var(--acento-cian);
+            font-size: var(--text-base);
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
         /* FIX overflow-x-auto: min-width:0 evita que flex/grid stretchen el wrapper */
         .overflow-x-auto {
             overflow-x: auto;
@@ -874,6 +955,8 @@
 
         /* ── 768px: base móvil ───────────────────────────────────────── */
         @media (max-width: 768px) {
+            /* Evita el zoom automático de Safari al enfocar campos en iPhone. */
+            input, select, textarea { font-size: 16px; }
             .header { flex-direction: column; text-align: center; align-items: center; padding: 12px 16px; }
             .logo-container { justify-content: center; min-width: 0; }
             .header-actions { justify-content: center; width: 100%; gap: 8px; }
@@ -890,15 +973,16 @@
             .form-grid-2, .form-grid-2-sm { grid-template-columns: 1fr; }
             .form-grid-3 { grid-template-columns: 1fr 1fr; }
             .horas-extra-row { flex-wrap: wrap; }
-            /* Botones de tabla: touch target mínimo 36px */
+            /* Botones de tabla: objetivo táctil accesible (WCAG / móvil). */
             td button {
-                min-height: 36px !important;
+                min-width: 44px;
+                min-height: 44px !important;
                 padding: 6px 10px !important;
                 font-size: 12px !important;
                 white-space: nowrap;
                 max-width: none;
             }
-            td button + button { margin-top: 4px; }
+            td button + button { margin-top: 8px; }
             /* FIX 5: min-width por columna para tablas de 9 columnas (Viajes/Mant.) */
             th:nth-child(1), td:nth-child(1) { min-width: 80px; }
             th:nth-child(2), td:nth-child(2) { min-width: 110px; }
@@ -949,7 +1033,7 @@
             }
             .table-responsive-cards td.actions-cell {
                 justify-content: flex-end;
-                gap: 6px;
+                gap: 8px;
                 flex-wrap: wrap;
             }
             .table-responsive-cards td.actions-cell::before { display: none; }
@@ -991,7 +1075,7 @@
             .tarjeta-glass { padding: 10px; border-radius: 12px; }
             .btn-primario, .btn-secundario { padding: 9px 14px; font-size: 12px; }
             label { font-size: 12px; }
-            input, select, textarea { padding: 9px; font-size: 13px; }
+            input, select, textarea { padding: 9px; font-size: 16px; }
             .modal-content { padding: 16px; max-height: 88dvh; }
             .modal-title { font-size: 15px; }
         }
@@ -1014,14 +1098,14 @@
             .btn-row { flex-direction: column; }
             .btn-row .btn-primario, .btn-row .btn-secundario { flex: none; }
             label { font-size: 12.5px; }
-            input, select, textarea { padding: 9px 10px; font-size: 14px; }
+            input, select, textarea { padding: 9px 10px; font-size: 16px; }
             /* FIX 4: saldo caja chica no desborda en 360px */
             #saldo-caja-chica { font-size: 16px !important; word-break: break-word; overflow-wrap: break-word; }
             /* FIX 3: form-grid-3 a 1 columna en 360px */
             .form-grid-2, .form-grid-2-sm, .form-grid-3 { grid-template-columns: 1fr; }
             table { font-size: 10px; }
             th, td { padding: 5px 3px; font-size: 10px; }
-            td button { min-height: 34px !important; padding: 5px 8px !important; font-size: 11px !important; }
+            td button { min-width: 44px; min-height: 44px !important; padding: 6px 8px !important; font-size: 11px !important; }
             /* FIX 6: paginación en móvil extremo — centrada y sin desborde */
             .paginacion-container { gap: 3px; }
             .paginacion-container button { padding: 5px 10px !important; font-size: 11px !important; min-height: 32px !important; }
@@ -1061,7 +1145,11 @@
 
         .file-input { display: none; }
         .file-label {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            min-height: 44px;
             padding: 8px 16px;
             background: rgba(255,255,255,0.1);
             border: 1px solid var(--glass-border);
@@ -1082,6 +1170,25 @@
             white-space: nowrap;
             border: 0;
         }
+
+        /* Salto de teclado: aparece solo al recibir foco y evita recorrer toda la navegación. */
+        .skip-link {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 3000;
+            transform: translateY(-160%);
+            background: var(--acento-cian);
+            color: #06121c;
+            border-radius: 8px;
+            box-sizing: border-box;
+            min-height: 44px;
+            padding: 10px 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+        .skip-link:focus { transform: translateY(0); outline: 3px solid #fff; outline-offset: 2px; }
 
         /* Spinner — FIX #20: role=status se agrega en HTML */
         .spinner {
@@ -1490,8 +1597,8 @@
             <h3 id="modal-title" class="modal-title">Confirmación</h3>
             <p id="modal-message" class="modal-message">¿Está seguro de realizar esta acción?</p>
             <div class="modal-buttons">
-                <button id="modal-cancel" class="btn-secundario">Cancelar</button>
-                <button id="modal-confirm" class="btn-primario">Confirmar</button>
+                <button id="modal-cancel" type="button" class="btn-secundario">Cancelar</button>
+                <button id="modal-confirm" type="button" class="btn-primario">Confirmar</button>
             </div>
         </div>
     </div>
@@ -1513,8 +1620,8 @@
                 <input type="number" inputmode="decimal" id="proyecto-presupuesto" placeholder="0.00" step="0.01" min="0" max="99999999">
             </div>
             <div class="modal-buttons">
-                <button onclick="cerrarModalCrearProyecto()" class="btn-secundario">Cancelar</button>
-                <button onclick="crearProyectoDesdeModal()" class="btn-primario">Crear Proyecto</button>
+                <button type="button" onclick="cerrarModalCrearProyecto()" class="btn-secundario">Cancelar</button>
+                <button type="button" onclick="crearProyectoDesdeModal()" class="btn-primario">Crear Proyecto</button>
             </div>
         </div>
     </div>
@@ -1626,11 +1733,12 @@
         </div><!-- /.vp-body -->
     </div><!-- /#modal-vista-previa -->
 
+    <a class="skip-link" href="#contenido-principal">Saltar al contenido principal</a>
     <div class="container main-content">
         <!-- Header -->
         <header class="header tarjeta-glass" role="banner">
             <div class="logo-container">
-                <img id="header-logo" class="logo-img" src="" alt="Logo CONSTRURAMSA" style="display:none;">
+                <img id="header-logo" class="logo-img" src="" alt="Logo CONSTRURAMSA" width="240" height="60" style="display:none;">
                 <div>
                     <h1 class="company-name">CONSTRURAMSA</h1>
                     <p class="slogan">Soluciones en Ingeniería y Arquitectura</p>
@@ -1641,7 +1749,7 @@
             <!-- FIX #14: clase header-actions en vez de config-section inline -->
             <div class="header-actions">
                 <label for="selector-proyectos" class="visually-hidden">Seleccionar proyecto activo</label>
-                <select id="selector-proyectos" aria-label="Seleccionar proyecto activo">
+                <select id="selector-proyectos" name="selector-proyectos" aria-label="Seleccionar proyecto activo">
                     <option value="">-- Seleccionar Proyecto --</option>
                 </select>
                 <button onclick="mostrarModalCrearProyecto()" class="btn-secundario" style="padding:8px 16px;" aria-label="Crear nuevo proyecto" data-tooltip="Crear nuevo proyecto">➕</button>
@@ -1665,19 +1773,21 @@
             <button class="nav-tab" data-module="configuracion" aria-label="Módulo Configuración">⚙️ Configuración</button>
         </nav>
 
+        <main id="contenido-principal" tabindex="-1">
+
         <!-- ═══════════════════════════════════════ -->
         <!-- MÓDULO RESUMEN / DASHBOARD             -->
         <!-- ═══════════════════════════════════════ -->
         <div id="resumen" class="module active tarjeta-glass" role="region" aria-labelledby="resumen-title">
-            <h2 id="resumen-title" style="color:var(--acento-cian);margin-top:0;">📈 Panel de Resumen Ejecutivo</h2>
+            <h2 id="resumen-title" class="modulo-titulo">📈 Panel de Resumen Ejecutivo</h2>
             <p style="color:var(--texto-secundario);font-size:13px;">Visión general de la obra: saldo, movimientos, viajes, mantenimiento e insumos.</p>
 
             <div id="kpi-avisos"></div>
 
             <div class="kpi-grid" id="kpi-grid"></div>
 
-            <div style="margin-top:5px;padding:14px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid var(--glass-border);">
-                <h3 style="color:var(--acento-cian);font-size:14px;margin:0 0 10px 0;">📌 Próximos registros pendientes</h3>
+            <div class="tarjeta-lista">
+                <h3 class="pendientes-titulo">📌 Próximos registros pendientes</h3>
                 <ul id="lista-pendientes" style="margin:0;padding-left:18px;color:var(--texto-principal);font-size:13px;line-height:1.8;">
                     <li>Cargando...</li>
                 </ul>
@@ -1688,11 +1798,11 @@
         <!-- MÓDULO CAJA CHICA                       -->
         <!-- ═══════════════════════════════════════ -->
         <div id="caja-chica" class="module tarjeta-glass" role="region" aria-labelledby="caja-chica-title">
-            <h2 id="caja-chica-title" style="color:var(--acento-cian);margin-top:0;">💰 Caja Chica e Insumos</h2>
+            <h2 id="caja-chica-title" class="modulo-titulo">💰 Caja Chica e Insumos</h2>
             <div id="aviso-sin-proyecto-caja" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
 
             <div style="margin-bottom:20px;padding:15px;background:rgba(0,164,228,0.1);border-radius:8px;border:1px solid var(--acento-cian);">
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <div class="saldo-row">
                     <span style="font-size:14px;">Saldo Disponible:</span>
                     <span id="saldo-caja-chica" class="saldo-positivo" style="font-size:24px;font-weight:bold;" aria-live="polite">Q0.00</span>
                 </div>
@@ -1789,7 +1899,7 @@
                 </div>
             </form>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Movimientos</h3>
+            <h3 class="historial-titulo">📜 Historial de Movimientos</h3>
             <div class="overflow-x-auto">
                 <table id="tabla-caja-chica" class="table-responsive-cards" aria-label="Historial de movimientos de caja chica">
                     <thead>
@@ -1812,13 +1922,13 @@
         <!-- MÓDULO MAQUINARIA                       -->
         <!-- ═══════════════════════════════════════ -->
         <div id="maquinaria" class="module tarjeta-glass" role="region" aria-labelledby="maquinaria-title">
-            <h2 id="maquinaria-title" style="color:var(--acento-cian);margin-top:0;">🚜 Control de Maquinaria y Flota</h2>
+            <h2 id="maquinaria-title" class="modulo-titulo">🚜 Control de Maquinaria y Flota</h2>
             <div id="aviso-sin-proyecto-maq" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
             <p style="color:var(--texto-secundario);font-size:13px;">Registra el uso, consumo de combustible y mantenimiento de las unidades.</p>
 
             <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()" aria-label="Formulario de registro de maquinaria" autocomplete="off">
-                <!-- Campo de fecha + tipo en primera fila -->
-                <div class="form-grid-2">
+                <!-- F-01: form-grid-3 para 3 campos (Fecha + Tipo + Código) -->
+                <div class="form-grid-3">
                     <div>
                         <label for="maq-fecha">Fecha del Registro</label>
                         <input type="date" id="maq-fecha" required aria-required="true" autocomplete="off">
@@ -1858,7 +1968,7 @@
                 </div>
                 <span id="maq-error-uso" style="color:var(--alerta);font-size:12px;display:block;margin-top:-10px;margin-bottom:10px;" role="alert"></span>
 
-                <h3 style="color:var(--acento-purpura);font-size:16px;border-bottom:1px solid var(--glass-border);padding-bottom:5px;">⛽ Combustible y Suministros</h3>
+                <h3 class="modulo-subtitulo">⛽ Combustible y Suministros</h3>
                 <div class="form-grid-2">
                     <div>
                         <label for="maq-galones">Galones Suministrados</label>
@@ -1870,7 +1980,7 @@
                     </div>
                 </div>
 
-                <h3 style="color:var(--acento-purpura);font-size:16px;border-bottom:1px solid var(--glass-border);padding-bottom:5px;">🔧 Mantenimiento y Repuestos</h3>
+                <h3 class="modulo-subtitulo">🔧 Mantenimiento y Repuestos</h3>
                 <div style="margin-bottom:15px;">
                     <label for="maq-mantenimiento-detalles">Detalles del Mantenimiento / Piezas Cambiadas</label>
                     <textarea id="maq-mantenimiento-detalles" rows="2" placeholder="Ej: Cambio de aceite hidráulico, filtro de motor..." maxlength="500"></textarea>
@@ -1881,7 +1991,7 @@
                 </div>
 
                 <!-- Panel en tiempo real -->
-                <div style="background:rgba(255,255,255,0.02);border:1px dashed var(--acento-cian);border-radius:8px;padding:15px;margin-bottom:20px;" aria-live="polite" aria-label="Métricas calculadas en tiempo real">
+                <div class="panel-metricas" aria-live="polite" aria-label="Métricas calculadas en tiempo real">
                     <div class="form-grid-2" style="margin-bottom:0;">
                         <!-- FIX #21: unidad visible desde el inicio -->
                         <div>Trabajado: <strong id="lbl-uso-total" style="color:var(--acento-cian);">0.00 Hrs</strong></div>
@@ -1898,7 +2008,7 @@
                 </div>
             </form>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">📜 Historial de Maquinaria</h3>
+            <h3 class="historial-titulo">📜 Historial de Maquinaria</h3>
             <div class="overflow-x-auto">
                 <table id="tabla-maquinaria" class="table-responsive-cards" aria-label="Historial de registros de maquinaria">
                     <thead>
@@ -1924,9 +2034,10 @@
         <!-- ═══════════════════════════════════════ -->
         <div id="personal" class="module tarjeta-glass" role="region" aria-labelledby="personal-title">
             <h2 id="personal-title" style="color:var(--acento-cian);margin-top:0;">👷 Control de Asistencia y Nómina</h2>
+            <div id="aviso-sin-proyecto-personal" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
 
-            <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
-                <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">📝 Catálogo de Trabajadores</h3>
+            <div class="modulo-catalogo">
+                <h3 class="catalogo-titulo">📝 Catálogo de Trabajadores</h3>
                 <form id="form-trabajador" style="margin-bottom:15px;" aria-label="Formulario de registro de trabajadores" autocomplete="off">
                     <!-- FIX #22: clases reales + FIX #9: labels explícitos para inputs numéricos -->
                     <div class="form-grid-2-sm">
@@ -1954,7 +2065,7 @@
             </div>
 
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;">
-                <h3 style="color:var(--texto-principal);font-size:16px;margin:0;">📋 Pase de Lista</h3>
+                <h3 class="historial-titulo" style="margin:0;">📋 Pase de Lista</h3>
                 <div>
                     <label for="fecha-asistencia" style="font-size:12px;color:var(--texto-secundario);margin-right:6px;">Fecha:</label>
                     <input type="date" id="fecha-asistencia" style="width:auto;padding:6px 12px;" aria-label="Seleccionar fecha para pase de lista" autocomplete="off">
@@ -1967,7 +2078,7 @@
                 ✅ Cerrar y Guardar Planilla del Día
             </button>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">📜 Historial de Asistencia</h3>
+            <h3 class="historial-titulo">📜 Historial de Asistencia</h3>
             <div class="overflow-x-auto">
                 <table id="tabla-asistencia" class="table-responsive-cards" aria-label="Historial de asistencia de trabajadores">
                     <thead>
@@ -1990,10 +2101,11 @@
         <!-- MÓDULO ADQUISICIONES                    -->
         <!-- ═══════════════════════════════════════ -->
         <div id="adquisiciones" class="module tarjeta-glass" role="region" aria-labelledby="adquisiciones-title">
-            <h2 id="adquisiciones-title" style="color:var(--acento-cian);margin-top:0;">📋 Adquisiciones y Cotizaciones</h2>
+            <h2 id="adquisiciones-title" class="modulo-titulo">📋 Adquisiciones y Cotizaciones</h2>
+            <div id="aviso-sin-proyecto-adq" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
 
-            <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
-                <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🏢 Directorio de Proveedores</h3>
+            <div class="modulo-catalogo">
+                <h3 class="catalogo-titulo">🏢 Directorio de Proveedores</h3>
                 <form id="form-proveedor" style="margin-bottom:15px;" aria-label="Formulario de registro de proveedores" autocomplete="off">
                     <div class="form-grid-2-sm">
                         <div>
@@ -2013,7 +2125,7 @@
                 </form>
             </div>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:15px;">📋 Lista de Proveedores</h3>
+            <h3 class="historial-titulo">📋 Lista de Proveedores</h3>
             <div class="overflow-x-auto">
                 <table id="tabla-proveedores" class="table-responsive-cards" aria-label="Lista de proveedores registrados">
                     <thead>
@@ -2028,38 +2140,49 @@
                 </table>
             </div>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">📝 Registrar Nueva Cotización</h3>
+            <h3 class="historial-titulo" style="margin-top:25px;">📝 Registrar Nueva Cotización</h3>
             <form id="form-cotizacion" style="margin-bottom:25px;" aria-label="Formulario de registro de cotizaciones" autocomplete="off">
+                <!-- F-05: fecha de cotización -->
                 <div class="form-grid-2">
+                    <div>
+                        <label for="cot-fecha">Fecha de Cotización</label>
+                        <input type="date" id="cot-fecha" required aria-required="true" autocomplete="off">
+                    </div>
                     <div>
                         <label for="cot-proveedor">Proveedor</label>
                         <select id="cot-proveedor" required aria-required="true">
                             <option value="">Seleccionar proveedor...</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-grid-2">
                     <div>
                         <label for="cot-material">Material / Insumo</label>
                         <input type="text" id="cot-material" placeholder="Ej: 50 sacos de Cemento" required aria-required="true" maxlength="200">
                     </div>
-                </div>
-                <div class="form-grid-2">
                     <div>
                         <label for="cot-precio">Precio Unitario (Q)</label>
                         <input type="number" inputmode="decimal" step="0.01" id="cot-precio" required aria-required="true" min="0.01" max="999999">
                     </div>
+                </div>
+                <div class="form-grid-2" style="margin-bottom:15px;">
                     <div>
                         <label for="cot-cantidad">Cantidad</label>
                         <input type="number" inputmode="decimal" id="cot-cantidad" required aria-required="true" min="1" max="99999">
                     </div>
                 </div>
-                <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar nueva cotización de material">📊 Registrar Cotización</button>
+                <div class="btn-row">
+                    <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar nueva cotización de material">📊 Registrar Cotización</button>
+                    <button type="button" id="btn-cancelar-cot" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionCotizacion()">✖ Cancelar</button>
+                </div>
             </form>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;">🔍 Cuadro Comparativo de Ofertas</h3>
+            <h3 class="historial-titulo">🔍 Cuadro Comparativo de Ofertas</h3>
             <div class="overflow-x-auto">
                 <table id="tabla-cotizaciones" class="table-responsive-cards" aria-label="Cuadro comparativo de cotizaciones">
                     <thead>
                         <tr>
+                            <th scope="col">Fecha</th>
                             <th scope="col">Material</th>
                             <th scope="col">Proveedor</th>
                             <th scope="col">Total (Q)</th>
@@ -2077,12 +2200,12 @@
         <!-- MÓDULO VIAJES DE CAMIONES                -->
         <!-- ═══════════════════════════════════════ -->
         <div id="viajes" class="module tarjeta-glass" role="region" aria-labelledby="viajes-title">
-            <h2 id="viajes-title" style="color:var(--acento-cian);margin-top:0;">🚛 Control de Viajes de Camiones</h2>
+            <h2 id="viajes-title" class="modulo-titulo">🚛 Control de Viajes de Camiones</h2>
             <div id="aviso-sin-proyecto-viajes" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
             <p style="color:var(--texto-secundario);font-size:13px;">Registra transportes al botadero, extracción y tipo de material. Para camiones propios se estima el combustible por distancia; para alquilados se registra la tarifa por día o por viaje.</p>
 
-            <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
-                <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🚚 Catálogo de Camiones y Equipo</h3>
+            <div class="modulo-catalogo">
+                <h3 class="catalogo-titulo">🚚 Catálogo de Camiones y Equipo</h3>
                 <form id="form-camion" style="margin-bottom:15px;" aria-label="Formulario de registro de camión o equipo" autocomplete="off">
                     <div class="form-grid-2-sm">
                         <div>
@@ -2130,8 +2253,8 @@
                 </div>
             </div>
 
-            <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
-                <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🗺️ Rutas / Distancias al Botadero</h3>
+            <div class="modulo-catalogo">
+                <h3 class="catalogo-titulo">🗺️ Rutas / Distancias al Botadero</h3>
                 <form id="form-ruta" style="margin-bottom:15px;" aria-label="Formulario de ruta al botadero" autocomplete="off">
                     <div class="form-grid-2">
                         <div>
@@ -2143,7 +2266,7 @@
                             <input type="number" inputmode="decimal" step="0.1" id="ruta-distancia" placeholder="0.0" required aria-required="true" min="0.1" max="9999" aria-label="Distancia de ida en kilómetros">
                         </div>
                     </div>
-                    <button type="submit" class="btn-primario" style="width:100%;" data-tooltip="Registrar ruta">💾 Registrar Ruta</button>
+                    <button type="submit" class="btn-secundario" style="width:100%;font-size:12px;" data-tooltip="Registrar ruta">💾 Registrar Ruta</button>
                 </form>
                 <div class="overflow-x-auto">
                     <table id="tabla-rutas" class="table-responsive-cards" aria-label="Rutas al botadero">
@@ -2153,7 +2276,7 @@
                 </div>
             </div>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:10px;">📦 Registrar Viaje</h3>
+            <h3 class="historial-titulo" style="margin-top:10px;">📦 Registrar Viaje</h3>
             <form id="form-viaje" oninput="calcularMetricasViaje()" style="margin-bottom:25px;" aria-label="Formulario de registro de viaje de camión" autocomplete="off">
                 <div class="form-grid-2">
                     <div>
@@ -2205,7 +2328,7 @@
                 <div id="div-viaje-tarifa-info" style="display:none;padding:8px 12px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.3);border-radius:8px;margin-bottom:10px;font-size:12px;color:var(--acento-purpura);">
                     🔑 Camión alquilado — se aplicará la tarifa configurada en el catálogo
                 </div>
-                <div style="background:rgba(255,255,255,0.02);border:1px dashed var(--acento-cian);border-radius:8px;padding:15px;margin-bottom:20px;" aria-live="polite" aria-label="Cálculo del viaje en tiempo real">
+                <div class="panel-metricas" aria-live="polite" aria-label="Cálculo del viaje en tiempo real">
                     <div class="form-grid-2" style="margin-bottom:0;gap:12px;">
                         <div>Distancia Total: <strong id="lbl-viaje-km" style="color:var(--acento-cian);">0.0 km</strong></div>
                         <div>Combustible Estimado: <strong id="lbl-viaje-litros">0.0 L</strong></div>
@@ -2221,7 +2344,7 @@
                 </div>
             </form>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Viajes</h3>
+            <h3 class="historial-titulo">📜 Historial de Viajes</h3>
             <div class="overflow-x-auto">
                 <table id="tabla-viajes" class="table-responsive-cards" aria-label="Historial de viajes de camiones">
                     <thead><tr><th scope="col">Fecha</th><th scope="col">Unidad</th><th scope="col">Material</th><th scope="col">Viajes</th><th scope="col">Km</th><th scope="col">Combustible</th><th scope="col">Total (Q)</th><th scope="col">Acciones</th></tr></thead>
@@ -2235,12 +2358,12 @@
         <!-- MÓDULO CONSOLIDADO                       -->
         <!-- ═══════════════════════════════════════ -->
         <div id="mantenimiento" class="module tarjeta-glass" role="region" aria-labelledby="mantenimiento-title">
-            <h2 id="mantenimiento-title" style="color:var(--acento-cian);margin-top:0;">🔧 Mantenimiento y Control de Insumos</h2>
+            <h2 id="mantenimiento-title" class="modulo-titulo">🔧 Mantenimiento y Control de Insumos</h2>
             <div id="aviso-sin-proyecto-mant" class="kpi-aviso" style="display:none;">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
             <p style="color:var(--texto-secundario);font-size:13px;">Gestiona el catálogo de maquinaria, formatos de inspección (mantenimiento preventivo/correctivo) y compras de repuestos, aceites, hidráulicos y combustible.</p>
 
-            <div style="margin-bottom:25px;padding:15px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid var(--glass-border);">
-                <h3 style="color:var(--acento-purpura);font-size:14px;margin-top:0;">🏗️ Catálogo de Maquinaria</h3>
+            <div class="modulo-catalogo">
+                <h3 class="catalogo-titulo">🏗️ Catálogo de Maquinaria</h3>
                 <form id="form-maqcat" style="margin-bottom:15px;" aria-label="Formulario de catálogo de maquinaria" autocomplete="off">
                     <div class="form-grid-2-sm">
                         <div>
@@ -2277,7 +2400,7 @@
                 </div>
             </div>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:10px;">🔩 Registrar Orden de Mantenimiento</h3>
+            <h3 class="historial-titulo" style="margin-top:10px;">🔩 Registrar Orden de Mantenimiento</h3>
             <form id="form-orden" style="margin-bottom:25px;" aria-label="Formulario de orden de mantenimiento" autocomplete="off">
                 <div class="form-grid-2">
                     <div>
@@ -2315,7 +2438,7 @@
                 </div>
             </form>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;">📜 Órdenes de Mantenimiento</h3>
+            <h3 class="historial-titulo">📜 Órdenes de Mantenimiento</h3>
             <div class="overflow-x-auto">
                 <table id="tabla-ordenes" class="table-responsive-cards" aria-label="Historial de órdenes de mantenimiento">
                     <thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Costo (Q)</th><th>Acciones</th></tr></thead>
@@ -2324,7 +2447,7 @@
             </div>
             <div id="paginacion-ordenes" class="paginacion-container"></div>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;margin-top:25px;">🛒 Compra de Repuestos, Aceites e Insumos</h3>
+            <h3 class="historial-titulo">🛒 Compra de Repuestos, Aceites e Insumos</h3>
             <form id="form-insumo" style="margin-bottom:25px;" aria-label="Formulario de compra de insumos" autocomplete="off">
                 <div class="form-grid-2">
                     <div>
@@ -2350,16 +2473,16 @@
                     </div>
                     <div>
                         <label for="insumo-cantidad">Cantidad</label>
-                        <input type="number" inputmode="decimal" id="insumo-cantidad" value="1" min="1" max="99999" aria-label="Cantidad de insumo">
+                        <input type="number" inputmode="decimal" id="insumo-cantidad" placeholder="1" min="1" max="99999" aria-label="Cantidad de insumo">
                     </div>
                     <div>
                         <label for="insumo-costo">Costo Total (Q)</label>
-                        <input type="number" inputmode="decimal" step="0.01" id="insumo-costo" value="0" min="0" max="999999" aria-label="Costo total del insumo">
+                        <input type="number" inputmode="decimal" step="0.01" id="insumo-costo" placeholder="0.00" min="0" max="999999" aria-label="Costo total del insumo">
                     </div>
                 </div>
                 <div style="margin-top:12px;">
                     <label for="insumo-stock-min">Stock Mínimo (Alerta)</label>
-                    <input type="number" inputmode="decimal" id="insumo-stock-min" value="0" min="0" max="99999" placeholder="Opcional: alerta al bajar de este valor" aria-label="Stock mínimo de alerta">
+                    <input type="number" inputmode="decimal" id="insumo-stock-min" min="0" max="99999" placeholder="Opcional: alerta al bajar de este valor" aria-label="Stock mínimo de alerta">
                 </div>
                 <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar compra y descontar de caja">💾 Registrar Compra</button>
@@ -2367,7 +2490,7 @@
                 </div>
             </form>
 
-            <h3 style="color:var(--texto-principal);font-size:16px;">📜 Historial de Compras de Insumos</h3>
+            <h3 class="historial-titulo">📜 Historial de Compras de Insumos</h3>
             <div class="overflow-x-auto">
                 <table id="tabla-insumos" class="table-responsive-cards" aria-label="Historial de compras de insumos">
                     <thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th>Costo (Q)</th><th>Acciones</th></tr></thead>
@@ -2378,7 +2501,7 @@
         </div>
 
         <div id="reportes" class="module tarjeta-glass" role="region" aria-labelledby="reportes-title">
-            <h2 id="reportes-title" style="color:var(--acento-cian);margin-top:0;">📊 Generación de Reportes</h2>
+            <h2 id="reportes-title" class="modulo-titulo">📊 Generación de Reportes</h2>
 
             <div class="form-grid-1">
                 <div>
@@ -2413,10 +2536,10 @@
         <!-- MÓDULO CONFIGURACIÓN                    -->
         <!-- ═══════════════════════════════════════ -->
         <div id="configuracion" class="module tarjeta-glass" role="region" aria-labelledby="configuracion-title">
-            <h2 id="configuracion-title" style="color:var(--acento-cian);margin-top:0;">⚙️ Configuración y Respaldo</h2>
+            <h2 id="configuracion-title" class="modulo-titulo">⚙️ Configuración y Respaldo</h2>
 
             <div style="margin-bottom:25px;">
-                <h3 style="color:var(--texto-principal);font-size:16px;">📁 Gestión de Proyectos</h3>
+                <h3 class="historial-titulo">📁 Gestión de Proyectos</h3>
                 <div style="margin-top:10px;">
                     <button onclick="mostrarModalCrearProyecto()" class="btn-primario" style="margin-bottom:15px;">➕ Crear Nuevo Proyecto</button>
                     <div id="lista-proyectos-config" style="display:flex;flex-direction:column;gap:10px;margin-top:15px;"></div>
@@ -2424,7 +2547,7 @@
             </div>
 
             <div style="margin-bottom:25px;">
-                <h3 style="color:var(--texto-principal);font-size:16px;">Presupuesto Inicial de Caja Chica</h3>
+                <h3 class="historial-titulo">💰 Presupuesto Inicial de Caja Chica</h3>
                 <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
                     <label for="config-presupuesto" class="visually-hidden">Presupuesto inicial</label>
                     <input type="number" inputmode="decimal" step="0.01" id="config-presupuesto" placeholder="Monto inicial (Q)" aria-label="Monto inicial de caja chica" min="0" max="9999999" style="flex:1;min-width:150px;">
@@ -2433,7 +2556,7 @@
             </div>
 
             <div style="margin-bottom:25px;">
-                <h3 style="color:var(--texto-principal);font-size:16px;">🏢 Identidad de la Empresa</h3>
+                <h3 class="historial-titulo">🏢 Identidad de la Empresa</h3>
                 <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">Personaliza el nombre y eslogan de tu empresa. Estos datos aparecerán en toda la aplicación y en los reportes.</p>
                 <div style="margin-top:10px;">
                     <label for="cfg-nombre-empresa" style="font-size:12px;color:var(--texto-principal);">Nombre de la Empresa</label>
@@ -2449,7 +2572,7 @@
             </div>
 
             <div style="margin-bottom:25px;">
-                <h3 style="color:var(--texto-principal);font-size:16px;">📇 Datos de Contacto de la Empresa</h3>
+                <h3 class="historial-titulo">📇 Datos de Contacto de la Empresa</h3>
                 <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">Estos datos aparecerán en la cabecera de los reportes PDF.</p>
                 <div class="form-grid-2" style="margin-top:10px;">
                     <div>
@@ -2475,7 +2598,7 @@
             </div>
 
             <div style="margin-bottom:25px;">
-                <h3 style="color:var(--texto-principal);font-size:16px;">Respaldo de Datos</h3>
+                <h3 class="historial-titulo">📦 Respaldo de Datos</h3>
                 <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
                     <button onclick="exportarBaseDatos()" class="btn-primario" aria-label="Exportar base de datos en formato JSON">📤 Exportar JSON</button>
                     <label class="file-label" id="import-label">
@@ -2486,7 +2609,7 @@
             </div>
 
             <div style="margin-bottom:25px;padding:16px;border:1px solid var(--glass-border);border-radius:12px;background:linear-gradient(145deg,rgba(11,63,143,0.25),rgba(139,92,246,0.12));">
-                <h3 style="color:var(--acento-cian);font-size:16px;margin-top:0;">☁️ Respaldo en la Nube (Google Drive / OneDrive)</h3>
+                <h3 class="historial-titulo" style="color:var(--acento-cian);">☁️ Respaldo en la Nube (Google Drive / OneDrive)</h3>
                 <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">
                     El respaldo funcional disponible actualmente es Google Apps Script. Los conectores OAuth avanzados se habilitarán cuando tengan integración completa.
                 </p>
@@ -2551,7 +2674,7 @@
             </div>
 
             <div style="margin-bottom:25px;">
-                <h3 style="color:var(--texto-principal);font-size:16px;">Gestión de Logo</h3>
+                <h3 class="historial-titulo">🖼️ Gestión de Logo</h3>
                 <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:center;">
                     <label class="file-label">
                         📷 Cambiar Logo
@@ -2562,14 +2685,15 @@
             </div>
 
             <div>
-                <h3 style="color:var(--texto-principal);font-size:16px;">Información de la Aplicación</h3>
+                <h3 class="historial-titulo">ℹ️ Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.8.1 (Corrección de errores 404 y Service Worker)<br>
+                    Versión: 2.8.2 (Exportación offline, accesibilidad y Service Worker)<br>
                     Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV/XLSX<br>
                     Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
             </div>
         </div>
+        </main>
     </div><!-- /container -->
 
     <!-- Plantilla de Impresión Oculta (solo para PDF) -->
@@ -2609,7 +2733,7 @@
                     <td style="width: 56%; vertical-align: middle; text-align: center; padding: 0 15px;">
                         <!-- Logo grande centrado -->
                         <div style="margin-bottom: 8px;">
-                            <img id="pdf-logo-membrete" src="./icon.png" alt="Logo Empresa"
+                            <img id="pdf-logo-membrete" src="./icon.png" alt="Logo Empresa" width="260" height="90"
                                  style="max-height: 90px; max-width: 260px; width: auto; object-fit: contain; display: block; margin: 0 auto;">
                         </div>
                         <!-- Nombre corporativo — dinámico desde configuración -->
@@ -2771,7 +2895,7 @@
                             </div>
                         </td>
                         <td style="width: 50%; text-align: right; vertical-align: middle;">
-                            <img src="./icon.png" alt="CONSTRURAMSA"
+                            <img src="./icon.png" alt="CONSTRURAMSA" width="28" height="28"
                                  style="max-height: 28px; width: auto; object-fit: contain; opacity: 0.35; vertical-align: middle; margin-right: 6px;">
                             <span style="font-size: 7.5px; color: #D1D5DB; vertical-align: middle;">construramsa.com</span>
                         </td>
@@ -2841,6 +2965,7 @@
         }
 
         function migrarDB(db) {
+            if (!db.version) db.version = '2.8.2';
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
             if (!db.configuracion.nombre_empresa) db.configuracion.nombre_empresa = 'CONSTRURAMSA';
             if (!db.configuracion.eslogan) db.configuracion.eslogan = 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
@@ -2882,6 +3007,7 @@
 
         function inicializarDB() {
             const db = {
+                version: '2.8.2',
                 configuracion: { 
                     nombre_empresa:'CONSTRURAMSA', 
                     eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', 
@@ -3039,6 +3165,15 @@
         }
         function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
 
+        // Todos los campos conservan una clave de formulario estable para autofill,
+        // accesibilidad y futuras integraciones, incluso cuando se procesan localmente.
+        function normalizarCamposFormulario() {
+            document.querySelectorAll('input, select, textarea').forEach(campo => {
+                if (!campo.name && campo.id) campo.name = campo.id;
+                if (campo.type === 'email') campo.spellcheck = false;
+            });
+        }
+
         let modalPreviousFocus = null;
         function showConfirmModal(title, message, onConfirm) {
             const ov = document.getElementById('modal-overlay');
@@ -3169,14 +3304,38 @@
             cargarIdentidadEmpresa();
         }
 
+        let modalCrearPreviousFocus = null;
+        let modalCrearKeyHandler = null;
         function mostrarModalCrearProyecto() {
+            if (modalCrearKeyHandler) document.removeEventListener('keydown', modalCrearKeyHandler);
+            modalCrearPreviousFocus = document.activeElement;
             document.getElementById('proyecto-nombre').value = '';
             document.getElementById('proyecto-descripcion').value = '';
             document.getElementById('proyecto-presupuesto').value = '';
             document.getElementById('modal-crear-proyecto').classList.remove('hidden');
             document.getElementById('proyecto-nombre').focus();
+            modalCrearKeyHandler = (event) => {
+                if (event.key === 'Escape') cerrarModalCrearProyecto();
+                if (event.key === 'Tab') {
+                    const modal = document.getElementById('modal-crear-proyecto');
+                    const elementos = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]')]
+                        .filter(el => el.offsetParent !== null);
+                    if (!elementos.length) return;
+                    const primero = elementos[0];
+                    const ultimo = elementos[elementos.length - 1];
+                    if (event.shiftKey && document.activeElement === primero) { event.preventDefault(); ultimo.focus(); }
+                    else if (!event.shiftKey && document.activeElement === ultimo) { event.preventDefault(); primero.focus(); }
+                }
+            };
+            document.addEventListener('keydown', modalCrearKeyHandler);
         }
-        function cerrarModalCrearProyecto() { document.getElementById('modal-crear-proyecto').classList.add('hidden'); }
+        function cerrarModalCrearProyecto() {
+            document.getElementById('modal-crear-proyecto').classList.add('hidden');
+            if (modalCrearKeyHandler) document.removeEventListener('keydown', modalCrearKeyHandler);
+            modalCrearKeyHandler = null;
+            if (modalCrearPreviousFocus && typeof modalCrearPreviousFocus.focus === 'function') modalCrearPreviousFocus.focus();
+            modalCrearPreviousFocus = null;
+        }
 
         function crearProyectoDesdeModal() {
             const nombre = document.getElementById('proyecto-nombre').value.trim();
@@ -3216,7 +3375,7 @@
         function actualizarAvisosSinProyecto() {
             const db = getDB();
             const sinProyecto = !db.configuracion.proyecto_actual;
-            ['aviso-sin-proyecto-caja','aviso-sin-proyecto-maq','aviso-sin-proyecto-viajes','aviso-sin-proyecto-mant'].forEach(id => {
+            ['aviso-sin-proyecto-caja','aviso-sin-proyecto-maq','aviso-sin-proyecto-viajes','aviso-sin-proyecto-mant','aviso-sin-proyecto-personal','aviso-sin-proyecto-adq'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = sinProyecto ? '' : 'none';
             });
@@ -3269,8 +3428,6 @@
             delete form.dataset.editando;
             form.reset();
             document.getElementById('insumo-fecha').value     = new Date().toISOString().split('T')[0];
-            document.getElementById('insumo-cantidad').value  = 1;
-            document.getElementById('insumo-stock-min').value = 0;
             form.querySelector('button[type="submit"]').textContent = '💾 Registrar Compra';
             const btn = document.getElementById('btn-cancelar-insumo');
             if (btn) btn.style.display = 'none';
@@ -3492,6 +3649,8 @@
                     this.classList.add('active');
                     this.setAttribute('aria-current', 'page');
                     const mid = this.dataset.module;
+                    const navegacionHistorial = this.dataset.fromHistory === 'true';
+                    delete this.dataset.fromHistory;
                     const moduleElement = document.getElementById(mid);
                     
                     if (moduleElement) {
@@ -3508,7 +3667,25 @@
                     if (mid === 'viajes') { cargarCamiones(); cargarRutas(); cargarTablaViajes(); }
                     if (mid === 'mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }
                     if (mid === 'configuracion') cargarListaProyectosConfig();
+
+                    // Cada módulo mantiene una URL copiable y el botón Atrás conserva el contexto.
+                    if (!navegacionHistorial && window.history?.pushState) {
+                        const url = new URL(window.location.href);
+                        if (url.searchParams.get('module') !== mid) {
+                            url.searchParams.set('module', mid);
+                            window.history.pushState({ module: mid }, '', url);
+                        }
+                    }
                 });
+            });
+
+            window.addEventListener('popstate', function () {
+                const modulo = new URLSearchParams(window.location.search).get('module') || 'resumen';
+                const tab = document.querySelector(`[data-module="${modulo}"]`);
+                if (tab) {
+                    tab.dataset.fromHistory = 'true';
+                    tab.click();
+                }
             });
         }
 
@@ -3537,19 +3714,65 @@
          * FIX #4: procesarGastoCajaChica ahora escribe en el proyecto activo,
          * NO en la raíz de la DB.
          */
-        function procesarGastoCajaChica(monto, categoria, descripcion) {
+        function procesarGastoCajaChica(monto, categoria, descripcion, fecha) {
             const saldo = actualizarSaldoCajaChica();
             if (monto > saldo) {
                 showToast(`❌ Fondos insuficientes. Saldo: ${formatearMoneda(saldo)}. Gasto: ${formatearMoneda(monto)}`, 'error', 5000);
                 return false;
             }
             const datos = getProyectoData();
-            const mov = { id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'egreso', categoria, descripcion, monto, responsable:'Sistema Automático' };
+            const mov = { id:generarId(), fecha:fecha || new Date().toISOString().split('T')[0], tipo:'egreso', categoria, descripcion, monto, responsable:'Sistema Automático' };
             datos.caja_chica.push(mov);
             saveProyectoData(datos);
             actualizarSaldoCajaChica();
             // Devuelve el movimiento creado (truthy) para poder vincular el gasto_id
             return mov;
+        }
+
+        /** Revierte únicamente un egreso contable identificable. Nunca fabrica ingresos. */
+        function revertirGastoVinculado(datos, registro, categoriasLegacy, etiqueta) {
+            const monto = Number(registro?.total ?? registro?.costo ?? 0);
+            if (monto <= 0) return true;
+            let egreso = (datos.caja_chica || []).find(m => registro.gasto_id && m.id === registro.gasto_id && m.tipo === 'egreso');
+            // Solo para registros históricos sin gasto_id: coincidencia única, nunca ambigua.
+            if (!egreso && !registro.gasto_id) {
+                const candidatos = (datos.caja_chica || []).filter(m =>
+                    m.tipo === 'egreso' && categoriasLegacy.includes(m.categoria) && Math.abs(Number(m.monto) - monto) < 0.01
+                );
+                if (candidatos.length === 1) egreso = candidatos[0];
+            }
+            if (!egreso) {
+                showToast(`⚠️ No se eliminó ${etiqueta}: no se encontró un egreso vinculado para revertir. Revise la conciliación de caja.`, 'error', 6500);
+                return false;
+            }
+            datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
+            return true;
+        }
+
+        /** Mantiene el monto y la fecha del egreso ligado a un registro editable. */
+        function sincronizarGastoVinculado(datos, previo, gastoNuevo, categoria, descripcion, fecha, etiqueta) {
+            const gastoPrevio = Number(previo?.total ?? previo?.costo ?? ((Number(previo?.combustible_costo) || 0) + (Number(previo?.mantenimiento_costo) || 0)));
+            let egreso = (datos.caja_chica || []).find(m => previo.gasto_id && m.id === previo.gasto_id && m.tipo === 'egreso');
+            if (egreso) {
+                if (gastoNuevo <= 0) datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
+                else { egreso.monto = gastoNuevo; egreso.fecha = fecha; egreso.descripcion = descripcion; }
+                return true;
+            }
+            if (gastoPrevio > 0 || previo.gasto_id) {
+                showToast(`⚠️ No se actualizó ${etiqueta}: falta su egreso vinculado. Concílielo antes de editar.`, 'error', 6500);
+                return false;
+            }
+            if (gastoNuevo <= 0) return true;
+            const saldo = (datos.caja_chica || []).reduce((acum, mov) =>
+                acum + (mov.tipo === 'ingreso' ? Number(mov.monto) || 0 : -(Number(mov.monto) || 0)), 0);
+            if (gastoNuevo > saldo) {
+                showToast(`❌ Fondos insuficientes. Saldo: ${formatearMoneda(saldo)}. Gasto: ${formatearMoneda(gastoNuevo)}`, 'error', 5000);
+                return false;
+            }
+            const mov = { id: generarId(), fecha: fecha || new Date().toISOString().split('T')[0], tipo: 'egreso', categoria, descripcion, monto: gastoNuevo, responsable: 'Sistema Automático' };
+            datos.caja_chica.push(mov);
+            previo.gasto_id = mov.id;
+            return true;
         }
 
         // Valida ediciones de gastos vinculados sin contar dos veces el egreso anterior.
@@ -3852,9 +4075,9 @@ tbody.innerHTML = '';
                         const gastoPrev = (prev.combustible_costo || 0) + (prev.mantenimiento_costo || 0);
                         const gastoNuevo = costoComb + mantCosto;
                         if (!validarAjusteGasto(gastoPrev, gastoNuevo)) return;
+                        const descripcionGasto = `Maquinaria ${codigo}${mantDet ? ' - ' + mantDet : ''}`;
+                        if (!sincronizarGastoVinculado(datos, prev, gastoNuevo, 'Combustible/Mantenimiento', descripcionGasto, fechaMaq, 'el registro de maquinaria')) return;
                         datos.maquinaria_flota.registros[idx] = { ...prev, fecha: fechaMaq, odometro_inicial:valIni, odometro_final:valFin, horas_trabajadas: tipo==='retroexcavadora'?uso:0, combustible_galones:gal, combustible_costo:costoComb, mantenimiento_detalles:mantDet, mantenimiento_costo:mantCosto };
-                        // Recalcular el gasto vinculado en caja chica si cambió
-                        ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo, fechaMaq);
                         saveProyectoData(datos);
                     }
                     delete this.dataset.editando;
@@ -3871,7 +4094,7 @@ tbody.innerHTML = '';
             // Nuevo registro: descontar gasto de caja chica del proyecto activo
             let movGasto = null;
             if (gastoTotal > 0) {
-                movGasto = procesarGastoCajaChica(gastoTotal, 'Combustible/Mantenimiento', `Maquinaria ${codigo}${mantDet ? ' - ' + mantDet : ''}`);
+                movGasto = procesarGastoCajaChica(gastoTotal, 'Combustible/Mantenimiento', `Maquinaria ${codigo}${mantDet ? ' - ' + mantDet : ''}`, fechaMaq);
                 if (!movGasto) return;
             }
 
@@ -3899,42 +4122,6 @@ tbody.innerHTML = '';
             getDomElement('lbl-costo-combustible').textContent = formatearMoneda(0);
             getDomElement('lbl-rendimiento').textContent      = 'N/A';
             getDomElement('lbl-gasto-total').textContent      = formatearMoneda(0);
-        }
-
-        /**
-         * Ajusta el egreso de caja vinculado a un registro de maquinaria.
-         * Busca el egreso por gasto_id o (fallback) por la descripción que contiene el código.
-         * - Si el nuevo gasto > 0 y existe egreso: actualiza su monto (y descripción).
-         * - Si el nuevo gasto > 0 y NO existe (antes era 0): crea un egreso y lo vincula.
-         * - Si el nuevo gasto === 0: elimina el egreso vinculado (revierte).
-         */
-        function ajustarGastoMaquinaria(datos, prev, gastoPrev, gastoNuevo, codigo, fecha = new Date().toISOString().split('T')[0]) {
-            // localizar el egreso vinculado
-            let egreso = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
-            if (!egreso) {
-                egreso = (datos.caja_chica || []).find(m => m.tipo === 'egreso' && m.categoria === 'Combustible/Mantenimiento' && m.descripcion && m.descripcion.indexOf('Maquinaria ' + codigo) === 0);
-            }
-            const reg = datos.maquinaria_flota.registros.find(r => r.id === prev.id);
-
-            if (gastoNuevo > 0) {
-                if (egreso) {
-                    // Ajustar el monto del egreso vinculado al nuevo gasto
-                    egreso.monto = gastoNuevo;
-                    egreso.fecha = fecha;
-                    if (reg) reg.gasto_id = egreso.id;
-                } else {
-                    // No había egreso (se pasó de 0 a gasto); crear uno. Validar saldo.
-                    const saldo = actualizarSaldoCajaChica();
-                    if (gastoNuevo > saldo) { showToast(`❌ Fondos insuficientes. Saldo: ${formatearMoneda(saldo)}. Gasto: ${formatearMoneda(gastoNuevo)}`, 'error', 5000); return; }
-                    const mov = { id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'egreso', categoria:'Combustible/Mantenimiento', descripcion:`Maquinaria ${codigo}`, monto:gastoNuevo, responsable:'Sistema Automático' };
-                    datos.caja_chica.push(mov);
-                    if (reg) reg.gasto_id = mov.id;
-                }
-            } else if (egreso) {
-                // Gasto bajó a 0: eliminar el egreso vinculado (revierte en caja)
-                datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
-                if (reg) delete reg.gasto_id;
-            }
         }
 
         function editarRegistroMaquinaria(id) {
@@ -3965,47 +4152,9 @@ tbody.innerHTML = '';
             showConfirmModal('Eliminar Registro', '¿Eliminar este registro de maquinaria? El gasto asociado en caja chica también será revertido.', () => {
                 const datos   = getProyectoData();
                 const reg     = datos.maquinaria_flota.registros.find(r => r.id === id);
-                const veh     = datos.maquinaria_flota.vehiculos.find(v => v.id === reg?.vehiculo_id);
                 if (reg) {
-                    let gasto = (reg.combustible_costo || 0) + (reg.mantenimiento_costo || 0);
-                    // Buscar el egreso vinculado exacto por gasto_id (prioridad alta)
-                    let egreso = (datos.caja_chica || []).find(m => reg.gasto_id && m.id === reg.gasto_id && m.tipo === 'egreso');
-                    const vehCodigo = veh?.codigo || 'N/A';
-                    
-                    if (!egreso && reg.gasto_id) {
-                        // Si tiene gasto_id pero no se encontró, loggear warning
-                        console.warn(`Gasto vinculado ${reg.gasto_id} no encontrado en caja chica`);
-                    }
-                    
-                    if (!egreso) {
-                        // Fallback: buscar por descripción y monto exacto (datos migrados)
-                        egreso = (datos.caja_chica || []).find(m => 
-                            m.tipo === 'egreso' && 
-                            m.categoria === 'Combustible/Mantenimiento' && 
-                            m.descripcion && 
-                            m.descripcion.includes('Maquinaria ' + vehCodigo) &&
-                            Math.abs(m.monto - gasto) < 0.01 // Coincidencia de monto exacta
-                        );
-                    }
-                    
-                    if (egreso) {
-                        // Revertir eliminando el egreso vinculado exacto (evita doble reembolso)
-                        console.log(`Eliminando egreso vinculado ${egreso.id} de maquinaria ${id}`);
-                        datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
-                    } else if (gasto > 0) {
-                        // Fallback (datos migrados sin vínculo): agregar ingreso de reembolso
-                        console.log(`Creando reembolso por gasto no vinculado: ${gasto}`);
-                        datos.caja_chica.push({ 
-                            id: generarId(), 
-                            fecha: new Date().toISOString().split('T')[0], 
-                            tipo:'ingreso', 
-                            categoria:'Reembolso', 
-                            descripcion:`Reversión gasto maquinaria: ${vehCodigo}`, 
-                            monto: gasto, 
-                            responsable:'Sistema Automatico',
-                            nota: 'reembolso_sin_vinculo'
-                        });
-                    }
+                    const gasto = (reg.combustible_costo || 0) + (reg.mantenimiento_costo || 0);
+                    if (!revertirGastoVinculado(datos, { ...reg, costo:gasto }, ['Combustible/Mantenimiento'], 'el registro de maquinaria')) return;
                     datos.maquinaria_flota.registros = datos.maquinaria_flota.registros.filter(r => r.id !== id);
                     saveProyectoData(datos);
                 }
@@ -4176,7 +4325,7 @@ tbody.innerHTML = '';
             if (datos.personal.trabajadores.length === 0) { showToast('❌ No hay trabajadores registrados', 'error'); return; }
 
             const registros = [];
-            datos.personal.trabajadores.forEach(t => {
+            for (const t of datos.personal.trabajadores) {
                 const estadoInput = document.querySelector(`input[name="asistencia-${t.id}"]:checked`);
                 const estado      = estadoInput ? estadoInput.value : 'falto';
                 const horasExtraRaw = document.getElementById(`horas-extra-${t.id}`)?.value ?? '';
@@ -4195,7 +4344,7 @@ tbody.innerHTML = '';
                     horas_extras: horasExtra, horas_extras_cantidad: horasExtra,
                     calculos: estado === 'asistio' ? { pago_normal:pagNorm, pago_extra:pagExt, total_diario:pagNorm+pagExt } : { pago_normal:0, pago_extra:0, total_diario:0 }
                 });
-            });
+            }
 
             datos.personal.asistencia = datos.personal.asistencia.filter(a => a.fecha !== fecha);
             datos.personal.asistencia.push({ fecha, registros });
@@ -4313,6 +4462,11 @@ tbody.innerHTML = '';
         function eliminarProveedor(id) {
             showConfirmModal('Eliminar Proveedor', '¿Eliminar este proveedor? No se puede deshacer.', () => {
                 const datos = getProyectoData();
+                const cotizaciones = (datos.adquisiciones.cotizaciones_compras || []).filter(c => c.proveedor_id === id);
+                if (cotizaciones.length) {
+                    showToast(`⚠️ No se puede eliminar: el proveedor tiene ${cotizaciones.length} cotización(es) asociada(s). Conserve el historial o archive el proveedor.`, 'error', 6000);
+                    return;
+                }
                 datos.adquisiciones.proveedores = datos.adquisiciones.proveedores.filter(p => p.id !== id);
                 saveProyectoData(datos);
                 cargarTablaProveedores(); cargarProveedores();
@@ -4352,10 +4506,12 @@ function cargarTablaProveedores() {
 
         document.getElementById('form-cotizacion').addEventListener('submit', function(e) {
             e.preventDefault();
+            const fecha    = document.getElementById('cot-fecha').value;
             const provId   = document.getElementById('cot-proveedor').value;
             const material = document.getElementById('cot-material').value.trim();
             const precio   = parseFloat(document.getElementById('cot-precio').value);
             const cantidad = parseInt(document.getElementById('cot-cantidad').value);
+            if (!fecha)                     { showToast('❌ Seleccione la fecha de la cotización', 'error'); return; }
             if (!provId)                    { showToast('❌ Seleccione un proveedor', 'error'); return; }
             if (!material || material.length < 3) { showToast('❌ Descripción del material debe tener al menos 3 caracteres', 'error'); return; }
             if (isNaN(precio) || precio <= 0)  { showToast('❌ El precio debe ser positivo', 'error'); return; }
@@ -4371,24 +4527,36 @@ function cargarTablaProveedores() {
             if (editandoId) {
                 showConfirmModal('Actualizar Cotización', '¿Guardar los cambios en esta cotización?', () => {
                     const idx = datos.adquisiciones.cotizaciones_compras.findIndex(c => c.id === editandoId);
-                    if (idx !== -1) { datos.adquisiciones.cotizaciones_compras[idx] = { ...datos.adquisiciones.cotizaciones_compras[idx], proveedor_id:provId, material_descripcion:material, precio_unitario:precio, cantidad, total }; saveProyectoData(datos); }
-                    delete this.dataset.editando;
-                    this.querySelector('button[type="submit"]').textContent = '📊 Registrar Cotización';
-                    this.reset(); cargarTablaCotizaciones();
+                    if (idx !== -1) { datos.adquisiciones.cotizaciones_compras[idx] = { ...datos.adquisiciones.cotizaciones_compras[idx], fecha, proveedor_id:provId, material_descripcion:material, precio_unitario:precio, cantidad, total }; saveProyectoData(datos); }
+                    cancelarEdicionCotizacion();
+                    cargarTablaCotizaciones();
                     showToast('✅ Cotización actualizada', 'success');
                 });
                 return;
             }
-            datos.adquisiciones.cotizaciones_compras.push({ id:generarId(), fecha:new Date().toISOString().split('T')[0], proveedor_id:provId, material_descripcion:material, precio_unitario:precio, cantidad, total, estado:'pendiente' });
+            datos.adquisiciones.cotizaciones_compras.push({ id:generarId(), fecha, proveedor_id:provId, material_descripcion:material, precio_unitario:precio, cantidad, total, estado:'pendiente' });
             saveProyectoData(datos);
-            this.reset(); cargarTablaCotizaciones();
+            this.reset();
+            document.getElementById('cot-fecha').value = new Date().toISOString().split('T')[0];
+            cargarTablaCotizaciones();
             showToast('✅ Cotización registrada', 'success');
         });
+
+        function cancelarEdicionCotizacion() {
+            const form = document.getElementById('form-cotizacion');
+            delete form.dataset.editando;
+            form.reset();
+            document.getElementById('cot-fecha').value = new Date().toISOString().split('T')[0];
+            form.querySelector('button[type="submit"]').textContent = '📊 Registrar Cotización';
+            const btn = document.getElementById('btn-cancelar-cot');
+            if (btn) btn.style.display = 'none';
+        }
 
         function editarCotizacion(id) {
             const datos = getProyectoData();
             const c = datos.adquisiciones.cotizaciones_compras.find(c => c.id === id);
             if (!c) return;
+            document.getElementById('cot-fecha').value     = c.fecha || new Date().toISOString().split('T')[0];
             document.getElementById('cot-proveedor').value = c.proveedor_id;
             document.getElementById('cot-material').value  = c.material_descripcion;
             document.getElementById('cot-precio').value    = c.precio_unitario;
@@ -4396,6 +4564,8 @@ function cargarTablaProveedores() {
             const form = document.getElementById('form-cotizacion');
             form.dataset.editando = id;
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Cotización';
+            const btn = document.getElementById('btn-cancelar-cot');
+            if (btn) btn.style.display = '';
             form.scrollIntoView({ behavior:'smooth' });
         }
 
@@ -4407,7 +4577,7 @@ function cargarTablaProveedores() {
             const tbody = document.getElementById('tabla-cotizaciones-cuerpo');
             if (!tbody) return;
             const cots = [...(datos.adquisiciones.cotizaciones_compras||[])].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-            if (cots.length === 0) { tbody.innerHTML = filaVacia(5, 'No hay cotizaciones registradas'); renderPaginacion('paginacion-cotizaciones', 0, 1, 'cambiarPaginaCotizaciones'); return; }
+            if (cots.length === 0) { tbody.innerHTML = filaVacia(6, 'No hay cotizaciones registradas'); renderPaginacion('paginacion-cotizaciones', 0, 1, 'cambiarPaginaCotizaciones'); return; }
             const pag  = estadoPaginacion.cotizaciones;
             const ini_ = (pag - 1) * REGISTROS_POR_PAGINA;
             const pag_ = cots.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
@@ -4418,6 +4588,7 @@ pag_.forEach(c => {
                 const color  = c.estado==='aprobada'?'var(--exito)':c.estado==='rechazada'?'var(--alerta-texto)':'var(--advertencia-texto)';
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td data-label="Fecha" style="color:var(--texto-secundario);">${c.fecha || '—'}</td>
                     <td data-label="Material">${_esc(c.material_descripcion)}</td>
                     <td data-label="Proveedor" style="color:var(--texto-secundario);">${_esc(pNomb)}</td>
                     <td data-label="Total (Q)" style="text-align:right;font-weight:bold;">${formatearMoneda(c.total)}</td>
@@ -4468,9 +4639,7 @@ pag_.forEach(c => {
                 const datos2 = getProyectoData();
                 const c2 = datos2.adquisiciones.cotizaciones_compras.find(c => c.id === id);
                 if (c2?.estado === 'aprobada') {
-                    const egreso = (datos2.caja_chica || []).find(m => c2.gasto_id && m.id === c2.gasto_id && m.tipo === 'egreso');
-                    if (egreso) datos2.caja_chica = datos2.caja_chica.filter(m => m.id !== egreso.id);
-                    else datos2.caja_chica.push({ id:generarId(), fecha:new Date().toISOString().split('T')[0], tipo:'ingreso', categoria:'Reembolso', descripcion:`Reversión cotización: ${c2.material_descripcion}`, monto:c2.total, responsable:'Sistema' });
+                    if (!revertirGastoVinculado(datos2, c2, ['Materiales'], 'la cotización aprobada')) return;
                 }
                 datos2.adquisiciones.cotizaciones_compras = datos2.adquisiciones.cotizaciones_compras.filter(c => c.id !== id);
                 saveProyectoData(datos2);
@@ -4732,8 +4901,12 @@ pag_.forEach(c => {
                 if (!(campo in data)) {
                     throw new Error(`Campo faltante: ${campo}`);
                 }
-                if (typeof data[campo] !== tipo) {
-                    throw new Error(`Campo ${campo} debe ser ${tipo}, es ${typeof data[campo]}`);
+                const esTipoEsperado = tipo === 'array'
+                    ? Array.isArray(data[campo])
+                    : typeof data[campo] === tipo;
+                if (!esTipoEsperado) {
+                    const tipoRecibido = Array.isArray(data[campo]) ? 'array' : typeof data[campo];
+                    throw new Error(`Campo ${campo} debe ser ${tipo}, es ${tipoRecibido}`);
                 }
             }
             
@@ -4843,7 +5016,7 @@ pag_.forEach(c => {
         }
         
         // Versión de la aplicación para control de caché
-        const APP_VERSION = '2.8.1';
+        const APP_VERSION = '2.8.2';
         function _nubeSetEstado(msg, ok) {
             const el = document.getElementById('nube-estado');
             if (!el) return;
@@ -5540,6 +5713,11 @@ function cargarTablaCamiones() {
         function eliminarCamion(id) {
             showConfirmModal('Eliminar Camión', '¿Eliminar este camión? No se puede deshacer.', () => {
                 const datos = getProyectoData();
+                const viajes = (datos.viajes_camiones.viajes || []).filter(v => v.vehiculo_id === id);
+                if (viajes.length) {
+                    showToast(`⚠️ No se puede eliminar: el camión tiene ${viajes.length} viaje(s) en el historial.`, 'error', 6000);
+                    return;
+                }
                 datos.viajes_camiones.camiones = datos.viajes_camiones.camiones.filter(c => c.id !== id);
                 saveProyectoData(datos);
                 cargarCamiones();
@@ -5580,6 +5758,11 @@ function cargarTablaCamiones() {
         function eliminarRuta(id) {
             showConfirmModal('Eliminar Ruta', '¿Eliminar esta ruta/botadero?', () => {
                 const datos = getProyectoData();
+                const viajes = (datos.viajes_camiones.viajes || []).filter(v => v.ruta_id === id);
+                if (viajes.length) {
+                    showToast(`⚠️ No se puede eliminar: la ruta tiene ${viajes.length} viaje(s) en el historial.`, 'error', 6000);
+                    return;
+                }
                 datos.viajes_camiones.rutas_botadero = datos.viajes_camiones.rutas_botadero.filter(r => r.id !== id);
                 saveProyectoData(datos);
                 cargarRutas();
@@ -5623,12 +5806,9 @@ function cargarTablaCamiones() {
                 if (idx !== -1) {
                     const prev = datos.viajes_camiones.viajes[idx];
                     if (!validarAjusteGasto(prev.total || 0, total)) return;
-                    // Ajustar egreso vinculado si cambió el monto
-                    let egresoV = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
-                    if (egresoV) {
-                        egresoV.monto = total;
-                        egresoV.fecha = fecha;
-                    }
+                    const descripcion = `Viaje ${numero} (${material}) ${cam.nombre} → ${ruta.nombre}`;
+                    const categoria = cam.propiedad === 'alquilado' ? 'Alquiler de Equipo' : 'Combustible';
+                    if (!sincronizarGastoVinculado(datos, prev, total, categoria, descripcion, fecha, 'el viaje')) return;
                     datos.viajes_camiones.viajes[idx] = { ...prev, fecha, vehiculo_id: camId, ruta_id: rutaId, material, numero, km_total: kmTotal, litros, costo_combustible: costoComb, costo_alquiler: costoAlq, extra, total };
                     saveProyectoData(datos);
                 }
@@ -5644,7 +5824,7 @@ function cargarTablaCamiones() {
             const categoria = cam.propiedad === 'alquilado' ? 'Alquiler de Equipo' : 'Combustible';
             let movGastoViaje = null;
             if (total > 0) {
-                movGastoViaje = procesarGastoCajaChica(total, categoria, descripcion);
+                movGastoViaje = procesarGastoCajaChica(total, categoria, descripcion, fecha);
                 if (!movGastoViaje) return;
             }
             const datos2 = getProyectoData();
@@ -5701,41 +5881,7 @@ pag_.forEach(v => {
             showConfirmModal('Eliminar Viaje', 'Se revertirá el gasto asociado en caja. ¿Continuar?', () => {
                 const datos = getProyectoData();
                 const v = datos.viajes_camiones.viajes.find(x => x.id === id);
-                if (v && v.total > 0) {
-                    // Buscar y eliminar egreso vinculado exacto por gasto_id (prioridad alta)
-                    let egreso = (datos.caja_chica || []).find(m => v.gasto_id && m.id === v.gasto_id && m.tipo === 'egreso');
-                    
-                    if (!egreso && v.gasto_id) {
-                        // Si tiene gasto_id pero no se encontró, loggear warning
-                        console.warn(`Gasto vinculado ${v.gasto_id} no encontrado en caja chica`);
-                    }
-                    
-                    if (!egreso) {
-                        // Fallback: buscar por categoría y monto exacto (datos migrados)
-                        egreso = (datos.caja_chica || []).find(m =>
-                            m.tipo === 'egreso' &&
-                            (m.categoria === 'Alquiler de Equipo' || m.categoria === 'Combustible') &&
-                            Math.abs(m.monto - v.total) < 0.01 // Coincidencia de monto exacta
-                        );
-                    }
-                    
-                    if (egreso) {
-                        console.log(`Eliminando egreso vinculado ${egreso.id} de viaje ${id}`);
-                        datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
-                    } else {
-                        console.log(`Creando reembolso por gasto no vinculado: ${v.total}`);
-                        datos.caja_chica.push({ 
-                            id: generarId(), 
-                            fecha: new Date().toISOString().split('T')[0], 
-                            tipo:'ingreso', 
-                            categoria:'Reembolso', 
-                            descripcion: `Reversión viaje: ${v.material}`, 
-                            monto: v.total, 
-                            responsable:'Sistema',
-                            nota: 'reembolso_sin_vinculo'
-                        });
-                    }
-                }
+                if (v && !revertirGastoVinculado(datos, v, ['Alquiler de Equipo', 'Combustible'], 'el viaje')) return;
                 datos.viajes_camiones.viajes = datos.viajes_camiones.viajes.filter(x => x.id !== id);
                 saveProyectoData(datos);
                 estadoPaginacion.viajes = estadoPaginacion.viajes || 1;
@@ -5813,6 +5959,11 @@ lista.forEach(m => {
         function eliminarMaquinaCatalogo(id) {
             showConfirmModal('Eliminar Maquinaria', '¿Eliminar este equipo del catálogo?', () => {
                 const datos = getProyectoData();
+                const ordenes = (datos.mantenimiento.ordenes || []).filter(o => o.maquinaria_id === id);
+                if (ordenes.length) {
+                    showToast(`⚠️ No se puede eliminar: el equipo tiene ${ordenes.length} orden(es) de mantenimiento en el historial.`, 'error', 6000);
+                    return;
+                }
                 datos.mantenimiento.maquinaria = datos.mantenimiento.maquinaria.filter(m => m.id !== id);
                 saveProyectoData(datos);
                 cargarMaquinasCatalogo();
@@ -5867,8 +6018,8 @@ lista.forEach(m => {
                 if (idx !== -1) {
                     const prev = datos.mantenimiento.ordenes[idx];
                     if (!validarAjusteGasto(prev.costo || 0, costo)) return;
-                    let egresoOrd = (datos.caja_chica || []).find(mo => prev.gasto_id && mo.id === prev.gasto_id && mo.tipo === 'egreso');
-                    if (egresoOrd) { egresoOrd.monto = costo; egresoOrd.fecha = fecha; }
+                    const descripcionGasto = `${tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'} ${m ? m.nombre : ''}`;
+                    if (!sincronizarGastoVinculado(datos, prev, costo, 'Combustible/Mantenimiento', `Mantenimiento ${descripcionGasto}`, fecha, 'la orden de mantenimiento')) return;
                     datos.mantenimiento.ordenes[idx] = { ...prev, fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items };
                     saveProyectoData(datos);
                 }
@@ -5883,7 +6034,7 @@ lista.forEach(m => {
             const descripcion = `${tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'} ${m ? m.nombre : ''}`;
             let movGastoOrden = null;
             if (costo > 0) {
-                movGastoOrden = procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Mantenimiento ${descripcion}`);
+                movGastoOrden = procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Mantenimiento ${descripcion}`, fecha);
                 if (!movGastoOrden) return;
             }
             const datos2 = getProyectoData();
@@ -5932,21 +6083,7 @@ tbody.innerHTML = '';
             showConfirmModal('Eliminar Orden', 'Se revertirá el gasto de mantenimiento. ¿Continuar?', () => {
                 const datos = getProyectoData();
                 const o = datos.mantenimiento.ordenes.find(x => x.id === id);
-                if (o && o.costo > 0) {
-                    let egreso = (datos.caja_chica || []).find(m => o.gasto_id && m.id === o.gasto_id && m.tipo === 'egreso');
-                    if (!egreso) {
-                        egreso = (datos.caja_chica || []).find(m =>
-                            m.tipo === 'egreso' &&
-                            m.categoria === 'Combustible/Mantenimiento' &&
-                            m.monto === o.costo
-                        );
-                    }
-                    if (egreso) {
-                        datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
-                    } else {
-                        datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: 'Reversión mantenimiento', monto: o.costo, responsable: 'Sistema' });
-                    }
-                }
+                if (o && !revertirGastoVinculado(datos, o, ['Combustible/Mantenimiento'], 'la orden de mantenimiento')) return;
                 datos.mantenimiento.ordenes = datos.mantenimiento.ordenes.filter(x => x.id !== id);
                 saveProyectoData(datos);
                 actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarTablaOrdenes();
@@ -5975,8 +6112,8 @@ tbody.innerHTML = '';
                 if (idx !== -1) {
                     const prev = datos.mantenimiento.compras_insumos[idx];
                     if (!validarAjusteGasto(prev.costo || 0, costo)) return;
-                    let egresoIns = (datos.caja_chica || []).find(m => prev.gasto_id && m.id === prev.gasto_id && m.tipo === 'egreso');
-                    if (egresoIns) { egresoIns.monto = costo; egresoIns.fecha = fecha; }
+                    const descripcionGasto = `${tipo}: ${articulo} x${cantidad}`;
+                    if (!sincronizarGastoVinculado(datos, prev, costo, 'Combustible/Mantenimiento', `Insumo ${descripcionGasto}`, fecha, 'la compra de insumo')) return;
                     datos.mantenimiento.compras_insumos[idx] = { ...prev, fecha, tipo, articulo, cantidad, costo, stock_min: stockMin };
                     saveProyectoData(datos);
                 }
@@ -5989,7 +6126,7 @@ tbody.innerHTML = '';
 
             // ── Nuevo registro ────────────────────────────────────────
             const descripcion = `${tipo}: ${articulo} x${cantidad}`;
-            const movGastoInsumo = procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Insumo ${descripcion}`);
+            const movGastoInsumo = procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Insumo ${descripcion}`, fecha);
             if (!movGastoInsumo) return;
             const datos = getProyectoData();
             const insumoObj = { id: generarId(), fecha, tipo, articulo, cantidad, costo, stock_min: stockMin };
@@ -5998,8 +6135,6 @@ tbody.innerHTML = '';
             saveProyectoData(datos);
             this.reset();
             document.getElementById('insumo-fecha').value = new Date().toISOString().split('T')[0];
-            document.getElementById('insumo-cantidad').value = 1;
-            document.getElementById('insumo-stock-min').value = 0;
             cargarTablaInsumos(); actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarResumen();
             showToast('Compra de insumo registrada', 'success');
         });
@@ -6038,21 +6173,7 @@ tbody.innerHTML = '';
             showConfirmModal('Eliminar Compra', 'Se revertirá el gasto del insumo. ¿Continuar?', () => {
                 const datos = getProyectoData();
                 const i = datos.mantenimiento.compras_insumos.find(x => x.id === id);
-                if (i && i.costo > 0) {
-                    let egreso = (datos.caja_chica || []).find(m => i.gasto_id && m.id === i.gasto_id && m.tipo === 'egreso');
-                    if (!egreso) {
-                        egreso = (datos.caja_chica || []).find(m =>
-                            m.tipo === 'egreso' &&
-                            m.categoria === 'Combustible/Mantenimiento' &&
-                            m.monto === i.costo
-                        );
-                    }
-                    if (egreso) {
-                        datos.caja_chica = datos.caja_chica.filter(m => m.id !== egreso.id);
-                    } else {
-                        datos.caja_chica.push({ id: generarId(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', categoria: 'Reembolso', descripcion: 'Reversión insumo', monto: i.costo, responsable: 'Sistema' });
-                    }
-                }
+                if (i && !revertirGastoVinculado(datos, i, ['Combustible/Mantenimiento'], 'la compra de insumo')) return;
                 datos.mantenimiento.compras_insumos = datos.mantenimiento.compras_insumos.filter(x => x.id !== id);
                 saveProyectoData(datos);
                 actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarTablaInsumos();
@@ -6655,6 +6776,8 @@ function validarDependenciasExportacion() {
          * Abre el modal de vista previa.
          * @param {string} modo  'whatsapp' | 'local'
          */
+        let vistaPreviaPreviousFocus = null;
+        let vistaPreviaKeyHandler = null;
         function abrirVistaPrevia(modo) {
             const tipo  = document.getElementById('reporte-tipo').value;
             const fecha = document.getElementById('reporte-fecha').value;
@@ -6667,6 +6790,8 @@ function validarDependenciasExportacion() {
 
             // Guardar el modo ('whatsapp' | 'local') en el botón confirmar y en data del modal
             const modal = document.getElementById('modal-vista-previa');
+            if (vistaPreviaKeyHandler) document.removeEventListener('keydown', vistaPreviaKeyHandler);
+            vistaPreviaPreviousFocus = document.activeElement;
             modal.dataset.modo = modo;
 
             // Texto del subtítulo
@@ -6696,6 +6821,18 @@ function validarDependenciasExportacion() {
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden'; // Evitar scroll del fondo
 
+            vistaPreviaKeyHandler = (event) => {
+                if (event.key !== 'Tab') return;
+                const elementos = [...modal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]')]
+                    .filter(el => el.offsetParent !== null);
+                if (!elementos.length) return;
+                const primero = elementos[0];
+                const ultimo = elementos[elementos.length - 1];
+                if (event.shiftKey && document.activeElement === primero) { event.preventDefault(); ultimo.focus(); }
+                else if (!event.shiftKey && document.activeElement === ultimo) { event.preventDefault(); primero.focus(); }
+            };
+            document.addEventListener('keydown', vistaPreviaKeyHandler);
+
             // Renderizar el preview por primera vez
             actualizarVistaPrevia();
 
@@ -6711,6 +6848,10 @@ function validarDependenciasExportacion() {
             const modal = document.getElementById('modal-vista-previa');
             modal.classList.add('hidden');
             document.body.style.overflow = '';
+            if (vistaPreviaKeyHandler) document.removeEventListener('keydown', vistaPreviaKeyHandler);
+            vistaPreviaKeyHandler = null;
+            if (vistaPreviaPreviousFocus && typeof vistaPreviaPreviousFocus.focus === 'function') vistaPreviaPreviousFocus.focus();
+            vistaPreviaPreviousFocus = null;
         }
 
         /**
@@ -7034,6 +7175,7 @@ function validarDependenciasExportacion() {
         // FIX #3: UN SOLO DOMContentLoaded — inicialización unificada
         // ============================================================
         document.addEventListener('DOMContentLoaded', function () {
+            normalizarCamposFormulario();
             // Paso 1: cargar datos desde JSON inicial (solo si localStorage vacío)
             if (!localStorage.getItem(DB_KEY)) {
                 fetch('./construramsa_db.json')
@@ -7090,6 +7232,7 @@ function validarDependenciasExportacion() {
             const fechaHoy = new Date().toISOString().split('T')[0];
             document.getElementById('caja-fecha').value          = fechaHoy;
             document.getElementById('maq-fecha').value           = fechaHoy;
+            document.getElementById('cot-fecha').value           = fechaHoy;
             document.getElementById('fecha-asistencia').value    = fechaHoy;
             document.getElementById('reporte-fecha').value       = fechaHoy;
             document.getElementById('viaje-fecha').value         = fechaHoy;

@@ -8,9 +8,6 @@
 
 ## Prioridad alta
 
-- Hospedar las librerías de exportación PDF/XLSX o incorporar una estrategia de carga offline para que las exportaciones no dependan del CDN.
-- Añadir pruebas E2E para todos los formularios de mantenimiento, insumos, personal, viajes, configuración y restauración/importación.
-- Configurar CI en GitHub para ejecutar pruebas, análisis estático y validación antes de aceptar cambios en `main`.
 - Verificar en Vercel las variables de entorno, dominio, protección de ramas y estado de los despliegues automáticos.
 
 ## Mejoras futuras
@@ -23,5 +20,7 @@
 
 ## Estado de esta entrega
 
-- Navegación, validaciones de formularios, vínculos contables, escape XSS, exportación CSV y pruebas smoke fueron corregidos o reforzados.
+- Navegación, validaciones de formularios, vínculos contables, escape XSS, exportaciones PDF/CSV/XLSX offline y pruebas smoke fueron corregidos o reforzados.
+- La suite E2E CRUD cubre los módulos operativos, configuración e importación/fusión JSON; GitHub Actions ejecuta `npm test` con Chromium.
+- Vercel incorpora políticas CSP y Permissions-Policy; falta confirmar el deployment remoto después del push.
 - El despliegue automático debe confirmarse mediante el primer push a GitHub y el estado del deployment asociado en Vercel.

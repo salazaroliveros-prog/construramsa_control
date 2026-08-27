@@ -1,10 +1,12 @@
 {
   "name": "control_obra_gastos",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "description": "Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra. Personalizable para cualquier empresa con sincronización en la nube.",
   "main": "server.js",
   "scripts": {
-    "test": "node test_smoke.js",
+    "test": "npm run test:smoke && npm run test:crud",
+    "test:smoke": "node test_smoke.js",
+    "test:crud": "node test_crud.js",
     "start": "node server.js"
   },
   "repository": {
@@ -27,6 +29,6 @@
   },
   "homepage": "https://github.com/salazaroliveros-prog/construramsa_control#readme",
   "devDependencies": {
-    "playwright": "^1.47.0"
+    "playwright": "^1.62.1"
   }
 }

@@ -21,7 +21,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 - **Respaldo de Datos**: Exportación e importación con fusión inteligente
 - **Accesibilidad WCAG 2.1 AA**: Contraste de colores corregido, aria-live, aria-label en todos los controles
 - **Paginación**: Tablas de historial paginadas a 20 registros por página
-- **PWA Completa**: Service Worker v2.6.0 con activación inmediata y cache robusto
+- **PWA Completa**: Service Worker v2.8.2 con activación inmediata, dependencias de exportación locales y caché robusto
 
 ## Instalación
 
@@ -63,7 +63,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 | Archivo | Descripción |
 |---------|-------------|
 | `index.html` | Aplicación principal (HTML + CSS + JavaScript) |
-| `sw.js` | Service Worker v2.6.0 para funcionalidad offline |
+| `sw.js` | Service Worker v2.8.2 para funcionalidad offline |
 | `manifest.json` | Configuración PWA con shortcuts de módulos |
 | `icon.png` | Icono corporativo 1024×1024 (instalación/PWA) |
 | `icon-512.png` | Icono PWA 512×512 |
@@ -275,10 +275,10 @@ La aplicación es una PWA instalable y 100% responsive, optimizada para uso en c
 - **Touch optimizado**: botones con altura mínima de 44px (WCAG target size), sin `:hover` dependiente en móvil, y `-webkit-tap-highlight-color` desactivado.
 - **Atajos de teclado** (Alt+1..9) para equipos de oficina.
 
-> **Nota**: al abrir la app por primera vez conviene estar conectado para precargar las librerías PDF (html2pdf) y XLSX (SheetJS) en el caché del Service Worker. Luego funciona 100% offline.
+> **Nota**: las librerías PDF (html2pdf), XLSX (SheetJS) y sanitización HTML se distribuyen localmente y se incluyen en el caché del Service Worker; las exportaciones funcionan sin conexión después de instalar la PWA.
 
 ---
 
-**Versión**: 2.7.4
+**Versión**: 2.8.2
 **Desarrollado para**: CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura  
 **Moneda**: Quetzales (Q) — Guatemala

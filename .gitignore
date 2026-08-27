@@ -32,11 +32,11 @@ _*.js
 _*.txt
 _*.ps1
 
-# Tests automatizados (solo para desarrollo local, no van a Vercel)
+# Tests automatizados locales: se versionan las suites de regresión que ejecuta CI.
 test_*.js
 !test_smoke.js
+!test_crud.js
 !package.json
-package-lock.json
 
 # Archivo fuente del logo (no se sube; las variantes icon-*.png sí)
 logocr.png

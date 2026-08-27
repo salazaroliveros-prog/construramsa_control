@@ -1,9 +1,9 @@
 // ============================================================
-// SERVICE WORKER — Control de Obra v2.8.1
+// SERVICE WORKER — Control de Obra v2.8.2
 // Estrategia: Network First con fallback a Cache
 // ============================================================
 
-const CACHE_NAME = 'control-obra-v2.8.1';
+const CACHE_NAME = 'control-obra-v2.8.2';
 
 const urlsToCache = [
     './',
@@ -14,9 +14,9 @@ const urlsToCache = [
     './icon-512.png',
     './icon-192.png',
     './icon.svg',
-    'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
-    'https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.0/purify.min.js'
+    './vendor/html2pdf.bundle.min.js',
+    './vendor/xlsx.full.min.js',
+    './vendor/purify.min.js'
 ];
 
 // ── Instalación ───────────────────────────────────────────────
@@ -48,7 +48,7 @@ self.addEventListener('activate', function (event) {
     );
 });
 
-// ── Fetch: Stale-While-Revalidate para CDN, Network First para locales ──
+// ── Fetch: Network First para locales, incluidos recursos de exportación offline ──
 self.addEventListener('fetch', function (event) {
     if (event.request.method !== 'GET') return;
     if (event.request.url.startsWith('chrome-extension://')) return;
@@ -56,8 +56,6 @@ self.addEventListener('fetch', function (event) {
     const url = new URL(event.request.url);
     const esNavegacion = event.request.mode === 'navigate' ||
                          event.request.destination === 'document';
-    const esCDN = url.hostname.includes('cdnjs.cloudflare.com') ||
-                  url.hostname.includes('cdn.sheetjs.com');
 
     if (esNavegacion && url.pathname.endsWith('index.html')) {
         event.respondWith(
@@ -72,25 +70,6 @@ self.addEventListener('fetch', function (event) {
                 .catch(function () {
                     return caches.match('./index.html');
                 })
-        );
-        return;
-    }
-
-    if (esCDN) {
-        event.respondWith(
-            caches.open(CACHE_NAME).then(function (cache) {
-                return cache.match(event.request).then(function (cached) {
-                    const fetchPromise = fetch(event.request).then(function (response) {
-                        if (response && response.status === 200) {
-                            cache.put(event.request, response.clone());
-                        }
-                        return response;
-                    }).catch(function () {
-                        return cached || new Response('', { status: 503, statusText: 'Offline' });
-                    });
-                    return cached || fetchPromise;
-                });
-            })
         );
         return;
     }
