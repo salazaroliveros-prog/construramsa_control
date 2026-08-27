@@ -3294,8 +3294,8 @@
                         <br><span class="proyecto-card-meta">Presupuesto: ${formatearMoneda(p.presupuesto_inicial)} | Creado: ${_esc(p.fecha_creacion)}</span>
                     </div>
                     <div class="proyecto-card-acciones">
-                        <button onclick="seleccionarProyecto('${_esc(p.id)}')" class="btn-primario" style="padding:6px 12px;font-size:11px;" aria-label="Seleccionar proyecto ${_esc(p.nombre)}">✅ Seleccionar</button>
-                        <button onclick="eliminarProyecto('${_esc(p.id)}')" class="btn-primario" style="padding:6px 12px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proyecto ${_esc(p.nombre)}">🗑️</button>
+                        <button onclick="seleccionarProyecto(${_jsArg(p.id)})" class="btn-primario" style="padding:6px 12px;font-size:11px;" aria-label="Seleccionar proyecto ${_esc(p.nombre)}">✅ Seleccionar</button>
+                        <button onclick="eliminarProyecto(${_jsArg(p.id)})" class="btn-primario" style="padding:6px 12px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proyecto ${_esc(p.nombre)}">🗑️</button>
                     </div>`;
                 cont.appendChild(div);
             });
@@ -3835,8 +3835,8 @@ tbody.innerHTML = '';
                     <td data-label="Descripción">${_esc(mov.descripcion)}${mov.responsable && mov.responsable !== 'Usuario' && mov.responsable !== 'Sistema Automático' ? `<br><span style="font-size:10px;color:var(--texto-secundario);">👤 ${_esc(mov.responsable)}</span>` : ''}</td>
                     <td data-label="Monto" style="font-weight:bold;color:${color};">${signo}${formatearMoneda(mov.monto)}</td>
                     <td class="actions-cell">
-                        <button onclick="editarMovimientoCaja('${_esc(mov.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar movimiento ${_esc(mov.descripcion)}">✏️ Editar</button>
-                        <button onclick="eliminarMovimientoCaja('${_esc(mov.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar movimiento ${_esc(mov.descripcion)}">🗑️ Eliminar</button>
+                        <button onclick="editarMovimientoCaja(${_jsArg(mov.id)})" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar movimiento ${_esc(mov.descripcion)}">✏️ Editar</button>
+                        <button onclick="eliminarMovimientoCaja(${_jsArg(mov.id)})" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar movimiento ${_esc(mov.descripcion)}">🗑️ Eliminar</button>
                     </td>`;
                 tbody.appendChild(row);
             });
@@ -4031,8 +4031,8 @@ tbody.innerHTML = '';
                     <td data-label="Rendimiento">${rend}</td>
                     <td data-label="Gasto Total" style="font-weight:bold;color:var(--alerta-texto);">${formatearMoneda(gasto)}</td>
                     <td class="actions-cell">
-                        <button onclick="editarRegistroMaquinaria('${_esc(reg.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar registro maquinaria ${_esc(codigo_)}">✏️ Editar</button>
-                        <button onclick="eliminarRegistroMaquinaria('${_esc(reg.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar registro maquinaria ${_esc(codigo_)}">🗑️ Eliminar</button>
+                        <button onclick="editarRegistroMaquinaria(${_jsArg(reg.id)})" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar registro maquinaria ${_esc(codigo_)}">✏️ Editar</button>
+                        <button onclick="eliminarRegistroMaquinaria(${_jsArg(reg.id)})" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar registro maquinaria ${_esc(codigo_)}">🗑️ Eliminar</button>
                     </td>`;
                 tbody.appendChild(row);
             });
@@ -4291,8 +4291,8 @@ tbody.innerHTML = '';
                         <input type="number" inputmode="decimal" id="horas-extra-${_esc(t.id)}" min="0" max="8" value="0" style="width:100px;min-width:90px;padding:10px;text-align:center;" aria-label="Horas extra de ${_esc(t.nombre)}">
                     </div>
 <div class="lista-asistencia-item-acciones">
-                        <button onclick="editarTrabajador('${_esc(t.id)}')" class="btn-secundario" style="padding:6px 8px;font-size:11px;flex:1;" aria-label="Editar trabajador ${_esc(t.nombre)}">✏️ Editar</button>
-                        <button onclick="eliminarTrabajador('${_esc(t.id)}')" class="btn-primario" style="padding:6px 8px;font-size:11px;background:var(--alerta);flex:1;" aria-label="Eliminar trabajador ${_esc(t.nombre)}">🗑️ Eliminar</button>
+                        <button onclick="editarTrabajador(${_jsArg(t.id)})" class="btn-secundario" style="padding:6px 8px;font-size:11px;flex:1;" aria-label="Editar trabajador ${_esc(t.nombre)}">✏️ Editar</button>
+                        <button onclick="eliminarTrabajador(${_jsArg(t.id)})" class="btn-primario" style="padding:6px 8px;font-size:11px;background:var(--alerta);flex:1;" aria-label="Eliminar trabajador ${_esc(t.nombre)}">🗑️ Eliminar</button>
                     </div>`;
                 cont.appendChild(card);
             });
@@ -4488,8 +4488,8 @@ function cargarTablaProveedores() {
                     <td data-label="Teléfono">${_esc(p.telefono)}</td>
                     <td data-label="Especialidad">${_esc(p.especialidad)}</td>
                     <td class="actions-cell">
-                        <button onclick="editarProveedor('${p.id}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar proveedor ${p.nombre}">✏️</button>
-                        <button onclick="eliminarProveedor('${p.id}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proveedor ${p.nombre}">🗑️</button>
+                        <button onclick="editarProveedor(${_jsArg(p.id)})" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar proveedor ${_esc(p.nombre)}">✏️</button>
+                        <button onclick="eliminarProveedor(${_jsArg(p.id)})" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar proveedor ${_esc(p.nombre)}">🗑️</button>
                     </td>`;
                 tbody.appendChild(row);
             });
@@ -4595,9 +4595,9 @@ pag_.forEach(c => {
                     <td data-label="Estado" style="text-align:center;"><span style="color:${color};font-weight:600;">${c.estado.toUpperCase()}</span></td>
                     <td class="actions-cell" style="text-align:center;">
                         ${c.estado==='pendiente'?`
-                        <button onclick="editarCotizacion('${_esc(c.id)}')" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar cotización ${_esc(c.material_descripcion)}">✏️</button>
-                            <button onclick="aprobarCotizacion('${_esc(c.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--exito);" aria-label="Aprobar cotización ${_esc(c.material_descripcion)}">✅ Aprobar</button>
-                            <button onclick="rechazarCotizacion('${_esc(c.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Rechazar cotización ${_esc(c.material_descripcion)}">❌ Rechazar</button>
+                        <button onclick="editarCotizacion(${_jsArg(c.id)})" class="btn-secundario" style="padding:4px 8px;font-size:11px;" aria-label="Editar cotización ${_esc(c.material_descripcion)}">✏️</button>
+                            <button onclick="aprobarCotizacion(${_jsArg(c.id)})" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--exito);" aria-label="Aprobar cotización ${_esc(c.material_descripcion)}">✅ Aprobar</button>
+                            <button onclick="rechazarCotizacion(${_jsArg(c.id)})" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Rechazar cotización ${_esc(c.material_descripcion)}">❌ Rechazar</button>
                         `:`<button onclick="eliminarCotizacion('${_esc(c.id)}')" class="btn-primario" style="padding:4px 8px;font-size:11px;background:var(--alerta);" aria-label="Eliminar cotización ${_esc(c.material_descripcion)}">🗑️ Eliminar</button>`}
                     </td>`;
                 tbody.appendChild(row);
@@ -7039,6 +7039,12 @@ function validarDependenciasExportacion() {
             return String(str)
                 .replace(/&/g,'&amp;').replace(/</g,'&lt;')
                 .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        /** Serializa un argumento para handlers inline sin romper el contexto JS. */
+        function _jsArg(value) {
+            const safe = String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, '\\n');
+            return _esc(`'${safe}'`);
         }
 
         /**
