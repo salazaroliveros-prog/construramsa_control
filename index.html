@@ -3644,6 +3644,9 @@
         function inicializarNavTabs() {
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.addEventListener('click', function () {
+                    const moduloActivo = document.querySelector('.module.active');
+                    if (moduloActivo) guardarScrollModulo(moduloActivo.id);
+
                     document.querySelectorAll('.nav-tab').forEach(t => { t.classList.remove('active'); t.removeAttribute('aria-current'); });
                     document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
                     this.classList.add('active');
@@ -3652,15 +3655,14 @@
                     const navegacionHistorial = this.dataset.fromHistory === 'true';
                     delete this.dataset.fromHistory;
                     const moduleElement = document.getElementById(mid);
-                    
+
                     if (moduleElement) {
                         moduleElement.classList.add('active');
-                        // Smooth scroll al inicio del módulo para mejor UX
-                        requestAnimationFrame(() => {
-                            moduleElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        });
+                        restaurarScrollModulo(mid);
+                        moduleElement.setAttribute('tabindex', '-1');
+                        requestAnimationFrame(() => moduleElement.focus({ preventScroll: true }));
                     }
-                    
+
                     if (mid === 'resumen') { cargarResumen(); }
                     if (mid === 'personal') { cargarListaAsistencia(); cargarTablaAsistencia(); }
                     if (mid === 'adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
@@ -3668,7 +3670,6 @@
                     if (mid === 'mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }
                     if (mid === 'configuracion') cargarListaProyectosConfig();
 
-                    // Cada módulo mantiene una URL copiable y el botón Atrás conserva el contexto.
                     if (!navegacionHistorial && window.history?.pushState) {
                         const url = new URL(window.location.href);
                         if (url.searchParams.get('module') !== mid) {
@@ -7150,6 +7151,19 @@ function validarDependenciasExportacion() {
             }
         });
 
+        const APP_VERSION = '2.8.2';
+        const _scrollPositions = new Map();
+        function guardarScrollModulo(mid) {
+            const el = document.getElementById(mid);
+            if (el) _scrollPositions.set(mid, el.scrollTop);
+        }
+        function restaurarScrollModulo(mid) {
+            const el = document.getElementById(mid);
+            if (el && _scrollPositions.has(mid)) {
+                requestAnimationFrame(() => { el.scrollTop = _scrollPositions.get(mid); });
+            }
+        }
+
         // Navegar a un módulo por ID — función central reutilizada por tabs y atajos de teclado
         function navegarAModulo(mid) {
             const tab = document.querySelector(`[data-module="${mid}"]`);
@@ -7182,6 +7196,15 @@ function validarDependenciasExportacion() {
         // ============================================================
         document.addEventListener('DOMContentLoaded', function () {
             normalizarCamposFormulario();
+
+            const versionGuardada = localStorage.getItem('app_version');
+            if (versionGuardada && versionGuardada !== APP_VERSION) {
+                showToast('🔄 Nueva versión disponible. Recargando...', 'info', 3000);
+                setTimeout(() => location.reload(), 1200);
+                return;
+            }
+            localStorage.setItem('app_version', APP_VERSION);
+
             // Paso 1: cargar datos desde JSON inicial (solo si localStorage vacío)
             if (!localStorage.getItem(DB_KEY)) {
                 fetch('./construramsa_db.json')

@@ -4,8 +4,7 @@
 // ============================================================
 
 const CACHE_NAME = 'control-obra-v2.8.2';
-
-const urlsToCache = [
+const STATIC_ASSETS = [
     './',
     './index.html',
     './manifest.json',
@@ -25,8 +24,8 @@ self.addEventListener('install', function (event) {
         caches.open(CACHE_NAME)
             .then(function (cache) {
                 console.log('[SW] Instalando cache:', CACHE_NAME);
-                const locales = urlsToCache.filter(u => !u.startsWith('http'));
-                const remotos = urlsToCache.filter(u => u.startsWith('http'));
+                const locales = STATIC_ASSETS.filter(u => !u.startsWith('http'));
+                const remotos = STATIC_ASSETS.filter(u => u.startsWith('http'));
                 return cache.addAll(locales)
                     .then(() => Promise.allSettled(remotos.map(u => cache.add(u))));
             })
