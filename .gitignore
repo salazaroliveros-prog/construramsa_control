@@ -51,3 +51,4 @@ scroll_validation_screenshots/
 
 # Configuración local de Vercel CLI (no parte de la app)
 .vercel/
+.env*
