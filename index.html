@@ -474,7 +474,7 @@
             transform: translateZ(0);
             -webkit-transform: translateZ(0);
             /* Mejorar la respuesta al touch en móviles */
-            touch-action: pan-x;
+            touch-action: pan-x pan-y;
         }
         .nav-tabs::-webkit-scrollbar { display: none; }
         @media (min-width: 769px) {
@@ -1171,6 +1171,26 @@
             border: 0;
         }
 
+        #btn-instalar-app {
+            animation: pulse-install 2s infinite;
+        }
+        @keyframes pulse-install {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 164, 228, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(0, 164, 228, 0); }
+        }
+        .ios-install-hint {
+            display: none;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--texto-secundario);
+            text-align: center;
+        }
+        .ios-install-hint strong { color: var(--acento-cian); }
+
         /* Salto de teclado: aparece solo al recibir foco y evita recorrer toda la navegación. */
         .skip-link {
             position: fixed;
@@ -1753,6 +1773,7 @@
                     <option value="">-- Seleccionar Proyecto --</option>
                 </select>
                 <button onclick="mostrarModalCrearProyecto()" class="btn-secundario" style="padding:8px 16px;" aria-label="Crear nuevo proyecto" data-tooltip="Crear nuevo proyecto">➕</button>
+                <button id="btn-instalar-app" class="btn-primario" style="padding:8px 16px;display:none;" aria-label="Instalar aplicación" data-tooltip="Instalar como app nativa">📲 Instalar</button>
                 <label class="file-label" for="logo-input">
                     📷 Logo
                     <input type="file" id="logo-input" class="file-input" accept="image/*" aria-label="Cargar logo de la empresa">
@@ -2605,6 +2626,17 @@
                         📥 Importar JSON
                         <input type="file" id="import-json" class="file-input" accept=".json" aria-label="Importar base de datos desde archivo JSON">
                     </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom:25px;padding:16px;border:1px solid var(--glass-border);border-radius:12px;background:linear-gradient(145deg,rgba(11,63,143,0.25),rgba(139,92,246,0.12));">
+                <h3 class="historial-titulo" style="color:var(--acento-cian);">📱 Instalar como App Nativa</h3>
+                <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">
+                    Instala esta aplicación en tu dispositivo para acceso rápido, modo standalone y funcionamiento offline completo.
+                </p>
+                <button type="button" id="btn-instalar-app2" class="btn-primario" aria-label="Instalar aplicación en este dispositivo">📲 Instalar App</button>
+                <div id="ios-install-hint" class="ios-install-hint" style="margin-top:10px;">
+                    <strong>iOS:</strong> Toca el botón <strong>Compartir</strong> <span style="font-size:16px;">⎋</span> y luego <strong>"Agregar a pantalla de inicio"</strong>.
                 </div>
             </div>
 
@@ -7305,6 +7337,59 @@ function validarDependenciasExportacion() {
                     if (moduloURL === 'configuracion') cargarListaProyectosConfig();
                 }
             }
+        });
+
+        // ============================================================
+        // PWA INSTALL — Android Chrome / Desktop Chrome
+        // ============================================================
+        let deferredPrompt = null;
+        const btnInstallHeader = document.getElementById('btn-instalar-app');
+        const btnInstallConfig = document.getElementById('btn-instalar-app2');
+        const iosHint = document.getElementById('ios-install-hint');
+
+        function mostrarBotonInstalar() {
+            [btnInstallHeader, btnInstallConfig].forEach(b => { if (b) b.style.display = ''; });
+        }
+        function ocultarBotonInstalar() {
+            [btnInstallHeader, btnInstallConfig].forEach(b => { if (b) b.style.display = 'none'; });
+        }
+
+        function esIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        if (esIOS() && iosHint) {
+            iosHint.style.display = '';
+        }
+
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            mostrarBotonInstalar();
+        });
+
+        async function instalarApp() {
+            if (!deferredPrompt) {
+                showToast('ℹ️ Usa el menú del navegador para instalar la app', 'info');
+                return;
+            }
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                showToast('✅ App instalada correctamente', 'success');
+                ocultarBotonInstalar();
+            }
+            deferredPrompt = null;
+        }
+
+        [btnInstallHeader, btnInstallConfig].forEach(b => {
+            if (b) b.addEventListener('click', instalarApp);
+        });
+
+        window.addEventListener('appinstalled', function () {
+            deferredPrompt = null;
+            ocultarBotonInstalar();
+            showToast('✅ App instalada. Buscala en tu home screen.', 'success', 4000);
         });
 
         // ============================================================
