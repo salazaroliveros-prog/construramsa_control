@@ -15,7 +15,19 @@ const STATIC_ASSETS = [
     './icon.svg',
     './vendor/html2pdf.bundle.min.js',
     './vendor/xlsx.full.min.js',
-    './vendor/purify.min.js'
+    './vendor/purify.min.js',
+    './splash-640x1136.png',
+    './splash-750x1334.png',
+    './splash-1125x2436.png',
+    './splash-828x1792.png',
+    './splash-1242x2208.png',
+    './splash-1170x2532.png',
+    './splash-1284x2778.png',
+    './splash-1179x2556.png',
+    './splash-1290x2796.png',
+    './splash-1024x1366.png',
+    './splash-1536x2048.png',
+    './splash-1668x2388.png'
 ];
 
 // ── Instalación ───────────────────────────────────────────────
