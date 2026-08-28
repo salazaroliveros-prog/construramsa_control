@@ -6627,7 +6627,10 @@ function validarDependenciasExportacion() {
                 const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
                 const proyNombreX = proyObj ? proyObj.nombre : 'General';
                 if (!validarDependenciasExportacion()) { hideLoading(); return; }
-                generarXLSX(tipo, fecha, proyNombreX, nombre);
+                const xlsxData = generarXLSX(tipo, fecha, proyNombreX, nombre, true);
+                if (xlsxData) {
+                    archivos.push(new File([xlsxData], `${nombre}.xlsx`, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+                }
 
                 const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
                 archivos.push(new File([csvBlob], `${nombre}.csv`, { type:'text/csv' }));
@@ -6712,7 +6715,7 @@ function validarDependenciasExportacion() {
         }
 
         // Exporta el reporte actual a XLSX con SheetJS
-        function generarXLSX(tipo, fecha, proyNombre, nombre) {
+        function generarXLSX(tipo, fecha, proyNombre, nombre, returnBlob) {
             if (typeof XLSX === 'undefined') { showToast('⚠️ Módulo XLSX no disponible. Intente conectado a internet.', 'error'); return null; }
             const datos = getProyectoData();
             const db = getDB();
@@ -6745,7 +6748,7 @@ function validarDependenciasExportacion() {
                 ]);
                 const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha) && !_idsExtXLSX.has(g.id));
                 const filasCaja   = movs.map(g => [g.fecha, g.tipo, etiquetaCategoria(g.categoria), g.descripcion, g.monto]);
-                const filasViajes = viajesX.map(v => { const c=(datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id)||{nombre:'N/A'}; return [v.fecha, 'Viaje', c.nombre+' ('+v.material+') x'+v.numero, (v.propiedad==='alquilado'?'Alquiler Equipo':'Combustible'), v.total]; });
+                const filasViajes = viajesX.map(v => { const c=(datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id)||{nombre:'N/A'}; return [v.fecha, 'Viaje', c.nombre+' ('+v.material+') x'+v.numero, ((v.propiedad || c.propiedad)==='alquilado'?'Alquiler Equipo':'Combustible'), v.total]; });
                 const filasMT = ordsX.map(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id)||{nombre:'N/A'}; return [o.fecha, 'Mantenimiento '+o.tipo, m.nombre+' - '+(o.observaciones||''), 'Repuestos/Mantenimiento', o.costo]; });
                 const filasIn = insX.map(i => [i.fecha, 'Insumo '+i.tipo, i.articulo+' (x'+i.cantidad+')', 'Insumo', i.costo]);
                 const totalIngXLSX = movs.filter(g=>g.tipo==='ingreso').reduce((s,g)=>s+g.monto,0);
@@ -6784,6 +6787,9 @@ function validarDependenciasExportacion() {
             ws['!cols'] = data[0] ? data[0].map(() => ({ wch: 22 })) : [];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+            // returnBlob=true → devuelve ArrayBuffer para compartir (sin descarga forzada).
+            // En la descarga local se conserva XLSX.writeFile() (descarga directa).
+            if (returnBlob) return XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
             XLSX.writeFile(wb, nombre + '.xlsx');
             return true;
         }
@@ -6824,11 +6830,10 @@ function validarDependenciasExportacion() {
                 return;
             }
 
-            // Guardar el modo ('whatsapp' | 'local') en el botón confirmar y en data del modal
+            // El modo ('whatsapp' | 'local') se pasa directamente a confirmarYGenerar(modo)
             const modal = document.getElementById('modal-vista-previa');
             if (vistaPreviaKeyHandler) document.removeEventListener('keydown', vistaPreviaKeyHandler);
             vistaPreviaPreviousFocus = document.activeElement;
-            modal.dataset.modo = modo;
 
             // Texto del subtítulo
             const etiqueta = ETIQUETAS_REPORTE[tipo] || tipo;
@@ -7413,6 +7418,11 @@ function validarDependenciasExportacion() {
                         });
                     })
                     .catch(err => console.warn('SW no disponible:', err));
+                // FIX update: al confirmar la actualización, el nuevo SW toma el control
+                // (controllerchange) y recargamos automáticamente para aplicar la nueva versión.
+                navigator.serviceWorker.addEventListener('controllerchange', function () {
+                    window.location.reload();
+                });
             });
         }
     </script>
