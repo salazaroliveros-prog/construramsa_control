@@ -46,6 +46,10 @@ logocr.png
 wilson.png
 juan.png
 
+# Auditoría visual E2E local y screenshots (no versionables)
+audit_ui.js
+scroll_audit_screenshots/
+
 # Directorio de screenshots de pruebas (solo desarrollo local)
 scroll_validation_screenshots/
 
