@@ -6,11 +6,11 @@
 </head>
 <body>
     <script>
-        // Obtener el código de autorización de la URL
+        // Reenviar el codigo de autorizacion a la app via postMessage
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         const error = urlParams.get('error');
-        
+
         if (error) {
             document.body.innerHTML = `
                 <h1>Error de autorización</h1>
@@ -20,9 +20,12 @@
         } else if (code) {
             document.body.innerHTML = `
                 <h1>✅ Autorización exitosa</h1>
-                <p>Puedes cerrar esta ventana. La aplicación se conectará automáticamente.</p>
+                <p>Conectando... esta ventana se cerrará sola.</p>
             `;
-            // El código será capturado por el popup en la ventana principal
+            if (window.opener) {
+                window.opener.postMessage({ type: 'onedrive-auth', code: code }, window.location.origin);
+                setTimeout(() => window.close(), 800);
+            }
         } else {
             document.body.innerHTML = `
                 <h1>Error</h1>

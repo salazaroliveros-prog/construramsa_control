@@ -2654,8 +2654,8 @@
                 <label for="nube-proveedor" style="font-size:12px;color:var(--texto-principal);">Método de respaldo</label>
                 <select id="nube-proveedor" style="margin-bottom:12px;">
                     <option value="gas">Google Apps Script (Google Drive)</option>
-                    <option value="onedrive">OneDrive / Microsoft Graph</option>
-                    <option value="gdrive" disabled>Google Drive API (próximamente)</option>
+                    <option value="onedrive">OneDrive (Microsoft)</option>
+                    <option value="gdrive">Google Drive — conectar con tu cuenta</option>
                 </select>
 
                 <!-- Campos: Google Apps Script -->
@@ -2676,23 +2676,37 @@
                     <input type="password" id="nube-gd-token" placeholder="ya29..." aria-label="Token de acceso de Google">
                 </div>
 
+                <!-- Campos: Google Drive OAuth automatico -->
+                <div id="nube-cfg-gdrive" style="display:none;">
+                    <div style="margin-bottom:12px;">
+                        <p style="color:var(--texto-secundario);font-size:11px;margin-bottom:8px;">
+                            <strong>🔗 Conexión automática con tu cuenta de Google (Gmail):</strong><br>
+                            1. Ingresa tu Client ID de Google Cloud (una sola vez — <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--acento-cian);">crear credencial OAuth</a>, tipo *Aplicación web*, URI autorizado = origen de esta app)<br>
+                            2. Pulsa «Conectar con Google» e inicia sesión con tu Gmail<br>
+                            3. Listo: los respaldos se suben solos a la carpeta <strong>ControlObra_Gastos</strong> de tu Drive
+                        </p>
+                    </div>
+                    <label for="nube-gd-client" style="font-size:12px;color:var(--texto-principal);">Google OAuth Client ID</label>
+                    <input type="text" id="nube-gd-client" placeholder="1234567890-abc.apps.googleusercontent.com" aria-label="Google OAuth Client ID">
+                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                        <button type="button" onclick="gdriveConectar()" class="btn-primario" style="font-size:12px;">🔗 Conectar con Google</button>
+                        <button type="button" onclick="gdriveDesconectar()" class="btn-secundario" style="font-size:12px;">🔌 Desconectar</button>
+                    </div>
+                    <div id="gdrive-estado" style="margin-top:8px;font-size:11px;color:var(--texto-secundario);">Estado: No conectado</div>
+                </div>
+
                 <!-- Campos: OneDrive OAuth -->
                 <div id="nube-cfg-onedrive" style="display:none;">
                     <div style="margin-bottom:12px;">
                         <p style="color:var(--texto-secundario);font-size:11px;margin-bottom:8px;">
-                            <strong>🔗 Pasos para conectar OneDrive:</strong><br>
-                            1. Registra tu app en <a href="https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" style="color:var(--acento-cian);">Azure Portal</a><br>
-                            2. Configura permisos: Files.ReadWrite, User.Read<br>
-                            3. Genera Client Secret y copia el Client ID<br>
-                            4. Usa el botón "Conectar OneDrive" para autorizar
+                            <strong>🔗 Conexión automática con tu cuenta Microsoft:</strong><br>
+                            1. Ingresa tu Client ID de Azure (una sola vez — <a href="https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" style="color:var(--acento-cian);">registrar app</a>, tipo SPA, redirect = origen de esta app + <code>/onedrive-callback.html</code>)<br>
+                            2. Pulsa «Conectar OneDrive» e inicia sesión con tu cuenta Microsoft<br>
+                            3. Listo: sincronización automática con tu OneDrive
                         </p>
                     </div>
                     <label for="nube-od-client" style="font-size:12px;color:var(--texto-principal);">OneDrive Client ID</label>
                     <input type="text" id="nube-od-client" placeholder="00000000-0000-0000-0000-000000000000" aria-label="OneDrive OAuth Client ID">
-                    <label for="nube-od-secret" style="font-size:12px;color:var(--texto-principal);margin-top:8px;">Client Secret</label>
-                    <input type="password" id="nube-od-secret" placeholder="Azure Client Secret" aria-label="Azure Client Secret">
-                    <label for="nube-od-token" style="font-size:12px;color:var(--texto-principal);margin-top:8px;">Access Token (opcional - se genera automáticamente)</label>
-                    <input type="password" id="nube-od-token" placeholder="EwA..." aria-label="Token de acceso de OneDrive">
                     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
                         <button type="button" onclick="onedriveConectar()" class="btn-primario" style="font-size:12px;">🔗 Conectar OneDrive</button>
                         <button type="button" onclick="onedriveDesconectar()" class="btn-secundario" style="font-size:12px;">🔌 Desconectar</button>
@@ -5038,8 +5052,11 @@ pag_.forEach(c => {
                 url:'', 
                 auto:true, 
                 ultimo:null, 
-                gd_client:'', 
-                gd_token:'', 
+                gd_client:'',
+                gd_token:'',
+                gd_connected:false,
+                gd_expires_at:null,
+                gd_file_id:null,
                 od_client:'', 
                 od_secret:'',
                 od_token:'',
@@ -5071,9 +5088,7 @@ pag_.forEach(c => {
             const gd1 = document.getElementById('nube-gd-client'); if (gd1) gd1.value = c.gd_client || '';
             const gd2 = document.getElementById('nube-gd-token'); if (gd2) gd2.value = c.gd_token || '';
             const od1 = document.getElementById('nube-od-client'); if (od1) od1.value = c.od_client || '';
-            const odSecret = document.getElementById('nube-od-secret'); if (odSecret) odSecret.value = c.od_secret || '';
-            const od2 = document.getElementById('nube-od-token'); if (od2) od2.value = c.od_token || '';
-            
+
             // Actualizar estado de OneDrive
             const odEstado = document.getElementById('onedrive-estado');
             if (odEstado) {
@@ -5085,7 +5100,19 @@ pag_.forEach(c => {
                     odEstado.style.color = 'var(--texto-secundario)';
                 }
             }
-            
+
+            // Actualizar estado de Google Drive
+            const gdEstado = document.getElementById('gdrive-estado');
+            if (gdEstado) {
+                if (c.gd_connected && c.gd_token) {
+                    gdEstado.textContent = 'Estado: ✅ Conectado a Google Drive - Auto-respaldo activo';
+                    gdEstado.style.color = 'var(--exito)';
+                } else {
+                    gdEstado.textContent = 'Estado: No conectado';
+                    gdEstado.style.color = 'var(--texto-secundario)';
+                }
+            }
+
             _nubeSetEstado(c.url || c.gd_token || c.od_token ? 'Configurado — auto-respaldo ' + (c.auto ? 'ACTIVO' : 'desactivado') : '— Sin configurar —', true);
             _nubeSetUltimo(c.ultimo);
             nubeCambiarProveedor2();
@@ -5099,25 +5126,25 @@ pag_.forEach(c => {
             const prov = document.getElementById('nube-proveedor');
             if (!prov) return;
             const p = prov.value;
-            document.getElementById('nube-cfg-gas').style.display = p === 'gas' ? '' : 'none';
-            document.getElementById('nube-cfg-gred').style.display = p === 'gdrive' ? '' : 'none';
-            document.getElementById('nube-cfg-onedrive').style.display = p === 'onedrive' ? '' : 'none';
+            const gasEl = document.getElementById('nube-cfg-gas');
+            const gdEl = document.getElementById('nube-cfg-gdrive');
+            const odEl = document.getElementById('nube-cfg-onedrive');
+            if (gasEl) gasEl.style.display = p === 'gas' ? '' : 'none';
+            if (gdEl) gdEl.style.display = p === 'gdrive' ? '' : 'none';
+            if (odEl) odEl.style.display = p === 'onedrive' ? '' : 'none';
         }
         function nubeGuardarConfig() {
             const db = getDB();
             const c = db.configuracion.nube;
             c.proveedor = document.getElementById('nube-proveedor').value;
             c.url = document.getElementById('nube-gas-url').value.trim();
-            c.gd_client = document.getElementById('nube-gd-client').value.trim();
-            c.gd_token = document.getElementById('nube-gd-token').value.trim();
-            c.od_client = document.getElementById('nube-od-client').value.trim();
-            c.od_secret = document.getElementById('nube-od-secret').value.trim();
-            c.od_token = document.getElementById('nube-od-token').value.trim();
+            c.gd_client = (document.getElementById('nube-gd-client') || {}).value ? document.getElementById('nube-gd-client').value.trim() : (c.gd_client || '');
+            c.od_client = (document.getElementById('nube-od-client') || {}).value ? document.getElementById('nube-od-client').value.trim() : (c.od_client || '');
             c.auto = true;
             saveDB(db);
             _nubeSetEstado('Configuración de nube guardada', true);
             showToast('⚙️ Configuración de nube guardada', 'success');
-            
+
             // Si cambió a OneDrive y está conectado, reiniciar sincronización
             if (c.proveedor === 'onedrive' && c.od_connected) {
                 iniciarSincronizacionOneDrive();
@@ -5233,63 +5260,303 @@ pag_.forEach(c => {
         document.addEventListener('change', function (e) { if (e.target && e.target.id === 'nube-proveedor') nubeCambiarProveedor2(); });
 
         // ============================================================
+        // GOOGLE DRIVE - Conexion automatica (Google Identity Services)
+        // El usuario solo pulsa "Conectar con Google" e inicia sesion
+        // con su Gmail. Sin copiar ni pegar scripts.
+        // ============================================================
+        const GDRIVE_FOLDER = 'ControlObra_Gastos';
+        const GDRIVE_API = 'https://www.googleapis.com/drive/v3';
+        const GDRIVE_UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3';
+        const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+        let _gdTokenClient = null;
+
+        function _gdCargarGIS() {
+            return new Promise((resolve, reject) => {
+                if (window.google && window.google.accounts && window.google.accounts.oauth2) return resolve();
+                if (document.getElementById('gsi-client')) { document.getElementById('gsi-client').addEventListener('load', () => resolve()); return; }
+                const s = document.createElement('script');
+                s.id = 'gsi-client';
+                s.src = 'https://accounts.google.com/gsi/client';
+                s.async = true;
+                s.onload = resolve;
+                s.onerror = () => reject(new Error('No se pudo cargar Google Identity Services'));
+                document.head.appendChild(s);
+            });
+        }
+
+        async function gdriveConectar() {
+            const c = _nubeCfg();
+            const clientId = (c.gd_client || '').trim();
+            if (!clientId) {
+                showToast('❌ Ingresa tu Google OAuth Client ID primero', 'error');
+                return;
+            }
+            try {
+                _nubeSetEstado('🔗 Conectando con Google...', true);
+                await _gdCargarGIS();
+                if (!_gdTokenClient) {
+                    _gdTokenClient = window.google.accounts.oauth2.initTokenClient({
+                        client_id: clientId,
+                        scope: GDRIVE_SCOPE,
+                        callback: async (resp) => {
+                            if (resp.error) {
+                                _nubeSetEstado('❌ Conexión con Google cancelada: ' + resp.error, false);
+                                showToast('❌ No se conectó con Google: ' + resp.error, 'error');
+                                return;
+                            }
+                            const db = getDB();
+                            const cfg = db.configuracion.nube;
+                            cfg.gd_token = resp.access_token;
+                            cfg.gd_expires_at = Date.now() + ((resp.expires_in || 3600) * 1000);
+                            cfg.gd_connected = true;
+                            saveDB(db);
+                            try {
+                                await gdriveAsegurarCarpeta();
+                                _nubeSetEstado('✅ Conectado a Google Drive — respaldo automático activo', true);
+                                showToast('✅ Google Drive conectado con tu cuenta', 'success');
+                                nubeRenderUI();
+                            } catch (e) {
+                                _nubeSetEstado('❌ Error al preparar carpeta en Drive: ' + e.message, false);
+                            }
+                        }
+                    });
+                }
+                _gdTokenClient.requestAccessToken({ prompt: '' });
+            } catch (e) {
+                _nubeSetEstado('❌ ' + e.message, false);
+                showToast('❌ ' + e.message, 'error');
+            }
+        }
+
+        function gdriveDesconectar() {
+            const db = getDB();
+            const cfg = db.configuracion.nube;
+            if (cfg.gd_token && window.google && window.google.accounts) {
+                try { window.google.accounts.oauth2.revoke(cfg.gd_token, () => {}); } catch (e) {}
+            }
+            cfg.gd_token = '';
+            cfg.gd_connected = false;
+            cfg.gd_expires_at = null;
+            cfg.gd_file_id = null;
+            saveDB(db);
+            nubeRenderUI();
+            showToast('🔌 Google Drive desconectado', 'info');
+        }
+
+        // Renovar token silenciosamente si expiro (sin molestar al usuario)
+        async function gdriveTokenValido() {
+            const c = _nubeCfg();
+            if (!c.gd_connected || !c.gd_token) return false;
+            if (c.gd_expires_at && Date.now() < c.gd_expires_at - 60000) return true;
+            return new Promise((resolve) => {
+                try {
+                    if (!_gdTokenClient && window.google && window.google.accounts) {
+                        _gdTokenClient = window.google.accounts.oauth2.initTokenClient({
+                            client_id: c.gd_client,
+                            scope: GDRIVE_SCOPE,
+                            callback: (resp) => {
+                                if (resp.access_token) {
+                                    const db = getDB();
+                                    const cfg = db.configuracion.nube;
+                                    cfg.gd_token = resp.access_token;
+                                    cfg.gd_expires_at = Date.now() + ((resp.expires_in || 3600) * 1000);
+                                    cfg.gd_connected = true;
+                                    saveDB(db);
+                                    resolve(true);
+                                } else resolve(false);
+                            }
+                        });
+                    }
+                    if (!_gdTokenClient) return resolve(false);
+                    _gdTokenClient.requestAccessToken({ prompt: '' });
+                } catch (e) { resolve(false); }
+            });
+        }
+
+        async function gdriveAsegurarCarpeta() {
+            const c = _nubeCfg();
+            if (c.gd_file_id) return c.gd_file_id;
+            const q = encodeURIComponent(`name='${GDRIVE_FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+            const listRes = await fetch(`${GDRIVE_API}/files?q=${q}&fields=files(id,name)`, {
+                headers: { 'Authorization': `Bearer ${c.gd_token}` }
+            });
+            if (!listRes.ok) throw new Error('HTTP ' + listRes.status);
+            const list = await listRes.json();
+            let folderId = list.files && list.files.length ? list.files[0].id : null;
+            if (!folderId) {
+                const createRes = await fetch(`${GDRIVE_API}/files`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${c.gd_token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: GDRIVE_FOLDER, mimeType: 'application/vnd.google-apps.folder' })
+                });
+                if (!createRes.ok) throw new Error('HTTP ' + createRes.status);
+                folderId = (await createRes.json()).id;
+            }
+            const db = getDB();
+            db.configuracion.nube.gd_file_id = folderId;
+            saveDB(db);
+            return folderId;
+        }
+
+        async function gdriveSubirAhora(auto = false) {
+            const c = _nubeCfg();
+            if (!c.gd_connected || !c.gd_token) {
+                if (!auto) showToast('⚠️ Conecta tu cuenta de Google primero', 'info');
+                return;
+            }
+            const ok = await gdriveTokenValido();
+            if (!ok) { if (!auto) showToast('⚠️ Sesión de Google expirada. Pulsa «Conectar con Google»', 'info'); return; }
+            try {
+                if (!auto) _nubeSetEstado('⬆️ Subiendo a Google Drive...', true);
+                const folderId = await gdriveAsegurarCarpeta();
+                const db = getDB();
+                const content = JSON.stringify(db, null, 2);
+                const boundary = '-------cob' + Date.now();
+                const nombre = `control_obra_${new Date().toISOString().split('T')[0]}.json`;
+                const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and (name='${nombre}' or name='latest.json')`);
+                const listRes = await fetch(`${GDRIVE_API}/files?q=${q}&fields=files(id,name)`, {
+                    headers: { 'Authorization': `Bearer ${c.gd_token}` }
+                });
+                const existentes = {};
+                if (listRes.ok) (await listRes.json()).files.forEach(f => { existentes[f.name] = f.id; });
+                const meta = (name) => JSON.stringify({ name, parents: [folderId], mimeType: 'application/json' });
+                const cuerpo = (name) => `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta(name)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${content}\r\n--${boundary}--`;
+                for (const name of [nombre, 'latest.json']) {
+                    const existe = existentes[name];
+                    const url = existe
+                        ? `${GDRIVE_UPLOAD_API}/files/${existentes[name]}?uploadType=multipart`
+                        : `${GDRIVE_UPLOAD_API}/files?uploadType=multipart`;
+                    const res = await fetch(url, {
+                        method: existe ? 'PATCH' : 'POST',
+                        headers: { 'Authorization': `Bearer ${c.gd_token}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+                        body: cuerpo(name)
+                    });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                }
+                c.ultimo = new Date().toISOString();
+                const dbCur = getDB();
+                dbCur.configuracion.nube.ultimo = c.ultimo;
+                localStorage.setItem(DB_KEY, JSON.stringify(dbCur));
+                _dbCache = dbCur;
+                _nubeSetEstado('✅ Respaldo subido a tu Google Drive', true);
+                _nubeSetUltimo(c.ultimo);
+                if (!auto) showToast('✅ Datos subidos a tu Google Drive', 'success');
+            } catch (e) {
+                _nubeSetEstado('❌ Error al subir a Drive: ' + e.message, false);
+                if (!auto) showToast('❌ No se pudo subir a Drive: ' + e.message, 'error');
+            }
+        }
+
+        async function gdriveRestaurar() {
+            const c = _nubeCfg();
+            if (!c.gd_connected || !c.gd_token) { showToast('⚠️ Conecta tu cuenta de Google primero', 'info'); return; }
+            const ok = await gdriveTokenValido();
+            if (!ok) { showToast('⚠️ Sesión de Google expirada. Conéctate de nuevo', 'info'); return; }
+            showLoading('Descargando respaldo de Google Drive...');
+            try {
+                const folderId = await gdriveAsegurarCarpeta();
+                const q = encodeURIComponent(`'${folderId}' in parents and name='latest.json' and trashed=false`);
+                const listRes = await fetch(`${GDRIVE_API}/files?q=${q}&fields=files(id)`, {
+                    headers: { 'Authorization': `Bearer ${c.gd_token}` }
+                });
+                const files = (await listRes.json()).files || [];
+                if (!files.length) { hideLoading(); showToast('ℹ️ No hay respaldo en tu Drive todavía', 'info'); return; }
+                const fileRes = await fetch(`${GDRIVE_API}/files/${files[0].id}?alt=media`, {
+                    headers: { 'Authorization': `Bearer ${c.gd_token}` }
+                });
+                if (!fileRes.ok) throw new Error('HTTP ' + fileRes.status);
+                const remoto = await fileRes.json();
+                hideLoading();
+                showConfirmModal('Restaurar desde Google Drive',
+                    'Se FUSIONARÁ el respaldo remoto con tus datos actuales. ¿Continuar?',
+                    () => {
+                        showLoading('Restaurando...');
+                        const fusionado = importarBaseDatosConFusion(remoto);
+                        invalidarCacheDB(); saveDB(fusionado);
+                        hideLoading();
+                        _nubeSetEstado('✅ ¡Restaurado desde Google Drive!', true);
+                        showToast('✅ Datos restaurados', 'success', 5000);
+                        setTimeout(() => location.reload(), 1400);
+                    });
+            } catch (e) {
+                hideLoading();
+                _nubeSetEstado('❌ Error al restaurar: ' + e.message, false);
+                showToast('❌ Error al restaurar: ' + e.message, 'error');
+            }
+        }
+
+        // ============================================================
         // ONE DRIVE / MICROSOFT GRAPH - Sincronización Bidireccional
         // ============================================================
         let _onedriveSyncTimer = null;
         const ONEDRIVE_APP_FOLDER = 'ControlObra_Gastos';
         const ONEDRIVE_BASE_URL = 'https://graph.microsoft.com/v1.0';
         
-        function onedriveConectar() {
+        // PKCE helpers para OAuth seguro en navegador (SPA, sin client secret)
+        function _odBase64Url(buf) {
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+        async function _odPkce() {
+            const arr = new Uint8Array(32);
+            crypto.getRandomValues(arr);
+            const verifier = _odBase64Url(arr);
+            const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+            return { verifier, challenge: _odBase64Url(digest) };
+        }
+        // Capturar el codigo via postMessage desde onedrive-callback.html
+        function _odEsperarCodigo(timeoutMs) {
+            return new Promise((resolve) => {
+                const timer = setTimeout(() => { window.removeEventListener('message', h); resolve(null); }, timeoutMs);
+                function h(e) {
+                    if (e.data && e.data.type === 'onedrive-auth') {
+                        clearTimeout(timer);
+                        window.removeEventListener('message', h);
+                        resolve(e.data.code || null);
+                    }
+                }
+                window.addEventListener('message', h);
+            });
+        }
+
+        async function onedriveConectar() {
             const c = _nubeCfg();
-            const clientId = c.od_client.trim();
-            const clientSecret = c.od_secret.trim();
-            
-            if (!clientId || !clientSecret) {
-                showToast('❌ Ingresa Client ID y Client Secret de Azure', 'error');
+            const clientId = (c.od_client || '').trim();
+            if (!clientId) {
+                showToast('❌ Ingresa tu OneDrive Client ID primero', 'error');
                 return;
             }
-            
-            // Usar PKCE para mejor seguridad (implicit flow)
             const redirectUri = window.location.origin + '/onedrive-callback.html';
-            const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=Files.ReadWrite User.Read offline_access`;
-            
-            // Abrir popup para autorización
-            const width = 500, height = 600;
+            const pkce = await _odPkce();
+            const authUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+                + `?client_id=${encodeURIComponent(clientId)}`
+                + '&response_type=code'
+                + `&redirect_uri=${encodeURIComponent(redirectUri)}`
+                + '&scope=Files.ReadWrite%20User.Read%20offline_access'
+                + `&code_challenge=${pkce.challenge}&code_challenge_method=S256`
+                + '&response_mode=query';
+
+            const width = 500, height = 650;
             const left = (window.screen.width - width) / 2;
             const top = (window.screen.height - height) / 2;
             const popup = window.open(authUrl, 'onedrive-auth', `width=${width},height=${height},left=${left},top=${top}`);
-            
             if (!popup) {
                 showToast('❌ Popup bloqueado. Habilita popups para conectar OneDrive', 'error');
                 return;
             }
-            
-            // Esperar respuesta del popup
-            const checkPopup = setInterval(() => {
-                try {
-                    if (popup.closed) {
-                        clearInterval(checkPopup);
-                        showToast('❌ Autorización cancelada', 'error');
-                    }
-                    
-                    // Verificar si el popup redirigió al callback
-                    if (popup.location.href.includes(redirectUri)) {
-                        clearInterval(checkPopup);
-                        const urlParams = new URLSearchParams(popup.location.href.split('?')[1]);
-                        const code = urlParams.get('code');
-                        
-                        if (code) {
-                            popup.close();
-                            onedriveIntercambiarToken(code);
-                        }
-                    }
-                } catch (e) {
-                    // Cross-origin error es normal mientras popup está en dominio Microsoft
-                }
-            }, 1000);
+            _nubeSetEstado('🔗 Esperando autorización de tu cuenta Microsoft...', true);
+            const code = await _odEsperarCodigo(300000); // 5 min
+            if (!code) {
+                if (!popup.closed) popup.close();
+                showToast('⚠️ Autorización cancelada o expirada', 'info');
+                _nubeSetEstado('— Autorización de OneDrive no completada —', false);
+                return;
+            }
+            popup.close();
+            await onedriveIntercambiarToken(code, pkce.verifier);
         }
         
-        async function onedriveIntercambiarToken(code) {
+        async function onedriveIntercambiarToken(code, codeVerifier) {
             const c = _nubeCfg();
             const redirectUri = window.location.origin + '/onedrive-callback.html';
             
@@ -5301,8 +5568,8 @@ pag_.forEach(c => {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({
                         client_id: c.od_client,
-                        client_secret: c.od_secret,
                         code: code,
+                        code_verifier: codeVerifier,
                         redirect_uri: redirectUri,
                         grant_type: 'authorization_code'
                     })
@@ -5487,7 +5754,6 @@ pag_.forEach(c => {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({
                         client_id: c.od_client,
-                        client_secret: c.od_secret,
                         refresh_token: c.od_refresh_token,
                         grant_type: 'refresh_token'
                     })
@@ -5613,6 +5879,8 @@ pag_.forEach(c => {
                 const c = _nubeCfg();
                 if (c.proveedor === 'onedrive' && c.od_connected) {
                     onedriveSubirAhora(true);
+                } else if (c.proveedor === 'gdrive' && c.gd_connected) {
+                    gdriveSubirAhora(true);
                 } else {
                     nubeSubirAhora(true);
                 }
@@ -5626,6 +5894,8 @@ pag_.forEach(c => {
             
             if (c.proveedor === 'onedrive') {
                 await onedriveSubirAhora(auto);
+            } else if (c.proveedor === 'gdrive') {
+                await gdriveSubirAhora(auto);
             } else {
                 await originalNubeSubirAhora(auto);
             }
@@ -5642,6 +5912,8 @@ pag_.forEach(c => {
                     return; 
                 }
                 onedriveSincronizar();
+            } else if (c.proveedor === 'gdrive') {
+                gdriveRestaurar();
             } else {
                 originalNubeRestaurar();
             }
