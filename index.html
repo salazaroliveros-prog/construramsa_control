@@ -3952,7 +3952,7 @@ tbody.innerHTML = '';
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Movimiento';
             const btnCc = document.getElementById('btn-cancelar-caja');
             if (btnCc) btnCc.style.display = '';
-            form.scrollIntoView({ behavior:'smooth' });
+            form.scrollIntoView({ behavior: 'smooth' });
         }
 
         // FIX #7 + #8: eliminar simplemente filtra; NO agrega reembolso fantasma
@@ -4182,7 +4182,7 @@ tbody.innerHTML = '';
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Registro';
             const btnMaq = document.getElementById('btn-cancelar-maq');
             if (btnMaq) btnMaq.style.display = '';
-            form.scrollIntoView({ behavior:'smooth' });
+            form.scrollIntoView({ behavior: 'smooth' });
         }
 
         // FIX #7: eliminar maquinaria tampoco crea reembolso fantasma
@@ -4262,7 +4262,7 @@ tbody.innerHTML = '';
             const form = document.getElementById('form-trabajador');
             form.dataset.editando = id;
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Trabajador';
-            form.scrollIntoView({ behavior:'smooth' });
+            form.scrollIntoView({ behavior: 'smooth' });
         }
 
         function eliminarTrabajador(id) {
@@ -4494,7 +4494,7 @@ tbody.innerHTML = '';
             const form = document.getElementById('form-proveedor');
             form.dataset.editando = id;
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Proveedor';
-            form.scrollIntoView({ behavior:'smooth' });
+            form.scrollIntoView({ behavior: 'smooth' });
         }
 
         function eliminarProveedor(id) {
@@ -4604,7 +4604,7 @@ function cargarTablaProveedores() {
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Cotización';
             const btn = document.getElementById('btn-cancelar-cot');
             if (btn) btn.style.display = '';
-            form.scrollIntoView({ behavior:'smooth' });
+            form.scrollIntoView({ behavior: 'smooth' });
         }
 
         estadoPaginacion.cotizaciones = 1;
