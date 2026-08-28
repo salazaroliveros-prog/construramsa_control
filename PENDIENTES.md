@@ -24,3 +24,10 @@
 - La suite E2E CRUD cubre los módulos operativos, configuración e importación/fusión JSON; GitHub Actions ejecuta `npm test` con Chromium.
 - Vercel incorpora políticas CSP y Permissions-Policy; falta confirmar el deployment remoto después del push.
 - El despliegue automático debe confirmarse mediante el primer push a GitHub y el estado del deployment asociado en Vercel.
+
+## Auditoría de consistencia (implementada)
+
+- **`check_versions.js`** (`npm run audit:versions`): valida que la versión de `package.json` esté alineada en `index.html` (APP_VERSION, `db.version` en inicializarDB/migrarDB, UI "Versión:"), `sw.js` (CACHE_NAME, cabecera) y `manifest.json`.
+- **`check_assets.js`** (`npm run audit:assets`): verifica que todos los recursos locales referenciados en `sw.js` (precache), `manifest.json` (iconos) e `index.html` (src/href estáticos) existan en el repositorio.
+- `npm test` ahora ejecuta `npm run audit` (versiones + assets) antes de la suite E2E, por lo que GitHub Actions también valida consistencia e integridad en cada push.
+- Tokens OIDC locales (`.env.local`) quedan fuera del repositorio y se eliminaron del entorno local de desarrollo (higiene).
