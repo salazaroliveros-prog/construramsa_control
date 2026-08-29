@@ -3606,14 +3606,6 @@
                     </div>
                 </div>
 
-                <!-- Campos: Google Drive OAuth -->
-                <div id="nube-cfg-gred" style="display:none;">
-                    <label for="nube-gd-client" style="font-size:12px;color:var(--texto-principal);">Google Client ID</label>
-                    <input type="text" id="nube-gd-client" placeholder="xxxx.apps.googleusercontent.com" aria-label="Google OAuth Client ID">
-                    <label for="nube-gd-token" style="font-size:12px;color:var(--texto-principal);margin-top:8px;">Access Token (opcional, pegar desde la URL luego de autorizar)</label>
-                    <input type="password" id="nube-gd-token" placeholder="ya29..." aria-label="Token de acceso de Google">
-                </div>
-
                 <!-- Campos: Google Drive OAuth automatico -->
                 <div id="nube-cfg-gdrive" style="display:none;">
                     <div style="margin-bottom:12px;">
@@ -7298,11 +7290,11 @@ pag_.forEach(c => {
             return { verifier, challenge: _odBase64Url(digest) };
         }
         // Capturar el codigo via postMessage desde onedrive-callback.html
-        function _odEsperarCodigo(timeoutMs) {
+        function _odEsperarCodigo(timeoutMs, expectedWindow) {
             return new Promise((resolve) => {
                 const timer = setTimeout(() => { window.removeEventListener('message', h); resolve(null); }, timeoutMs);
                 function h(e) {
-                    if (e.data && e.data.type === 'onedrive-auth') {
+                    if (e.origin === window.location.origin && e.source === expectedWindow && e.data && e.data.type === 'onedrive-auth') {
                         clearTimeout(timer);
                         window.removeEventListener('message', h);
                         resolve(e.data.code || null);
@@ -7338,7 +7330,7 @@ pag_.forEach(c => {
                 return;
             }
             _nubeSetEstado('🔗 Esperando autorización de tu cuenta Microsoft...', true);
-            const code = await _odEsperarCodigo(300000); // 5 min
+            const code = await _odEsperarCodigo(300000, popup); // 5 min
             if (!code) {
                 if (!popup.closed) popup.close();
                 showToast('⚠️ Autorización cancelada o expirada', 'info');
@@ -7424,6 +7416,7 @@ pag_.forEach(c => {
                 const foldersResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/root/children`, {
                     headers: { 'Authorization': `Bearer ${c.od_token}` }
                 });
+                if (!foldersResponse.ok) throw new Error('HTTP ' + foldersResponse.status);
                 
                 const folders = await foldersResponse.json();
                 const appFolder = folders.value?.find(f => f.name === ONEDRIVE_APP_FOLDER);
@@ -7444,6 +7437,7 @@ pag_.forEach(c => {
                             '@microsoft.graph.conflictBehavior': 'rename'
                         })
                     });
+                    if (!createResponse.ok) throw new Error('HTTP ' + createResponse.status);
                     
                     const created = await createResponse.json();
                     c.od_file_id = created.id;
@@ -7487,7 +7481,7 @@ pag_.forEach(c => {
                 if (!uploadResponse.ok) throw new Error('HTTP ' + uploadResponse.status);
                 
                 // Actualizar archivo latest
-                await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}:/control_obra_latest.json:/content`, {
+                const latestResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}:/control_obra_latest.json:/content`, {
                     method: 'PUT',
                     headers: { 
                         'Authorization': `Bearer ${c.od_token}`,
@@ -7495,6 +7489,7 @@ pag_.forEach(c => {
                     },
                     body: JSON.stringify(db, null, 2)
                 });
+                if (!latestResponse.ok) throw new Error('HTTP ' + latestResponse.status);
                 
                 // Actualizar timestamp
                 c.ultimo = new Date().toISOString();
@@ -7575,6 +7570,66 @@ pag_.forEach(c => {
                 throw error;
             }
         }
+
+        // Restauración manual: siempre descarga el respaldo latest, aunque no sea
+        // más reciente que el último sync local.
+        async function onedriveRestaurar() {
+            const c = _nubeCfg();
+            if (!c.od_connected || !c.od_token || !c.od_file_id) {
+                showToast('⚠️ Conecta OneDrive primero', 'info');
+                return;
+            }
+            showLoading('Descargando respaldo de OneDrive...');
+            const descargar = async () => {
+                const filesResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}/children`, {
+                    headers: { 'Authorization': `Bearer ${c.od_token}` }
+                });
+                if (!filesResponse.ok) throw new Error('HTTP ' + filesResponse.status);
+                const files = await filesResponse.json();
+                const jsonFiles = (files.value || []).filter(f => f.name.endsWith('.json'))
+                    .sort((a, b) => new Date(b.lastModifiedDateTime) - new Date(a.lastModifiedDateTime));
+                const latest = jsonFiles.find(f => f.name === 'control_obra_latest.json') || jsonFiles[0];
+                if (!latest) throw new Error('Sin respaldo en OneDrive');
+                const downloadResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${latest.id}/content`, {
+                    headers: { 'Authorization': `Bearer ${c.od_token}` }
+                });
+                if (!downloadResponse.ok) throw new Error('HTTP ' + downloadResponse.status);
+                return await downloadResponse.json();
+            };
+            try {
+                let remoto;
+                try {
+                    remoto = await descargar();
+                } catch (error) {
+                    if (!error.message.includes('401') && !error.message.includes('403')) throw error;
+                    await onedriveRenovarToken();
+                    remoto = await descargar();
+                }
+                hideLoading();
+                showConfirmModal('Restaurar desde OneDrive',
+                    'Se FUSIONARÁ el respaldo remoto con tus datos actuales. ¿Continuar?',
+                    () => {
+                        showLoading('Restaurando...');
+                        try {
+                            const fusionado = importarBaseDatosConFusion(remoto);
+                            invalidarCacheDB();
+                            saveDB(fusionado);
+                            _nubeSetEstado('✅ ¡Restaurado desde OneDrive! Recargando...', true);
+                            showToast('✅ Datos restaurados desde OneDrive', 'success', 5000);
+                            setTimeout(() => location.reload(), 1400);
+                        } catch (error) {
+                            _nubeSetEstado('❌ Error al fusionar: ' + error.message, false);
+                            showToast('❌ Error al restaurar: ' + error.message, 'error');
+                        } finally {
+                            hideLoading();
+                        }
+                    });
+            } catch (error) {
+                hideLoading();
+                _nubeSetEstado('❌ Error al descargar: ' + error.message, false);
+                showToast('❌ Error al restaurar: ' + error.message, 'error');
+            }
+        }
         
         async function onedriveSincronizar() {
             const c = _nubeCfg();
@@ -7607,7 +7662,7 @@ pag_.forEach(c => {
                     const downloadResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${latestRemote.id}/content`, {
                         headers: { 'Authorization': `Bearer ${c.od_token}` }
                     });
-                    
+                    if (!downloadResponse.ok) throw new Error('HTTP ' + downloadResponse.status);
                     const remoteData = await downloadResponse.json();
                     
                     // Fusionar con datos locales
@@ -7704,7 +7759,7 @@ pag_.forEach(c => {
                     showToast('⚠️ Conecta OneDrive primero', 'info'); 
                     return; 
                 }
-                onedriveSincronizar();
+                onedriveRestaurar();
             } else if (c.proveedor === 'gdrive') {
                 gdriveRestaurar();
             } else {

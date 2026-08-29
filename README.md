@@ -256,7 +256,7 @@ La app puede respaldar **automáticamente** tus datos en tu propia cuenta para q
 5. Pega esa URL en el campo **URL del Web App**, pulsa **💾 Guardar Configuración** y luego **⬆️ Subir a la Nube**.
 6. De ahí en adelante, **cada vez que guardes datos se respaldan solos** (auto-subida con debounce). Para recuperar tras reinstalar: **⬇️ Restaurar desde la Nube** (fusiona con tus datos).
 
-Se crea en tu Google Drive la carpeta **`CONSTRURAMSA_Backups`** con un archivo por día (`construramsa_AAAA-MM-DD.json`) y el más reciente (`construramsa_latest.json`).
+Se crea en tu Google Drive la carpeta **`ControlObra_Backups`** con un archivo por día (`control_obra_AAAA-MM-DD.json`) y el más reciente (`control_obra_latest.json`).
 
 ### Métodos avanzados (OAuth)
 El módulo también admite **Google Drive API** y **OneDrive / Microsoft Graph**, ingresando un *Client ID (y token)* de una app registrada con un Redirect URI configurado. Requiere registrar la aplicación en Google Cloud / Azure; por simplicidad y 100% offline se recomienda Google Apps Script.
