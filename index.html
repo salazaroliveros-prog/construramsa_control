@@ -1572,6 +1572,12 @@
             .form-grid-2, .form-grid-2-sm, .form-grid-3 { grid-template-columns: 1fr; }
             table { font-size: 10px; }
             th, td { padding: 5px 3px; font-size: 10px; }
+            /* Reportes nuevos en 360px */
+            #reporte-progreso { padding: 10px; }
+            #reporte-progreso-mensaje { font-size: 10px; }
+            #reportes-recientes { font-size: 10px; }
+            #reporte-fechas-rango { grid-template-columns: 1fr; }
+        }
             td button { min-width: 44px; min-height: 44px !important; padding: 6px 8px !important; font-size: 11px !important; }
             .action-buttons { gap: 4px; }
             /* FIX 6: paginación en móvil extremo — centrada y sin desborde */
@@ -3131,35 +3137,89 @@
 
         <div id="reportes" class="module tarjeta-glass" role="region" aria-labelledby="reportes-title">
             <h2 id="reportes-title" class="modulo-titulo">📊 Generación de Reportes</h2>
-            <p class="modulo-descripcion">Reportes diarios, semanales, de asistencia, viajes y mantenimiento con exportación múltiple.</p>
+            <p class="modulo-descripcion">Reportes diarios, semanales, mensuales, de asistencia, viajes y mantenimiento con exportación múltiple.</p>
 
             <div class="form-grid-2">
                 <div>
                     <label for="reporte-tipo">Tipo de Reporte</label>
-                    <select id="reporte-tipo">
+                    <select id="reporte-tipo" onchange="actualizarOpcionesFecha()">
                         <option value="diario">Reporte Diario de Gastos</option>
                         <option value="semanal">Informe Semanal Consolidado</option>
+                        <option value="mensual">Reporte Mensual Consolidado</option>
                         <option value="asistencia">Reporte de Asistencia y Horas Extra</option>
                         <option value="viajes">Reporte de Viajes de Camiones</option>
                         <option value="mantenimiento">Reporte de Mantenimiento e Insumos</option>
                     </select>
                 </div>
                 <div>
+                    <label for="reporte-modo-fecha">Modo de Fecha</label>
+                    <select id="reporte-modo-fecha" onchange="actualizarOpcionesFecha()">
+                        <option value="unica">Fecha Única</option>
+                        <option value="rango">Rango de Fechas</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-grid-2" id="reporte-fechas-unicas">
+                <div>
                     <label for="reporte-fecha">Fecha</label>
                     <input type="date" id="reporte-fecha" aria-label="Seleccionar fecha del reporte" autocomplete="off">
                 </div>
+                <div></div>
             </div>
+            
+            <div class="form-grid-2" id="reporte-fechas-rango" style="display:none;">
+                <div>
+                    <label for="reporte-fecha-inicio">Fecha Inicio</label>
+                    <input type="date" id="reporte-fecha-inicio" aria-label="Seleccionar fecha de inicio" autocomplete="off">
+                </div>
+                <div>
+                    <label for="reporte-fecha-fin">Fecha Fin</label>
+                    <input type="date" id="reporte-fecha-fin" aria-label="Seleccionar fecha de fin" autocomplete="off">
+                </div>
+            </div>
+
+            <div style="margin:15px 0;padding:12px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid var(--glass-border);">
+                <label style="font-size:12px;color:var(--texto-principal);font-weight:700;margin-bottom:8px;display:block;">Formatos de Exportación</label>
+                <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-secundario);cursor:pointer;">
+                        <input type="checkbox" id="export-pdf" checked> PDF
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-secundario);cursor:pointer;">
+                        <input type="checkbox" id="export-csv" checked> CSV
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-secundario);cursor:pointer;">
+                        <input type="checkbox" id="export-xlsx" checked> XLSX
+                    </label>
+                </div>
+            </div>
+
+            <div id="reporte-progreso" style="display:none;margin:15px 0;padding:12px;background:rgba(0,164,228,0.1);border-radius:8px;border:1px solid rgba(0,164,228,0.3);">
+                <div style="font-size:12px;color:var(--acento-cian);font-weight:700;margin-bottom:8px;">Progreso de Generación</div>
+                <div id="reporte-progreso-mensaje" style="font-size:11px;color:var(--texto-secundario);">Iniciando...</div>
+                <div style="margin-top:8px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
+                    <div id="reporte-progreso-barra" style="height:100%;width:0%;background:linear-gradient(90deg,var(--acento-azul),var(--acento-cian));transition:width 0.3s ease;"></div>
+                </div>
+            </div>
+
             <div class="btn-row" style="margin-bottom:15px;">
                 <button onclick="abrirVistaPrevia('whatsapp')" class="btn-primario" style="flex:1;" data-tooltip="Ver preview antes de enviar por WhatsApp / Correo">
                     📱 Enviar por WhatsApp / Correo
                 </button>
-                <button onclick="abrirVistaPrevia('local')" class="btn-secundario" style="flex:1;" data-tooltip="Ver preview antes de descargar PDF, CSV y XLSX">
+                <button onclick="abrirVistaPrevia('local')" class="btn-secundario" style="flex:1;" data-tooltip="Ver preview antes de descargar">
                     📥 Descargar Reporte
                 </button>
             </div>
-            <button onclick="generarReporteLocal()" class="btn-secundario" style="width:100%;margin-bottom:8px;" data-tooltip="Descargar reporte directamente sin vista previa (PDF + CSV + XLSX)">
+            <button onclick="generarReporteLocal()" class="btn-secundario" style="width:100%;margin-bottom:8px;" data-tooltip="Descargar reporte directamente sin vista previa">
                 ⚡ Descarga Rápida (sin previa)
             </button>
+            
+            <div style="margin-top:15px;padding:12px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid var(--glass-border);">
+                <div style="font-size:12px;color:var(--texto-principal);font-weight:700;margin-bottom:8px;">📁 Reportes Recientes</div>
+                <div id="reportes-recientes" style="font-size:11px;color:var(--texto-secundario);">
+                    No hay reportes generados recientemente
+                </div>
+            </div>
         </div>
 
         <!-- ═══════════════════════════════════════ -->
@@ -5080,9 +5140,16 @@
                 const fecha = new Date().toISOString().split('T')[0];
                 const elemReporteTipo = document.getElementById('reporte-tipo');
                 const elemReporteFecha = document.getElementById('reporte-fecha');
+                const elemReporteModo = document.getElementById('reporte-modo-fecha');
                 
                 if (elemReporteTipo) elemReporteTipo.value = tipo;
                 if (elemReporteFecha) elemReporteFecha.value = fecha;
+                if (elemReporteModo) elemReporteModo.value = 'unica';
+                
+                // Actualizar opciones de fecha para asegurar estado correcto
+                if (typeof actualizarOpcionesFecha === 'function') {
+                    actualizarOpcionesFecha();
+                }
 
                 if (destino === 'local') {
                     await generarReporteLocal();
@@ -8060,8 +8127,140 @@ tbody.innerHTML = '';
             return { inicio: lunes.toISOString().split('T')[0], fin: dom.toISOString().split('T')[0] };
         }
 
-        function generarCSVReporte(tipo, fecha) {
-            if (!fecha && tipo !== 'asistencia') {
+        function obtenerRangoMensual(fechaStr) {
+            const fecha = new Date(fechaStr + 'T00:00:00');
+            const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+            const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
+            return { inicio: primerDia.toISOString().split('T')[0], fin: ultimoDia.toISOString().split('T')[0] };
+        }
+
+        // Cache de reportes recientes (máximo 5)
+        let cacheReportes = [];
+
+        function agregarReporteCache(tipo, fechaInicio, fechaFin) {
+            const reporte = {
+                id: generarId(),
+                tipo,
+                fechaInicio,
+                fechaFin,
+                timestamp: Date.now()
+            };
+            cacheReportes.unshift(reporte);
+            if (cacheReportes.length > 5) cacheReportes.pop();
+            renderizarReportesRecientes();
+        }
+
+        function renderizarReportesRecientes() {
+            const container = document.getElementById('reportes-recientes');
+            if (!container) return;
+            
+            if (cacheReportes.length === 0) {
+                container.innerHTML = 'No hay reportes generados recientemente';
+                return;
+            }
+
+            const etiquetas = {
+                diario: 'Diario',
+                semanal: 'Semanal',
+                mensual: 'Mensual',
+                asistencia: 'Asistencia',
+                viajes: 'Viajes',
+                mantenimiento: 'Mantenimiento'
+            };
+
+            container.innerHTML = cacheReportes.map(r => {
+                const fechaDisplay = r.fechaInicio === r.fechaFin 
+                    ? r.fechaInicio 
+                    : `${r.fechaInicio} a ${r.fechaFin}`;
+                const tiempo = Math.floor((Date.now() - r.timestamp) / 60000);
+                const tiempoStr = tiempo < 1 ? 'Ahora' : tiempo < 60 ? `Hace ${tiempo} min` : `Hace ${Math.floor(tiempo/60)}h`;
+                
+                return `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <div>
+                            <span style="color:var(--acento-cian);font-weight:600;">${etiquetas[r.tipo] || r.tipo}</span>
+                            <span style="color:var(--texto-secundario);margin-left:8px;">${fechaDisplay}</span>
+                        </div>
+                        <div style="font-size:10px;color:var(--texto-secundario);">${tiempoStr}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function actualizarOpcionesFecha() {
+            const tipo = document.getElementById('reporte-tipo').value;
+            const modo = document.getElementById('reporte-modo-fecha').value;
+            const fechasUnicas = document.getElementById('reporte-fechas-unicas');
+            const fechasRango = document.getElementById('reporte-fechas-rango');
+
+            // Algunos tipos solo soportan fecha única
+            if (tipo === 'asistencia' || tipo === 'viajes' || tipo === 'mantenimiento') {
+                document.getElementById('reporte-modo-fecha').value = 'unica';
+                document.getElementById('reporte-modo-fecha').disabled = true;
+                fechasUnicas.style.display = 'grid';
+                fechasRango.style.display = 'none';
+            } else {
+                document.getElementById('reporte-modo-fecha').disabled = false;
+                if (modo === 'rango') {
+                    fechasUnicas.style.display = 'none';
+                    fechasRango.style.display = 'grid';
+                } else {
+                    fechasUnicas.style.display = 'grid';
+                    fechasRango.style.display = 'none';
+                }
+            }
+        }
+
+        function obtenerRangoReporte() {
+            const tipo = document.getElementById('reporte-tipo').value;
+            const modo = document.getElementById('reporte-modo-fecha').value;
+            
+            if (tipo === 'semanal') {
+                const fecha = document.getElementById('reporte-fecha').value;
+                return obtenerRangoSemana(fecha);
+            }
+            
+            if (tipo === 'mensual') {
+                const fecha = document.getElementById('reporte-fecha').value;
+                return obtenerRangoMensual(fecha);
+            }
+            
+            if (modo === 'rango') {
+                const inicio = document.getElementById('reporte-fecha-inicio').value;
+                const fin = document.getElementById('reporte-fecha-fin').value;
+                return { inicio, fin };
+            }
+            
+            // Fecha única
+            const fecha = document.getElementById('reporte-fecha').value;
+            return { inicio: fecha, fin: fecha };
+        }
+
+        function actualizarProgresoReporte(mensaje, porcentaje) {
+            const progresoDiv = document.getElementById('reporte-progreso');
+            const mensajeDiv = document.getElementById('reporte-progreso-mensaje');
+            const barraDiv = document.getElementById('reporte-progreso-barra');
+            
+            if (progresoDiv) {
+                progresoDiv.style.display = 'block';
+                if (mensajeDiv) mensajeDiv.textContent = mensaje;
+                if (barraDiv) barraDiv.style.width = porcentaje + '%';
+            }
+        }
+
+        function ocultarProgresoReporte() {
+            const progresoDiv = document.getElementById('reporte-progreso');
+            if (progresoDiv) {
+                setTimeout(() => {
+                    progresoDiv.style.display = 'none';
+                }, 1000);
+            }
+        }
+
+        function generarCSVReporte(tipo, fecha, rangoPersonalizado) {
+            const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
+            
+            if (!rango.inicio && tipo !== 'asistencia') {
                 return '\uFEFFError: Debe seleccionar una fecha para generar el reporte.';
             }
             const datos = getProyectoData();
@@ -8090,11 +8289,13 @@ tbody.innerHTML = '';
             csv += `# ${csvCell(direccion)} | Tel: ${csvCell(telefono)} | Email: ${csvCell(email)} | ${csvCell(website)}\n`;
             csv += `# \n`;
 
-            if (tipo === 'diario' || tipo === 'semanal') {
-                const rango = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
-                const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rango.inicio && f <= rango.fin);
-                csv += `# ${csvCell(tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado')} - ${csvCell(empresa)} - Proyecto: ${csvCell(proyNombre)}\n`;
-                if (tipo === 'semanal') csv += `# Periodo: ${rango.inicio} al ${rango.fin}\n`;
+            const enRango = (f) => f >= rango.inicio && f <= rango.fin;
+            const periodoDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
+
+            if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
+                const tipoNombre = tipo === 'diario' ? 'Reporte Diario Consolidado' : tipo === 'semanal' ? 'Informe Semanal Consolidado' : 'Reporte Mensual Consolidado';
+                csv += `# ${csvCell(tipoNombre)} - ${csvCell(empresa)} - Proyecto: ${csvCell(proyNombre)}\n`;
+                if (tipo !== 'diario') csv += `# Periodo: ${periodoDisplay}\n`;
                 csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
                 csv += `Fecha,Tipo,Categoria,Descripcion,Monto (Q)\n`;
                 /* FIX DUPLICIDAD: armar un Set con los gasto_id de viajes y mantenimiento
@@ -8198,18 +8399,21 @@ tbody.innerHTML = '';
             return csv;
         }
 
-        function generarHTMLReporte(tipo, fecha) {
+        function generarHTMLReporte(tipo, fecha, rangoPersonalizado) {
             const datos = getProyectoData();
             const db    = getDB();
             const proy  = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
             const proyNombre = proy ? proy.nombre : 'General';
             let html = '';
 
-            if (tipo === 'diario' || tipo === 'semanal') {
-                const rangoT = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
-                const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rangoT.inicio && f <= rangoT.fin);
-                html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">${tipo === 'diario' ? 'Reporte Diario Consolidado' : 'Informe Semanal Consolidado'}</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(fecha)) : ('Período: ' + _esc(rangoT.inicio) + ' al ' + _esc(rangoT.fin))} | Proyecto: ${_esc(proyNombre)}</p>`;
+            const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
+            const enRango = (f) => f >= rango.inicio && f <= rango.fin;
+            const periodoDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
+
+            if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
+                const tipoNombre = tipo === 'diario' ? 'Reporte Diario Consolidado' : tipo === 'semanal' ? 'Informe Semanal Consolidado' : 'Reporte Mensual Consolidado';
+                html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">${_esc(tipoNombre)}</h2>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(rango.inicio)) : ('Período: ' + _esc(periodoDisplay))} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:#6B7280;">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
                 /* FIX DUPLICIDAD: armar Set de gasto_id vinculados a viajes y mantenimiento
@@ -8443,28 +8647,31 @@ function validarDependenciasExportacion() {
 
         async function compartirReporteWhatsApp() {
             try {
-                const tipo   = document.getElementById('reporte-tipo').value;
-                const fecha  = document.getElementById('reporte-fecha').value;
-                if (!fecha && tipo !== 'asistencia') {
+                const tipo = document.getElementById('reporte-tipo').value;
+                const rango = obtenerRangoReporte();
+                
+                if (!rango.inicio && tipo !== 'asistencia') {
                     showToast('⚠️ Seleccione una fecha para generar el reporte.', 'error');
                     hideLoading();
                     return;
                 }
-                const nombre = `reporte_${tipo}_${fecha || 'asistencia'}`;
+                
+                const fechaDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio}_${rango.fin}`;
+                const nombre = `reporte_${tipo}_${fechaDisplay}`;
                 const archivos = [];
 
                 const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
                 const proyNombreX = proyObj ? proyObj.nombre : 'General';
                 if (!validarDependenciasExportacion()) { hideLoading(); return; }
-                const xlsxData = generarXLSX(tipo, fecha, proyNombreX, nombre, true);
+                const xlsxData = generarXLSX(tipo, rango.inicio, proyNombreX, nombre, true, rango);
                 if (xlsxData) {
                     archivos.push(new File([xlsxData], `${nombre}.xlsx`, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
                 }
 
-                const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
+                const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type:'text/csv;charset=utf-8;' });
                 archivos.push(new File([csvBlob], `${nombre}.csv`, { type:'text/csv' }));
 
-                const htmlData   = generarHTMLReporte(tipo, fecha);
+                const htmlData = generarHTMLReporte(tipo, rango.inicio, rango);
                 const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
 
                 // Reaplicar portada si fue configurada desde la vista previa
@@ -8473,7 +8680,7 @@ function validarDependenciasExportacion() {
                 // Hacer visible el contenedor para html2canvas
                 contenedor.classList.add('pdf-generating');
 
-                const pdf     = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
+                const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
                 const pdfBlob = pdf.output('blob');
 
                 // Restaurar estado oculto
@@ -8500,43 +8707,84 @@ function validarDependenciasExportacion() {
         }
 
         function generarReporteLocal() {
-            showLoading('Generando reporte...');
-            const tipo  = document.getElementById('reporte-tipo').value;
-            const fecha = document.getElementById('reporte-fecha').value;
-            if (!fecha && tipo !== 'asistencia') {
+            const tipo = document.getElementById('reporte-tipo').value;
+            const rango = obtenerRangoReporte();
+            
+            if (!rango.inicio && tipo !== 'asistencia') {
                 showToast('⚠️ Seleccione una fecha para generar el reporte.', 'error');
-                hideLoading();
                 return;
             }
-            const nombre= `reporte_${tipo}_${fecha || 'asistencia'}`;
-            if (!validarDependenciasExportacion()) { hideLoading(); return; }
+            
+            const exportPDF = document.getElementById('export-pdf').checked;
+            const exportCSV = document.getElementById('export-csv').checked;
+            const exportXLSX = document.getElementById('export-xlsx').checked;
+            
+            if (!exportPDF && !exportCSV && !exportXLSX) {
+                showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
+                return;
+            }
+            
+            const fechaDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio}_${rango.fin}`;
+            const nombre = `reporte_${tipo}_${fechaDisplay}`;
+            
+            if (!validarDependenciasExportacion()) { return; }
+            
+            actualizarProgresoReporte('Iniciando generación...', 10);
+            
             setTimeout(async () => {
                 try {
                     const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
                     const proyNombreX = proyObj ? proyObj.nombre : 'General';
-                    generarXLSX(tipo, fecha, proyNombreX, nombre);
-
-                    const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type:'text/csv;charset=utf-8;' });
-                    const urlCSV  = URL.createObjectURL(csvBlob);
-                    const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
-
-                    const htmlData   = generarHTMLReporte(tipo, fecha);
-                    const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
-
-                    // Hacer visible el contenedor para html2canvas
-                    contenedor.classList.add('pdf-generating');
-
-                    const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
-                    pdf.save(`${nombre}.pdf`);
-
-                    // Restaurar estado oculto
-                    contenedor.classList.remove('pdf-generating');
-                    hideLoading(); 
-                    showToast('✅ Reporte generado y descargado', 'success');
+                    
+                    let formatoCount = 0;
+                    const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0) + (exportXLSX ? 1 : 0);
+                    
+                    // XLSX
+                    if (exportXLSX) {
+                        actualizarProgresoReporte('Generando XLSX...', 20);
+                        generarXLSX(tipo, rango.inicio, proyNombreX, nombre, rango);
+                        formatoCount++;
+                        actualizarProgresoReporte('XLSX generado', 20 + (formatoCount / totalFormatos) * 30);
+                    }
+                    
+                    // CSV
+                    if (exportCSV) {
+                        actualizarProgresoReporte('Generando CSV...', 20 + (formatoCount / totalFormatos) * 30);
+                        const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type:'text/csv;charset=utf-8;' });
+                        const urlCSV = URL.createObjectURL(csvBlob);
+                        const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
+                        formatoCount++;
+                        actualizarProgresoReporte('CSV generado', 20 + (formatoCount / totalFormatos) * 30);
+                    }
+                    
+                    // PDF
+                    if (exportPDF) {
+                        actualizarProgresoReporte('Generando PDF...', 20 + (formatoCount / totalFormatos) * 30);
+                        const htmlData = generarHTMLReporte(tipo, rango.inicio, rango);
+                        const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
+                        contenedor.classList.add('pdf-generating');
+                        
+                        const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
+                        pdf.save(`${nombre}.pdf`);
+                        
+                        contenedor.classList.remove('pdf-generating');
+                        formatoCount++;
+                        actualizarProgresoReporte('PDF generado', 20 + (formatoCount / totalFormatos) * 30);
+                    }
+                    
+                    actualizarProgresoReporte('¡Completado!', 100);
+                    
+                    // Agregar al cache
+                    agregarReporteCache(tipo, rango.inicio, rango.fin);
+                    
+                    setTimeout(() => {
+                        ocultarProgresoReporte();
+                        showToast('✅ Reporte generado y descargado', 'success');
+                    }, 500);
                 } catch (err) { 
                     const contenedor = document.getElementById('plantilla-reporte-impresion');
                     if (contenedor) contenedor.classList.remove('pdf-generating');
-                    hideLoading(); 
+                    ocultarProgresoReporte();
                     showToast('❌ Error al generar reporte', 'error'); 
                     console.error(err); 
                 }
@@ -8544,7 +8792,7 @@ function validarDependenciasExportacion() {
         }
 
         // Exporta el reporte actual a XLSX con SheetJS
-        function generarXLSX(tipo, fecha, proyNombre, nombre, returnBlob) {
+        function generarXLSX(tipo, fecha, proyNombre, nombre, returnBlob, rangoPersonalizado) {
             if (typeof XLSX === 'undefined') { showToast('⚠️ Módulo XLSX no disponible. Intente conectado a internet.', 'error'); return null; }
             const datos = getProyectoData();
             const db = getDB();
@@ -8563,9 +8811,11 @@ function validarDependenciasExportacion() {
                 []
             ];
 
-                        if (tipo === 'diario' || tipo === 'semanal') {
-                const rangoX = tipo === 'diario' ? null : obtenerRangoSemana(fecha);
-                const enRango = (f) => tipo === 'diario' ? (f === fecha) : (f >= rangoX.inicio && f <= rangoX.fin);
+            const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
+            const enRango = (f) => f >= rango.inicio && f <= rango.fin;
+
+            if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
+                const tipoNombre = tipo === 'diario' ? 'Diario Consolidado' : tipo === 'semanal' ? 'Semanal Consolidado' : 'Mensual Consolidado';
                 const viajesX = (datos.viajes_camiones.viajes||[]).filter(v => enRango(v.fecha));
                 const ordsX   = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
                 const insX    = (datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha));
@@ -8585,7 +8835,7 @@ function validarDependenciasExportacion() {
                     + viajesX.reduce((s,v)=>s+(v.total||0),0)
                     + ordsX.reduce((s,o)=>s+(o.costo||0),0)
                     + insX.reduce((s,i)=>s+(i.costo||0),0);
-                data = [...enc, [`Reporte ${tipo==='diario'?'Diario Consolidado':'Semanal Consolidado'} - Proyecto: ${proyNombre}`],
+                data = [...enc, [`Reporte ${tipoNombre} - Proyecto: ${proyNombre}`],
                     ['Fecha','Tipo','Descripción','Categoría','Monto (Q)'],
                     ['--- CAJA CHICA (movimientos directos) ---'], ...filasCaja,
                     ['--- VIAJES DE CAMIONES ---'], ...filasViajes,
@@ -8638,6 +8888,7 @@ function validarDependenciasExportacion() {
         const ETIQUETAS_REPORTE = {
             diario:        'Reporte Diario de Gastos',
             semanal:       'Informe Semanal Consolidado',
+            mensual:       'Reporte Mensual Consolidado',
             asistencia:    'Reporte de Asistencia y Horas Extra',
             viajes:        'Reporte de Viajes de Camiones',
             mantenimiento: 'Reporte de Mantenimiento e Insumos'
@@ -8650,11 +8901,11 @@ function validarDependenciasExportacion() {
         let vistaPreviaPreviousFocus = null;
         let vistaPreviaKeyHandler = null;
         function abrirVistaPrevia(modo) {
-            const tipo  = document.getElementById('reporte-tipo').value;
-            const fecha = document.getElementById('reporte-fecha').value;
+            const tipo = document.getElementById('reporte-tipo').value;
+            const rango = obtenerRangoReporte();
 
             // Validar fecha antes de abrir (excepto asistencia)
-            if (!fecha && tipo !== 'asistencia') {
+            if (!rango.inicio && tipo !== 'asistencia') {
                 showToast('⚠️ Seleccione una fecha para el reporte antes de continuar.', 'error');
                 return;
             }
@@ -8666,15 +8917,16 @@ function validarDependenciasExportacion() {
 
             // Texto del subtítulo
             const etiqueta = ETIQUETAS_REPORTE[tipo] || tipo;
-            const fechaStr = fecha ? ` · ${fecha}` : '';
+            const fechaStr = rango.inicio === rango.fin ? ` · ${rango.inicio}` : ` · ${rango.inicio} a ${rango.fin}`;
             document.getElementById('vp-subtitulo').textContent = etiqueta + fechaStr;
 
             // Poblar el campo de info tipo (solo lectura)
-            document.getElementById('vp-info-tipo').textContent = etiqueta + (fecha ? '  —  ' + fecha : '');
+            const fechaDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} - ${rango.fin}`;
+            document.getElementById('vp-info-tipo').textContent = etiqueta + '  —  ' + fechaDisplay;
 
             // Pre-llenar la fecha del informe con la del reporte si está vacía
             const vpFecha = document.getElementById('vp-fecha');
-            if (!vpFecha.value && fecha) vpFecha.value = fecha;
+            if (!vpFecha.value && rango.inicio) vpFecha.value = rango.inicio;
 
             // Pre-llenar remitente si la configuración tiene un nombre de empresa
             const vpRem = document.getElementById('vp-remitente');
@@ -8738,14 +8990,14 @@ function validarDependenciasExportacion() {
          * Inyecta una copia del contenido real de la plantilla dentro de #vp-plantilla-preview.
          */
         function actualizarVistaPrevia() {
-            const tipo  = document.getElementById('reporte-tipo').value;
-            const fecha = document.getElementById('reporte-fecha').value;
+            const tipo = document.getElementById('reporte-tipo').value;
+            const rango = obtenerRangoReporte();
 
             // Leer campos de la portada
             const portada = _leerCamposPortada();
 
             // Generar el HTML del contenido del reporte
-            const htmlReporte = generarHTMLReporte(tipo, fecha);
+            const htmlReporte = generarHTMLReporte(tipo, rango.inicio, rango);
 
             // Construir el HTML completo del membrete + portada + contenido
             const db  = getDB();
@@ -8969,34 +9221,69 @@ function validarDependenciasExportacion() {
             if (modo === 'whatsapp') {
                 compartirReporteWhatsApp();
             } else {
-                const tipo  = document.getElementById('reporte-tipo').value;
-                const fecha = document.getElementById('reporte-fecha').value;
-                if (!fecha && tipo !== 'asistencia') {
+                const tipo = document.getElementById('reporte-tipo').value;
+                const rango = obtenerRangoReporte();
+                
+                if (!rango.inicio && tipo !== 'asistencia') {
                     showToast('⚠️ Seleccione una fecha para el reporte.', 'error');
                     hideLoading();
                     return;
                 }
-                const nombre = `reporte_${tipo}_${fecha || 'asistencia'}`;
+                
+                const exportPDF = document.getElementById('export-pdf').checked;
+                const exportCSV = document.getElementById('export-csv').checked;
+                const exportXLSX = document.getElementById('export-xlsx').checked;
+                
+                if (!exportPDF && !exportCSV && !exportXLSX) {
+                    showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
+                    hideLoading();
+                    return;
+                }
+                
+                const fechaDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio}_${rango.fin}`;
+                const nombre = `reporte_${tipo}_${fechaDisplay}`;
+                
                 setTimeout(async () => {
                     try {
                         const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
                         const proyNombreX = proyObj ? proyObj.nombre : 'General';
+                        
                         if (!validarDependenciasExportacion()) throw new Error('Dependencias de exportación no disponibles');
-                        generarXLSX(tipo, fecha, proyNombreX, nombre);
+                        
+                        let formatoCount = 0;
+                        const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0) + (exportXLSX ? 1 : 0);
+                        
+                        // XLSX
+                        if (exportXLSX) {
+                            generarXLSX(tipo, rango.inicio, proyNombreX, nombre, rango);
+                            formatoCount++;
+                        }
+                        
+                        // CSV
+                        if (exportCSV) {
+                            const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type: 'text/csv;charset=utf-8;' });
+                            const urlCSV = URL.createObjectURL(csvBlob);
+                            const aC = document.createElement('a'); aC.href = urlCSV; aC.download = `${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
+                            formatoCount++;
+                        }
+                        
+                        // PDF
+                        if (exportPDF) {
+                            const htmlData = generarHTMLReporte(tipo, rango.inicio, rango);
+                            const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
+                            // Reaplicar portada sobre la plantilla recién preparada
+                            aplicarPortadaPlantilla(portada);
 
-                        const csvBlob = new Blob([generarCSVReporte(tipo, fecha)], { type: 'text/csv;charset=utf-8;' });
-                        const urlCSV  = URL.createObjectURL(csvBlob);
-                        const aC = document.createElement('a'); aC.href = urlCSV; aC.download = `${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
-
-                        const htmlData   = generarHTMLReporte(tipo, fecha);
-                        const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
-                        // Reaplicar portada sobre la plantilla recién preparada
-                        aplicarPortadaPlantilla(portada);
-
-                        contenedor.classList.add('pdf-generating');
-                        const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
-                        pdf.save(`${nombre}.pdf`);
-                        contenedor.classList.remove('pdf-generating');
+                            contenedor.classList.add('pdf-generating');
+                            const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
+                            pdf.save(`${nombre}.pdf`);
+                            contenedor.classList.remove('pdf-generating');
+                            formatoCount++;
+                        }
+                        
+                        // Agregar al cache
+                        agregarReporteCache(tipo, rango.inicio, rango.fin);
+                        
                         hideLoading();
                         showToast('✅ Reporte generado y descargado', 'success');
                     } catch (err) {
@@ -9151,8 +9438,10 @@ function validarDependenciasExportacion() {
             document.getElementById('caja-fecha').value          = fechaHoy;
             document.getElementById('maq-fecha').value           = fechaHoy;
             document.getElementById('cot-fecha').value           = fechaHoy;
-            document.getElementById('fecha-asistencia').value    = fechaHoy;
             document.getElementById('reporte-fecha').value       = fechaHoy;
+            document.getElementById('reporte-fecha-inicio').value = fechaHoy;
+            document.getElementById('reporte-fecha-fin').value   = fechaHoy;
+            document.getElementById('fecha-asistencia').value    = fechaHoy;
             document.getElementById('viaje-fecha').value         = fechaHoy;
             document.getElementById('ord-fecha').value           = fechaHoy;
             document.getElementById('insumo-fecha').value        = fechaHoy;
@@ -9170,10 +9459,13 @@ function validarDependenciasExportacion() {
             actualizarNombreEmpresaUI();
             actualizarTituloPagina();
 
-            // Paso 7: registrar listeners de navegación por tabs
+            // Paso 7: inicializar opciones de fecha del módulo de reportes
+            actualizarOpcionesFecha();
+
+            // Paso 8: registrar listeners de navegación por tabs
             inicializarNavTabs();
 
-            // Paso 8: manejar parámetros URL (shortcuts PWA y deep links)
+            // Paso 9: manejar parámetros URL (shortcuts PWA y deep links)
             const urlParams = new URLSearchParams(window.location.search);
             const moduloURL = urlParams.get('module');
             if (moduloURL) {
