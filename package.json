@@ -7,6 +7,7 @@
     "test": "npm run audit && npm run test:smoke && npm run test:crud",
     "test:smoke": "node test_smoke.js",
     "test:crud": "node test_crud.js",
+    "test:automatizado": "node tests-automatizados.js",
     "audit": "npm run audit:versions && npm run audit:assets",
     "audit:versions": "node check_versions.js",
     "audit:assets": "node check_assets.js",
@@ -33,5 +34,8 @@
   "homepage": "https://github.com/salazaroliveros-prog/construramsa_control#readme",
   "devDependencies": {
     "playwright": "^1.62.1"
+  },
+  "dependencies": {
+    "playwright-core": "^1.62.1"
   }
 }
