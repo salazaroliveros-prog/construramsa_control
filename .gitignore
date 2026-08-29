@@ -52,6 +52,7 @@ scroll_audit_screenshots/
 
 # Directorio de screenshots de pruebas (solo desarrollo local)
 scroll_validation_screenshots/
+screenshots/
 
 # Configuración local de Vercel CLI (no parte de la app)
 .vercel/
