@@ -197,7 +197,7 @@
             cursor: pointer;
             font-size: 11px;
             font-weight: 600;
-            transition: all 0.2s;
+            transition: background-color 0.2s, transform 0.2s;
         }
         #pruebas-panel .prueba-btn:hover {
             background: rgba(0, 164, 228, 0.4);
@@ -221,7 +221,7 @@
             cursor: pointer;
             font-size: 24px;
             color: var(--acento-cian);
-            transition: all 0.3s;
+            transition: background-color 0.3s, transform 0.3s;
         }
         #pruebas-toggle:hover {
             background: rgba(0, 164, 228, 0.3);
@@ -404,7 +404,7 @@
             opacity: 1;
         }
 
-        input:focus, select:focus, textarea:focus {
+        input:focus-visible, select:focus-visible, textarea:focus-visible {
             border-color: var(--acento-cian);
             background: rgba(0, 164, 228, 0.07);
             outline: none;
@@ -546,6 +546,7 @@
             font-size: 24px;
             font-weight: 800;
             color: var(--acento-cian);
+            text-wrap: balance;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -651,6 +652,8 @@
                 background: linear-gradient(90deg, transparent, rgba(9,10,15,0.92) 55%);
                 z-index: 2;
             }
+            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); width: fit-content !important; }
+            .toast { max-width: 100% !important; box-sizing: border-box !important; }
         }
 
         .nav-tab {
@@ -729,6 +732,7 @@
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        table td, table th { font-variant-numeric: tabular-nums; }
 
         th {
             background: linear-gradient(135deg, rgba(11, 63, 143, 0.45), rgba(0, 164, 228, 0.25));
@@ -919,6 +923,7 @@
             color: var(--acento-cian);
             font-size: var(--text-xl);
             font-weight: 800;
+            text-wrap: balance;
             margin-top: 0;
             margin-bottom: 6px;
         }
@@ -1153,6 +1158,8 @@
             .camera-thumbnails {
                 gap: 6px;
             }
+            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); width: fit-content !important; }
+            .toast { max-width: 100% !important; box-sizing: border-box !important; }
         }
 
         @media (max-width: 480px) {
@@ -1607,6 +1614,8 @@
             .modal-content { max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
             /* FIX nav-tabs: en móvil ocupar todo el ancho disponible */
             .nav-tabs { padding-left: 0; padding-right: 0; }
+            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); width: fit-content !important; }
+            .toast { max-width: 100% !important; box-sizing: border-box !important; }
             /* FIX: tarjeta-glass sin padding horizontal excesivo */
             .tarjeta-glass { border-radius: 12px; }
             /* Tablas responsivas: convertir a tarjetas apiladas en móvil */
@@ -1658,8 +1667,8 @@
             .kpi-value { font-size: 15px !important; }
             .kpi-label { font-size: 10px; }
             .btn-primario, .btn-secundario { padding: 10px 16px; font-size: 13px; }
-            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); }
-            .toast { max-width: 100% !important; }
+            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); width: fit-content !important; }
+            .toast { max-width: 100% !important; box-sizing: border-box !important; }
             .vp-topbar { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
             .vp-topbar > div:first-child { flex: 1 1 auto; min-width: 0; }
             .vp-topbar-actions { width: 100%; justify-content: flex-end; gap: 8px; }
@@ -1685,6 +1694,8 @@
             input, select, textarea { padding: 9px; font-size: 16px; }
             .modal-content { padding: 16px; max-height: 88dvh; }
             .modal-title { font-size: 15px; }
+            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); width: fit-content !important; }
+            .toast { max-width: 100% !important; box-sizing: border-box !important; }
         }
 
         /* ── 360px: Galaxy S, Moto G4/G5, Android budget market ──────── */
@@ -1715,6 +1726,8 @@
             /* Reportes nuevos en 360px */
             #reporte-progreso { padding: 10px; }
             #reporte-progreso-mensaje { font-size: 10px; }
+            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); width: fit-content !important; }
+            .toast { max-width: 100% !important; box-sizing: border-box !important; }
             #reportes-recientes { font-size: 10px; }
             #reporte-fechas-rango { grid-template-columns: 1fr; }
             td button { min-width: 44px; min-height: 44px !important; padding: 6px 8px !important; font-size: 11px !important; }
@@ -1728,8 +1741,9 @@
                 right: env(safe-area-inset-right, 6px) !important;
                 top: env(safe-area-inset-top, 8px) !important;
                 max-width: calc(100vw - env(safe-area-inset-left, 6px) - env(safe-area-inset-right, 6px)) !important;
+                width: fit-content !important;
             }
-            .toast { max-width: 100% !important; font-size: 13px; padding: 12px 14px; }
+            .toast { max-width: 100% !important; font-size: 13px; padding: 12px 14px; box-sizing: border-box !important; }
             .modal-content { padding: 14px; border-radius: 12px; max-height: 90dvh; }
             .modal-title { font-size: 15px; }
             .modal-message { font-size: 13px; }
@@ -1845,7 +1859,16 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-width: 320px;
+            max-width: min(320px, calc(100vw - 40px));
+            width: fit-content;
+        }
+        @media (max-width: 400px) {
+            .toast-container {
+                left: 10px !important;
+                right: 10px !important;
+                max-width: calc(100% - 20px) !important;
+                width: fit-content !important;
+            }
         }
         .toast {
             background: var(--glass-bg);
@@ -1859,13 +1882,21 @@
             box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
             animation: slideIn 0.3s ease;
             word-break: break-word;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        @media (max-width: 400px) {
+            .toast {
+                animation: none !important;
+                transform: none !important;
+            }
         }
         .toast.success { border-left: 4px solid var(--exito); }
         .toast.error   { border-left: 4px solid var(--alerta); }
         .toast.info    { border-left: 4px solid var(--acento-cian); }
 
-        @keyframes slideIn  { from{transform:translateX(100%);opacity:0;} to{transform:translateX(0);opacity:1;} }
-        @keyframes slideOut { from{transform:translateX(0);opacity:1;} to{transform:translateX(100%);opacity:0;} }
+        @keyframes slideIn  { from{transform:translateX(20px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+        @keyframes slideOut { from{transform:translateX(0);opacity:1;} to{transform:translateX(20px);opacity:0;} }
 
         /* ── Tooltips ──────────────────────────────────────────────────────
            FIX: z-index explícito · max-width con clamp · flecha indicadora
@@ -2026,6 +2057,7 @@
             font-weight: 800;
             color: var(--texto-principal);
             word-break: break-word;
+            font-variant-numeric: tabular-nums;
         }
         .kpi-card .kpi-sub { font-size: 11px; color: var(--texto-secundario); margin-top: 4px; }
         .kpi-card.positivo .kpi-value { color: #10b981; }
@@ -2141,9 +2173,9 @@
             transition: border-color 0.2s, box-shadow 0.2s;
             resize: vertical;
         }
-        .vp-field input:focus,
-        .vp-field textarea:focus,
-        .vp-field select:focus {
+        .vp-field input:focus-visible,
+        .vp-field textarea:focus-visible,
+        .vp-field select:focus-visible {
             border-color: var(--acento-cian);
             outline: none;
             box-shadow: 0 0 0 3px rgba(0,164,228,0.16);
@@ -2204,6 +2236,8 @@
             .vp-topbar { padding: 10px 14px; }
             .vp-topbar > div:first-child { min-width: 0; flex: 1 1 auto; }
             .vp-topbar-title { font-size: 13px; }
+            .toast-container { left: 10px !important; right: 10px !important; max-width: calc(100% - 20px); width: fit-content !important; }
+            .toast { max-width: 100% !important; box-sizing: border-box !important; }
         }
         @media (max-width: 480px) {
             .vp-editor { max-height: calc(100dvh - 140px); padding: 14px 12px; gap: 12px; }
@@ -2558,7 +2592,7 @@
                 </div>
             </div>
 
-            <form id="form-caja-chica" style="margin-bottom:25px;" aria-label="Formulario de registro de movimientos de caja chica" autocomplete="off">
+            <form id="form-caja-chica" style="margin-bottom:25px;" aria-label="Formulario de registro de movimientos de caja chica">
                 <!-- FIX #22: clase form-grid-2 en vez de style inline -->
                 <div class="form-grid-2">
                     <div>
@@ -2676,7 +2710,7 @@
             <p class="modulo-descripcion">Registra el uso, consumo de combustible y mantenimiento de las unidades.</p>
             <div id="aviso-sin-proyecto-maq" class="kpi-aviso display-none">⚠️ <strong>Sin proyecto activo.</strong> Los datos se guardarán en modo general. Se recomienda seleccionar o crear un proyecto primero.</div>
 
-            <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()" aria-label="Formulario de registro de maquinaria" autocomplete="off">
+            <form id="form-maquinaria" oninput="calcularMetricasMaquinaria()" aria-label="Formulario de registro de maquinaria">
                 <!-- F-01: form-grid-3 para 3 campos (Fecha + Tipo + Código) -->
                 <div class="form-grid-3">
                     <div>
@@ -2789,7 +2823,7 @@
 
             <div class="modulo-catalogo">
                 <h3 class="catalogo-titulo">📝 Catálogo de Trabajadores</h3>
-                <form id="form-trabajador" style="margin-bottom:15px;" aria-label="Formulario de registro de trabajadores" autocomplete="off">
+                <form id="form-trabajador" style="margin-bottom:15px;" aria-label="Formulario de registro de trabajadores">
                     <!-- FIX #22: clases reales + FIX #9: labels explícitos para inputs numéricos -->
                     <div class="form-grid-2-sm">
                         <div>
@@ -2858,7 +2892,7 @@
 
             <div class="modulo-catalogo">
                 <h3 class="catalogo-titulo">🏢 Directorio de Proveedores</h3>
-                <form id="form-proveedor" style="margin-bottom:15px;" aria-label="Formulario de registro de proveedores" autocomplete="off">
+                <form id="form-proveedor" style="margin-bottom:15px;" aria-label="Formulario de registro de proveedores">
                     <div class="form-grid-2-sm">
                         <div>
                             <label for="prov-nombre" class="visually-hidden">Nombre del proveedor</label>
@@ -2893,7 +2927,7 @@
             </div>
 
             <h3 class="historial-titulo" style="margin-top:25px;">📝 Registrar Nueva Cotización</h3>
-            <form id="form-cotizacion" style="margin-bottom:25px;" aria-label="Formulario de registro de cotizaciones" autocomplete="off">
+            <form id="form-cotizacion" style="margin-bottom:25px;" aria-label="Formulario de registro de cotizaciones">
                 <!-- F-05: fecha de cotización -->
                 <div class="form-grid-2">
                     <div>
@@ -2958,7 +2992,7 @@
 
             <div class="modulo-catalogo">
                 <h3 class="catalogo-titulo">🚚 Catálogo de Camiones y Equipo</h3>
-                <form id="form-camion" style="margin-bottom:15px;" aria-label="Formulario de registro de camión o equipo" autocomplete="off">
+                <form id="form-camion" style="margin-bottom:15px;" aria-label="Formulario de registro de camión o equipo">
                     <div class="form-grid-2-sm">
                         <div>
                             <label for="cam-nombre" class="visually-hidden">Nombre o placa</label>
@@ -3007,7 +3041,7 @@
 
             <div class="modulo-catalogo">
                 <h3 class="catalogo-titulo">🗺️ Rutas / Distancias al Botadero</h3>
-                <form id="form-ruta" style="margin-bottom:15px;" aria-label="Formulario de ruta al botadero" autocomplete="off">
+                <form id="form-ruta" style="margin-bottom:15px;" aria-label="Formulario de ruta al botadero">
                     <div class="form-grid-2">
                         <div>
                             <label for="ruta-nombre">Nombre / Destino</label>
@@ -3029,7 +3063,7 @@
             </div>
 
             <h3 class="historial-titulo" style="margin-top:10px;">📦 Registrar Viaje</h3>
-            <form id="form-viaje" oninput="calcularMetricasViaje()" style="margin-bottom:25px;" aria-label="Formulario de registro de viaje de camión" autocomplete="off">
+            <form id="form-viaje" oninput="calcularMetricasViaje()" style="margin-bottom:25px;" aria-label="Formulario de registro de viaje de camión">
                 <div class="form-grid-2">
                     <div>
                         <label for="viaje-fecha">Fecha</label>
@@ -3116,7 +3150,7 @@
 
             <div class="modulo-catalogo">
                 <h3 class="catalogo-titulo">🏗️ Catálogo de Maquinaria</h3>
-                <form id="form-maqcat" style="margin-bottom:15px;" aria-label="Formulario de catálogo de maquinaria" autocomplete="off">
+                <form id="form-maqcat" style="margin-bottom:15px;" aria-label="Formulario de catálogo de maquinaria">
                     <div class="form-grid-2-sm">
                         <div>
                             <label for="maqcat-nombre" class="visually-hidden">Nombre del equipo</label>
@@ -3153,7 +3187,7 @@
             </div>
 
             <h3 class="historial-titulo" style="margin-top:10px;">🔩 Registrar Orden de Mantenimiento</h3>
-            <form id="form-orden" style="margin-bottom:25px;" aria-label="Formulario de orden de mantenimiento" autocomplete="off">
+            <form id="form-orden" style="margin-bottom:25px;" aria-label="Formulario de orden de mantenimiento">
                 <div class="form-grid-2">
                     <div>
                         <label for="ord-fecha">Fecha</label>
@@ -3222,7 +3256,7 @@
             <div id="paginacion-ordenes" class="paginacion-container"></div>
 
             <h3 class="historial-titulo">🛒 Compra de Repuestos, Aceites e Insumos</h3>
-            <form id="form-insumo" style="margin-bottom:25px;" aria-label="Formulario de compra de insumos" autocomplete="off">
+            <form id="form-insumo" style="margin-bottom:25px;" aria-label="Formulario de compra de insumos">
                 <div class="form-grid-2">
                     <div>
                         <label for="insumo-tipo">Tipo de Insumo</label>
@@ -3407,7 +3441,7 @@
                 <div class="form-grid-2" style="margin-top:10px;">
                     <div>
                         <label for="cfg-telefono" style="font-size:12px;color:var(--texto-principal);">Teléfono</label>
-                        <input type="text" id="cfg-telefono" placeholder="+502 0000 0000" aria-label="Teléfono de la empresa" maxlength="30">
+                        <input type="tel" id="cfg-telefono" placeholder="+502 0000 0000" aria-label="Teléfono de la empresa" maxlength="30">
                     </div>
                     <div>
                         <label for="cfg-email" style="font-size:12px;color:var(--texto-principal);">Email</label>
@@ -3420,7 +3454,7 @@
                 </div>
                 <div style="margin-top:10px;">
                     <label for="cfg-website" style="font-size:12px;color:var(--texto-principal);">Sitio Web</label>
-                    <input type="text" id="cfg-website" placeholder="www.miempresa.com" aria-label="Sitio web de la empresa" maxlength="50">
+                    <input type="url" id="cfg-website" placeholder="www.miempresa.com" aria-label="Sitio web de la empresa" maxlength="50">
                 </div>
                 <div style="margin-top:12px;">
                     <button onclick="guardarDatosContacto()" class="btn-primario" aria-label="Guardar datos de contacto">💾 Guardar Datos de Contacto</button>

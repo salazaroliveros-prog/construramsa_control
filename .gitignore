@@ -24,6 +24,10 @@ build/
 # Documentation and notes
 *.md
 !README.md
+!UI_UX_IMPROVEMENTS.md
+!REPORTES_VALIDATION.md
+!FILES_COMPATIBILITY.md
+!UX_FILES_REPORT.md
 
 # Servidor local usado por las pruebas; Vercel no lo incluye en builds estáticos.
 server.js
@@ -37,6 +41,9 @@ _*.ps1
 test_*.js
 !test_smoke.js
 !test_crud.js
+!test_reportes.js
+!test_reportes_validation.js
+!test_ux_files.js
 !package.json
 
 # Archivo fuente del logo (no se sube; las variantes icon-*.png sí)
