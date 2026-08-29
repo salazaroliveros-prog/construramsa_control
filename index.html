@@ -6979,14 +6979,20 @@ pag_.forEach(c => {
             "    return ContentService.createTextOutput(JSON.stringify({ok:true}));",
             "  } catch(err){ return ContentService.createTextOutput(JSON.stringify({ok:false,error:String(err)})); }",
             "}",
+            "function respuesta(obj,e){",
+            "  var json = JSON.stringify(obj);",
+            "  var prefix = e && e.parameter && e.parameter.prefix;",
+            "  if (prefix && /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(prefix)) return ContentService.createTextOutput(prefix + '(' + json + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);",
+            "  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);",
+            "}",
             "function doGet(e){",
             "  try {",
             "    var folder = buscarCarpeta();",
             "    var f = folder.getFilesByName('control_obra_latest.json');",
-            "    if (!f.hasNext()) return ContentService.createTextOutput(JSON.stringify({ok:false,error:'Sin respaldo'}));",
+            "    if (!f.hasNext()) return respuesta({ok:false,error:'Sin respaldo'},e);",
             "    var contenido = f.next().getBlob().getDataAsString();",
-            "    return ContentService.createTextOutput(JSON.stringify({ok:true,data:JSON.parse(contenido)}));",
-            "  } catch(err){ return ContentService.createTextOutput(JSON.stringify({ok:false,error:String(err)})); }",
+            "    return respuesta({ok:true,data:JSON.parse(contenido)},e);",
+            "  } catch(err){ return respuesta({ok:false,error:String(err)},e); }",
             "}",
             "/** Solo para autorizar permisos la primera vez */",
             "function crearCarpetaPrueba(){ buscarCarpeta(); return 'Carpeta ControlObra lista'; }"
@@ -7018,13 +7024,33 @@ pag_.forEach(c => {
                 if (!auto) showToast('❌ No se pudo subir: ' + err.message, 'error');
             }
         }
-        function nubeRestaurar() {
+        function nubeDescargarGasJsonp(url) {
+            return new Promise((resolve, reject) => {
+                const callback = '__nubeGasCallback_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+                const script = document.createElement('script');
+                const cleanup = () => { delete window[callback]; script.remove(); };
+                const timer = setTimeout(() => { cleanup(); reject(new Error('Tiempo de espera agotado al descargar desde Apps Script')); }, 30000);
+                window[callback] = (payload) => { clearTimeout(timer); cleanup(); resolve(payload); };
+                script.onerror = () => { clearTimeout(timer); cleanup(); reject(new Error('No se pudo leer la respuesta de Apps Script')); };
+                script.src = url + (url.includes('?') ? '&' : '?') + 'prefix=' + encodeURIComponent(callback);
+                document.head.appendChild(script);
+            });
+        }
+        async function nubeDescargarGas(url) {
+            try {
+                const r = await fetch(url, { method: 'GET' });
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return await r.json();
+            } catch (fetchError) {
+                return await nubeDescargarGasJsonp(url);
+            }
+        }
+        async function nubeRestaurar() {
             const c = _nubeCfg();
             if (c.proveedor !== 'gas' || !c.url) { showToast('⚠️ Configura un respaldo en la nube primero', 'info'); return; }
             showLoading('Descargando respaldo de la nube...');
-            fetch(c.url, { method: 'GET' })
-                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                .then(r => {
+            try {
+                const r = await nubeDescargarGas(c.url);
                     if (!r.ok) throw new Error(r.error || 'sin respaldo');
                     hideLoading();
                     showConfirmModal('Restaurar desde la nube',
@@ -7038,8 +7064,11 @@ pag_.forEach(c => {
                             showToast('✅ Datos restaurados desde la nube', 'success', 5000);
                             setTimeout(() => location.reload(), 1400);
                         });
-                })
-                .catch(err => { hideLoading(); _nubeSetEstado('❌ Error al descargar: ' + err.message, false); showToast('❌ Error al restaurar: ' + err.message, 'error'); });
+            } catch (err) {
+                hideLoading();
+                _nubeSetEstado('❌ Error al descargar: ' + err.message, false);
+                showToast('❌ Error al restaurar: ' + err.message, 'error');
+            }
         }
         document.addEventListener('DOMContentLoaded', function () { setTimeout(nubeRenderUI, 600); });
         document.addEventListener('change', function (e) { if (e.target && e.target.id === 'nube-proveedor') nubeCambiarProveedor2(); });
