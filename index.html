@@ -134,6 +134,134 @@
         img, video, canvas { max-width: 100%; height: auto; }
 
         /* ============================================================
+           MODO DE PRUEBAS VISUALES - Panel de validación
+           ============================================================ */
+        #pruebas-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--acento-cian);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 10000;
+            min-width: 280px;
+            max-width: 350px;
+            display: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 12px;
+        }
+        #pruebas-panel.active { display: block; }
+        #pruebas-panel h3 {
+            color: var(--acento-cian);
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 8px;
+        }
+        #pruebas-panel .prueba-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid var(--acento-cian);
+        }
+        #pruebas-panel .prueba-item.success { border-left-color: #10b981; }
+        #pruebas-panel .prueba-item.error { border-left-color: #ef4444; }
+        #pruebas-panel .prueba-item.warning { border-left-color: #f59e0b; }
+        #pruebas-panel .prueba-label {
+            font-weight: 600;
+            color: var(--texto-principal);
+            margin-bottom: 4px;
+        }
+        #pruebas-panel .prueba-value {
+            color: var(--texto-secundario);
+            font-size: 11px;
+        }
+        #pruebas-panel .prueba-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        #pruebas-panel .prueba-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            border: 1px solid var(--acento-cian);
+            background: rgba(0, 164, 228, 0.2);
+            color: var(--acento-cian);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        #pruebas-panel .prueba-btn:hover {
+            background: rgba(0, 164, 228, 0.4);
+        }
+        #pruebas-panel .prueba-btn:active {
+            transform: scale(0.98);
+        }
+        #pruebas-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--acento-cian);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--acento-cian);
+            transition: all 0.3s;
+        }
+        #pruebas-toggle:hover {
+            background: rgba(0, 164, 228, 0.3);
+            transform: scale(1.1);
+        }
+        #pruebas-toggle.active {
+            background: var(--acento-cian);
+            color: #000;
+        }
+        /* Indicadores visuales de scroll */
+        .scroll-indicator {
+            position: fixed;
+            background: rgba(0, 164, 228, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 9998;
+            display: none;
+            pointer-events: none;
+        }
+        .scroll-indicator.show { display: block; }
+        .scroll-indicator-top { top: 70px; left: 50%; transform: translateX(-50%); }
+        .scroll-indicator-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
+        .scroll-indicator-left { left: 20px; top: 50%; transform: translateY(-50%); }
+        .scroll-indicator-right { right: 20px; top: 50%; transform: translateY(-50%); }
+        /* Highlight de elementos para pruebas */
+        .prueba-highlight {
+            outline: 3px solid var(--acento-cian) !important;
+            outline-offset: 2px;
+            box-shadow: 0 0 10px rgba(0, 164, 228, 0.5);
+        }
+        .prueba-highlight-error {
+            outline: 3px solid #ef4444 !important;
+            outline-offset: 2px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        /* ============================================================
            SCROLL NATIVO PURO - Sin transformaciones ni GPU que interfieran
            ============================================================ */
         html {
@@ -9476,7 +9604,10 @@ function validarDependenciasExportacion() {
             // Paso 8: registrar listeners de navegación por tabs
             inicializarNavTabs();
 
-            // Paso 9: manejar parámetros URL (shortcuts PWA y deep links)
+            // Paso 9: inicializar sistema de pruebas visuales
+            inicializarPruebasVisuales();
+
+            // Paso 10: manejar parámetros URL (shortcuts PWA y deep links)
             const urlParams = new URLSearchParams(window.location.search);
             const moduloURL = urlParams.get('module');
             if (moduloURL) {
@@ -9580,6 +9711,352 @@ function validarDependenciasExportacion() {
                 });
             });
         }
+
+        // ============================================================
+        // SISTEMA DE PRUEBAS VISUALES Y VALIDACIÓN
+        // ============================================================
+        let pruebasActivas = false;
+        let scrollTimeout = null;
+
+        // Toggle del panel de pruebas
+        function togglePruebas() {
+            pruebasActivas = !pruebasActivas;
+            const panel = document.getElementById('pruebas-panel');
+            const toggle = document.getElementById('pruebas-toggle');
+            
+            if (pruebasActivas) {
+                panel.classList.add('active');
+                toggle.classList.add('active');
+                toggle.textContent = '✖';
+                ejecutarPruebasAutomaticas();
+            } else {
+                panel.classList.remove('active');
+                toggle.classList.remove('active');
+                toggle.textContent = '🧪';
+                limpiarHighlights();
+            }
+        }
+
+        // Ejecutar pruebas automáticas
+        function ejecutarPruebasAutomaticas() {
+            if (!pruebasActivas) return;
+            
+            const resultados = [];
+            
+            // Prueba 1: Verificar scroll vertical
+            const scrollVertical = document.documentElement.scrollHeight > window.innerHeight;
+            resultados.push({
+                label: 'Scroll Vertical',
+                value: scrollVertical ? `Disponible (${document.documentElement.scrollHeight}px)` : 'No necesario',
+                status: scrollVertical ? 'success' : 'warning'
+            });
+            
+            // Prueba 2: Verificar scroll horizontal
+            const scrollHorizontal = document.documentElement.scrollWidth > window.innerWidth;
+            resultados.push({
+                label: 'Scroll Horizontal',
+                value: scrollHorizontal ? `Detectado (${document.documentElement.scrollWidth}px)` : 'No detectado',
+                status: scrollHorizontal ? 'warning' : 'success'
+            });
+            
+            // Prueba 3: Verificar módulo activo
+            const moduloActivo = document.querySelector('.module.active');
+            resultados.push({
+                label: 'Módulo Activo',
+                value: moduloActivo ? moduloActivo.id : 'Ninguno',
+                status: moduloActivo ? 'success' : 'error'
+            });
+            
+            // Prueba 4: Verificar proyecto seleccionado
+            const db = getDB();
+            const proyectoActivo = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
+            resultados.push({
+                label: 'Proyecto Activo',
+                value: proyectoActivo ? proyectoActivo.nombre : 'Ninguno',
+                status: proyectoActivo ? 'success' : 'warning'
+            });
+            
+            // Prueba 5: Verificar localStorage
+            const localStorageDisponible = localStorage.getItem(DB_KEY);
+            resultados.push({
+                label: 'LocalStorage',
+                value: localStorageDisponible ? 'Datos cargados' : 'Vacío',
+                status: localStorageDisponible ? 'success' : 'error'
+            });
+            
+            // Prueba 6: Verificar tamaño de pantalla
+            const viewport = `${window.innerWidth}x${window.innerHeight}`;
+            let dispositivo = 'Desktop';
+            if (window.innerWidth < 768) dispositivo = 'Móvil';
+            else if (window.innerWidth < 1024) dispositivo = 'Tablet';
+            resultados.push({
+                label: 'Viewport',
+                value: `${viewport} (${dispositivo})`,
+                status: 'success'
+            });
+            
+            // Prueba 7: Verificar soporte de touch
+            const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            resultados.push({
+                label: 'Touch Support',
+                value: touchSupport ? 'Sí' : 'No',
+                status: 'success'
+            });
+            
+            // Prueba 8: Verificar scroll nativo
+            const bodyScroll = document.body.style.overflowY;
+            resultados.push({
+                label: 'Scroll Nativo',
+                value: bodyScroll === 'auto' ? 'Habilitado' : bodyScroll,
+                status: bodyScroll === 'auto' ? 'success' : 'warning'
+            });
+            
+            renderizarResultadosPruebas(resultados);
+        }
+
+        // Renderizar resultados en el panel
+        function renderizarResultadosPruebas(resultados) {
+            const container = document.getElementById('pruebas-panel');
+            const contenido = container.querySelector('.pruebas-contenido') || document.createElement('div');
+            contenido.className = 'pruebas-contenido';
+            
+            contenido.innerHTML = '';
+            resultados.forEach(r => {
+                const item = document.createElement('div');
+                item.className = `prueba-item ${r.status}`;
+                item.innerHTML = `
+                    <div class="prueba-label">${r.label}</div>
+                    <div class="prueba-value">${r.value}</div>
+                `;
+                contenido.appendChild(item);
+            });
+            
+            if (!container.querySelector('.pruebas-contenido')) {
+                container.appendChild(contenido);
+            }
+        }
+
+        // Limpiar highlights
+        function limpiarHighlights() {
+            document.querySelectorAll('.prueba-highlight, .prueba-highlight-error').forEach(el => {
+                el.classList.remove('prueba-highlight', 'prueba-highlight-error');
+            });
+        }
+
+        // Highlight de módulo activo
+        function highlightModuloActivo() {
+            if (!pruebasActivas) return;
+            limpiarHighlights();
+            const modulo = document.querySelector('.module.active');
+            if (modulo) {
+                modulo.classList.add('prueba-highlight');
+            }
+        }
+
+        // Indicadores de scroll
+        function mostrarIndicadorScroll(direccion) {
+            if (!pruebasActivas) return;
+            
+            let indicador;
+            switch(direccion) {
+                case 'top':
+                    indicador = document.querySelector('.scroll-indicator-top');
+                    break;
+                case 'bottom':
+                    indicador = document.querySelector('.scroll-indicator-bottom');
+                    break;
+                case 'left':
+                    indicador = document.querySelector('.scroll-indicator-left');
+                    break;
+                case 'right':
+                    indicador = document.querySelector('.scroll-indicator-right');
+                    break;
+            }
+            
+            if (indicador) {
+                indicador.classList.add('show');
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    indicador.classList.remove('show');
+                }, 1000);
+            }
+        }
+
+        // Detectar eventos de scroll
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
+            const maxScrollLeft = document.documentElement.scrollWidth - window.innerWidth;
+            
+            if (scrollTop <= 10) mostrarIndicadorScroll('top');
+            if (scrollTop >= maxScrollTop - 10) mostrarIndicadorScroll('bottom');
+            if (scrollLeft <= 10) mostrarIndicadorScroll('left');
+            if (scrollLeft >= maxScrollLeft - 10) mostrarIndicadorScroll('right');
+        });
+
+        // Capturar screenshot usando Screen Capture API
+        async function capturarScreenshot() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                    showToast('❌ Captura de pantalla no soportada en este navegador', 'error');
+                    return;
+                }
+                
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "always" },
+                    audio: false
+                });
+                
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                stream.getTracks().forEach(track => track.stop());
+                
+                const imageData = canvas.toDataURL('image/png');
+                
+                // Descargar screenshot
+                const link = document.createElement('a');
+                link.download = `screenshot_${new Date().toISOString().split('T')[0]}.png`;
+                link.href = imageData;
+                link.click();
+                
+                showToast('✅ Screenshot capturado y descargado', 'success');
+            } catch (error) {
+                console.error('Error al capturar screenshot:', error);
+                showToast('❌ Error al capturar screenshot', 'error');
+            }
+        }
+
+        // Validar scroll en elemento específico
+        function validarScrollElemento(selector) {
+            const el = document.querySelector(selector);
+            if (!el) {
+                showToast(`❌ Elemento no encontrado: ${selector}`, 'error');
+                return;
+            }
+            
+            const hasScrollY = el.scrollHeight > el.clientHeight;
+            const hasScrollX = el.scrollWidth > el.clientWidth;
+            
+            el.classList.add('prueba-highlight');
+            
+            setTimeout(() => {
+                el.classList.remove('prueba-highlight');
+            }, 2000);
+            
+            const mensaje = `Scroll Y: ${hasScrollY ? 'Sí' : 'No'} | Scroll X: ${hasScrollX ? 'Sí' : 'No'}`;
+            showToast(`📊 ${selector}: ${mensaje}`, 'info', 4000);
+        }
+
+        // Validar todos los scrollables
+        function validarTodosScrollables() {
+            const scrollables = document.querySelectorAll('.overflow-x-auto, .overflow-y-auto, [style*="overflow"]');
+            let count = 0;
+            
+            scrollables.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('prueba-highlight');
+                    setTimeout(() => {
+                        el.classList.remove('prueba-highlight');
+                    }, 1000);
+                }, index * 200);
+                count++;
+            });
+            
+            showToast(`📊 Validando ${count} elementos scrollables`, 'info', 3000);
+        }
+
+        // Agregar indicadores de scroll al DOM
+        function agregarIndicadoresScroll() {
+            const posiciones = ['top', 'bottom', 'left', 'right'];
+            posiciones.forEach(pos => {
+                const indicador = document.createElement('div');
+                indicador.className = `scroll-indicator scroll-indicator-${pos}`;
+                indicador.textContent = pos === 'top' ? '⬆️ Inicio' : 
+                                      pos === 'bottom' ? '⬇️ Fin' : 
+                                      pos === 'left' ? '⬅️ Inicio' : '➡️ Fin';
+                document.body.appendChild(indicador);
+            });
+        }
+
+        // Inicializar sistema de pruebas
+        function inicializarPruebasVisuales() {
+            // Agregar botón toggle
+            const toggle = document.createElement('div');
+            toggle.id = 'pruebas-toggle';
+            toggle.textContent = '🧪';
+            toggle.onclick = togglePruebas;
+            toggle.title = 'Activar/Desactivar modo de pruebas';
+            document.body.appendChild(toggle);
+            
+            // Agregar panel de pruebas
+            const panel = document.createElement('div');
+            panel.id = 'pruebas-panel';
+            panel.innerHTML = `
+                <h3>🧪 Panel de Pruebas</h3>
+                <div class="pruebas-contenido"></div>
+                <div class="prueba-actions">
+                    <button class="prueba-btn" onclick="ejecutarPruebasAutomaticas()">🔄 Actualizar</button>
+                    <button class="prueba-btn" onclick="capturarScreenshot()">📷 Screenshot</button>
+                    <button class="prueba-btn" onclick="validarScrollElemento('.nav-tabs')">📊 Tabs</button>
+                    <button class="prueba-btn" onclick="validarScrollElemento('.container')">📊 Contenedor</button>
+                    <button class="prueba-btn" onclick="validarTodosScrollables()">📊 Todos</button>
+                    <button class="prueba-btn" onclick="highlightModuloActivo()">🎯 Módulo</button>
+                </div>
+            `;
+            document.body.appendChild(panel);
+            
+            // Agregar indicadores de scroll
+            agregarIndicadoresScroll();
+            
+            // Actualizar pruebas al cambiar de módulo
+            const observer = new MutationObserver(() => {
+                if (pruebasActivas) {
+                    ejecutarPruebasAutomaticas();
+                }
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class']
+            });
+            
+            // Atajo de teclado para activar pruebas (Ctrl+Shift+P)
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+                    e.preventDefault();
+                    togglePruebas();
+                }
+            });
+        }
     </script>
+    
+    <!-- Elementos del sistema de pruebas visuales -->
+    <button id="pruebas-toggle" onclick="togglePruebas()" title="Activar modo de pruebas (Ctrl+Shift+P)">🧪</button>
+    <div id="pruebas-panel">
+        <h3>🧪 Panel de Pruebas</h3>
+        <div class="pruebas-contenido"></div>
+        <div class="prueba-actions">
+            <button class="prueba-btn" onclick="ejecutarPruebasAutomaticas()">🔄 Actualizar</button>
+            <button class="prueba-btn" onclick="capturarScreenshot()">📷 Screenshot</button>
+            <button class="prueba-btn" onclick="validarScrollElemento('.nav-tabs')">📊 Tabs</button>
+            <button class="prueba-btn" onclick="validarScrollElemento('.container')">📊 Contenedor</button>
+            <button class="prueba-btn" onclick="validarTodosScrollables()">📊 Todos</button>
+            <button class="prueba-btn" onclick="highlightModuloActivo()">🎯 Módulo</button>
+        </div>
+    </div>
 </body>
 </html>
