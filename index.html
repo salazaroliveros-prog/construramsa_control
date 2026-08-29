@@ -146,6 +146,9 @@
             /* Scroll nativo puro en todos los dispositivos */
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
+            /* FIX: Asegurar scroll en trackpads de portátiles */
+            -ms-overflow-style: scrollbar;
+            scrollbar-width: auto;
         }
 
         body {
@@ -158,6 +161,11 @@
             /* Scroll nativo puro en todos los dispositivos */
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
+            /* FIX: Asegurar scroll en trackpads de portátiles */
+            -ms-overflow-style: scrollbar;
+            scrollbar-width: auto;
+            /* FIX: Permitir gestos de scroll en trackpads y touch */
+            touch-action: auto;
             background-color: var(--bg-principal);
             background-image:
                 radial-gradient(at 12% 6%, rgba(11, 63, 143, 0.55) 0px, transparent 46%),
@@ -166,7 +174,8 @@
                 radial-gradient(at 82% 88%, rgba(139, 92, 246, 0.36) 0px, transparent 48%),
                 radial-gradient(at 18% 86%, rgba(11, 63, 143, 0.34) 0px, transparent 48%),
                 linear-gradient(160deg, #070813 0%, #0a0c14 40%, #0b1530 74%, #121b3a 100%);
-            background-attachment: fixed;
+            /* FIX: background-attachment: fixed bloquea scroll en móviles y trackpads */
+            /* background-attachment: fixed; */
             color: var(--texto-principal);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             /* safe-area padding para iPhone con notch */
@@ -181,14 +190,17 @@
             -webkit-text-size-adjust: 100%;
             -moz-text-size-adjust: 100%;
             text-size-adjust: 100%;
-            /* Prevenir pull-to-refresh accidental */
-            overscroll-behavior-y: contain;
+            /* FIX: overscroll-behavior-y: contain bloquea scroll en trackpads */
+            /* overscroll-behavior-y: contain; */
+            /* Permitir scroll nativo completo en todos los dispositivos */
+            overscroll-behavior: auto;
         }
 
         /* Granulado global del fondo — vidrio granulado desenfocado sobre el degradado */
         body::before {
             content: "";
-            position: fixed;
+            /* FIX: position: fixed bloquea scroll en móviles - cambiado a absolute */
+            position: absolute;
             inset: 0;
             background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 180px 180px;
@@ -475,11 +487,11 @@
             padding-bottom: 4px;
             flex-wrap: nowrap;
             position: relative;
-            /* Mejora de rendimiento: GPU layer para scroll horizontal */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            /* Mejorar la respuesta al touch en móviles */
-            touch-action: pan-x pan-y;
+            /* FIX: Removido transform: translateZ(0) que bloquea scroll en trackpads */
+            /* transform: translateZ(0); */
+            /* -webkit-transform: translateZ(0); */
+            /* FIX: Removido touch-action: pan-x pan-y que restringe scroll vertical */
+            /* touch-action: pan-x pan-y; */
         }
         .nav-tabs::-webkit-scrollbar { display: none; }
         @media (min-width: 769px) {
