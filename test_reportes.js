@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.2 — Test Suite de Reportes
+ * CONSTRURAMSA v2.8.4 — Test Suite de Reportes
  * Prueba: Generación y validación de todos los tipos de reportes en todos los formatos
  */
 const { chromium } = require('playwright');
@@ -50,7 +50,7 @@ function log(tipo, formato, ok, detalle = '') {
 
   try {
     console.log('\n══════════════════════════════════════════════');
-    console.log('  CONSTRURAMSA v2.8.2 — TEST SUITE DE REPORTES');
+    console.log('  CONSTRURAMSA v2.8.4 — TEST SUITE DE REPORTES');
     console.log('══════════════════════════════════════════════\n');
 
     await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });

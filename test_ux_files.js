@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.2 — Test de Experiencia de Usuario en Archivos
+ * CONSTRURAMSA v2.8.4 — Test de Experiencia de Usuario en Archivos
  * Prueba: Valida el renderizado, legibilidad y scroll natural de archivos generados
  */
 const { chromium } = require('playwright');
@@ -49,7 +49,7 @@ function log(formato, aspecto, ok, detalle = '') {
 
   try {
     console.log('\n══════════════════════════════════════════════');
-    console.log('  CONSTRURAMSA v2.8.2 — TEST DE EXPERIENCIA DE USUARIO EN ARCHIVOS');
+    console.log('  CONSTRURAMSA v2.8.4 — TEST DE EXPERIENCIA DE USUARIO EN ARCHIVOS');
     console.log('══════════════════════════════════════════════\n');
 
     await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });
@@ -194,8 +194,8 @@ function log(formato, aspecto, ok, detalle = '') {
       
       return {
         tieneColoresTotales: !!(totalIngreso && totalEgreso && totalDestacado),
-        tieneDiferenciacionVisual: totalIngreso && totalEgreso && 
-                                totalIngreso.style.color !== totalEgreso.style.color
+        tieneDiferenciacionVisual: totalIngreso && totalEgreso &&
+                                window.getComputedStyle(totalIngreso).color !== window.getComputedStyle(totalEgreso).color
       };
     });
     
@@ -328,10 +328,10 @@ function log(formato, aspecto, ok, detalle = '') {
       let tablasResponsive = 0;
       
       tablas.forEach(tabla => {
-        const style = window.getComputedStyle(tabla);
-        const width = style.width;
+        const width = tabla.offsetWidth;
+        const parentWidth = tabla.parentElement ? tabla.parentElement.offsetWidth : 0;
         
-        if (width === '100%' || width === 'auto') {
+        if (width <= parentWidth) {
           tablasResponsive++;
         }
       });

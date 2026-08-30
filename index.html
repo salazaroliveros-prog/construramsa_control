@@ -65,6 +65,19 @@
     <!-- ═══ Android Chrome — color barra de estado ═══ -->
     <meta name="mobile-web-app-capable" content="yes">
 
+    <!-- Preconnect a orígenes externos usados por sincronización en la nube -->
+    <link rel="preconnect" href="https://oauth2.googleapis.com">
+    <link rel="preconnect" href="https://www.googleapis.com">
+    <link rel="preconnect" href="https://login.microsoftonline.com">
+    <link rel="preconnect" href="https://graph.microsoft.com">
+    <link rel="dns-prefetch" href="https://script.google.com">
+    <link rel="dns-prefetch" href="https://accounts.google.com">
+
+    <!-- Preload críticos: vendor scripts (PDF, XLSX, sanitización) cargados de forma sincrónica -->
+    <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
+    <link rel="preload" as="script" href="./vendor/xlsx.full.min.js">
+    <link rel="preload" as="script" href="./vendor/purify.min.js">
+
     <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
     <!-- SheetJS para exportar reportes a XLSX -->
     <script src="./vendor/xlsx.full.min.js" integrity="sha384-gx12pQMMYnabkTgbCHqqrT65RwDnXI/f/dU2H9JUmT0KUeiMF5bf+yroQBmX0Nuk" crossorigin="anonymous"></script>
@@ -824,19 +837,20 @@
         }
 
         /* Estilos para totales en tablas PDF */
-        #plantilla-reporte-impresion .total-destacado {
+        /* Selector incluye table.tabla-pdf td para vencer la especificidad de .tabla-pdf td */
+        #plantilla-reporte-impresion table.tabla-pdf td.total-destacado {
             font-weight: 700;
             color: var(--pdf-azul-oscuro);
             text-align: right;
             background-color: #EFF6FF !important;
         }
-        #plantilla-reporte-impresion .total-egreso {
+        #plantilla-reporte-impresion table.tabla-pdf td.total-egreso {
             font-weight: 700;
             color: var(--pdf-rojo);
             text-align: right;
             background-color: #FEF2F2 !important;
         }
-        #plantilla-reporte-impresion .total-ingreso {
+        #plantilla-reporte-impresion table.tabla-pdf td.total-ingreso {
             font-weight: 700;
             color: var(--pdf-verde);
             text-align: right;

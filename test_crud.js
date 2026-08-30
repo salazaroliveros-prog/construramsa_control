@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.2 — Test CRUD completo
+ * CONSTRURAMSA v2.8.4 — Test CRUD completo
  * Prueba: Crear, Leer, Modificar y Eliminar en todos los módulos
  * IDs verificados directamente desde index.html
  */
@@ -79,7 +79,7 @@ async function getDatos(page) {
 
   try {
     console.log('\n══════════════════════════════════════════════');
-    console.log('  CONSTRURAMSA v2.8.2 — TEST CRUD COMPLETO');
+    console.log('  CONSTRURAMSA v2.8.4 — TEST CRUD COMPLETO');
     console.log('══════════════════════════════════════════════\n');
 
     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 45000 });
