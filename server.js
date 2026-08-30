@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const DIST = path.join(process.cwd(), 'static');
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
@@ -9,12 +10,8 @@ const MIME = {
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.jpg': 'image/jpeg',
-  '.ico': 'image/x-icon',
-  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  '.pdf': 'application/pdf'
+  '.ico': 'image/x-icon'
 };
-
-const DIST = path.join(process.env.VERCEL ? '/var/task/dist' : __dirname, 'static');
 
 module.exports = async (req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
@@ -23,9 +20,9 @@ module.exports = async (req, res) => {
   if (!filePath.startsWith(DIST)) {
     res.writeHead(403); res.end('Forbidden'); return;
   }
-  let stat;
-  try { stat = await fs.promises.stat(filePath); } catch { stat = null; }
-  if (!stat || !stat.isFile()) {
+  let isFile = false;
+  try { isFile = (await fs.promises.stat(filePath)).isFile(); } catch { isFile = false; }
+  if (!isFile) {
     const idx = path.join(DIST, 'index.html');
     const data = await fs.promises.readFile(idx);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -35,5 +32,6 @@ module.exports = async (req, res) => {
   res.setHeader('Content-Type', MIME[ext] || 'application/octet-stream');
   res.setHeader('Cache-Control', ext === '.html' ? 'no-store' : 'public, max-age=31536000, immutable');
   res.writeHead(200);
-  fs.createReadStream(filePath).pipe(res);
+  const stream = fs.createReadStream(filePath);
+  stream.pipe(res);
 };
