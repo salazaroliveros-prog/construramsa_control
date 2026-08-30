@@ -4,7 +4,7 @@
   "description": "Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra. Personalizable para cualquier empresa con sincronización en la nube.",
   "main": "server.js",
   "scripts": {
-    "test": "npm run audit && npm run test:smoke && npm run test:crud",
+    "test": "npm run audit && npm run test:smoke && npm run test:crud && npm run test:reportes && npm run test:reportes:validation",
     "test:smoke": "node test_smoke.js",
     "test:crud": "node test_crud.js",
     "test:automatizado": "node tests-automatizados.js",
