@@ -21,7 +21,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 - **Respaldo de Datos**: Exportación e importación con fusión inteligente
 - **Accesibilidad WCAG 2.1 AA**: Contraste de colores corregido, aria-live, aria-label en todos los controles
 - **Paginación**: Tablas de historial paginadas a 20 registros por página
-- **PWA Completa**: Service Worker v2.8.2 con activación inmediata, dependencias de exportación locales y caché robusto
+- **PWA Completa**: Service Worker v2.8.4 con activación inmediata, dependencias de exportación locales y caché robusto
 
 ## Instalación
 
@@ -63,7 +63,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 | Archivo | Descripción |
 |---------|-------------|
 | `index.html` | Aplicación principal (HTML + CSS + JavaScript) |
-| `sw.js` | Service Worker v2.8.2 para funcionalidad offline |
+| `sw.js` | Service Worker v2.8.4 para funcionalidad offline |
 | `manifest.json` | Configuración PWA con shortcuts de módulos |
 | `icon.png` | Icono corporativo 1024×1024 (instalación/PWA) |
 | `icon-512.png` | Icono PWA 512×512 |
@@ -138,6 +138,28 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 | Footer PDF | `#6B7280` | `#ffffff` | ~4.6:1 | ✅ AA |
 
 ## Historial de Cambios
+
+### v2.8.4 (2026-08-29) — Roving tabindex completo en tablist
+- **Accesibilidad**: tab activo tiene `tabindex="0"` y los 8 tabs inactivos tienen `tabindex="-1"` en el HTML inicial, cumpliendo el patrón APG de *roving tabindex*
+- **JS - click handler**: al limpiar los tabs se les asigna `tabindex="-1"`; al activar el tab seleccionado se le asigna `tabindex="0"` — antes solo `aria-selected` se actualizaba
+- **JS - URL handler** (DOMContentLoaded): mismo patrón roving tabindex aplicado al activar módulo por parámetro URL o shortcut PWA
+- **JS - keyboard handler** (ya existente desde v2.8.3): ArrowRight/Left mueven el foco entre tabs (circular), Home/End al primero/último, Enter/Space activan el tab enfocado — funciona correctamente con el roving tabindex corregido
+- **CSS**: eliminado bloque duplicado de `.module { display: none }` / `.module.active { display: block }` que existía dos veces en el stylesheet (era ruido visual, no afectaba el comportamiento)
+- **Cumple**: con roving tabindex, la navegación por teclado en el tablist es completamente conforme a ARIA APG Tabs Pattern — un solo `Tab` llega al tablist y las flechas navegan dentro de él
+
+### v2.8.3 (2026-08-29) — Patrón ARIA tablist/tab/tabpanel completo
+- **Accesibilidad**: `<nav class="nav-tabs">` tiene `role="tablist"` (ya tenía desde v2.8.2); ahora cada `<button class="nav-tab">` tiene `id="tab-{módulo}"` para que los tabpanels puedan referenciarlos
+- **Accesibilidad**: los 9 módulos cambian de `role="region"` a `role="tabpanel"`; `aria-labelledby` apunta al `id` del tab correspondiente (`tab-resumen`, `tab-caja-chica`, etc.) en lugar del `h2` interno
+- **Accesibilidad**: `tabindex="0"` en el tabpanel activo (resumen por defecto); `tabindex="-1"` en los 8 paneles inactivos
+- **JS - tab click handler**: al desactivar todos los módulos se les pone `tabindex="-1"`; al activar el módulo seleccionado se le pone `tabindex="0"` antes del focus
+- **JS - URL handler**: mismo patrón en el handler de deep links / shortcuts PWA del `DOMContentLoaded`
+- **JS - popstate / Alt+1..9**: heredan el fix automáticamente al reutilizar `tab.click()`
+- **Cumple**: ARIA Authoring Practices Guide — Tabs Pattern (APG); lectores de pantalla (NVDA, JAWS, VoiceOver) anuncian el panel activo correctamente
+
+### v2.8.2 (2026-08-27) — Exportación offline, accesibilidad base y Service Worker
+- **PWA**: Service Worker actualizado a v2.8.2 con activación inmediata (`skipWaiting` + `clients.claim()`) y caché robusto
+- **Offline**: dependencias de exportación (html2pdf, SheetJS, DOMPurify) servidas localmente desde `./vendor/`; las exportaciones funcionan sin conexión tras la primera carga
+- **Accesibilidad**: `role="tablist"` en `<nav>`, `role="tab"` + `aria-selected` + `aria-controls` en cada botón de navegación; `aria-selected` actualizado dinámicamente en los handlers de click y de URL
 
 ### v2.7.2 (2026-08-26) — Membrete oficial en exportaciones PDF
 - **Plantilla PDF**: rediseño completo fiel al membrete oficial de CONSTRURAMSA — logo centrado grande, nombre con letra-spacing amplio, slogan en azul bold, franja doble azul-cian divisoria
@@ -279,6 +301,6 @@ La aplicación es una PWA instalable y 100% responsive, optimizada para uso en c
 
 ---
 
-**Versión**: 2.8.2
+**Versión**: 2.8.4
 **Desarrollado para**: CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura  
 **Moneda**: Quetzales (Q) — Guatemala
