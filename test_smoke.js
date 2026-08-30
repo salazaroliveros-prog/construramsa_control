@@ -37,7 +37,7 @@ async function waitForServer(url, timeout = 15000) {
 
     for (const tab of await page.locator('.nav-tab').all()) {
       await tab.click();
-      if (!(await tab.getAttribute('aria-current'))) throw new Error('La navegación no actualizó aria-current');
+      if (!(await tab.getAttribute('aria-selected'))) throw new Error('La navegación no actualizó aria-selected');
     }
 
     await page.evaluate(() => localStorage.clear());

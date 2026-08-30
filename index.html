@@ -65,11 +65,11 @@
     <!-- ═══ Android Chrome — color barra de estado ═══ -->
     <meta name="mobile-web-app-capable" content="yes">
 
-    <script src="./vendor/html2pdf.bundle.min.js"></script>
+    <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
     <!-- SheetJS para exportar reportes a XLSX -->
-    <script src="./vendor/xlsx.full.min.js"></script>
+    <script src="./vendor/xlsx.full.min.js" integrity="sha384-gx12pQMMYnabkTgbCHqqrT65RwDnXI/f/dU2H9JUmT0KUeiMF5bf+yroQBmX0Nuk" crossorigin="anonymous"></script>
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
-    <script src="./vendor/purify.min.js"></script>
+    <script src="./vendor/purify.min.js" integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF" crossorigin="anonymous"></script>
     <style>
         :root {
             /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */
@@ -3892,6 +3892,21 @@
     </div>
     <script>
         'use strict';
+
+        // ============================================================
+        // DEBUG FLAG — silencia console.log/warn/error en producción
+        // Verdadero: window.DEBUG=true (manual en devtools)
+        // Falso:  en producción, todos los console.* se convierten en no-op
+        // ============================================================
+        window.DEBUG = false;
+        if (!window.DEBUG) {
+            const noop = function () {};
+            console.log = noop;
+            console.warn = noop;
+            console.error = noop;
+            console.info = noop;
+            console.debug = noop;
+        }
         // ============================================================
         // SISTEMA DE GESTIÓN DE DATOS (LocalStorage + cache de sesión)
         // FIX #15: cache de sesión para evitar deserializar en cada call
@@ -7046,7 +7061,7 @@ pag_.forEach(c => {
             }
             if (!c.url) { if (!auto) { _nubeSetEstado('⚠️ Configura la URL del Web App primero', false); showToast('⚠️ Sin URL de Web App', 'info'); } return; }
             try {
-                if (!auto) _nubeSetEstado('⬆️ Subiendo a Google Drive...', );
+                if (!auto) _nubeSetEstado('⬆️ Subiendo a Google Drive...');
                 const body = JSON.stringify({ data: db });
                 const res = await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -7704,7 +7719,7 @@ pag_.forEach(c => {
             if (!c.od_connected || !c.od_token) return;
             
             try {
-                _nubeSetEstado('🔄 Sincronizando con OneDrive...', );
+                _nubeSetEstado('🔄 Sincronizando con OneDrive...');
                 
                 // Obtener archivos remotos
                 const filesResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}/children`, {
@@ -10250,19 +10265,5 @@ function validarDependenciasExportacion() {
         }
     </script>
     
-    <!-- Elementos del sistema de pruebas visuales -->
-    <button id="pruebas-toggle" onclick="togglePruebas()" title="Activar modo de pruebas (Ctrl+Shift+P)">🧪</button>
-    <div id="pruebas-panel">
-        <h3>🧪 Panel de Pruebas</h3>
-        <div class="pruebas-contenido"></div>
-        <div class="prueba-actions">
-            <button class="prueba-btn" onclick="ejecutarPruebasAutomaticas()">🔄 Actualizar</button>
-            <button class="prueba-btn" onclick="capturarScreenshot()">📷 Screenshot</button>
-            <button class="prueba-btn" onclick="validarScrollElemento('.nav-tabs')">📊 Tabs</button>
-            <button class="prueba-btn" onclick="validarScrollElemento('.container')">📊 Contenedor</button>
-            <button class="prueba-btn" onclick="validarTodosScrollables()">📊 Todos</button>
-            <button class="prueba-btn" onclick="highlightModuloActivo()">🎯 Módulo</button>
-        </div>
-    </div>
 </body>
 </html>

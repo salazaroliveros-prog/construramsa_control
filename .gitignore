@@ -30,21 +30,19 @@ build/
 !UX_FILES_REPORT.md
 
 # Servidor local usado por las pruebas; Vercel no lo incluye en builds estáticos.
-server.js
-!server.js
 server_log.txt
 _*.js
 _*.txt
 _*.ps1
 
 # Tests automatizados locales: se versionan las suites de regresión que ejecuta CI.
+# Ignorar todos los archivos de test, pero permitir los de regresión versionados.
 test_*.js
 !test_smoke.js
 !test_crud.js
 !test_reportes.js
 !test_reportes_validation.js
 !test_ux_files.js
-!package.json
 
 # Archivo fuente del logo (no se sube; las variantes icon-*.png sí)
 logocr.png
