@@ -44,9 +44,6 @@ test_*.js
 !test_reportes_validation.js
 !test_ux_files.js
 
-# Archivo fuente del logo (no se sube; las variantes icon-*.png sí)
-logocr.png
-
 # Archivos de firmas personales (no se suben al repositorio)
 wilson.png
 juan.png
@@ -58,6 +55,7 @@ scroll_audit_screenshots/
 # Directorio de screenshots de pruebas (solo desarrollo local)
 scroll_validation_screenshots/
 screenshots/
+.playwright-mcp/
 
 # Configuración local de Vercel CLI (no parte de la app)
 .vercel/

@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
     './index.html',
     './manifest.json',
     './onedrive-callback.html',
-    './icon.png',
+    './logocr.png',
     './icon-512.png',
     './icon-192.png',
     './icon.svg',
