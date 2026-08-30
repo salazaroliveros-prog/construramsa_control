@@ -54,3 +54,13 @@ module.exports = async (req, res) => {
     }
   }
 };
+
+// Modo local: `node server.js` arranca un servidor HTTP (usado por npm test y npm start).
+// Modo Vercel: exporta el handler (aunque el despliegue en Vercel es estático).
+if (require.main === module) {
+  const http = require('http');
+  const PORT = process.env.PORT || 3000;
+  http.createServer((req, res) => module.exports(req, res)).listen(PORT, () => {
+    console.log(`CONSTRURAMSA Control de Obra — http://127.0.0.1:${PORT}/`);
+  });
+}
