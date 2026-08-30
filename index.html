@@ -9922,26 +9922,50 @@ function validarDependenciasExportacion() {
         });
 
         // ============================================================
-        // FIX #4: SERVICE WORKER — ruta relativa ./sw.js, scope ./
+        // ACTUALIZACIONES PWA — detección automática de nuevas versiones
+        // desplegadas en Vercel: aviso al usuario + recarga controlada.
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
+                let _recargandoPorUpdate = false;
+
                 navigator.serviceWorker.register('./sw.js', { scope: './' })
                     .then(reg => {
                         console.log('SW registrado:', reg.scope);
+
+                        // Aviso cuando el navegador detecta e instala un SW nuevo
                         reg.addEventListener('updatefound', function () {
                             const w = reg.installing;
+                            if (!w) return;
                             w.addEventListener('statechange', function () {
                                 if (w.state === 'installed' && navigator.serviceWorker.controller) {
-                                    showConfirmModal('Actualización disponible', '¿Hay una nueva versión de la app. ¿Actualizar ahora?', () => w.postMessage({ action:'skipWaiting' }));
+                                    showConfirmModal(
+                                        'Actualización disponible',
+                                        'Hay una nueva versión de la app. ¿Actualizar ahora?',
+                                        () => w.postMessage({ action: 'skipWaiting' })
+                                    );
                                 }
                             });
                         });
+
+                        // Comprobación periódica: PWA standalone puede quedar abierta
+                        // días sin recargar; sin esto el usuario nunca vería el aviso.
+                        setInterval(() => { reg.update().catch(() => {}); }, 60 * 60 * 1000);
+
+                        // Comprobar al volver a la app (pestaña visible / app enfocada)
+                        document.addEventListener('visibilitychange', function () {
+                            if (document.visibilityState === 'visible') {
+                                reg.update().catch(() => {});
+                            }
+                        });
                     })
                     .catch(err => console.warn('SW no disponible:', err));
-                // FIX update: al confirmar la actualización, el nuevo SW toma el control
-                // (controllerchange) y recargamos automáticamente para aplicar la nueva versión.
+
+                // Cuando el nuevo SW toma el control tras confirmar la actualización,
+                // recargamos UNA sola vez para aplicar la versión nueva.
                 navigator.serviceWorker.addEventListener('controllerchange', function () {
+                    if (_recargandoPorUpdate) return;
+                    _recargandoPorUpdate = true;
                     window.location.reload();
                 });
             });
