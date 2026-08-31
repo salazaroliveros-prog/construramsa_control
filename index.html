@@ -86,6 +86,10 @@
     <script src="./vendor/exceljs.min.js" integrity="sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz" crossorigin="anonymous"></script>
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
     <script src="./vendor/purify.min.js" integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF" crossorigin="anonymous"></script>
+<!-- Módulos tipados y config central (IIFE: no filtran globals, no colisionan con el bundle) -->
+    <script src="./src/types.js"></script>
+    <script src="./src/config.js"></script>
+    <script src="./src/exportador.js"></script>
     <style>
         :root {
             /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */
@@ -4145,7 +4149,9 @@
         }
 
         function numToF(v) { const n = parseFloat(v); return (Number.isFinite(n) ? n : 0).toFixed(2); }
-        function formatearMoneda(v) { const n = parseFloat(v); return 'Q' + (Number.isFinite(n) ? n : 0).toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        // Símbolo de moneda centralizado en CR_CONFIG (fallback a 'Q' si el módulo no cargó).
+        const _SIMBOLO_MONEDA = (typeof CR_CONFIG !== 'undefined' && CR_CONFIG.APP_CONFIG) ? CR_CONFIG.APP_CONFIG.moneda : 'Q';
+        function formatearMoneda(v) { const n = parseFloat(v); return _SIMBOLO_MONEDA + (Number.isFinite(n) ? n : 0).toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
         function generarId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
 
@@ -8612,12 +8618,12 @@ tbody.innerHTML = '';
             const direccion = config.direccion || 'Guatemala, C.A.';
             const website = config.website || 'construramsa.com';
             
-            const csvCell = value => {
-                const text = String(value ?? '').replace(/\r?\n/g, ' ');
-                const safeText = /^[=+\-@]/.test(text.trim()) ? "'" + text : text;
-                return '"' + safeText.replace(/"/g, '""') + '"';
-            };
-            const csvRow = values => values.map(value => typeof value === 'number' ? numToF(value) : csvCell(value)).join(',');
+            // Escapado CSV centralizado en el módulo CR_Export (celdaCSV/filaCSV).
+            // Si el módulo no está disponible, se usa el fallback local idéntico.
+            const _ExportCSV = (typeof CR_Export !== 'undefined' && CR_Export) ? CR_Export : null;
+            const csvCell = value => _ExportCSV ? _ExportCSV.celdaCSV(value)
+                : (() => { const text = String(value ?? '').replace(/\r?\n/g, ' '); const safeText = /^[=+\-@]/.test(text.trim()) ? "'" + text : text; return '"' + safeText.replace(/"/g, '""') + '"'; })();
+            const csvRow = values => _ExportCSV ? _ExportCSV.filaCSV(values) : values.map(value => typeof value === 'number' ? numToF(value) : csvCell(value)).join(',');
             let csv = '\uFEFF'; // BOM UTF-8 para Excel
             
             // Encabezado con información de la empresa (como comentarios para Excel)
@@ -9183,7 +9189,15 @@ function validarDependenciasExportacion() {
             const config = (getDB().configuracion || {});
             const empresa = config.nombre_empresa || 'CONSTRURAMSA';
             const eslogan = config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
-            const NAVY = '0B4F8F', CYAN = '00A4E4', LIGHT = 'EFF6FF';
+            // Paleta corporativa centralizada en CR_CONFIG (consistentes con el membrete PDF y
+            // las variables CSS --pdf-*). Se omiten los '#' y se usa un matiz claro derivado.
+            // Fallback defensivo a los valores originales si el módulo no está disponible.
+            const _pal = (typeof CR_CONFIG !== 'undefined' && CR_CONFIG.PALETA_CORPORATIVA) ? CR_CONFIG.PALETA_CORPORATIVA : null;
+            const _hex = v => String(v || '').replace(/^#/, '');
+            const NAVY   = _hex((_pal && _pal.primario)   || '#0B4F8F');
+            const CYAN   = _hex((_pal && _pal.secundario) || '#00A4E4');
+            const LIGHT  = _hex((_pal && _pal.fondoClaro) || '#EFF6FF');
+            const GRIS   = _hex((_pal && _pal.grisMedio)  || '#6B7280');
             const wb = new ExcelJS.Workbook();
             wb.creator = empresa;
             wb.created = new Date();
@@ -9216,7 +9230,7 @@ function validarDependenciasExportacion() {
             cEs.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
             const coRow = r; ws.getRow(coRow).height = 14; ws.mergeCells(coRow, 1, coRow, nCols);
             const cCo = ws.getRow(coRow).getCell(1); cCo.value = String(data[2]?.[0] || '');
-            cCo.font = { name: 'Arial', size: 8.5, color: { argb: 'FF6B7280' } };
+            cCo.font = { name: 'Arial', size: 8.5, color: { argb: 'FF' + GRIS } };
             cCo.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
             const peRow = r; ws.getRow(peRow).height = 14; ws.mergeCells(peRow, 1, peRow, nCols);
             const cPe = ws.getRow(peRow).getCell(1); cPe.value = String(data[4]?.[0] || '');
