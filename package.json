@@ -36,9 +36,10 @@
   },
   "homepage": "https://github.com/salazaroliveros-prog/construramsa_control#readme",
   "devDependencies": {
-    "playwright": "^1.62.1"
+    "playwright": "^1.62.1",
+    "playwright-core": "^1.62.1"
   },
   "dependencies": {
-    "playwright-core": "^1.62.1"
+    "exceljs": "^4.4.0"
   }
 }

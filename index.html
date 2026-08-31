@@ -76,11 +76,14 @@
     <!-- Preload críticos: vendor scripts (PDF, XLSX, sanitización) cargados de forma sincrónica -->
     <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
     <link rel="preload" as="script" href="./vendor/xlsx.full.min.js">
+    <link rel="preload" as="script" href="./vendor/exceljs.min.js">
     <link rel="preload" as="script" href="./vendor/purify.min.js">
 
     <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
-    <!-- SheetJS para exportar reportes a XLSX -->
+    <!-- SheetJS para exportar reportes a XLSX (respaldo; no soporta estilos/logotipo) -->
     <script src="./vendor/xlsx.full.min.js" integrity="sha384-gx12pQMMYnabkTgbCHqqrT65RwDnXI/f/dU2H9JUmT0KUeiMF5bf+yroQBmX0Nuk" crossorigin="anonymous"></script>
+    <!-- ExcelJS para XLSX profesional: estilos de celda, bordes, membrete y firmas -->
+    <script src="./vendor/exceljs.min.js" integrity="sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz" crossorigin="anonymous"></script>
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
     <script src="./vendor/purify.min.js" integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF" crossorigin="anonymous"></script>
     <style>
@@ -796,13 +799,16 @@
             z-index: -1;
         }
 
-        /* Clase para hacer visible la plantilla durante la generación de PDF */
+        /* Clase para hacer visible la plantilla durante la generación de PDF.
+           Se mantiene fuera del viewport visible (left negativo) pero "renderizable":
+           en móvil, mostrarla en pantalla (left:0/top:0, z-index 9999) desplazaba el
+           documento bajo el overlay de carga y causaba capturas incompletas. */
         #plantilla-reporte-impresion.pdf-generating {
             left: 0;
             top: 0;
             opacity: 1;
             z-index: 9999;
-            pointer-events: auto;
+            pointer-events: none;
         }
 
         #plantilla-reporte-impresion table.tabla-pdf {
@@ -2199,6 +2205,10 @@
         .vp-preview {
             flex: 1;
             overflow: auto;
+            /* FIX MÓVIL: sin min-height:0 el panel colapsa dentro del flex-column
+               del modal y el documento queda cortado sin scroll */
+            min-height: 0;
+            -webkit-overflow-scrolling: touch;
             background: #4B5563;
             display: flex;
             align-items: flex-start;
@@ -2233,9 +2243,11 @@
                 min-width: 0;
                 border-right: none;
                 border-bottom: 1px solid var(--glass-border);
-                max-height: calc(100dvh - 140px);
+                /* FIX MÓVIL: limitar el editor para dejar espacio visible al preview */
+                max-height: 38dvh;
+                flex-shrink: 0;
             }
-            .vp-preview { padding: 12px; }
+            .vp-preview { padding: 12px; flex: 1 1 auto; min-height: 0; overflow-y: auto; }
             .vp-preview-wrapper { width: 100%; }
             #vp-plantilla-preview { padding: 16px 14px; font-size: 11px; }
             .vp-topbar { padding: 10px 14px; }
@@ -2245,7 +2257,8 @@
             .toast { max-width: 100% !important; box-sizing: border-box !important; }
         }
         @media (max-width: 480px) {
-            .vp-editor { max-height: calc(100dvh - 140px); padding: 14px 12px; gap: 12px; }
+            /* FIX MÓVIL: limitar el editor con dvh para dejar espacio visible+scroll al preview */
+            .vp-editor { max-height: 40dvh; padding: 14px 12px; gap: 12px; }
             .vp-topbar-actions .btn-primario,
             .vp-topbar-actions .btn-secundario { padding: 8px 14px; font-size: 12px; }
         }
@@ -8619,7 +8632,7 @@ tbody.innerHTML = '';
             if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
                 const tipoNombre = tipo === 'diario' ? 'Reporte Diario Consolidado' : tipo === 'semanal' ? 'Informe Semanal Consolidado' : 'Reporte Mensual Consolidado';
                 csv += `# ${csvCell(tipoNombre)} - ${csvCell(empresa)} - Proyecto: ${csvCell(proyNombre)}\n`;
-                if (tipo !== 'diario') csv += `# Periodo: ${periodoDisplay}\n`;
+                csv += `# Periodo: ${periodoDisplay}\n`;
                 csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
                 csv += `Fecha,Tipo,Categoria,Descripcion,Monto (Q)\n`;
                 /* FIX DUPLICIDAD: armar un Set con los gasto_id de viajes y mantenimiento
@@ -8720,6 +8733,11 @@ tbody.innerHTML = '';
                 csv += `,,,\n`;
                 csv += `,,,,TOTAL MANTENIMIENTO E INSUMOS:,${totalM.toFixed(2)}\n`;
             }
+
+            // ── Bloque de firmas autorizadas (membrete profesional) ──────────
+            csv += `# \n`;
+            csv += `# FIRMAS AUTORIZADAS\n`;
+            csv += `${csvCell('Elaborado por: Arq. Wilson Dario Salazar - Jefe de Proyectos')},,${csvCell('Visto Bueno - Encargado de Obra: ______________________')},,${csvCell('Ing. Juan Luis Ramirez Jimenez - Gerente Comercial')}\n`;
             return csv;
         }
 
@@ -8958,12 +8976,33 @@ function validarDependenciasExportacion() {
             const PAGE_WIDTHS = { letter: '216mm', a4: '210mm', legal: '216mm' };
             contenedor.style.width = PAGE_WIDTHS[pageSize] || '216mm';
 
+            /* FIX MÓVIL: html2canvas por defecto renderiza solo el viewport del
+               dispositivo, por lo que en móviles el PDF salía con el contenido
+               cortado. Se fija windowWidth/windowHeight al tamaño real del
+               documento y se ajusta la escala para no exceder el límite de
+               altura de canvas de los navegadores móviles (iOS ≈ 4096-8192px). */
+            const docWidth  = Math.max(Math.ceil(contenedor.scrollWidth), 794);
+            const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123);
+            const scale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
+
             const opts = {
                 margin: 10,
                 filename: filename,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
-                jsPDF: { unit: 'mm', format: pageSize, orientation: 'portrait' }
+                html2canvas: {
+                    scale,
+                    useCORS: true,
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: docWidth,
+                    windowHeight: docHeight,
+                    width: docWidth,
+                    height: docHeight
+                },
+                jsPDF: { unit: 'mm', format: pageSize, orientation: 'portrait' },
+                /* Evitar cortes de página a mitad de filas/imágenes/firmas */
+                pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img'] }
             };
             const pdf = await html2pdf().set(opts).from(contenedor).toPdf().get('pdf');
             const total = pdf.internal.getNumberOfPages();
@@ -8996,7 +9035,7 @@ function validarDependenciasExportacion() {
                 const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
                 const proyNombreX = proyObj ? proyObj.nombre : 'General';
                 if (!validarDependenciasExportacion()) { hideLoading(); return; }
-                const xlsxData = generarXLSX(tipo, rango.inicio, proyNombreX, nombre, true, rango);
+                const xlsxData = await generarXLSX(tipo, rango.inicio, proyNombreX, nombre, true, rango);
                 if (xlsxData) {
                     archivos.push(new File([xlsxData], `${nombre}.xlsx`, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
                 }
@@ -9075,7 +9114,7 @@ function validarDependenciasExportacion() {
                     // XLSX
                     if (exportXLSX) {
                         actualizarProgresoReporte('Generando XLSX...', 20);
-                        generarXLSX(tipo, rango.inicio, proyNombreX, nombre, rango);
+                        await generarXLSX(tipo, rango.inicio, proyNombreX, nombre, false, rango);
                         formatoCount++;
                         actualizarProgresoReporte('XLSX generado', 20 + (formatoCount / totalFormatos) * 30);
                     }
@@ -9124,8 +9163,147 @@ function validarDependenciasExportacion() {
             }, 300);
         }
 
-        // Exporta el reporte actual a XLSX con SheetJS
-        function generarXLSX(tipo, fecha, proyNombre, nombre, returnBlob, rangoPersonalizado) {
+        // ── ExcelJS: XLSX profesional con estilos, membrete y firmas ─────────────
+        // Clasifica cada fila de la matriz para aplicar estilo según su rol.
+        function _tipoXLSXFila(row, idx) {
+            if (idx <= 4) return ['empresa','eslogan','contacto','blanco','periodo'][idx];
+            if (idx === 5) return 'titulo';
+            if (idx === 6) return 'cabecera';
+            const l0 = String(row[0] || '').trim();
+            if (l0.startsWith('---')) return 'seccion';
+            if (l0 === 'FIRMAS AUTORIZADAS') return 'firma_titulo';
+            if (l0.startsWith('Elaborado por')) return 'firma_cab';
+            if (/^(Arq\.|Ing\.)/.test(l0)) return 'firma_nombre';
+            if (l0 === 'Jefe de Proyectos') return 'firma_cargo';
+            if (!row.length || (row.length === 1 && !row[0])) return 'blanco';
+            return (/TOTAL|SALDO/.test(String(row[row.length-1]||''))) ? 'total' : 'dato';
+        }
+
+        async function _renderXLSXExcelJS(data) {
+            const config = (getDB().configuracion || {});
+            const empresa = config.nombre_empresa || 'CONSTRURAMSA';
+            const eslogan = config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            const NAVY = '0B4F8F', CYAN = '00A4E4', LIGHT = 'EFF6FF';
+            const wb = new ExcelJS.Workbook();
+            wb.creator = empresa;
+            wb.created = new Date();
+            const ws = wb.addWorksheet('Reporte');
+            ws.properties.defaultRowHeight = 17;
+
+            const nCols = Math.max(5, ...data.map(r => Array.isArray(r) ? r.length : 0));
+            const colWidths = Array(nCols).fill(8);
+            data.forEach(r => { if (!Array.isArray(r)) return; r.forEach((c, i) => { const l = String(c ?? '').length; if (l > colWidths[i]) colWidths[i] = l; }); });
+            ws.columns = colWidths.map((w, i) => ({ width: Math.min(Math.max(w + 2, 10), i === 3 ? 60 : 45) }));
+
+            const thin = { style: 'thin', color: { argb: 'FFD1D5DB' } };
+            const border = { top: thin, left: thin, bottom: thin, right: thin };
+
+            // ── Encabezado corporativo (sin logotipo incrustado: el bundle UMD de ExcelJS
+            //    para navegador no serializa imágenes de forma fiable y corrompería
+            //    el archivo; el logotipo sí se incluye en el PDF de impresión). ──
+            let r = 1; // puntero de fila (1-based)
+            ws.getRow(1).height = 8;
+            ws.getRow(r).height = 6; r++; // separador
+
+            // ── Membrete ──
+            const empRow = r; ws.getRow(empRow).height = 24; ws.mergeCells(empRow, 1, empRow, nCols);
+            const cEmp = ws.getRow(empRow).getCell(1); cEmp.value = String(data[0]?.[0] || empresa);
+            cEmp.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FF' + NAVY } };
+            cEmp.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
+            const esRow = r; ws.getRow(esRow).height = 16; ws.mergeCells(esRow, 1, esRow, nCols);
+            const cEs = ws.getRow(esRow).getCell(1); cEs.value = String(data[1]?.[0] || eslogan);
+            cEs.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF' + CYAN } };
+            cEs.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
+            const coRow = r; ws.getRow(coRow).height = 14; ws.mergeCells(coRow, 1, coRow, nCols);
+            const cCo = ws.getRow(coRow).getCell(1); cCo.value = String(data[2]?.[0] || '');
+            cCo.font = { name: 'Arial', size: 8.5, color: { argb: 'FF6B7280' } };
+            cCo.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
+            const peRow = r; ws.getRow(peRow).height = 14; ws.mergeCells(peRow, 1, peRow, nCols);
+            const cPe = ws.getRow(peRow).getCell(1); cPe.value = String(data[4]?.[0] || '');
+            cPe.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FF374151' } };
+            cPe.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
+            ws.getRow(r).height = 6; r++; // separador
+
+            // ── Título ──
+            const tiRow = r; ws.getRow(tiRow).height = 20; ws.mergeCells(tiRow, 1, tiRow, nCols);
+            const cT = ws.getRow(tiRow).getCell(1); cT.value = String(data[5]?.[0] || '');
+            cT.font = { name: 'Arial', size: 13, bold: true, color: { argb: 'FF' + NAVY } };
+            cT.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
+            ws.getRow(r).height = 7; r++; // separador
+
+            // ── Cabecera de tabla ──
+            const hr = r;
+            const hrRow = ws.getRow(hr); hrRow.height = 18;
+            (data[6] || []).forEach((h, ci) => {
+                if (ci >= nCols) return;
+                const cell = hrRow.getCell(ci + 1);
+                cell.value = String(h);
+                cell.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + NAVY } };
+                cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                cell.border = border;
+            });
+            r++;
+
+            // ── Cuerpo ──
+            let lastTableRow = hr;
+            for (let i = 7; i < data.length; i++) {
+                const row = data[i] || [];
+                const rr = r;
+                const cur = ws.getRow(rr);
+                cur.height = 16;
+                const tipo = _tipoXLSXFila(row, i);
+                if (tipo === 'blanco') { r++; continue; }
+                if (tipo === 'firma_titulo') {
+                    lastTableRow = rr - 1;
+                    cur.height = 20; ws.mergeCells(rr, 1, rr, nCols);
+                    const c = cur.getCell(1); c.value = 'FIRMAS AUTORIZADAS';
+                    c.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF' + NAVY } };
+                    c.alignment = { horizontal: 'center' };
+                    r++; continue;
+                }
+                if (tipo === 'firma_cab' || tipo === 'firma_nombre' || tipo === 'firma_cargo') {
+                    row.forEach((v, ci) => {
+                        if (ci >= nCols) return;
+                        const c = cur.getCell(ci + 1);
+                        if (v !== undefined) c.value = v;
+                        c.font = { name: 'Arial', size: 10, bold: (tipo === 'firma_nombre'), color: { argb: 'FF374151' } };
+                    });
+                    r++; continue;
+                }
+                row.forEach((v, ci) => {
+                    if (ci >= nCols) return;
+                    const c = cur.getCell(ci + 1);
+                    if (v !== undefined && v !== null) c.value = v;
+                    if (tipo === 'seccion') {
+                        ws.mergeCells(rr, 1, rr, nCols);
+                        c.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FF' + NAVY } };
+                        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + LIGHT } };
+                    } else if (tipo === 'total') {
+                        c.font = { name: 'Arial', size: 9.5, bold: true, color: { argb: 'FF' + NAVY } };
+                        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + LIGHT } };
+                        c.alignment = { horizontal: (ci === nCols - 1 ? 'right' : 'left'), vertical: 'middle' };
+                    } else {
+                        c.font = { name: 'Arial', size: 9, color: { argb: 'FF111827' } };
+                        c.alignment = { vertical: 'middle', horizontal: (typeof v === 'number') ? 'right' : 'left' };
+                    }
+                    c.border = border;
+                });
+                lastTableRow = rr;
+                r++;
+            }
+
+            // ── Impresión A4 ──
+            ws.pageSetup = { orientation: 'portrait', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+            ws.pageMargins = { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.3, footer: 0.3 };
+
+            const ab = await wb.xlsx.writeBuffer();
+            return (ab instanceof ArrayBuffer) ? ab : ab.buffer.slice(ab.byteOffset, ab.byteOffset + ab.byteLength);
+        }
+
+        /* genera el XLSX. Si ExcelJS está disponible genera uno profesional (membrete
+           corporativo con estilos, bordes, firmas); si no, cae a SheetJS (solo datos). */
+        async function generarXLSX(tipo, fecha, proyNombre, nombre, returnBlob, rangoPersonalizado) {
             if (typeof XLSX === 'undefined') { showToast('⚠️ Módulo XLSX no disponible. Intente conectado a internet.', 'error'); return null; }
             const datos = getProyectoData();
             const db = getDB();
@@ -9146,6 +9324,9 @@ function validarDependenciasExportacion() {
 
             const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
             const enRango = (f) => f >= rango.inicio && f <= rango.fin;
+            const periodoXLSX = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
+            // Membrete: periodo + fecha de generación (fila 4 de la cabecera fusionada)
+            enc.push([`Periodo: ${periodoXLSX}   |   Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}`]);
 
             if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
                 const tipoNombre = tipo === 'diario' ? 'Diario Consolidado' : tipo === 'semanal' ? 'Semanal Consolidado' : 'Mensual Consolidado';
@@ -9195,6 +9376,29 @@ function validarDependenciasExportacion() {
             } else {
                 return null;
             }
+            // ── Bloque de firmas autorizadas (membrete profesional) ──────────
+            data.push([],
+                ['FIRMAS AUTORIZADAS'],
+                ['Elaborado por:', 'Visto Bueno (Encargado de Obra):', '', 'Gerente Comercial:'],
+                ['Arq. Wilson Dario Salazar', '____________________', '', 'Ing. Juan Luis Ramirez Jimenez'],
+                ['Jefe de Proyectos', '', '', 'Gerente Comercial']);
+
+            // ── ExcelJS (profesional: estilos, membrete y firmas) — con respaldo SheetJS ──
+            if (typeof ExcelJS !== 'undefined') {
+                try {
+                    const ab = await _renderXLSXExcelJS(data);
+                    if (returnBlob) return ab;
+                    const typeX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                    const xBlob = new Blob([ab], { type: typeX });
+                    const u = URL.createObjectURL(xBlob);
+                    const aX = document.createElement('a'); aX.href = u; aX.download = nombre + '.xlsx'; aX.click();
+                    setTimeout(() => URL.revokeObjectURL(u), 2000);
+                    return true;
+                } catch (err) {
+                    console.error('ExcelJS falló, se usa SheetJS:', err);
+                }
+            }
+
             const ws = XLSX.utils.aoa_to_sheet(data);
 
             // ── Anchos dinámicos: máximo de caracteres por columna ──────────────
@@ -9629,7 +9833,7 @@ function validarDependenciasExportacion() {
                         
                         // XLSX
                         if (exportXLSX) {
-                            generarXLSX(tipo, rango.inicio, proyNombreX, nombre, false, rango);
+                            await generarXLSX(tipo, rango.inicio, proyNombreX, nombre, false, rango);
                             formatoCount++;
                         }
                         
