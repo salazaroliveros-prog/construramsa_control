@@ -23,4 +23,4 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm test
-      - run: npm run test:ux:files || echo "UX test: pre-existing issue (6/7), non-blocking"
+      - run: 'npm run test:ux:files || echo "UX test: pre-existing issue (6/7), non-blocking"'
