@@ -73,17 +73,12 @@
     <link rel="dns-prefetch" href="https://script.google.com">
     <link rel="dns-prefetch" href="https://accounts.google.com">
 
-    <!-- Preload críticos: vendor scripts (PDF, XLSX, sanitización) cargados de forma sincrónica -->
-    <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
-    <link rel="preload" as="script" href="./vendor/xlsx.full.min.js">
-    <link rel="preload" as="script" href="./vendor/exceljs.min.js">
+    <!-- Preload críticos: vendor scripts (PDF, sanitización) cargados de forma sincrónica -->
+    <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
     <link rel="preload" as="script" href="./vendor/purify.min.js">
 
     <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
-    <!-- SheetJS para exportar reportes a XLSX (respaldo; no soporta estilos/logotipo) -->
-    <script src="./vendor/xlsx.full.min.js" integrity="sha384-gx12pQMMYnabkTgbCHqqrT65RwDnXI/f/dU2H9JUmT0KUeiMF5bf+yroQBmX0Nuk" crossorigin="anonymous"></script>
-    <!-- ExcelJS para XLSX profesional: estilos de celda, bordes, membrete y firmas -->
-    <script src="./vendor/exceljs.min.js" integrity="sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz" crossorigin="anonymous"></script>
+
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
     <script src="./vendor/purify.min.js" integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF" crossorigin="anonymous"></script>
 <!-- Módulos tipados y config central (IIFE: no filtran globals, no colisionan con el bundle) -->
@@ -2338,7 +2333,7 @@
                 </button>
                 <button id="vp-btn-descargar" onclick="confirmarYGenerar('local')" class="btn-secundario"
                         style="padding:9px 18px;font-size:13px;"
-                        data-tooltip="Descargar PDF, CSV y XLSX">
+                        data-tooltip="Descargar PDF y CSV">
                     📥 Descargar
                 </button>
                 <button onclick="cerrarVistaPrevia()" class="btn-secundario"
@@ -3394,9 +3389,6 @@
                     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-secundario);cursor:pointer;">
                         <input type="checkbox" id="export-csv" checked> CSV
                     </label>
-                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-secundario);cursor:pointer;">
-                        <input type="checkbox" id="export-xlsx" checked> XLSX
-                    </label>
                 </div>
             </div>
 
@@ -3532,7 +3524,7 @@
                         <div style="margin-top:5px;" role="group" aria-label="Destino de exportación">
                             <label style="font-size:12px;color:var(--texto-secundario);display:flex;align-items:center;gap:5px;margin-bottom:5px;">
                                 <input type="checkbox" class="export-destino" value="local" checked id="export-local"> 
-                                Descargar Local (PDF/CSV/XLSX)
+                                Descargar Local (PDF/CSV)
                             </label>
                             <label style="font-size:12px;color:var(--texto-secundario);display:flex;align-items:center;gap:5px;">
                                 <input type="checkbox" class="export-destino" value="whatsapp" id="export-whatsapp"> 
@@ -3704,7 +3696,7 @@
                 <h3 class="historial-titulo">ℹ️ Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
                     Versión: 2.8.4 (Accesibilidad WCAG: roving tabindex completo en tablist)<br>
-                    Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV/XLSX<br>
+                    Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV<br>
                     Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
             </div>
@@ -8962,7 +8954,6 @@ tbody.innerHTML = '';
         // Generar el PDF del reporte y estampar "Página i de N" en cada hoja
 function validarDependenciasExportacion() {
             const faltantes = [];
-            if (typeof XLSX === 'undefined') faltantes.push('XLSX');
             if (typeof html2pdf !== 'function') faltantes.push('PDF');
             if (typeof DOMPurify === 'undefined') console.warn('DOMPurify no disponible; sanitización desactivada (solo offline)');
             if (faltantes.length > 0) {
@@ -9039,13 +9030,7 @@ function validarDependenciasExportacion() {
                 const archivos = [];
 
                 const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
-                const proyNombreX = proyObj ? proyObj.nombre : 'General';
                 if (!validarDependenciasExportacion()) { hideLoading(); return; }
-                const xlsxData = await generarXLSX(tipo, rango.inicio, proyNombreX, nombre, true, rango);
-                if (xlsxData) {
-                    archivos.push(new File([xlsxData], `${nombre}.xlsx`, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-                }
-
                 const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type:'text/csv;charset=utf-8;' });
                 archivos.push(new File([csvBlob], `${nombre}.csv`, { type:'text/csv' }));
 
@@ -9095,9 +9080,8 @@ function validarDependenciasExportacion() {
             
             const exportPDF = document.getElementById('export-pdf').checked;
             const exportCSV = document.getElementById('export-csv').checked;
-            const exportXLSX = document.getElementById('export-xlsx').checked;
             
-            if (!exportPDF && !exportCSV && !exportXLSX) {
+            if (!exportPDF && !exportCSV) {
                 showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
                 return;
             }
@@ -9112,18 +9096,9 @@ function validarDependenciasExportacion() {
             setTimeout(async () => {
                 try {
                     const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
-                    const proyNombreX = proyObj ? proyObj.nombre : 'General';
-                    
+
                     let formatoCount = 0;
-                    const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0) + (exportXLSX ? 1 : 0);
-                    
-                    // XLSX
-                    if (exportXLSX) {
-                        actualizarProgresoReporte('Generando XLSX...', 20);
-                        await generarXLSX(tipo, rango.inicio, proyNombreX, nombre, false, rango);
-                        formatoCount++;
-                        actualizarProgresoReporte('XLSX generado', 20 + (formatoCount / totalFormatos) * 30);
-                    }
+                    const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0);
                     
                     // CSV
                     if (exportCSV) {
@@ -9167,302 +9142,6 @@ function validarDependenciasExportacion() {
                     console.error(err); 
                 }
             }, 300);
-        }
-
-        // ── ExcelJS: XLSX profesional con estilos, membrete y firmas ─────────────
-        // Clasifica cada fila de la matriz para aplicar estilo según su rol.
-        function _tipoXLSXFila(row, idx) {
-            if (idx <= 4) return ['empresa','eslogan','contacto','blanco','periodo'][idx];
-            if (idx === 5) return 'titulo';
-            if (idx === 6) return 'cabecera';
-            const l0 = String(row[0] || '').trim();
-            if (l0.startsWith('---')) return 'seccion';
-            if (l0 === 'FIRMAS AUTORIZADAS') return 'firma_titulo';
-            if (l0.startsWith('Elaborado por')) return 'firma_cab';
-            if (/^(Arq\.|Ing\.)/.test(l0)) return 'firma_nombre';
-            if (l0 === 'Jefe de Proyectos') return 'firma_cargo';
-            if (!row.length || (row.length === 1 && !row[0])) return 'blanco';
-            return (/TOTAL|SALDO/.test(String(row[row.length-1]||''))) ? 'total' : 'dato';
-        }
-
-        async function _renderXLSXExcelJS(data) {
-            const config = (getDB().configuracion || {});
-            const empresa = config.nombre_empresa || 'CONSTRURAMSA';
-            const eslogan = config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
-            // Paleta corporativa centralizada en CR_CONFIG (consistentes con el membrete PDF y
-            // las variables CSS --pdf-*). Se omiten los '#' y se usa un matiz claro derivado.
-            // Fallback defensivo a los valores originales si el módulo no está disponible.
-            const _pal = (typeof CR_CONFIG !== 'undefined' && CR_CONFIG.PALETA_CORPORATIVA) ? CR_CONFIG.PALETA_CORPORATIVA : null;
-            const _hex = v => String(v || '').replace(/^#/, '');
-            const NAVY   = _hex((_pal && _pal.primario)   || '#0B4F8F');
-            const CYAN   = _hex((_pal && _pal.secundario) || '#00A4E4');
-            const LIGHT  = _hex((_pal && _pal.fondoClaro) || '#EFF6FF');
-            const GRIS   = _hex((_pal && _pal.grisMedio)  || '#6B7280');
-            const wb = new ExcelJS.Workbook();
-            wb.creator = empresa;
-            wb.created = new Date();
-            const ws = wb.addWorksheet('Reporte');
-            ws.properties.defaultRowHeight = 17;
-
-            const nCols = Math.max(5, ...data.map(r => Array.isArray(r) ? r.length : 0));
-            const colWidths = Array(nCols).fill(8);
-            data.forEach(r => { if (!Array.isArray(r)) return; r.forEach((c, i) => { const l = String(c ?? '').length; if (l > colWidths[i]) colWidths[i] = l; }); });
-            ws.columns = colWidths.map((w, i) => ({ width: Math.min(Math.max(w + 2, 10), i === 3 ? 60 : 45) }));
-
-            const thin = { style: 'thin', color: { argb: 'FFD1D5DB' } };
-            const border = { top: thin, left: thin, bottom: thin, right: thin };
-
-            // ── Encabezado corporativo (sin logotipo incrustado: el bundle UMD de ExcelJS
-            //    para navegador no serializa imágenes de forma fiable y corrompería
-            //    el archivo; el logotipo sí se incluye en el PDF de impresión). ──
-            let r = 1; // puntero de fila (1-based)
-            ws.getRow(1).height = 8;
-            ws.getRow(r).height = 6; r++; // separador
-
-            // ── Membrete ──
-            const empRow = r; ws.getRow(empRow).height = 24; ws.mergeCells(empRow, 1, empRow, nCols);
-            const cEmp = ws.getRow(empRow).getCell(1); cEmp.value = String(data[0]?.[0] || empresa);
-            cEmp.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FF' + NAVY } };
-            cEmp.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
-            const esRow = r; ws.getRow(esRow).height = 16; ws.mergeCells(esRow, 1, esRow, nCols);
-            const cEs = ws.getRow(esRow).getCell(1); cEs.value = String(data[1]?.[0] || eslogan);
-            cEs.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF' + CYAN } };
-            cEs.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
-            const coRow = r; ws.getRow(coRow).height = 14; ws.mergeCells(coRow, 1, coRow, nCols);
-            const cCo = ws.getRow(coRow).getCell(1); cCo.value = String(data[2]?.[0] || '');
-            cCo.font = { name: 'Arial', size: 8.5, color: { argb: 'FF' + GRIS } };
-            cCo.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
-            const peRow = r; ws.getRow(peRow).height = 14; ws.mergeCells(peRow, 1, peRow, nCols);
-            const cPe = ws.getRow(peRow).getCell(1); cPe.value = String(data[4]?.[0] || '');
-            cPe.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FF374151' } };
-            cPe.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
-            ws.getRow(r).height = 6; r++; // separador
-
-            // ── Título ──
-            const tiRow = r; ws.getRow(tiRow).height = 20; ws.mergeCells(tiRow, 1, tiRow, nCols);
-            const cT = ws.getRow(tiRow).getCell(1); cT.value = String(data[5]?.[0] || '');
-            cT.font = { name: 'Arial', size: 13, bold: true, color: { argb: 'FF' + NAVY } };
-            cT.alignment = { horizontal: 'center', vertical: 'middle' }; r++;
-            ws.getRow(r).height = 7; r++; // separador
-
-            // ── Cabecera de tabla ──
-            const hr = r;
-            const hrRow = ws.getRow(hr); hrRow.height = 18;
-            (data[6] || []).forEach((h, ci) => {
-                if (ci >= nCols) return;
-                const cell = hrRow.getCell(ci + 1);
-                cell.value = String(h);
-                cell.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
-                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + NAVY } };
-                cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-                cell.border = border;
-            });
-            r++;
-
-            // ── Cuerpo ──
-            let lastTableRow = hr;
-            for (let i = 7; i < data.length; i++) {
-                const row = data[i] || [];
-                const rr = r;
-                const cur = ws.getRow(rr);
-                cur.height = 16;
-                const tipo = _tipoXLSXFila(row, i);
-                if (tipo === 'blanco') { r++; continue; }
-                if (tipo === 'firma_titulo') {
-                    lastTableRow = rr - 1;
-                    cur.height = 20; ws.mergeCells(rr, 1, rr, nCols);
-                    const c = cur.getCell(1); c.value = 'FIRMAS AUTORIZADAS';
-                    c.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF' + NAVY } };
-                    c.alignment = { horizontal: 'center' };
-                    r++; continue;
-                }
-                if (tipo === 'firma_cab' || tipo === 'firma_nombre' || tipo === 'firma_cargo') {
-                    row.forEach((v, ci) => {
-                        if (ci >= nCols) return;
-                        const c = cur.getCell(ci + 1);
-                        if (v !== undefined) c.value = v;
-                        c.font = { name: 'Arial', size: 10, bold: (tipo === 'firma_nombre'), color: { argb: 'FF374151' } };
-                    });
-                    r++; continue;
-                }
-                row.forEach((v, ci) => {
-                    if (ci >= nCols) return;
-                    const c = cur.getCell(ci + 1);
-                    if (v !== undefined && v !== null) c.value = v;
-                    if (tipo === 'seccion') {
-                        ws.mergeCells(rr, 1, rr, nCols);
-                        c.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FF' + NAVY } };
-                        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + LIGHT } };
-                    } else if (tipo === 'total') {
-                        c.font = { name: 'Arial', size: 9.5, bold: true, color: { argb: 'FF' + NAVY } };
-                        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + LIGHT } };
-                        c.alignment = { horizontal: (ci === nCols - 1 ? 'right' : 'left'), vertical: 'middle' };
-                    } else {
-                        c.font = { name: 'Arial', size: 9, color: { argb: 'FF111827' } };
-                        c.alignment = { vertical: 'middle', horizontal: (typeof v === 'number') ? 'right' : 'left' };
-                    }
-                    c.border = border;
-                });
-                lastTableRow = rr;
-                r++;
-            }
-
-            // ── Impresión A4 ──
-            ws.pageSetup = { orientation: 'portrait', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
-            ws.pageMargins = { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.3, footer: 0.3 };
-
-            const ab = await wb.xlsx.writeBuffer();
-            return (ab instanceof ArrayBuffer) ? ab : ab.buffer.slice(ab.byteOffset, ab.byteOffset + ab.byteLength);
-        }
-
-        /* genera el XLSX. Si ExcelJS está disponible genera uno profesional (membrete
-           corporativo con estilos, bordes, firmas); si no, cae a SheetJS (solo datos). */
-        async function generarXLSX(tipo, fecha, proyNombre, nombre, returnBlob, rangoPersonalizado) {
-            if (typeof XLSX === 'undefined') { showToast('⚠️ Módulo XLSX no disponible. Intente conectado a internet.', 'error'); return null; }
-            const datos = getProyectoData();
-            const db = getDB();
-            const config = db.configuracion || {};
-            const empresa = config.nombre_empresa || 'CONSTRURAMSA';
-            const telefono = config.telefono || '+502 5997 9501';
-            const email = config.email || 'contacto@construramsa.com';
-            const direccion = config.direccion || 'Guatemala, C.A.';
-            const website = config.website || 'construramsa.com';
-            
-            let data = [];
-            const enc = [
-                [empresa], 
-                [config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA'], 
-                [`${direccion} | Tel: ${telefono} | Email: ${email} | ${website}`], 
-                []
-            ];
-
-            const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
-            const enRango = (f) => f >= rango.inicio && f <= rango.fin;
-            const periodoXLSX = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
-            // Membrete: periodo + fecha de generación (fila 4 de la cabecera fusionada)
-            enc.push([`Periodo: ${periodoXLSX}   |   Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}`]);
-
-            if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
-                const tipoNombre = tipo === 'diario' ? 'Diario Consolidado' : tipo === 'semanal' ? 'Semanal Consolidado' : 'Mensual Consolidado';
-                const viajesX = (datos.viajes_camiones.viajes||[]).filter(v => enRango(v.fecha));
-                const ordsX   = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
-                const insX    = (datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha));
-                /* FIX DUPLICIDAD: excluir de caja los movimientos vinculados a viajes/mantenimiento */
-                const _idsExtXLSX = new Set([
-                    ...(datos.viajes_camiones.viajes||[]).map(v=>v.gasto_id).filter(Boolean),
-                    ...(datos.mantenimiento.ordenes||[]).map(o=>o.gasto_id).filter(Boolean),
-                    ...(datos.mantenimiento.compras_insumos||[]).map(i=>i.gasto_id).filter(Boolean)
-                ]);
-                const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha) && !_idsExtXLSX.has(g.id));
-                const filasCaja   = movs.map(g => [g.fecha, g.tipo, etiquetaCategoria(g.categoria), g.descripcion, g.monto]);
-                const filasViajes = viajesX.map(v => { const c=(datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id)||{nombre:'N/A'}; return [v.fecha, 'Viaje', c.nombre+' ('+v.material+') x'+v.numero, ((v.propiedad || c.propiedad)==='alquilado'?'Alquiler Equipo':'Combustible'), v.total]; });
-                const filasMT = ordsX.map(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id)||{nombre:'N/A'}; return [o.fecha, 'Mantenimiento '+o.tipo, m.nombre+' - '+(o.observaciones||''), 'Repuestos/Mantenimiento', o.costo]; });
-                const filasIn = insX.map(i => [i.fecha, 'Insumo '+i.tipo, i.articulo+' (x'+i.cantidad+')', 'Insumo', i.costo]);
-                const totalIngXLSX = movs.filter(g=>g.tipo==='ingreso').reduce((s,g)=>s+g.monto,0);
-                const totalEgrXLSX = movs.filter(g=>g.tipo!=='ingreso').reduce((s,g)=>s+g.monto,0)
-                    + viajesX.reduce((s,v)=>s+(v.total||0),0)
-                    + ordsX.reduce((s,o)=>s+(o.costo||0),0)
-                    + insX.reduce((s,i)=>s+(i.costo||0),0);
-                data = [...enc, [`Reporte ${tipoNombre} - Proyecto: ${proyNombre}`],
-                    ['Fecha','Tipo','Descripción','Categoría','Monto (Q)'],
-                    ['--- CAJA CHICA (movimientos directos) ---'], ...filasCaja,
-                    ['--- VIAJES DE CAMIONES ---'], ...filasViajes,
-                    ['--- MANTENIMIENTO E INSUMOS ---'], ...filasMT, ...filasIn,
-                    [],
-                    ['', '', '', 'TOTAL INGRESOS', totalIngXLSX],
-                    ['', '', '', 'TOTAL EGRESOS', totalEgrXLSX],
-                    ['', '', '', 'SALDO NETO', totalIngXLSX - totalEgrXLSX]];
-            } else if (tipo === 'viajes') {
-                const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha);
-                data = [...enc, [`Reporte de Viajes - Proyecto: ${proyNombre}`], ['Fecha','Unidad','Material','No. Viajes','Km Total','Litros','Costo Comb.(Q)','Alquiler (Q)','Total (Q)'],
-                    ...viajes.map(v => { const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id); return [v.fecha, c?c.nombre:'N/A', v.material, v.numero, v.km_total, v.litros, v.costo_combustible, v.costo_alquiler, v.total]; })];
-            } else if (tipo === 'mantenimiento') {
-                const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
-                const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
-                const filas = [];
-                ords.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id); filas.push([o.fecha,'Mantenimiento '+o.tipo, m?m.nombre:'N/A', o.costo]); });
-                ins.forEach(i => filas.push([i.fecha,'Insumo '+i.tipo, i.articulo, i.costo]));
-                data = [...enc, [`Reporte de Mantenimiento e Insumos - Proyecto: ${proyNombre}`], ['Fecha','Módulo','Descripción','Monto (Q)'], ...filas];
-            } else if (tipo === 'asistencia') {
-                const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(r => ({...r, fecha:dia.fecha})));
-                data = [...enc, [`Reporte de Asistencia - Proyecto: ${proyNombre}`], ['Fecha','Trabajador','Puesto','Estado','Horas Extra','Sueldo (Q)'],
-                    ...regs.map(r => { const t=(datos.personal.trabajadores||[]).find(x=>x.id===r.trabajador_id); let s=0; if(r.calculos) s=r.calculos.total_diario; else if(r.estado==='asistio'&&t){const he=r.horas_extras||0;s=8*(parseFloat(t.pago_hora_normal)||0)+he*(parseFloat(t.pago_hora_extra)||0);} return [r.fecha, t?t.nombre:'Desconocido', t?t.puesto:'N/A', r.estado, r.horas_extras||0, s]; })];
-            } else {
-                return null;
-            }
-            // ── Bloque de firmas autorizadas (membrete profesional) ──────────
-            data.push([],
-                ['FIRMAS AUTORIZADAS'],
-                ['Elaborado por:', 'Visto Bueno (Encargado de Obra):', '', 'Gerente Comercial:'],
-                ['Arq. Wilson Dario Salazar', '____________________', '', 'Ing. Juan Luis Ramirez Jimenez'],
-                ['Jefe de Proyectos', '', '', 'Gerente Comercial']);
-
-            // ── ExcelJS (profesional: estilos, membrete y firmas) — con respaldo SheetJS ──
-            if (typeof ExcelJS !== 'undefined') {
-                try {
-                    const ab = await _renderXLSXExcelJS(data);
-                    if (returnBlob) return ab;
-                    const typeX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                    const xBlob = new Blob([ab], { type: typeX });
-                    const u = URL.createObjectURL(xBlob);
-                    const aX = document.createElement('a'); aX.href = u; aX.download = nombre + '.xlsx'; aX.click();
-                    setTimeout(() => URL.revokeObjectURL(u), 2000);
-                    return true;
-                } catch (err) {
-                    console.error('ExcelJS falló, se usa SheetJS:', err);
-                }
-            }
-
-            const ws = XLSX.utils.aoa_to_sheet(data);
-
-            // ── Anchos dinámicos: máximo de caracteres por columna ──────────────
-            const numCols = data.reduce((max, row) => Math.max(max, (row || []).length), 0);
-            const colWidths = Array(numCols).fill(8);
-            data.forEach(row => {
-                if (!Array.isArray(row)) return;
-                row.forEach((cell, ci) => {
-                    const len = String(cell ?? '').length;
-                    if (len > colWidths[ci]) colWidths[ci] = len;
-                });
-            });
-            // Clamp entre 10 y 50 caracteres, con columna de descripción más ancha
-            ws['!cols'] = colWidths.map((w, ci) => ({ wch: Math.min(Math.max(w + 2, 10), ci === 3 ? 55 : 40) }));
-
-            // ── Fusionar la primera fila (nombre empresa) a lo ancho ────────────
-            if (numCols > 1) {
-                ws['!merges'] = [
-                    { s: { r: 0, c: 0 }, e: { r: 0, c: numCols - 1 } },  // empresa
-                    { s: { r: 1, c: 0 }, e: { r: 1, c: numCols - 1 } },  // eslogan
-                    { s: { r: 2, c: 0 }, e: { r: 2, c: numCols - 1 } }   // contacto
-                ];
-            }
-
-            // ── Configuración de impresión ──────────────────────────────────────
-            // paperSize 9 = A4, 1 = Letter. Usamos A4 como default internacional;
-            // ajustable manualmente en Excel/Calc.
-            ws['!pageSetup'] = {
-                orientation: 'portrait',
-                paperSize: 9,        // A4
-                fitToPage: true,
-                fitToWidth: 1,
-                fitToHeight: 0
-            };
-            ws['!margins'] = {
-                left:   0.5,
-                right:  0.5,
-                top:    0.75,
-                bottom: 0.75,
-                header: 0.3,
-                footer: 0.3
-            };
-
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
-            // returnBlob=true → devuelve ArrayBuffer para compartir (sin descarga forzada).
-            // En la descarga local se conserva XLSX.writeFile() (descarga directa).
-            if (returnBlob) return XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-            XLSX.writeFile(wb, nombre + '.xlsx');
-            return true;
         }
 
         function generarYCompartirReporte() { showLoading('Preparando reporte...'); compartirReporteWhatsApp(); }
@@ -9824,9 +9503,7 @@ function validarDependenciasExportacion() {
                 
                 const exportPDF = document.getElementById('export-pdf').checked;
                 const exportCSV = document.getElementById('export-csv').checked;
-                const exportXLSX = document.getElementById('export-xlsx').checked;
-                
-                if (!exportPDF && !exportCSV && !exportXLSX) {
+                if (!exportPDF && !exportCSV) {
                     showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
                     hideLoading();
                     return;
@@ -9843,13 +9520,7 @@ function validarDependenciasExportacion() {
                         if (!validarDependenciasExportacion()) throw new Error('Dependencias de exportación no disponibles');
                         
                         let formatoCount = 0;
-                        const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0) + (exportXLSX ? 1 : 0);
-                        
-                        // XLSX
-                        if (exportXLSX) {
-                            await generarXLSX(tipo, rango.inicio, proyNombreX, nombre, false, rango);
-                            formatoCount++;
-                        }
+                        const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0);
                         
                         // CSV
                         if (exportCSV) {
