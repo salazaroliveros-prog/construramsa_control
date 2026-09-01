@@ -849,6 +849,7 @@
             font-size: 9.5px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             table-layout: fixed;
+            word-break: break-word;
         }
         #plantilla-reporte-impresion table.tabla-pdf th {
             background: linear-gradient(180deg, var(--pdf-azul-oscuro) 0%, var(--pdf-azul-claro) 100%);
@@ -860,9 +861,10 @@
             border: 1px solid var(--pdf-azul-oscuro);
             text-align: left;
             letter-spacing: 0.4px;
-            white-space: nowrap;
+            white-space: normal;
             overflow: hidden;
             text-overflow: ellipsis;
+            word-break: break-word;
         }
         #plantilla-reporte-impresion table.tabla-pdf td {
             font-size: 9px;
@@ -872,7 +874,9 @@
             vertical-align: middle;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            max-width: 100%;
+            word-break: break-word;
+            white-space: normal;
+            max-width: 0;
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:nth-child(even) {
             background-color: #F9FAFB;
@@ -9437,7 +9441,7 @@ tbody.innerHTML = '';
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">${_esc(tipoNombre)}</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(rango.inicio)) : ('Período: ' + _esc(periodoDisplay))} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:#6B7280;">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
-                html += `<table class="tabla-pdf"><thead><tr><th style="width:12%;">Fecha</th><th style="width:10%;">Tipo</th><th style="width:18%;">Categoría</th><th style="width:40%;">Descripción</th><th style="width:20%;text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:10%"><col style="width:18%"><col style="width:40%"><col style="width:20%"></colgroup><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
                 /* FIX DUPLICIDAD: armar Set de gasto_id vinculados a viajes y mantenimiento
                    para excluirlos de la sección de caja chica y no contarlos dos veces */
                 const _idsViajesGasto = new Set((datos.viajes_camiones.viajes||[]).map(v=>v.gasto_id).filter(Boolean));
@@ -9461,7 +9465,7 @@ tbody.innerHTML = '';
                 if (viajesC.length > 0) {
                     let totalVTmp = 0;
                     html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🚛 Viajes de Camiones</h3>`;
-                    html += `<table class="tabla-pdf"><thead><tr><th style="width:18%;">Unidad</th><th style="width:20%;">Material</th><th style="width:8%;">No.</th><th style="width:10%;">Km</th><th style="width:10%;">Litros</th><th style="width:12%;text-align:right;">Comb. (Q)</th><th style="width:12%;text-align:right;">Alquiler (Q)</th><th style="width:10%;text-align:right;">Total (Q)</th></tr></thead><tbody>`;
+                    html += `<table class="tabla-pdf"><colgroup><col style="width:18%"><col style="width:20%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:12%"><col style="width:12%"><col style="width:10%"></colgroup><thead><tr><th>Unidad</th><th>Material</th><th>No.</th><th>Km</th><th>Litros</th><th style="text-align:right;">Comb. (Q)</th><th style="text-align:right;">Alquiler (Q)</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                     viajesC.forEach(v => {
                         const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A',propiedad:'propio'};
                         const prop = c.propiedad==='alquilado' ? ' (Alq.)' : '';
@@ -9477,7 +9481,7 @@ tbody.innerHTML = '';
                     let totalMTmp = 0;
                     const tieneFirmas = ordsMT.some(o => o.firma);
                     html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">🔩 Mantenimiento</h3>`;
-                    html += `<table class="tabla-pdf"><thead><tr><th style="width:25%;">Equipo</th><th style="width:15%;">Tipo</th><th style="width:35%;">Observaciones</th><th style="width:15%;text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th style="width:10%;">Firma</th>' : ''}</tr></thead><tbody>`;
+                    html += `<table class="tabla-pdf"><colgroup><col style="width:25%"><col style="width:15%"><col style="width:${tieneFirmas?'35':'45'}%"><col style="width:15%">${tieneFirmas ? '<col style="width:10%">' : ''}</colgroup><thead><tr><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                     ordsMT.forEach(o => { 
                         const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; 
                         totalMTmp += o.costo||0; 
@@ -9494,7 +9498,7 @@ tbody.innerHTML = '';
                     let totalITmp = 0;
                     const tieneFirmas = insMT.some(i => i.firma);
                     html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
-                    html += `<table class="tabla-pdf"><thead><tr><th style="width:15%;">Tipo</th><th style="width:40%;">Artículo</th><th style="width:10%;">Cant.</th><th style="width:20%;text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th style="width:15%;">Firma</th>' : ''}</tr></thead><tbody>`;
+                    html += `<table class="tabla-pdf"><colgroup><col style="width:15%"><col style="width:${tieneFirmas?'40':'50'}%"><col style="width:10%"><col style="width:20%">${tieneFirmas ? '<col style="width:15%">' : ''}</colgroup><thead><tr><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                     insMT.forEach(i => { 
                         totalITmp += i.costo||0; 
                         totalEgr += i.costo||0; 
@@ -9512,7 +9516,7 @@ tbody.innerHTML = '';
             } else if (tipo === 'asistencia') {
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Asistencia y Horas Extra</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Generado: ${new Date().toLocaleDateString('es-GT')} | Proyecto: ${_esc(proyNombre)}</p>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Trabajador</th><th>Puesto</th><th>Estado</th><th>H. Extra</th><th style="text-align:right;">Sueldo (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:28%"><col style="width:22%"><col style="width:14%"><col style="width:10%"><col style="width:14%"></colgroup><thead><tr><th>Fecha</th><th>Trabajador</th><th>Puesto</th><th>Estado</th><th>H. Extra</th><th style="text-align:right;">Sueldo (Q)</th></tr></thead><tbody>`;
                 let totalNomina = 0;
                 const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
                 if (regs.length === 0) {
@@ -9535,7 +9539,7 @@ tbody.innerHTML = '';
             } else if (tipo === 'viajes') {
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><colgroup><col style="width:10%"><col style="width:22%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                 const enRangoVH = (f) => f >= rango.inicio && f <= rango.fin;
                 const viajes = (datos.viajes_camiones.viajes||[]).filter(v => enRangoVH(v.fecha)).sort((a,b) => a.fecha.localeCompare(b.fecha));
                 let totalV = 0;
@@ -9562,7 +9566,7 @@ tbody.innerHTML = '';
                 // Órdenes de mantenimiento
                 const tieneFirmasOrdenes = ords.some(o => o.firma);
                 html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">🔩 Órdenes de Mantenimiento</h3>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmasOrdenes ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:26%"><col style="width:13%"><col style="width:37%"><col style="width:12%"></colgroup><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmasOrdenes ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                 if (ords.length === 0) {
                     html += `<tr><td colspan="${5 + (tieneFirmasOrdenes ? 1 : 0)}" style="text-align:center;color:#6B7280;padding:15px;">Sin órdenes en esta fecha</td></tr>`;
                 } else {
@@ -9578,7 +9582,7 @@ tbody.innerHTML = '';
                 // Compras de insumos
                 const tieneFirmasInsumos = ins.some(i => i.firma);
                 html += `<h3 class="tabla-titulo" style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmasInsumos ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:14%"><col style="width:47%"><col style="width:9%"><col style="width:12%"><col style="width:6%"></colgroup><thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmasInsumos ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                 if (ins.length === 0) {
                     html += `<tr><td colspan="${5 + (tieneFirmasInsumos ? 1 : 0)}" style="text-align:center;color:#6B7280;padding:15px;">Sin compras en esta fecha</td></tr>`;
                 } else {
@@ -9606,7 +9610,7 @@ tbody.innerHTML = '';
                     
                     if (categoriasConValor.length > 0) {
                         let totalGastosCat = 0;
-                        html += `<table class="tabla-pdf"><thead><tr><th>Categoría</th><th style="text-align:right;">Monto (Q)</th><th style="text-align:right;">%</th></tr></thead><tbody>`;
+                        html += `<table class="tabla-pdf"><colgroup><col style="width:65%"><col style="width:20%"><col style="width:15%"></colgroup><thead><tr><th>Categoría</th><th style="text-align:right;">Monto (Q)</th><th style="text-align:right;">%</th></tr></thead><tbody>`;
                         
                         categoriasConValor.forEach(([cat, monto]) => {
                             totalGastosCat += monto;
@@ -9735,56 +9739,96 @@ function validarDependenciasExportacion() {
             if (!validarDependenciasExportacion()) throw new Error('Dependencias de exportación no disponibles');
             await esperarImagenesPlantilla();
 
-            // Leer el tamaño de página elegido por el usuario (Letter por defecto)
             const pageSize = (document.getElementById('vp-page-size')?.value || 'letter');
-            // Dimensiones en mm para ajustar el ancho de la plantilla al formato elegido
-            const PAGE_WIDTHS = { letter: '216mm', a4: '210mm', legal: '216mm' };
+            // Ancho en px a 96 dpi: letter=816, a4=794, legal=816
+            const PAGE_PX = { letter: 816, a4: 794, legal: 816 };
+            const PAGE_MM = { letter: '216mm', a4: '210mm', legal: '216mm' };
+            const targetPx = PAGE_PX[pageSize] || 816;
+
             contenedor.classList.add('pdf-generating');
             try {
-            contenedor.style.width = PAGE_WIDTHS[pageSize] || '216mm';
+                // 1) Forzar ancho exacto ANTES de que html2canvas mida el elemento.
+                //    position:fixed + left:-9999px lo saca del flujo pero sigue
+                //    siendo renderizable; asignamos el ancho en px para que
+                //    scrollWidth coincida exactamente con targetPx.
+                contenedor.style.width = targetPx + 'px';
+                contenedor.style.maxWidth = targetPx + 'px';
+                contenedor.style.minWidth = targetPx + 'px';
+                contenedor.style.overflowX = 'hidden';
 
-            /* FIX MÓVIL: html2canvas por defecto renderiza solo el viewport del
-               dispositivo, por lo que en móviles el PDF salía con el contenido
-               cortado. Se fija windowWidth/windowHeight al tamaño real del
-               documento y se ajusta la escala para no exceder el límite de
-               altura de canvas de los navegadores móviles (iOS ≈ 4096-8192px). */
-            const docWidth  = Math.max(Math.ceil(contenedor.scrollWidth), 794);
-            const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123);
-            const scale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
+                // 2) Dar un tick al navegador para que recalcule el layout
+                //    con el nuevo ancho antes de leer scrollHeight.
+                await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-            const opts = {
-                margin: [8, 12, 10, 12], // [top, left, bottom, right] en mm - coincide con CSS padding
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale,
-                    useCORS: true,
-                    logging: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: docWidth,
-                    windowHeight: docHeight,
-                    width: docWidth,
-                    height: docHeight,
-                    allowTaint: false
-                },
-                jsPDF: { unit: 'mm', format: pageSize, orientation: 'portrait' },
-                /* Evitar cortes de página a mitad de filas/imágenes/firmas */
-                pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper'] }
-            };
-            const pdf = await html2pdf().set(opts).from(contenedor).toPdf().get('pdf');
-            const total = pdf.internal.getNumberOfPages();
-            for (let i = 1; i <= total; i++) {
-                pdf.setPage(i);
-                pdf.setFontSize(8);
-                pdf.setTextColor(156, 163, 175);
-                pdf.text(`Página ${i} de ${total}`, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 5, { align: 'center' });
-            }
-            return pdf;
+                const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123);
+                const scale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
+
+                // 3) Variables CSS del tema que usa la plantilla.
+                //    html2canvas clona el DOM en un iframe aislado donde las
+                //    custom properties del :root principal NO están disponibles,
+                //    por eso se inyectan en el clon vía onclone.
+                const CSS_VARS = [
+                    '--pdf-azul-oscuro:#004B93',
+                    '--pdf-azul-claro:#00A4E4',
+                    '--pdf-gris-oscuro:#1F2937',
+                    '--pdf-gris-medio:#6B7280',
+                    '--pdf-rojo:#DC2626',
+                    '--pdf-verde:#16A34A'
+                ].join(';');
+
+                const opts = {
+                    margin: 0,
+                    filename: filename,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale,
+                        useCORS: true,
+                        logging: false,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: targetPx,
+                        windowHeight: docHeight,
+                        width: targetPx,
+                        height: docHeight,
+                        allowTaint: false,
+                        onclone: function(clonedDoc) {
+                            // Inyectar variables CSS en el documento clonado
+                            const style = clonedDoc.createElement('style');
+                            style.textContent = ':root{' + CSS_VARS + '}';
+                            clonedDoc.head.appendChild(style);
+                            // Forzar el mismo ancho en el clon
+                            const el = clonedDoc.getElementById('plantilla-reporte-impresion');
+                            if (el) {
+                                el.style.width = targetPx + 'px';
+                                el.style.maxWidth = targetPx + 'px';
+                                el.style.minWidth = targetPx + 'px';
+                                el.style.overflowX = 'hidden';
+                                el.style.position = 'relative';
+                                el.style.left = '0';
+                                el.style.top = '0';
+                                el.style.opacity = '1';
+                            }
+                        }
+                    },
+                    jsPDF: { unit: 'mm', format: pageSize, orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper'] }
+                };
+
+                const pdf = await html2pdf().set(opts).from(contenedor).toPdf().get('pdf');
+                const total = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= total; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(156, 163, 175);
+                    pdf.text(`Página ${i} de ${total}`, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 5, { align: 'center' });
+                }
+                return pdf;
             } finally {
-                // Limpieza SIEMPRE aunque falle el renderizado (BUG-CR-2026-014)
                 contenedor.classList.remove('pdf-generating');
-                contenedor.style.width = '210mm';
+                contenedor.style.width = PAGE_MM[pageSize] || '216mm';
+                contenedor.style.maxWidth = '';
+                contenedor.style.minWidth = '';
+                contenedor.style.overflowX = '';
             }
         }
 
