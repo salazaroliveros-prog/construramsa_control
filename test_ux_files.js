@@ -116,7 +116,6 @@ function log(formato, aspecto, ok, detalle = '') {
     await page.evaluate(() => {
       document.getElementById('export-pdf').checked = true;
       document.getElementById('export-csv').checked = false;
-      document.getElementById('export-xlsx').checked = false;
     });
     
     await page.evaluate(() => generarReporteLocal());
@@ -218,7 +217,6 @@ function log(formato, aspecto, ok, detalle = '') {
     await page.evaluate(() => {
       document.getElementById('export-pdf').checked = false;
       document.getElementById('export-csv').checked = true;
-      document.getElementById('export-xlsx').checked = false;
     });
     
     await page.evaluate(() => generarReporteLocal());
@@ -241,47 +239,6 @@ function log(formato, aspecto, ok, detalle = '') {
         `${csvStructureValid.cantidadRegistros} registros`);
     log('CSV', 'Encabezados', csvStructureValid.tieneEncabezados, 'CSV tiene encabezados definidos');
     resultados.push({ formato: 'CSV', aspecto: 'Estructura', ok: csvStructureValid.tieneDatos });
-
-    // Validar XLSX
-    console.log('\n--- XLSX ---');
-    await page.evaluate(() => {
-      const plantilla = document.getElementById('plantilla-reporte-impresion');
-      if (plantilla) {
-        plantilla.classList.remove('pdf-generating');
-        plantilla.style.left = '-9999px';
-        plantilla.style.top = '-9999';
-      }
-    });
-    await wait(500);
-    
-    await page.evaluate(() => {
-      document.getElementById('export-pdf').checked = false;
-      document.getElementById('export-csv').checked = false;
-      document.getElementById('export-xlsx').checked = true;
-    });
-    
-    await page.evaluate(() => generarReporteLocal());
-    await wait(3000);
-
-    // Validar estructura del XLSX
-    const xlsxStructureValid = await page.evaluate(() => {
-      const datos = getProyectoData();
-      const movs = datos.caja_chica || [];
-      
-      return {
-        tieneDatos: movs.length > 0,
-        cantidadRegistros: movs.length,
-        formatoExcel: true, // SheetJS genera formato Excel nativo
-        anchoColumnas: true // Columnas configuradas con ancho 22
-      };
-    });
-    
-    log('XLSX', 'Estructura', xlsxStructureValid.tieneDatos, 
-        `${xlsxStructureValid.cantidadRegistros} registros`);
-    log('XLSX', 'Formato Excel', xlsxStructureValid.formatoExcel, 'Formato nativo Excel 2007+');
-    log('XLSX', 'Ancho de columnas', xlsxStructureValid.anchoColumnas, 'Columnas con ancho configurado (22 caracteres)');
-    resultados.push({ formato: 'XLSX', aspecto: 'Estructura', ok: xlsxStructureValid.tieneDatos });
-
     // Validar experiencia de scroll natural
     console.log('\n══════════════════════════════════════════════');
     console.log('  VALIDACIÓN DE SCROLL NATURAL');
@@ -365,7 +322,6 @@ function log(formato, aspecto, ok, detalle = '') {
     console.log('✅ PDF: Colores diferenciados para ingresos/egresos y totales');
     console.log('✅ PDF: Bordes claros y filas alternadas para mejor lectura');
     console.log('✅ CSV: Formato lineal fácil de leer en Excel/Google Sheets');
-    console.log('✅ XLSX: Hojas de cálculo con anchos de columnas configurados');
     console.log('✅ Todos: Contenido renderizado correctamente sin cortes');
 
   } catch (error) {

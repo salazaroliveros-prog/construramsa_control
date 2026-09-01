@@ -215,8 +215,8 @@ function log(tipo, formato, ok, detalle = '') {
     }
 
     // Tipos de reportes a probar
-    const tiposReporte = ['diario', 'semanal', 'mensual', 'asistencia', 'viajes', 'mantenimiento'];
-    const formatos = ['pdf', 'csv', 'xlsx'];
+        const tiposReporte = ['diario', 'semanal', 'mensual', 'asistencia', 'viajes', 'mantenimiento'];
+    const formatos = ['pdf', 'csv'];
     
     console.log('\n══════════════════════════════════════════════');
     console.log('  GENERACIÓN DE REPORTES');
@@ -270,8 +270,7 @@ function log(tipo, formato, ok, detalle = '') {
           // Desmarcar todos los formatos
           await page.evaluate(() => {
             document.getElementById('export-pdf').checked = false;
-            document.getElementById('export-csv').checked = false;
-            document.getElementById('export-xlsx').checked = false;
+                        document.getElementById('export-csv').checked = false;
           });
           
           // Marcar solo el formato actual

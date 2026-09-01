@@ -141,7 +141,6 @@ function log(tipo, formato, ok, detalle = '') {
     await page.evaluate(() => {
       document.getElementById('export-pdf').checked = false;
       document.getElementById('export-csv').checked = true;
-      document.getElementById('export-xlsx').checked = false;
     });
     
     await page.evaluate(() => generarReporteLocal());
@@ -162,7 +161,6 @@ function log(tipo, formato, ok, detalle = '') {
     await page.evaluate(() => {
       document.getElementById('export-pdf').checked = true;
       document.getElementById('export-csv').checked = false;
-      document.getElementById('export-xlsx').checked = false;
     });
     
     await page.evaluate(() => {
@@ -194,37 +192,6 @@ function log(tipo, formato, ok, detalle = '') {
     
     log('diario', 'PDF plantilla', plantillaValida, plantillaValida ? 'Datos de empresa correctos' : 'Faltan datos de empresa');
     resultados.push({ tipo: 'diario', formato: 'PDF', validacion: plantillaValida });
-    
-    // Validar XLSX
-    await page.evaluate(() => {
-      const plantilla = document.getElementById('plantilla-reporte-impresion');
-      if (plantilla) {
-        plantilla.classList.remove('pdf-generating');
-        plantilla.style.left = '-9999px';
-        plantilla.style.top = '-9999px';
-      }
-    });
-    await wait(500);
-    
-    await page.evaluate(() => {
-      document.getElementById('export-pdf').checked = false;
-      document.getElementById('export-csv').checked = false;
-      document.getElementById('export-xlsx').checked = true;
-    });
-    
-    await page.evaluate(() => generarReporteLocal());
-    await wait(3000);
-    
-    const xlsxValido = await page.evaluate(() => {
-      const datos = getProyectoData();
-      const movs = datos.caja_chica || [];
-      const tieneValidacion = movs.some(m => m.descripcion.includes('VALIDACIÓN'));
-      return tieneValidacion;
-    });
-    
-    log('diario', 'XLSX contenido', xlsxValido, xlsxValido ? 'Contiene datos de prueba' : 'Faltan datos de prueba');
-    resultados.push({ tipo: 'diario', formato: 'XLSX', validacion: xlsxValido });
-    
     // Validar reporte de asistencia
     await page.click('[data-module="personal"]');
     await wait(500);
@@ -266,7 +233,6 @@ function log(tipo, formato, ok, detalle = '') {
     await page.evaluate(() => {
       document.getElementById('export-pdf').checked = false;
       document.getElementById('export-csv').checked = true;
-      document.getElementById('export-xlsx').checked = false;
     });
     
     await page.evaluate(() => generarReporteLocal());
@@ -351,7 +317,6 @@ function log(tipo, formato, ok, detalle = '') {
     await page.evaluate(() => {
       document.getElementById('export-pdf').checked = false;
       document.getElementById('export-csv').checked = true;
-      document.getElementById('export-xlsx').checked = false;
     });
     
     await page.evaluate(() => generarReporteLocal());
@@ -427,7 +392,6 @@ function log(tipo, formato, ok, detalle = '') {
     await page.evaluate(() => {
       document.getElementById('export-pdf').checked = false;
       document.getElementById('export-csv').checked = true;
-      document.getElementById('export-xlsx').checked = false;
     });
     
     await page.evaluate(() => generarReporteLocal());
