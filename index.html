@@ -3988,7 +3988,7 @@
             <div>
                 <h3 class="historial-titulo">ℹ️ Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.8.5 (Sistema de actualizaciones mejorado: detección automática de versiones desde Vercel)<br>
+                    Versión: 2.8.6 (Sistema de actualizaciones mejorado: detección automática de versiones desde Vercel)<br>
                     Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV<br>
                     Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
@@ -4282,7 +4282,7 @@
         }
 
         function migrarDB(db) {
-            if (!db.version) db.version = '2.8.5';
+            if (!db.version) db.version = '2.8.6';
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
             if (!db.configuracion.nombre_empresa) db.configuracion.nombre_empresa = 'CONSTRURAMSA';
             if (!db.configuracion.eslogan) db.configuracion.eslogan = 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
@@ -4324,7 +4324,7 @@
 
         function inicializarDB() {
             const db = {
-                version: '2.8.5',
+                version: '2.8.6',
                 configuracion: { 
                     nombre_empresa:'CONSTRURAMSA', 
                     eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', 
@@ -10298,8 +10298,8 @@ function validarDependenciasExportacion() {
             }
         });
 
-        const APP_VERSION = '2.8.5';
-        // APP_VERSION_MARKER:2.8.5 (usado para detección de actualizaciones)
+        const APP_VERSION = '2.8.6';
+        // APP_VERSION_MARKER:2.8.6 (usado para detección de actualizaciones)
         const _scrollPositions = new Map();
         function guardarScrollModulo(mid) {
             const el = document.getElementById(mid);
@@ -10344,14 +10344,6 @@ function validarDependenciasExportacion() {
         // ============================================================
         document.addEventListener('DOMContentLoaded', function () {
             normalizarCamposFormulario();
-
-            const versionGuardada = localStorage.getItem('app_version');
-            if (versionGuardada && versionGuardada !== APP_VERSION) {
-                showToast('🔄 Nueva versión disponible. Recargando...', 'info', 3000);
-                setTimeout(() => location.reload(), 1200);
-                return;
-            }
-            localStorage.setItem('app_version', APP_VERSION);
 
             // Paso 1: cargar datos desde JSON inicial (solo si localStorage vacío)
             if (!localStorage.getItem(DB_KEY)) {
@@ -10596,23 +10588,24 @@ function validarDependenciasExportacion() {
                         // Fetch del index.html para verificar si cambió
                         const response = await fetch('./index.html?' + now, { cache: 'no-store' });
                         if (!response.ok) return;
-                        
+
                         const html = await response.text();
                         // Extraer la versión del HTML buscando el marcador especial en comentario
                         const markerMatch = html.match(/\/\/ APP_VERSION_MARKER:([\d.]+)/);
                         if (!markerMatch) return;
-                        
+
                         const versionRemota = markerMatch[1];
                         const versionLocal = APP_VERSION;
-                        
+
+                        // Solo notificar si la versión remota es diferente de la local
+                        // y no estamos ya recargando por una actualización
                         if (versionRemota !== versionLocal && !_recargandoPorUpdate) {
                             console.log(`[Actualización] Versión local: ${versionLocal}, Versión remota: ${versionRemota}`);
                             _recargandoPorUpdate = true;
-                            
+
                             showToast(`🔄 Nueva versión ${versionRemota} disponible. Recargando...`, 'info', 5000);
-                            
+
                             setTimeout(() => {
-                                localStorage.setItem('app_version', versionRemota);
                                 location.reload();
                             }, 2000);
                         }

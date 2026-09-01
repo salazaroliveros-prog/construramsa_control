@@ -1,6 +1,6 @@
 {
   "name": "control_obra_gastos",
-  "version": "2.8.5",
+  "version": "2.8.6",
   "description": "Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra. Personalizable para cualquier empresa con sincronización en la nube.",
   "main": "server.js",
   "scripts": {
@@ -15,7 +15,8 @@
     "audit": "npm run audit:versions && npm run audit:assets",
     "audit:versions": "node check_versions.js",
     "audit:assets": "node check_assets.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "clean": "node -e \"const fs=require('fs'); const path=require('path'); const nm=path.join(__dirname,'node_modules'); const pl=path.join(__dirname,'package-lock.json'); if(fs.existsSync(nm))fs.rmSync(nm,{recursive:true,force:true}); if(fs.existsSync(pl))fs.unlinkSync(pl); console.log('Cleaned node_modules and package-lock.json');\""
   },
   "repository": {
     "type": "git",
