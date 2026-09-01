@@ -74,7 +74,7 @@
     <link rel="dns-prefetch" href="https://accounts.google.com">
 
     <!-- Preload críticos: vendor scripts (PDF, sanitización) cargados de forma sincrónica -->
-    <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
+    <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
     <link rel="preload" as="script" href="./vendor/purify.min.js">
 
     <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
@@ -9696,6 +9696,8 @@ function validarDependenciasExportacion() {
             const pageSize = (document.getElementById('vp-page-size')?.value || 'letter');
             // Dimensiones en mm para ajustar el ancho de la plantilla al formato elegido
             const PAGE_WIDTHS = { letter: '216mm', a4: '210mm', legal: '216mm' };
+            contenedor.classList.add('pdf-generating');
+            try {
             contenedor.style.width = PAGE_WIDTHS[pageSize] || '216mm';
 
             /* FIX MÓVIL: html2canvas por defecto renderiza solo el viewport del
@@ -9735,9 +9737,12 @@ function validarDependenciasExportacion() {
                 pdf.setTextColor(156, 163, 175);
                 pdf.text(`Página ${i} de ${total}`, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 5, { align: 'center' });
             }
-            // Restaurar ancho original (A4 / 210mm es el default del CSS)
-            contenedor.style.width = '210mm';
             return pdf;
+            } finally {
+                // Limpieza SIEMPRE aunque falle el renderizado (BUG-CR-2026-014)
+                contenedor.classList.remove('pdf-generating');
+                contenedor.style.width = '210mm';
+            }
         }
 
         async function compartirReporteWhatsApp() {
@@ -10312,6 +10317,11 @@ function validarDependenciasExportacion() {
         // Cerrar la vista previa al presionar Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
+                // Fail-safe BUG-CR-2026-014: cerrar plantilla de impresion si quedo incrustada
+                const plantillaBlock = document.getElementById('plantilla-reporte-impresion');
+                if (plantillaBlock && plantillaBlock.classList.contains('pdf-generating')) {
+                    plantillaBlock.classList.remove('pdf-generating');
+                }
                 const modal = document.getElementById('modal-vista-previa');
                 if (modal && !modal.classList.contains('hidden')) {
                     cerrarVistaPrevia();
