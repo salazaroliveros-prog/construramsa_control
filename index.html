@@ -86,6 +86,7 @@
     <script src="./src/config.js"></script>
     <script src="./src/exportador.js"></script>
     <script src="./src/reporteEjecutivo.js"></script>
+    <script src="./src/signatureCapture.js"></script>
     <style>
         :root {
             /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */
@@ -791,12 +792,14 @@
             font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
             color: #111827;
             background: #ffffff;
-            /* Padding reducido: el membrete ya incluye sus propios márgenes internos */
-            padding: 8mm 14mm 14mm 14mm;
+            /* Padding optimizado para máximo uso de espacio */
+            padding: 8mm 12mm 10mm 12mm;
             box-sizing: border-box;
             opacity: 0;
             pointer-events: none;
             z-index: -1;
+            overflow-x: hidden;
+            overflow-y: visible;
         }
 
         /* Clase para hacer visible la plantilla durante la generación de PDF.
@@ -816,30 +819,41 @@
             border-collapse: collapse;
             margin-top: 12px;
             font-size: 9.5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            table-layout: fixed;
         }
         #plantilla-reporte-impresion table.tabla-pdf th {
-            background-color: var(--pdf-azul-oscuro);
+            background: linear-gradient(180deg, var(--pdf-azul-oscuro) 0%, var(--pdf-azul-claro) 100%);
             color: #ffffff;
             font-size: 8.5px;
             font-weight: 700;
             text-transform: uppercase;
-            padding: 7px 6px;
+            padding: 8px 6px;
             border: 1px solid var(--pdf-azul-oscuro);
             text-align: left;
             letter-spacing: 0.4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         #plantilla-reporte-impresion table.tabla-pdf td {
             font-size: 9px;
-            padding: 6px 6px;
+            padding: 7px 6px;
             border: 1px solid #E5E7EB;
             color: var(--pdf-gris-oscuro);
             vertical-align: middle;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:nth-child(even) {
             background-color: #F9FAFB;
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:hover {
             background-color: #EFF6FF;
+        }
+        #plantilla-reporte-impresion table.tabla-pdf tr:first-child td {
+            border-top: 2px solid var(--pdf-azul-oscuro);
         }
 
         /* Estilos para totales en tablas PDF */
@@ -848,19 +862,77 @@
             font-weight: 700;
             color: var(--pdf-azul-oscuro);
             text-align: right;
-            background-color: #EFF6FF !important;
+            background: linear-gradient(90deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+            border-top: 2px solid var(--pdf-azul-oscuro);
+            border-bottom: 2px solid var(--pdf-azul-oscuro);
         }
         #plantilla-reporte-impresion table.tabla-pdf td.total-egreso {
             font-weight: 700;
             color: var(--pdf-rojo);
             text-align: right;
-            background-color: #FEF2F2 !important;
+            background: linear-gradient(90deg, #FEF2F2 0%, #FEE2E2 100%) !important;
+            border-top: 2px solid var(--pdf-rojo);
+            border-bottom: 2px solid var(--pdf-rojo);
         }
         #plantilla-reporte-impresion table.tabla-pdf td.total-ingreso {
             font-weight: 700;
             color: var(--pdf-verde);
             text-align: right;
-            background-color: #ECFDF5 !important;
+            background: linear-gradient(90deg, #ECFDF5 0%, #D1FAE5 100%) !important;
+            border-top: 2px solid var(--pdf-verde);
+            border-bottom: 2px solid var(--pdf-verde);
+        }
+
+        /* Mejoras en títulos de secciones de reportes */
+        #plantilla-reporte-impresion h3 {
+            color: var(--pdf-azul-oscuro);
+            font-size: 13px;
+            font-weight: 700;
+            margin: 18px 0 10px 0;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--pdf-azul-claro);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #plantilla-reporte-impresion h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--pdf-azul-oscuro);
+            border-radius: 2px;
+        }
+
+        /* Mejoras en contenedores de información */
+        #plantilla-reporte-impresion .info-box {
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-left: 4px solid var(--pdf-azul-claro);
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin: 12px 0;
+            font-size: 9px;
+            line-height: 1.5;
+        }
+        #plantilla-reporte-impresion .alert-box {
+            background: #FEF2F2;
+            border: 1px solid #FEE2E2;
+            border-left: 4px solid var(--pdf-rojo);
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin: 12px 0;
+            font-size: 9px;
+            line-height: 1.5;
+        }
+        #plantilla-reporte-impresion .success-box {
+            background: #ECFDF5;
+            border: 1px solid #D1FAE5;
+            border-left: 4px solid var(--pdf-verde);
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin: 12px 0;
+            font-size: 9px;
+            line-height: 1.5;
         }
 
         /* Encabezados de sección en el contenido dinámico */
@@ -871,11 +943,6 @@
             border-bottom: 2px solid var(--pdf-azul-oscuro);
             padding-bottom: 6px;
             margin: 0 0 10px 0;
-        }
-        #plantilla-reporte-impresion h3 {
-            font-size: 10.5px;
-            font-weight: 700;
-            margin: 12px 0 6px 0;
         }
         #plantilla-reporte-impresion p {
             font-size: 9px;
@@ -891,6 +958,111 @@
         .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .form-grid-2-sm { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+
+        /* ── Signature Capture Component ───────────────────────────────────── */
+        .signature-wrapper {
+            margin: 15px 0;
+        }
+        .signature-canvas-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .signature-canvas-container canvas {
+            display: block;
+            touch-action: none; /* Previene scroll mientras se firma */
+        }
+        .signature-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #9ca3af;
+            pointer-events: none;
+            font-size: 14px;
+            user-select: none;
+        }
+        .signature-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-limpiar-firma {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        /* ── Dashboard mejorado ───────────────────────────────────────────── */
+        .css-chart-bar {
+            flex: 1;
+            min-width: 20px;
+            background: linear-gradient(180deg, var(--acento-cian), var(--acento-azul));
+            border-radius: 4px 4px 0 0;
+            transition: height 0.3s ease, background 0.3s ease;
+            position: relative;
+        }
+        .css-chart-bar.alerta {
+            background: linear-gradient(180deg, #ef4444, #dc2626);
+        }
+        .css-chart-bar:hover {
+            opacity: 0.9;
+        }
+        .grafico-placeholder {
+            text-align: center;
+            color: var(--texto-secundario);
+            padding: 30px 20px;
+            font-size: 13px;
+            border: 2px dashed var(--glass-border);
+            border-radius: 8px;
+        }
+        .proyeccion-card.alerta {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .metricas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .metrica-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .metrica-label {
+            font-size: 10px;
+            color: var(--texto-secundario);
+            margin-bottom: 5px;
+        }
+        .metrica-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--texto-principal);
+        }
+        .metrica-value.positivo {
+            color: #10b981;
+        }
+        .metrica-value.negativo {
+            color: #ef4444;
+        }
+        .barra-progreso {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .barra-progreso-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--acento-cian), var(--acento-azul));
+            border-radius: 8px;
+            transition: width 0.5s ease, background 0.3s ease;
+        }
 
         /* ── S-01: sub-sección de catálogo dentro de módulo (camiones, proveedores, trabajadores…) */
         .modulo-catalogo {
@@ -3269,6 +3441,14 @@
                 </div>
                 
                 <div id="formatos-inspeccion" style="margin-bottom:15px;"></div>
+                
+                <!-- Firma Digital del Técnico -->
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:12px;color:var(--texto-principal);">✍️ Firma del Técnico/Responsable</label>
+                    <div id="signature-container-orden" class="signature-container"></div>
+                    <input type="hidden" id="ord-firma" name="firma">
+                </div>
+                
                 <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Guardar orden de mantenimiento">💾 Guardar Orden</button>
                     <button type="button" id="btn-cancelar-orden" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionOrden()">✖ Cancelar</button>
@@ -3321,6 +3501,14 @@
                     <label for="insumo-stock-min">Stock Mínimo (Alerta)</label>
                     <input type="number" inputmode="decimal" id="insumo-stock-min" min="0" max="99999" placeholder="Opcional: alerta al bajar de este valor" aria-label="Stock mínimo de alerta">
                 </div>
+                
+                <!-- Firma Digital de Recepción -->
+                <div style="margin-top:15px;">
+                    <label style="font-size:12px;color:var(--texto-principal);">✍️ Firma de Recepción</label>
+                    <div id="signature-container-insumo" class="signature-container"></div>
+                    <input type="hidden" id="insumo-firma" name="firma">
+                </div>
+                
                 <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar compra y descontar de caja">💾 Registrar Compra</button>
                     <button type="button" id="btn-cancelar-insumo" class="btn-secundario" style="flex:0 0 auto;display:none;" onclick="cancelarEdicionInsumo()">✖ Cancelar</button>
@@ -3341,13 +3529,32 @@
             <h2 id="reportes-title" class="modulo-titulo">📊 Generación de Reportes</h2>
             <p class="modulo-descripcion">Reportes diarios, semanales, mensuales, de asistencia, viajes y mantenimiento con exportación múltiple.</p>
 
+            <!-- Estadísticas rápidas de reportes -->
+            <div style="margin-bottom:20px;padding:12px;background:rgba(0,164,228,0.08);border-radius:8px;border:1px solid rgba(0,164,228,0.2);">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                    <div style="font-size:12px;color:var(--texto-principal);font-weight:700;">📈 Estadísticas de Reportes</div>
+                    <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                        <div style="font-size:11px;color:var(--texto-secundario);">
+                            <span style="color:var(--acento-cian);font-weight:600;" id="stats-total">0</span> generados
+                        </div>
+                        <div style="font-size:11px;color:var(--texto-secundario);">
+                            <span style="color:var(--acento-cian);font-weight:600;" id="stats-hoy">0</span> hoy
+                        </div>
+                        <div style="font-size:11px;color:var(--texto-secundario);">
+                            <span style="color:var(--acento-cian);font-weight:600;" id="stats-ultima">—</span> último
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-grid-2">
                 <div>
                     <label for="reporte-tipo">Tipo de Reporte</label>
-                    <select id="reporte-tipo" onchange="actualizarOpcionesFecha()">
+                    <select id="reporte-tipo" onchange="actualizarOpcionesFecha();actualizarDescripcionReporte()">
                         <option value="diario">Reporte Diario de Gastos</option>
                         <option value="semanal">Informe Semanal Consolidado</option>
                         <option value="mensual">Reporte Mensual Consolidado</option>
+                        <option value="categoria">Reporte por Categoría de Gastos</option>
                         <option value="asistencia">Reporte de Asistencia y Horas Extra</option>
                         <option value="viajes">Reporte de Viajes de Camiones</option>
                         <option value="mantenimiento">Reporte de Mantenimiento e Insumos</option>
@@ -3361,6 +3568,11 @@
                         <option value="rango">Rango de Fechas</option>
                     </select>
                 </div>
+            </div>
+            
+            <!-- Descripción dinámica del reporte -->
+            <div id="reporte-descripcion" style="margin:12px 0;padding:10px;background:rgba(255,255,255,0.03);border-radius:6px;border-left:3px solid var(--acento-cian);font-size:11px;color:var(--texto-secundario);">
+                📋 Reporte que incluye todos los movimientos de caja chica del día seleccionado.
             </div>
             
             <div class="form-grid-2" id="reporte-fechas-unicas">
@@ -3386,10 +3598,14 @@
                 <label style="font-size:12px;color:var(--texto-principal);font-weight:700;margin-bottom:8px;display:block;">Formatos de Exportación</label>
                 <div style="display:flex;gap:15px;flex-wrap:wrap;">
                     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-secundario);cursor:pointer;">
-                        <input type="checkbox" id="export-pdf" checked> PDF
+                        <input type="checkbox" id="export-pdf" checked> 
+                        <span>📄 PDF</span>
+                        <span style="font-size:10px;color:var(--texto-secundario);">(Formato profesional)</span>
                     </label>
                     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-secundario);cursor:pointer;">
-                        <input type="checkbox" id="export-csv" checked> CSV
+                        <input type="checkbox" id="export-csv" checked> 
+                        <span>📊 CSV</span>
+                        <span style="font-size:10px;color:var(--texto-secundario);">(Excel compatible)</span>
                     </label>
                 </div>
             </div>
@@ -3415,8 +3631,11 @@
             </button>
             
             <div style="margin-top:15px;padding:12px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid var(--glass-border);">
-                <div style="font-size:12px;color:var(--texto-principal);font-weight:700;margin-bottom:8px;">📁 Reportes Recientes</div>
-                <div id="reportes-recientes" style="font-size:11px;color:var(--texto-secundario);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <div style="font-size:12px;color:var(--texto-principal);font-weight:700;">📁 Reportes Recientes</div>
+                    <button onclick="limpiarHistorialReportes()" style="font-size:10px;padding:4px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:4px;color:#ef4444;cursor:pointer;" title="Limpiar historial">Limpiar</button>
+                </div>
+                <div id="reportes-recientes" style="font-size:11px;color:var(--texto-secundario);max-height:200px;overflow-y:auto;">
                     No hay reportes generados recientemente
                 </div>
             </div>
@@ -4509,6 +4728,15 @@
                 limpiarFotos();
             }
             
+            // Cargar firma digital si existe
+            if (o.firma && window.signatureCaptureOrden) {
+                window.signatureCaptureOrden.setData(o.firma);
+                document.getElementById('ord-firma').value = o.firma;
+            } else if (window.signatureCaptureOrden) {
+                window.signatureCaptureOrden.clear();
+                document.getElementById('ord-firma').value = '';
+            }
+            
             buildFormatosInspeccion();
             const form = document.getElementById('form-orden');
             form.dataset.editando = id;
@@ -4531,6 +4759,16 @@
             document.getElementById('insumo-cantidad').value  = i.cantidad || 1;
             document.getElementById('insumo-costo').value     = i.costo || 0;
             document.getElementById('insumo-stock-min').value = i.stock_min || 0;
+            
+            // Cargar firma digital si existe
+            if (i.firma && window.signatureCaptureInsumo) {
+                window.signatureCaptureInsumo.setData(i.firma);
+                document.getElementById('insumo-firma').value = i.firma;
+            } else if (window.signatureCaptureInsumo) {
+                window.signatureCaptureInsumo.clear();
+                document.getElementById('insumo-firma').value = '';
+            }
+            
             const form = document.getElementById('form-insumo');
             form.dataset.editando = id;
             form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Insumo';
@@ -4637,68 +4875,19 @@
                 const datos = getProyectoData();
                 const db = getDB();
                 const presupuesto = getPresupuestoActual();
+                
+                // Usar el motor de KPIs mejorado
+                const kpis = typeof CR_KPIEngine !== 'undefined' && CR_KPIEngine.calcularKPIs
+                    ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: presupuesto }, periodo)
+                    : null;
+                
+                if (!kpis) {
+                    console.warn('Motor de KPIs no disponible');
+                    return;
+                }
             
-            // Calcular fechas según período
-            const hoy = new Date();
-            let fechaInicio, fechaFin;
-            
-            switch(periodo) {
-                case 'semana':
-                    fechaInicio = new Date(hoy);
-                    fechaInicio.setDate(hoy.getDate() - hoy.getDay());
-                    fechaFin = new Date(hoy);
-                    fechaFin.setDate(hoy.getDate() + (6 - hoy.getDay()));
-                    break;
-                case 'mes':
-                    fechaInicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-                    fechaFin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-                    break;
-                case 'trimestre':
-                    const trimestreActual = Math.floor(hoy.getMonth() / 3);
-                    fechaInicio = new Date(hoy.getFullYear(), trimestreActual * 3, 1);
-                    fechaFin = new Date(hoy.getFullYear(), (trimestreActual + 1) * 3, 0);
-                    break;
-                case 'anio':
-                    fechaInicio = new Date(hoy.getFullYear(), 0, 1);
-                    fechaFin = new Date(hoy.getFullYear(), 11, 31);
-                    break;
-            }
-            
-            // Filtrar datos por período
-            const filtrarPorPeriodo = (registros, fechaCampo = 'fecha') => {
-                return registros.filter(r => {
-                    const fecha = new Date(r[fechaCampo]);
-                    return fecha >= fechaInicio && fecha <= fechaFin;
-                });
-            };
-            
-            // Calcular gastos por categoría
-            let gastosPorCategoria = {
-                caja: 0,
-                maquinaria: 0,
-                personal: 0,
-                viajes: 0,
-                mantenimiento: 0
-            };
-            
-            const cajaFiltrada = filtrarPorPeriodo(datos.caja_chica || []);
-            cajaFiltrada.forEach(m => { if (m.tipo === 'egreso') gastosPorCategoria.caja += m.monto; });
-            
-            const maquinariaFiltrada = filtrarPorPeriodo(datos.maquinaria || []);
-            maquinariaFiltrada.forEach(m => { gastosPorCategoria.maquinaria += (m.combustible || 0) + (m.mantenimiento || 0); });
-            
-            const asistFiltrada = filtrarPorPeriodo(datos.personal.asistencia || [], 'fecha');
-            asistFiltrada.forEach(dia => {
-                dia.registros.forEach(r => { if (r.calculos) gastosPorCategoria.personal += (r.calculos.total_diario || 0); });
-            });
-            
-            const viajesFiltrados = filtrarPorPeriodo(datos.viajes_camiones.viajes || []);
-            viajesFiltrados.forEach(v => { gastosPorCategoria.viajes += (v.total || 0); });
-            
-            const mantFiltrados = filtrarPorPeriodo(datos.mantenimiento.ordenes || []);
-            const insumosFiltrados = filtrarPorPeriodo(datos.mantenimiento.compras_insumos || []);
-            mantFiltrados.forEach(o => { gastosPorCategoria.mantenimiento += (o.costo || 0); });
-            insumosFiltrados.forEach(i => { gastosPorCategoria.mantenimiento += (i.costo || 0); });
+            // Filtrar gastos por categoría seleccionada
+            let gastosPorCategoria = { ...kpis.gastosPorCategoria };
             
             // Aplicar filtro de categoría si no es "todas"
             if (categoria !== 'todas') {
@@ -4707,36 +4896,87 @@
                 });
             }
             
-            // Actualizar gráfico
+            // Actualizar gráfico mejorado
             const graficoContainer = document.getElementById('grafico-gastos');
             if (!graficoContainer) {
                 console.warn('Contenedor de gráfico no encontrado');
             } else {
-                const maxGasto = Math.max(...Object.values(gastosPorCategoria));
+                const gastosConValor = Object.entries(gastosPorCategoria).filter(([cat, monto]) => monto > 0);
                 
-                if (maxGasto > 0) {
-                    const barras = Object.entries(gastosPorCategoria).map(([cat, monto]) => {
+                if (gastosConValor.length > 0) {
+                    const maxGasto = Math.max(...gastosConValor.map(([cat, monto]) => monto));
+                    const totalGastos = gastosConValor.reduce((sum, [cat, monto]) => sum + monto, 0);
+                    
+                    // Crear barras con colores y etiquetas mejoradas
+                    const colores = {
+                        'mano_de_obra': '#ef4444',
+                        'salarios': '#f97316',
+                        'epi': '#eab308',
+                        'alquiler_equipo': '#22c55e',
+                        'fletes': '#14b8a6',
+                        'viaticos': '#06b6d4',
+                        'energia': '#0ea5e9',
+                        'senalizacion': '#3b82f6',
+                        'demolicion': '#6366f1',
+                        'instalaciones': '#8b5cf6',
+                        'desechos': '#a855f7',
+                        'andamios': '#d946ef',
+                        'botiquin': '#ec4899',
+                        'vigilancia': '#f43f5e',
+                        'seguros': '#78716c',
+                        'lubricantes': '#71717a',
+                        'neumaticos': '#52525b',
+                        'laboratorio': '#3f3f46',
+                        'permisos': '#18181b',
+                        'impuestos': '#dc2626',
+                        'materiales': '#059669',
+                        'herramientas': '#0d9488',
+                        'combustible': '#0891b2',
+                        'mantenimiento': '#0c4a6e',
+                        'maquinaria': '#1e3a8a',
+                        'personal': '#1e40af',
+                        'viajes': '#312e81',
+                        'insumos': '#4c1d95',
+                        'otros': '#6b7280'
+                    };
+                    
+                    const barras = gastosConValor.map(([cat, monto]) => {
                         const altura = (monto / maxGasto) * 100;
+                        const porcentaje = ((monto / totalGastos) * 100).toFixed(1);
+                        const color = colores[cat] || '#6b7280';
                         const esAlerta = presupuesto > 0 && monto > presupuesto * 0.3;
-                        return `<div class="css-chart-bar ${esAlerta ? 'alerta' : ''}" style="height:${altura}%;" data-value="${formatearMoneda(monto)}"></div>`;
+                        const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        
+                        return `
+                            <div class="css-chart-bar ${esAlerta ? 'alerta' : ''}" 
+                                 style="height:${altura}%;background:linear-gradient(180deg,${color},${color}dd);"
+                                 data-value="${formatearMoneda(monto)}"
+                                 data-category="${etiquetaCat}"
+                                 data-percentage="${porcentaje}%">
+                            </div>
+                        `;
                     }).join('');
                     
-                    const labels = Object.keys(gastosPorCategoria).map(cat => 
-                        `<div style="text-align:center;font-size:10px;color:var(--texto-secundario);flex:1;">${cat.charAt(0).toUpperCase() + cat.slice(1)}</div>`
-                    ).join('');
+                    const labels = gastosConValor.map(([cat, monto]) => {
+                        const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        const porcentaje = ((monto / totalGastos) * 100).toFixed(1);
+                        return `
+                            <div style="text-align:center;font-size:10px;color:var(--texto-secundario);flex:1;padding:0 2px;">
+                                <div style="font-weight:600;color:var(--texto-principal);">${etiquetaCat.substring(0, 8)}</div>
+                                <div style="font-size:9px;">${porcentaje}%</div>
+                            </div>
+                        `;
+                    }).join('');
                     
-                    graficoContainer.innerHTML = barras + `<div style="display:flex;margin-top:5px;">${labels}</div>`;
+                    graficoContainer.innerHTML = barras + `<div style="display:flex;margin-top:8px;gap:2px;">${labels}</div>`;
                 } else {
                     graficoContainer.innerHTML = '<div class="grafico-placeholder">No hay datos para este período</div>';
                 }
             }
             
-            // Calcular total de gastos del período
-            const totalGastosPeriodo = Object.values(gastosPorCategoria).reduce((a, b) => a + b, 0);
-            
             // Actualizar proyecciones de presupuesto (solo para período mensual)
             if (periodo === 'mes') {
-                const gastoMensual = totalGastosPeriodo;
+                const gastoMensual = kpis.gastoPeriodo;
                 const porcentajeUsado = presupuesto > 0 ? (gastoMensual / presupuesto) * 100 : 0;
                 
                 const elemGastoMensual = document.getElementById('gasto-mensual');
@@ -4746,7 +4986,17 @@
                 
                 if (elemGastoMensual) elemGastoMensual.textContent = formatearMoneda(gastoMensual);
                 if (elemPresupuestoMensual) elemPresupuestoMensual.textContent = formatearMoneda(presupuesto);
-                if (elemBarraPresupuesto) elemBarraPresupuesto.style.width = `${Math.min(porcentajeUsado, 100)}%`;
+                if (elemBarraPresupuesto) {
+                    elemBarraPresupuesto.style.width = `${Math.min(porcentajeUsado, 100)}%`;
+                    // Color según estado
+                    if (porcentajeUsado > 90) {
+                        elemBarraPresupuesto.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+                    } else if (porcentajeUsado > 70) {
+                        elemBarraPresupuesto.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                    } else {
+                        elemBarraPresupuesto.style.background = 'linear-gradient(90deg, var(--acento-cian), var(--acento-azul))';
+                    }
+                }
                 if (elemEstadoPresupuesto) elemEstadoPresupuesto.textContent = `${porcentajeUsado.toFixed(1)}% del presupuesto utilizado`;
                 
                 // Alerta si se excede el presupuesto
@@ -4760,26 +5010,62 @@
                 }
                 
                 // Calcular proyección fin de mes
-                const diasTranscurridos = hoy.getDate();
-                const diasEnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
-                const diasRestantes = diasEnMes - diasTranscurridos;
-                const gastoDiarioPromedio = diasTranscurridos > 0 ? gastoMensual / diasTranscurridos : 0;
-                const proyeccion = gastoMensual + (gastoDiarioPromedio * diasRestantes);
-                
                 const elemProyeccionValor = document.getElementById('proyeccion-valor');
                 const elemDiasRestantes = document.getElementById('dias-restantes');
                 const elemGastoDiario = document.getElementById('gasto-diario');
                 
-                if (elemProyeccionValor) elemProyeccionValor.textContent = formatearMoneda(proyeccion);
-                if (elemDiasRestantes) elemDiasRestantes.textContent = diasRestantes;
-                if (elemGastoDiario) elemGastoDiario.textContent = formatearMoneda(gastoDiarioPromedio);
+                if (elemProyeccionValor) elemProyeccionValor.textContent = formatearMoneda(kpis.proyeccionFinDeMes);
+                if (elemDiasRestantes) elemDiasRestantes.textContent = kpis.diasRestantes;
+                if (elemGastoDiario) elemGastoDiario.textContent = formatearMoneda(kpis.gastoDiarioPromedio);
                 
                 // Tendencia
                 const tendenciaEl = document.getElementById('tendencia-gasto');
-                if (gastoDiarioPromedio > 0) {
-                    const tendencia = proyeccion > presupuesto ? '⚠️ Excederá' : '✅ Dentro';
+                if (kpis.gastoDiarioPromedio > 0) {
+                    const tendencia = kpis.proyeccionFinDeMes > presupuesto ? '⚠️ Excederá' : '✅ Dentro';
                     tendenciaEl.textContent = tendencia;
-                    tendenciaEl.className = `metrica-value ${proyeccion > presupuesto ? 'negativo' : 'positivo'}`;
+                    tendenciaEl.className = `metrica-value ${kpis.proyeccionFinDeMes > presupuesto ? 'negativo' : 'positivo'}`;
+                } else {
+                    tendenciaEl.textContent = '--';
+                    tendenciaEl.className = 'metrica-value';
+                }
+            } else {
+                // Para otros períodos, adaptar proyecciones
+                const elemGastoMensual = document.getElementById('gasto-mensual');
+                const elemPresupuestoMensual = document.getElementById('presupuesto-mensual');
+                const elemBarraPresupuesto = document.getElementById('barra-presupuesto');
+                const elemEstadoPresupuesto = document.getElementById('estado-presupuesto');
+                
+                if (elemGastoMensual) elemGastoMensual.textContent = formatearMoneda(kpis.gastoPeriodo);
+                if (elemPresupuestoMensual) elemPresupuestoMensual.textContent = formatearMoneda(presupuesto);
+                
+                const porcentajeUsado = presupuesto > 0 ? (kpis.gastoPeriodo / presupuesto) * 100 : 0;
+                if (elemBarraPresupuesto) {
+                    elemBarraPresupuesto.style.width = `${Math.min(porcentajeUsado, 100)}%`;
+                    if (porcentajeUsado > 90) {
+                        elemBarraPresupuesto.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+                    } else if (porcentajeUsado > 70) {
+                        elemBarraPresupuesto.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                    } else {
+                        elemBarraPresupuesto.style.background = 'linear-gradient(90deg, var(--acento-cian), var(--acento-azul))';
+                    }
+                }
+                if (elemEstadoPresupuesto) elemEstadoPresupuesto.textContent = `${porcentajeUsado.toFixed(1)}% del presupuesto utilizado (${periodo})`;
+                
+                // Actualizar proyección fin de período
+                const elemProyeccionValor = document.getElementById('proyeccion-valor');
+                const elemDiasRestantes = document.getElementById('dias-restantes');
+                const elemGastoDiario = document.getElementById('gasto-diario');
+                
+                if (elemProyeccionValor) elemProyeccionValor.textContent = formatearMoneda(kpis.proyeccionFinDeMes);
+                if (elemDiasRestantes) elemDiasRestantes.textContent = kpis.diasRestantes;
+                if (elemGastoDiario) elemGastoDiario.textContent = formatearMoneda(kpis.gastoDiarioPromedio);
+                
+                // Tendencia
+                const tendenciaEl = document.getElementById('tendencia-gasto');
+                if (kpis.gastoDiarioPromedio > 0) {
+                    const tendencia = kpis.proyeccionFinDeMes > presupuesto ? '⚠️ Excederá' : '✅ Dentro';
+                    tendenciaEl.textContent = tendencia;
+                    tendenciaEl.className = `metrica-value ${kpis.proyeccionFinDeMes > presupuesto ? 'negativo' : 'positivo'}`;
                 } else {
                     tendenciaEl.textContent = '--';
                     tendenciaEl.className = 'metrica-value';
@@ -4787,40 +5073,19 @@
             }
             
             // Calcular métricas de eficiencia
-            const totalViajes = datos.viajes_camiones.viajes?.length || 0;
-            const totalKm = (datos.viajes_camiones.viajes || []).reduce((sum, v) => sum + (v.km_total || 0), 0);
-            const totalLitros = (datos.viajes_camiones.viajes || []).reduce((sum, v) => sum + (v.litros || 0), 0);
-            const totalHorasMaq = (datos.maquinaria || []).reduce((sum, m) => sum + ((m.val_final - m.val_inicial) || 0), 0);
-            
-            // Costo por m³ (estimado basado en viajes)
-            const costoM3 = totalViajes > 0 ? totalGastosPeriodo / (totalViajes * 12) : 0; // Asumiendo 12m³ promedio por viaje
             const elemCostoM3 = document.getElementById('costo-m3');
-            if (elemCostoM3) elemCostoM3.textContent = formatearMoneda(costoM3);
+            if (elemCostoM3) elemCostoM3.textContent = formatearMoneda(kpis.costoPorM3);
             
-            // Costo por hora de maquinaria
-            const costoHoraMaq = totalHorasMaq > 0 ? gastosPorCategoria.maquinaria / totalHorasMaq : 0;
             const elemCostoHoraMaq = document.getElementById('costo-hora-maq');
-            if (elemCostoHoraMaq) elemCostoHoraMaq.textContent = formatearMoneda(costoHoraMaq);
+            if (elemCostoHoraMaq) elemCostoHoraMaq.textContent = formatearMoneda(kpis.costoHoraMaquinaria);
             
-            // Eficiencia combustible
-            const eficienciaCombustible = totalKm > 0 ? totalLitros / totalKm : 0;
             const elemEficienciaCombustible = document.getElementById('eficiencia-combustible');
-            if (elemEficienciaCombustible) elemEficienciaCombustible.textContent = `${eficienciaCombustible.toFixed(2)} L/km`;
+            if (elemEficienciaCombustible) elemEficienciaCombustible.textContent = `${kpis.eficienciaCombustible.toFixed(2)} L/km`;
             
-            // Variación vs mes anterior (simplificado)
-            const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
-            const mesAnteriorFin = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
-            
-            const gastosMesAnterior = (datos.caja_chica || []).filter(m => {
-                const fecha = new Date(m.fecha);
-                return fecha >= mesAnterior && fecha <= mesAnteriorFin && m.tipo === 'egreso';
-            }).reduce((sum, m) => sum + m.monto, 0);
-            
-            const variacion = gastosMesAnterior > 0 ? ((totalGastosPeriodo - gastosMesAnterior) / gastosMesAnterior) * 100 : 0;
             const variacionEl = document.getElementById('variacion-mensual');
             if (variacionEl) {
-                variacionEl.textContent = `${variacion > 0 ? '+' : ''}${variacion.toFixed(1)}%`;
-                variacionEl.className = `metrica-value ${variacion > 0 ? 'negativo' : 'positivo'}`;
+                variacionEl.textContent = `${kpis.variacionMensual > 0 ? '+' : ''}${kpis.variacionMensual.toFixed(1)}%`;
+                variacionEl.className = `metrica-value ${kpis.variacionMensual > 0 ? 'negativo' : 'positivo'}`;
             }
             
             showToast('Dashboard actualizado correctamente', 'success');
@@ -5504,6 +5769,7 @@
                     if (mid === 'adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
                     if (mid === 'viajes') { cargarCamiones(); cargarRutas(); cargarTablaViajes(); }
                     if (mid === 'mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }
+                    if (mid === 'reportes') { actualizarDescripcionReporte(); actualizarEstadisticasReportes(); }
                     if (mid === 'configuracion') cargarListaProyectosConfig();
 
                     if (!navegacionHistorial && window.history?.pushState) {
@@ -8269,6 +8535,8 @@ lista.forEach(m => {
             const obs = document.getElementById('ord-observaciones').value.trim();
             const fotosInput = document.getElementById('ord-fotos');
             const fotos = fotosInput ? JSON.parse(fotosInput.value || '[]') : [];
+            const firmaInput = document.getElementById('ord-firma');
+            const firma = firmaInput ? firmaInput.value : null;
             
             if (!fecha) { showToast('Seleccione la fecha', 'error'); return; }
             if (!maqId) { showToast('Seleccione la maquinaria', 'error'); return; }
@@ -8288,10 +8556,14 @@ lista.forEach(m => {
                     if (!validarAjusteGasto(prev.costo || 0, costo)) return;
                     const descripcionGasto = `${tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'} ${m ? m.nombre : ''}`;
                     if (!sincronizarGastoVinculado(datos, prev, costo, 'Combustible/Mantenimiento', `Mantenimiento ${descripcionGasto}`, fecha, 'la orden de mantenimiento')) return;
-                    datos.mantenimiento.ordenes[idx] = { ...prev, fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items, fotos };
+                    datos.mantenimiento.ordenes[idx] = { ...prev, fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items, fotos, firma };
                     saveProyectoData(datos);
                 }
                 cancelarEdicionOrden();
+                // Limpiar firma después de guardar
+                if (window.signatureCaptureOrden) {
+                    window.signatureCaptureOrden.clear();
+                }
                 estadoPaginacion.ordenes = 1;
                 cargarTablaOrdenes(); actualizarSaldoCajaChica(); cargarTablaCajaChica();
                 showToast('✅ Orden actualizada', 'success');
@@ -8306,10 +8578,15 @@ lista.forEach(m => {
                 if (!movGastoOrden) return;
             }
             const datos2 = getProyectoData();
-            const ordenObj = { id: generarId(), fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items, fotos };
+            const ordenObj = { id: generarId(), fecha, maquinaria_id: maqId, tipo, costo, observaciones: obs, items, fotos, firma };
             if (movGastoOrden) ordenObj.gasto_id = movGastoOrden.id;
             datos2.mantenimiento.ordenes.push(ordenObj);
             saveProyectoData(datos2);
+            
+            // Limpiar firma después de guardar
+            if (window.signatureCaptureOrden) {
+                window.signatureCaptureOrden.clear();
+            }
             this.reset();
             limpiarFotos();
             document.getElementById('ord-fecha').value = new Date().toISOString().split('T')[0];
@@ -8368,6 +8645,9 @@ tbody.innerHTML = '';
             const cantidad = parseInt(document.getElementById('insumo-cantidad').value) || 0;
             const costo = parseFloat(document.getElementById('insumo-costo').value) || 0;
             const stockMin = parseInt(document.getElementById('insumo-stock-min').value) || 0;
+            const firmaInput = document.getElementById('insumo-firma');
+            const firma = firmaInput ? firmaInput.value : null;
+            
             if (!fecha) { showToast('Seleccione la fecha', 'error'); return; }
             if (!articulo || articulo.length < 2) { showToast('Describa el artículo', 'error'); return; }
             if (cantidad < 1) { showToast('Cantidad inválida', 'error'); return; }
@@ -8383,10 +8663,14 @@ tbody.innerHTML = '';
                     if (!validarAjusteGasto(prev.costo || 0, costo)) return;
                     const descripcionGasto = `${tipo}: ${articulo} x${cantidad}`;
                     if (!sincronizarGastoVinculado(datos, prev, costo, 'Combustible/Mantenimiento', `Insumo ${descripcionGasto}`, fecha, 'la compra de insumo')) return;
-                    datos.mantenimiento.compras_insumos[idx] = { ...prev, fecha, tipo, articulo, cantidad, costo, stock_min: stockMin };
+                    datos.mantenimiento.compras_insumos[idx] = { ...prev, fecha, tipo, articulo, cantidad, costo, stock_min: stockMin, firma };
                     saveProyectoData(datos);
                 }
                 cancelarEdicionInsumo();
+                // Limpiar firma después de guardar
+                if (window.signatureCaptureInsumo) {
+                    window.signatureCaptureInsumo.clear();
+                }
                 estadoPaginacion.insumos = 1;
                 cargarTablaInsumos(); actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarResumen();
                 showToast('✅ Insumo actualizado', 'success');
@@ -8398,10 +8682,15 @@ tbody.innerHTML = '';
             const movGastoInsumo = procesarGastoCajaChica(costo, 'Combustible/Mantenimiento', `Insumo ${descripcion}`, fecha);
             if (!movGastoInsumo) return;
             const datos = getProyectoData();
-            const insumoObj = { id: generarId(), fecha, tipo, articulo, cantidad, costo, stock_min: stockMin };
+            const insumoObj = { id: generarId(), fecha, tipo, articulo, cantidad, costo, stock_min: stockMin, firma };
             if (movGastoInsumo) insumoObj.gasto_id = movGastoInsumo.id;
             datos.mantenimiento.compras_insumos.push(insumoObj);
             saveProyectoData(datos);
+            
+            // Limpiar firma después de guardar
+            if (window.signatureCaptureInsumo) {
+                window.signatureCaptureInsumo.clear();
+            }
             this.reset();
             document.getElementById('insumo-fecha').value = new Date().toISOString().split('T')[0];
             cargarTablaInsumos(); actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarResumen();
@@ -8471,7 +8760,7 @@ tbody.innerHTML = '';
             return { inicio: primerDia.toISOString().split('T')[0], fin: ultimoDia.toISOString().split('T')[0] };
         }
 
-        // Cache de reportes recientes (máximo 5)
+        // Cache de reportes recientes (máximo 10)
         let cacheReportes = [];
 
         function agregarReporteCache(tipo, fechaInicio, fechaFin) {
@@ -8483,8 +8772,9 @@ tbody.innerHTML = '';
                 timestamp: Date.now()
             };
             cacheReportes.unshift(reporte);
-            if (cacheReportes.length > 5) cacheReportes.pop();
+            if (cacheReportes.length > 10) cacheReportes.pop();
             renderizarReportesRecientes();
+            actualizarEstadisticasReportes();
         }
 
         function renderizarReportesRecientes() {
@@ -8500,9 +8790,11 @@ tbody.innerHTML = '';
                 diario: 'Diario',
                 semanal: 'Semanal',
                 mensual: 'Mensual',
+                categoria: 'Categoría',
                 asistencia: 'Asistencia',
                 viajes: 'Viajes',
-                mantenimiento: 'Mantenimiento'
+                mantenimiento: 'Mantenimiento',
+                ejecutivo: 'Ejecutivo'
             };
 
             container.innerHTML = cacheReportes.map(r => {
@@ -8524,6 +8816,51 @@ tbody.innerHTML = '';
             }).join('');
         }
 
+        function actualizarEstadisticasReportes() {
+            const statsTotal = document.getElementById('stats-total');
+            const statsHoy = document.getElementById('stats-hoy');
+            const statsUltima = document.getElementById('stats-ultima');
+            
+            if (!statsTotal || !statsHoy || !statsUltima) return;
+            
+            const total = cacheReportes.length;
+            const hoy = new Date().toISOString().split('T')[0];
+            const hoyCount = cacheReportes.filter(r => r.fechaInicio === hoy || r.fechaFin === hoy).length;
+            const ultima = cacheReportes.length > 0 ? cacheReportes[0].fechaInicio : '—';
+            
+            statsTotal.textContent = total;
+            statsHoy.textContent = hoyCount;
+            statsUltima.textContent = ultima;
+        }
+
+        function limpiarHistorialReportes() {
+            if (confirm('¿Estás seguro de que deseas limpiar el historial de reportes recientes?')) {
+                cacheReportes = [];
+                renderizarReportesRecientes();
+                actualizarEstadisticasReportes();
+                showToast('✅ Historial de reportes limpiado', 'success');
+            }
+        }
+
+        function actualizarDescripcionReporte() {
+            const tipo = document.getElementById('reporte-tipo').value;
+            const descripcionEl = document.getElementById('reporte-descripcion');
+            if (!descripcionEl) return;
+            
+            const descripciones = {
+                diario: '📋 Reporte que incluye todos los movimientos de caja chica del día seleccionado, excluyendo viajes y mantenimiento (se detallan por separado).',
+                semanal: '📊 Informe consolidado de toda la semana (lunes a domingo) con movimientos de caja, viajes, mantenimiento e insumos.',
+                mensual: '📅 Reporte mensual completo con todos los gastos operativos, viajes, mantenimiento y nómina del mes seleccionado.',
+                categoria: '📈 Análisis detallado de gastos por categoría, mostrando distribución porcentual y totales acumulados.',
+                asistencia: '👷 Reporte de asistencia del personal con horas trabajadas, horas extra y cálculos de nómina.',
+                viajes: '🚛 Registro de viajes de camiones con kilómetros recorridos, consumo de combustible y costos de alquiler.',
+                mantenimiento: '🔧 Historial de órdenes de mantenimiento y compras de insumos con costos detallados.',
+                ejecutivo: '📊 Resumen gerencial con KPIs clave, métricas de eficiencia y proyecciones de gasto.'
+            };
+            
+            descripcionEl.textContent = descripciones[tipo] || 'Selecciona un tipo de reporte para ver su descripción.';
+        }
+
         function actualizarOpcionesFecha() {
             const tipo = document.getElementById('reporte-tipo').value;
             const modo = document.getElementById('reporte-modo-fecha').value;
@@ -8531,7 +8868,7 @@ tbody.innerHTML = '';
             const fechasRango = document.getElementById('reporte-fechas-rango');
 
             // Algunos tipos solo soportan fecha única
-            if (tipo === 'asistencia' || tipo === 'viajes' || tipo === 'mantenimiento') {
+            if (tipo === 'asistencia' || tipo === 'viajes' || tipo === 'mantenimiento' || tipo === 'categoria') {
                 document.getElementById('reporte-modo-fecha').value = 'unica';
                 document.getElementById('reporte-modo-fecha').disabled = true;
                 fechasUnicas.style.display = 'grid';
@@ -8648,8 +8985,12 @@ tbody.innerHTML = '';
                 // Solo movimientos de caja chica propios (sin gasto_id externo)
                 const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha) && !idsExternos.has(g.id));
                 let totalIng = 0, totalEgr = 0;
-                if (movs.length === 0) { csv += `SIN MOVIMIENTOS DE CAJA EN EL PERIODO\n`; }
-                else { movs.forEach(g => { csv += `${csvRow([g.fecha, g.tipo, g.categoria, g.descripcion, g.monto])}\n`; if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto; }); }
+                if (movs.length === 0) { csv += `"SIN MOVIMIENTOS DE CAJA EN EL PERIODO",,,,\n`; }
+                else { movs.forEach(g => { 
+                    const desc = (g.descripcion || '').substring(0, 100); // Limitar longitud para evitar desbordes
+                    csv += `${csvRow([g.fecha, g.tipo, g.categoria, desc, g.monto])}\n`; 
+                    if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto; 
+                }); }
                 /* ===== SECCION CONSOLIDADA: VIAJES ===== */
                 const viajes = viajesAll.filter(v => enRango(v.fecha));
                 let totalViajes = 0;
@@ -8732,6 +9073,39 @@ tbody.innerHTML = '';
                 }
                 csv += `,,,\n`;
                 csv += `,,,,TOTAL MANTENIMIENTO E INSUMOS:,${totalM.toFixed(2)}\n`;
+            } else if (tipo === 'categoria') {
+                csv += `${csvRow(['Reporte por Categoría de Gastos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `Fecha,Categoría,Monto (Q),Porcentaje\n`;
+                
+                // Usar el motor de KPIs para obtener gastos por categoría
+                const kpis = typeof CR_KPIEngine !== 'undefined' && CR_KPIEngine.calcularKPIs
+                    ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: getPresupuestoActual() }, 'mes')
+                    : null;
+                
+                if (kpis && kpis.gastosPorCategoria) {
+                    const gastosPorCat = kpis.gastosPorCategoria;
+                    const categoriasConValor = Object.entries(gastosPorCat).filter(([cat, monto]) => monto > 0);
+                    
+                    if (categoriasConValor.length > 0) {
+                        let totalGastosCat = 0;
+                        categoriasConValor.forEach(([cat, monto]) => {
+                            totalGastosCat += monto;
+                        });
+                        
+                        categoriasConValor.forEach(([cat, monto]) => {
+                            const porcentaje = ((monto / totalGastosCat) * 100).toFixed(1);
+                            const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            csv += `${csvRow([fecha, etiquetaCat, monto || 0, porcentaje + '%'])}\n`;
+                        });
+                        
+                        csv += `,,,\n`;
+                        csv += `,,TOTAL GASTOS:,${totalGastosCat.toFixed(2)},100.0%\n`;
+                    } else {
+                        csv += `"SIN GASTOS EN ${fecha}",,,\n`;
+                    }
+                } else {
+                    csv += `"Error: Motor de KPIs no disponible",,,\n`;
+                }
             }
 
             // ── Bloque de firmas autorizadas (membrete profesional) ──────────
@@ -8778,7 +9152,7 @@ tbody.innerHTML = '';
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">${_esc(tipoNombre)}</h2>`;
                 html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(rango.inicio)) : ('Período: ' + _esc(periodoDisplay))} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:#6B7280;">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><thead><tr><th style="width:12%;">Fecha</th><th style="width:10%;">Tipo</th><th style="width:18%;">Categoría</th><th style="width:40%;">Descripción</th><th style="width:20%;text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
                 /* FIX DUPLICIDAD: armar Set de gasto_id vinculados a viajes y mantenimiento
                    para excluirlos de la sección de caja chica y no contarlos dos veces */
                 const _idsViajesGasto = new Set((datos.viajes_camiones.viajes||[]).map(v=>v.gasto_id).filter(Boolean));
@@ -8802,7 +9176,7 @@ tbody.innerHTML = '';
                 if (viajesC.length > 0) {
                     let totalVTmp = 0;
                     html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🚛 Viajes de Camiones</h3>`;
-                    html += `<table class="tabla-pdf"><thead><tr><th>Unidad</th><th>Material</th><th>No.</th><th>Km</th><th>Litros</th><th style="text-align:right;">Comb. (Q)</th><th style="text-align:right;">Alquiler (Q)</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
+                    html += `<table class="tabla-pdf"><thead><tr><th style="width:18%;">Unidad</th><th style="width:20%;">Material</th><th style="width:8%;">No.</th><th style="width:10%;">Km</th><th style="width:10%;">Litros</th><th style="width:12%;text-align:right;">Comb. (Q)</th><th style="width:12%;text-align:right;">Alquiler (Q)</th><th style="width:10%;text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                     viajesC.forEach(v => {
                         const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A',propiedad:'propio'};
                         const prop = c.propiedad==='alquilado' ? ' (Alq.)' : '';
@@ -8816,20 +9190,33 @@ tbody.innerHTML = '';
                 const ordsMT = (datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha));
                 if (ordsMT.length > 0) {
                     let totalMTmp = 0;
+                    const tieneFirmas = ordsMT.some(o => o.firma);
                     html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">🔩 Mantenimiento</h3>`;
-                    html += `<table class="tabla-pdf"><thead><tr><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
-                    ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMTmp += o.costo||0; totalEgr += o.costo||0; html += `<tr><td>${_esc(m.nombre)}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`; });
-                    html += `<tr><td colspan="3" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMTmp)}</td></tr>`;
+                    html += `<table class="tabla-pdf"><thead><tr><th style="width:25%;">Equipo</th><th style="width:15%;">Tipo</th><th style="width:35%;">Observaciones</th><th style="width:15%;text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th style="width:10%;">Firma</th>' : ''}</tr></thead><tbody>`;
+                    ordsMT.forEach(o => { 
+                        const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; 
+                        totalMTmp += o.costo||0; 
+                        totalEgr += o.costo||0; 
+                        const firmaHtml = o.firma ? `<img src="${o.firma}" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
+                        html += `<tr><td>${_esc(m.nombre)}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td>${tieneFirmas ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`; 
+                    });
+                    html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMTmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
                 /* INSUMOS */
                 const insMT = (datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha));
                 if (insMT.length > 0) {
                     let totalITmp = 0;
+                    const tieneFirmas = insMT.some(i => i.firma);
                     html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
-                    html += `<table class="tabla-pdf"><thead><tr><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
-                    insMT.forEach(i => { totalITmp += i.costo||0; totalEgr += i.costo||0; html += `<tr><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td></tr>`; });
-                    html += `<tr><td colspan="3" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalITmp)}</td></tr>`;
+                    html += `<table class="tabla-pdf"><thead><tr><th style="width:15%;">Tipo</th><th style="width:40%;">Artículo</th><th style="width:10%;">Cant.</th><th style="width:20%;text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th style="width:15%;">Firma</th>' : ''}</tr></thead><tbody>`;
+                    insMT.forEach(i => { 
+                        totalITmp += i.costo||0; 
+                        totalEgr += i.costo||0; 
+                        const firmaHtml = i.firma ? `<img src="${i.firma}" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
+                        html += `<tr><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td>${tieneFirmas ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`; 
+                    });
+                    html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalITmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
                 if (movs.length === 0 && viajesC.length === 0 && ordsMT.length === 0 && insMT.length === 0) {
@@ -8884,32 +9271,98 @@ tbody.innerHTML = '';
                 const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
                 const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
                 let totalM = 0;
+                
                 // Órdenes de mantenimiento
+                const tieneFirmasOrdenes = ords.some(o => o.firma);
                 html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">🔩 Órdenes de Mantenimiento</h3>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmasOrdenes ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                 if (ords.length === 0) {
-                    html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:15px;">Sin órdenes en esta fecha</td></tr>`;
+                    html += `<tr><td colspan="${5 + (tieneFirmasOrdenes ? 1 : 0)}" style="text-align:center;color:#6B7280;padding:15px;">Sin órdenes en esta fecha</td></tr>`;
                 } else {
                     ords.forEach(o => {
                         const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
                         totalM += o.costo || 0;
-                        html += `<tr><td>${_esc(o.fecha)}</td><td>${_esc(m?m.nombre:'N/A')}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td></tr>`;
+                        const firmaHtml = o.firma ? `<img src="${o.firma}" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
+                        html += `<tr><td>${_esc(o.fecha)}</td><td>${_esc(m?m.nombre:'N/A')}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td>${tieneFirmasOrdenes ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`;
                     });
                 }
                 html += `</tbody></table>`;
+                
                 // Compras de insumos
+                const tieneFirmasInsumos = ins.some(i => i.firma);
                 html += `<h3 class="tabla-titulo" style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
-                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th></tr></thead><tbody>`;
+                html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmasInsumos ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                 if (ins.length === 0) {
-                    html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:15px;">Sin compras en esta fecha</td></tr>`;
+                    html += `<tr><td colspan="${5 + (tieneFirmasInsumos ? 1 : 0)}" style="text-align:center;color:#6B7280;padding:15px;">Sin compras en esta fecha</td></tr>`;
                 } else {
                     ins.forEach(i => {
                         totalM += i.costo || 0;
-                        html += `<tr><td>${_esc(i.fecha)}</td><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td></tr>`;
+                        const firmaHtml = i.firma ? `<img src="${i.firma}" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
+                        html += `<tr><td>${_esc(i.fecha)}</td><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td>${tieneFirmasInsumos ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`;
                     });
                 }
                 html += `</tbody></table>`;
                 html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:#EFF6FF;padding:10px;margin-top:10px;">TOTAL MANTENIMIENTO E INSUMOS: ${formatearMoneda(totalM)}</div>`;
+            } else if (tipo === 'categoria') {
+                // Reporte por Categoría de Gastos
+                html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte por Categoría de Gastos</h2>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${_esc(fecha)} | Proyecto: ${_esc(proyNombre)}</p>`;
+                
+                // Usar el motor de KPIs para obtener gastos por categoría
+                const kpis = typeof CR_KPIEngine !== 'undefined' && CR_KPIEngine.calcularKPIs
+                    ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: getPresupuestoActual() }, 'mes')
+                    : null;
+                
+                if (kpis && kpis.gastosPorCategoria) {
+                    const gastosPorCat = kpis.gastosPorCategoria;
+                    const categoriasConValor = Object.entries(gastosPorCat).filter(([cat, monto]) => monto > 0);
+                    
+                    if (categoriasConValor.length > 0) {
+                        let totalGastosCat = 0;
+                        html += `<table class="tabla-pdf"><thead><tr><th>Categoría</th><th style="text-align:right;">Monto (Q)</th><th style="text-align:right;">%</th></tr></thead><tbody>`;
+                        
+                        categoriasConValor.forEach(([cat, monto]) => {
+                            totalGastosCat += monto;
+                        });
+                        
+                        categoriasConValor.forEach(([cat, monto]) => {
+                            const porcentaje = ((monto / totalGastosCat) * 100).toFixed(1);
+                            const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            html += `<tr><td>${_esc(etiquetaCat)}</td><td style="text-align:right;">${formatearMoneda(monto)}</td><td style="text-align:right;">${porcentaje}%</td></tr>`;
+                        });
+                        
+                        html += `<tr><td style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);">TOTAL GASTOS:</td><td class="total-egreso" style="text-align:right;font-weight:bold;">${formatearMoneda(totalGastosCat)}</td><td style="text-align:right;">100.0%</td></tr>`;
+                        html += `</tbody></table>`;
+                        
+                        // Gráfico de barras simple en HTML
+                        html += `<div style="margin-top:20px;padding:15px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">`;
+                        html += `<h4 style="color:var(--pdf-azul-oscuro);font-size:12px;margin-bottom:10px;">Distribución de Gastos por Categoría</h4>`;
+                        html += `<div style="display:flex;flex-direction:column;gap:8px;">`;
+                        
+                        const maxGastoCat = Math.max(...categoriasConValor.map(([cat, monto]) => monto));
+                        categoriasConValor.forEach(([cat, monto]) => {
+                            const porcentaje = ((monto / totalGastosCat) * 100).toFixed(1);
+                            const barraWidth = (monto / maxGastoCat) * 100;
+                            const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            html += `
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div style="width:120px;font-size:11px;color:#374151;">${_esc(etiquetaCat.substring(0, 15))}</div>
+                                    <div style="flex:1;background:#e5e7eb;border-radius:4px;height:16px;overflow:hidden;">
+                                        <div style="width:${barraWidth}%;background:linear-gradient(90deg,var(--pdf-azul-claro),var(--pdf-azul-oscuro));height:100%;"></div>
+                                    </div>
+                                    <div style="width:80px;text-align:right;font-size:11px;color:#374151;">${porcentaje}%</div>
+                                    <div style="width:80px;text-align:right;font-size:11px;font-weight:600;color:#374151;">${formatearMoneda(monto)}</div>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `</div></div>`;
+                    } else {
+                        html += `<p style="text-align:center;color:#6B7280;padding:20px;">No hay gastos registrados para esta fecha</p>`;
+                    }
+                } else {
+                    html += `<p style="text-align:center;color:#dc2626;padding:20px;">Error: Motor de KPIs no disponible</p>`;
+                }
             }
             return html;
         }
@@ -9006,7 +9459,7 @@ function validarDependenciasExportacion() {
             const scale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
 
             const opts = {
-                margin: 10,
+                margin: [8, 12, 10, 12], // [top, left, bottom, right] en mm - coincide con CSS padding
                 filename: filename,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
@@ -9018,11 +9471,12 @@ function validarDependenciasExportacion() {
                     windowWidth: docWidth,
                     windowHeight: docHeight,
                     width: docWidth,
-                    height: docHeight
+                    height: docHeight,
+                    allowTaint: false
                 },
                 jsPDF: { unit: 'mm', format: pageSize, orientation: 'portrait' },
                 /* Evitar cortes de página a mitad de filas/imágenes/firmas */
-                pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img'] }
+                pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper'] }
             };
             const pdf = await html2pdf().set(opts).from(contenedor).toPdf().get('pdf');
             const total = pdf.internal.getNumberOfPages();
@@ -9183,9 +9637,11 @@ function validarDependenciasExportacion() {
             diario:        'Reporte Diario de Gastos',
             semanal:       'Informe Semanal Consolidado',
             mensual:       'Reporte Mensual Consolidado',
+            categoria:     'Reporte por Categoría de Gastos',
             asistencia:    'Reporte de Asistencia y Horas Extra',
             viajes:        'Reporte de Viajes de Camiones',
-            mantenimiento: 'Reporte de Mantenimiento e Insumos'
+            mantenimiento: 'Reporte de Mantenimiento e Insumos',
+            ejecutivo:     'Resumen Ejecutivo (KPIs Gerenciales)'
         };
 
         /**
@@ -9678,6 +10134,16 @@ function validarDependenciasExportacion() {
             cargarConfiguracionNotificaciones();
             cargarConfiguracionExportacion();
             inicializarDashboardObserver();
+            
+            // Paso 3.1: inicializar módulo de reportes
+            actualizarDescripcionReporte();
+            actualizarEstadisticasReportes();
+            
+            // Paso 3.2: establecer fecha actual por defecto en reportes
+            const reporteFecha = document.getElementById('reporte-fecha');
+            if (reporteFecha && !reporteFecha.value) {
+                reporteFecha.value = new Date().toISOString().split('T')[0];
+            }
 
             // Paso 3.5: inicializar event listeners del dashboard
             const dashboardPeriodo = document.getElementById('dashboard-periodo');
@@ -9754,7 +10220,32 @@ function validarDependenciasExportacion() {
             // Paso 9: inicializar sistema de pruebas visuales
             inicializarPruebasVisuales();
 
-            // Paso 10: manejar parámetros URL (shortcuts PWA y deep links)
+            // Paso 10: inicializar componente de firma digital
+            if (typeof CR_SignatureCapture !== 'undefined' && CR_SignatureCapture.create) {
+                window.signatureCaptureOrden = CR_SignatureCapture.create('signature-container-orden', {
+                    width: '100%',
+                    height: '120px',
+                    lineColor: '#000000',
+                    lineWidth: 2,
+                    backgroundColor: '#ffffff',
+                    onSignatureChange: function(data) {
+                        document.getElementById('ord-firma').value = data || '';
+                    }
+                });
+                
+                window.signatureCaptureInsumo = CR_SignatureCapture.create('signature-container-insumo', {
+                    width: '100%',
+                    height: '120px',
+                    lineColor: '#000000',
+                    lineWidth: 2,
+                    backgroundColor: '#ffffff',
+                    onSignatureChange: function(data) {
+                        document.getElementById('insumo-firma').value = data || '';
+                    }
+                });
+            }
+
+            // Paso 11: manejar parámetros URL (shortcuts PWA y deep links)
             const urlParams = new URLSearchParams(window.location.search);
             const moduloURL = urlParams.get('module');
             if (moduloURL) {
