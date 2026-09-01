@@ -61,3 +61,14 @@ screenshots/
 # Configuración local de Vercel CLI (no parte de la app)
 .vercel/
 .env*
+
+# Scripts de desarrollo local (generan/sobreescriben datos — no para CI)
+seed_datos_reales.js
+generar_exportaciones_reales.js
+
+# Artefactos generados (PDFs, CSVs de prueba)
+exports/
+
+# Archivos temporales de sesión
+*.txt
+!README.md
