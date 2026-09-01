@@ -18,6 +18,7 @@ const STATIC_ASSETS = [
     './src/types.js',
     './src/config.js',
     './src/exportador.js',
+    './src/reporteEjecutivo.js',
     './splash-640x1136.png',
     './splash-750x1334.png',
     './splash-1125x2436.png',

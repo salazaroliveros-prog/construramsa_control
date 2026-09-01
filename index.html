@@ -85,6 +85,7 @@
     <script src="./src/types.js"></script>
     <script src="./src/config.js"></script>
     <script src="./src/exportador.js"></script>
+    <script src="./src/reporteEjecutivo.js"></script>
     <style>
         :root {
             /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */
@@ -3350,6 +3351,7 @@
                         <option value="asistencia">Reporte de Asistencia y Horas Extra</option>
                         <option value="viajes">Reporte de Viajes de Camiones</option>
                         <option value="mantenimiento">Reporte de Mantenimiento e Insumos</option>
+                        <option value="ejecutivo">Resumen Ejecutivo (KPIs Gerenciales)</option>
                     </select>
                 </div>
                 <div>
@@ -8745,6 +8747,27 @@ tbody.innerHTML = '';
             const proy  = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
             const proyNombre = proy ? proy.nombre : 'General';
             let html = '';
+
+            // ── REPORTE EJECUTIVO (Resumen Gerencial con KPIs) ──
+            if (tipo === 'ejecutivo') {
+                const rangoEj = rangoPersonalizado || (fecha ? { inicio: fecha, fin: fecha } : { inicio: '', fin: '' });
+                const cfgEj = db.configuracion || {};
+                const portadaEj = (typeof _leerCamposPortada === 'function') ? _leerCamposPortada() : {};
+                const CR_Ej = (typeof window !== 'undefined') ? window.CR_ReporteEjecutivo : undefined;
+                if (CR_Ej) {
+                    return CR_Ej.generarHTML(db, {
+                        empresa: cfgEj.nombre_empresa || 'CONSTRURAMSA',
+                        logo: (cfgEj.logo_base64 && cfgEj.logo_base64.startsWith('data:image')) ? cfgEj.logo_base64 : undefined,
+                        responsable: cfgEj.responsable || 'Gerente de Proyecto'
+                    }, {
+                        inicio: rangoEj.inicio,
+                        fin: rangoEj.fin,
+                        tipo: 'ejecutivo',
+                        proyecto: proyNombre
+                    });
+                }
+                html += '<p>Módulo de reporte ejecutivo no disponible.</p>';
+            }
 
             const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
             const enRango = (f) => f >= rango.inicio && f <= rango.fin;
