@@ -9842,10 +9842,20 @@ function validarDependenciasExportacion() {
                         const htmlData = generarHTMLReporte(tipo, rango.inicio, rango);
                         const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
                         contenedor.classList.add('pdf-generating');
-                        
+
                         const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
-                        pdf.save(`${nombre}.pdf`);
-                        
+
+                        // Forzar descarga usando Blob para asegurar que se abra el diálogo de guardar
+                        const pdfBlob = pdf.output('blob');
+                        const pdfUrl = URL.createObjectURL(pdfBlob);
+                        const aPdf = document.createElement('a');
+                        aPdf.href = pdfUrl;
+                        aPdf.download = `${nombre}.pdf`;
+                        document.body.appendChild(aPdf);
+                        aPdf.click();
+                        document.body.removeChild(aPdf);
+                        setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+
                         contenedor.classList.remove('pdf-generating');
                         formatoCount++;
                         actualizarProgresoReporte('PDF generado', 20 + (formatoCount / totalFormatos) * 30);
@@ -10267,7 +10277,18 @@ function validarDependenciasExportacion() {
 
                             contenedor.classList.add('pdf-generating');
                             const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
-                            pdf.save(`${nombre}.pdf`);
+
+                            // Forzar descarga usando Blob para asegurar que se abra el diálogo de guardar
+                            const pdfBlob = pdf.output('blob');
+                            const pdfUrl = URL.createObjectURL(pdfBlob);
+                            const aPdf = document.createElement('a');
+                            aPdf.href = pdfUrl;
+                            aPdf.download = `${nombre}.pdf`;
+                            document.body.appendChild(aPdf);
+                            aPdf.click();
+                            document.body.removeChild(aPdf);
+                            setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+
                             contenedor.classList.remove('pdf-generating');
                             formatoCount++;
                         }
