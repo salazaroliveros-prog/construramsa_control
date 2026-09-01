@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -7593,8 +7593,7 @@ pag_.forEach(c => {
             }
             if (!c.url) { if (!auto) { _nubeSetEstado('⚠️ Configura la URL del Web App primero', false); showToast('⚠️ Sin URL de Web App', 'info'); } return; }
             try {
-                if (!auto) _nubeSetEstado('⬆️ Subiendo a Google Drive...');
-                showLoading('Subiendo respaldo a la nube...');
+                if (!auto) { _nubeSetEstado('⬆️ Subiendo a Google Drive...'); showLoading('Subiendo respaldo a la nube...'); }
                 const body = JSON.stringify({ data: db });
                 const res = await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -7602,12 +7601,12 @@ pag_.forEach(c => {
                 c.ultimo = new Date().toISOString();
                 _dbCache = db;
                 localStorage.setItem(DB_KEY, JSON.stringify(db));
-                hideLoading();
+                if (!auto) hideLoading();
                 _nubeSetEstado('✅ Respaldo subido a la nube correctamente', true);
                 _nubeSetUltimo(c.ultimo);
-                showToast(auto ? '☁️ Base de datos actualizada en la nube automáticamente' : '✅ Datos subidos a tu Google Drive', 'success');
+                showToast(auto ? '☁️ Respaldo en la nube actualizado' : '✅ Datos subidos a tu Google Drive', 'success');
             } catch (err) {
-                hideLoading();
+                if (!auto) hideLoading();
                 _nubeSetEstado('❌ Error al subir: ' + err.message, false);
                 if (!auto) showToast('❌ No se pudo subir: ' + err.message, 'error');
             }
