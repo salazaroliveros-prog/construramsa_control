@@ -8581,7 +8581,7 @@ function cargarTablaCamiones() {
                     const descripcion = `Viaje ${numero} (${material}) ${cam.nombre} → ${ruta.nombre}`;
                     const categoria = cam.propiedad === 'alquilado' ? 'Alquiler de Equipo' : 'Combustible';
                     if (!sincronizarGastoVinculado(datos, prev, total, categoria, descripcion, fecha, 'el viaje')) return;
-                    datos.viajes_camiones.viajes[idx] = { ...prev, fecha, vehiculo_id: camId, ruta_id: rutaId, material, numero, km_total: kmTotal, litros, costo_combustible: costoComb, costo_alquiler: costoAlq, extra, total };
+                    datos.viajes_camiones.viajes[idx] = { ...prev, fecha, vehiculo_id: camId, ruta_id: rutaId, material, numero, km_total: kmTotal, litros, costo_combustible: costoComb, costo_alquiler: costoAlq, extra, total, propiedad: cam.propiedad, tarifa_modalidad: cam.modalidad };
                     saveProyectoData(datos);
                 }
                 cancelarEdicionViaje();

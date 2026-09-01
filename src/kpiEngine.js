@@ -230,11 +230,14 @@
         const saldo = presupuesto + totalIngresos - totalEgresos;
 
         const viajes = (db.viajes_camiones && db.viajes_camiones.viajes) || [];
+        const camiones = (db.viajes_camiones && db.viajes_camiones.camiones) || [];
         let viajesPropios = 0, viajesAlq = 0, totalKm = 0, totalLitros = 0;
         viajes.forEach(v => {
             totalKm += (v.km_total || 0);
             totalLitros += (v.litros || 0);
-            if (v.propiedad === 'alquilado') viajesAlq += 1; else viajesPropios += 1;
+            // propiedad puede estar en el viaje (nuevo) o hay que buscarlo en el camión (datos migrados)
+            const prop = v.propiedad || (camiones.find(c => c.id === v.vehiculo_id) || {}).propiedad || 'propio';
+            if (prop === 'alquilado') viajesAlq += 1; else viajesPropios += 1;
         });
 
         const ordenes = (db.mantenimiento && db.mantenimiento.ordenes) || [];
