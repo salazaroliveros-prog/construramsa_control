@@ -14,8 +14,6 @@ const STATIC_ASSETS = [
     './icon-192.png',
     './icon.svg',
     './vendor/html2pdf.bundle.min.js',
-    './vendor/xlsx.full.min.js',
-    './vendor/exceljs.min.js',
     './vendor/purify.min.js',
     './src/types.js',
     './src/config.js',
