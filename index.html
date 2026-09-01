@@ -74,7 +74,8 @@
     <link rel="dns-prefetch" href="https://accounts.google.com">
 
     <!-- Preload críticos: vendor scripts (PDF, sanitización) cargados de forma sincrónica -->
-    <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
+    <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
+
     <link rel="preload" as="script" href="./vendor/purify.min.js">
 
     <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
@@ -85,6 +86,7 @@
     <script src="./src/types.js"></script>
     <script src="./src/config.js"></script>
     <script src="./src/exportador.js"></script>
+    <script src="./src/kpiEngine.js"></script>
     <script src="./src/reporteEjecutivo.js"></script>
     <script src="./src/signatureCapture.js"></script>
     <style>
@@ -4875,27 +4877,57 @@
             const proyNombre = proy ? proy.nombre : 'General';
             const presupuesto = getPresupuestoActual();
 
-            let totalIng = 0, totalEgr = 0;
-            (datos.caja_chica || []).forEach(m => { if (m.tipo === 'ingreso') totalIng += m.monto; else totalEgr += m.monto; });
-            const saldo = presupuesto + totalIng - totalEgr;
+            // Usar el motor de KPIs unificado
+            const kpis = typeof CR_KPIEngine !== 'undefined' && CR_KPIEngine.calcularKPIs
+                ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: presupuesto }, 'mes')
+                : null;
 
-            const viajes = datos.viajes_camiones.viajes || [];
-            const camiones = datos.viajes_camiones.camiones || [];
-            let totalViajes = 0, viajesPropios = 0, viajesAlq = 0, kmTot = 0, litrosTot = 0;
-            viajes.forEach(v => {
-                totalViajes += (v.total || 0); kmTot += (v.km_total || 0); litrosTot += (v.litros || 0);
-                if (v.propiedad === 'alquilado') viajesAlq += 1; else viajesPropios += 1;
-            });
+            let saldo = 0, totalIng = 0, totalEgr = 0;
+            let viajes = [], camiones = [], totalViajes = 0, viajesPropios = 0, viajesAlq = 0, kmTot = 0, litrosTot = 0;
+            let ords = [], ins = [], totalMTTO = 0, totalNomina = 0, regsAsist = [];
 
-            const ords = datos.mantenimiento.ordenes || [];
-            const ins = datos.mantenimiento.compras_insumos || [];
-            let totalMTTO = 0;
-            ords.forEach(o => totalMTTO += (o.costo || 0));
-            ins.forEach(i => totalMTTO += (i.costo || 0));
+            if (kpis) {
+                // Usar KPIs del motor unificado
+                saldo = kpis.saldo;
+                totalIng = kpis.totalIngresos;
+                totalEgr = kpis.totalEgresos;
+                totalViajes = kpis.totalViajes;
+                viajesPropios = kpis.viajesPropios;
+                viajesAlq = kpis.viajesAlquilados;
+                kmTot = kpis.totalKm;
+                litrosTot = kpis.totalLitros;
+                totalMTTO = kpis.totalMantenimiento;
+                totalNomina = kpis.totalNomina;
+                
+                // Datos para pendientes
+                viajes = datos.viajes_camiones.viajes || [];
+                camiones = datos.viajes_camiones.camiones || [];
+                ords = datos.mantenimiento.ordenes || [];
+                ins = datos.mantenimiento.compras_insumos || [];
+                regsAsist = (datos.personal.asistencia || []).flatMap(dia => dia.registros.map(r => ({...r, fecha: dia.fecha})));
+            } else {
+                // Fallback: cálculo inline (código original)
+                (datos.caja_chica || []).forEach(m => { 
+                    if (m.tipo === 'ingreso') totalIng += m.monto; 
+                    else if (m.tipo === 'egreso') totalEgr += m.monto; 
+                });
+                saldo = presupuesto + totalIng - totalEgr;
 
-            const regsAsist = (datos.personal.asistencia || []).flatMap(dia => dia.registros.map(r => ({...r, fecha: dia.fecha})));
-            let totalNomina = 0;
-            regsAsist.forEach(r => { if (r.calculos) totalNomina += (r.calculos.total_diario || 0); });
+                viajes = datos.viajes_camiones.viajes || [];
+                camiones = datos.viajes_camiones.camiones || [];
+                viajes.forEach(v => {
+                    totalViajes += (v.total || 0); kmTot += (v.km_total || 0); litrosTot += (v.litros || 0);
+                    if (v.propiedad === 'alquilado') viajesAlq += 1; else viajesPropios += 1;
+                });
+
+                ords = datos.mantenimiento.ordenes || [];
+                ins = datos.mantenimiento.compras_insumos || [];
+                ords.forEach(o => totalMTTO += (o.costo || 0));
+                ins.forEach(i => totalMTTO += (i.costo || 0));
+
+                regsAsist = (datos.personal.asistencia || []).flatMap(dia => dia.registros.map(r => ({...r, fecha: dia.fecha})));
+                regsAsist.forEach(r => { if (r.calculos) totalNomina += (r.calculos.total_diario || 0); });
+            }
 
             const pending = [];
             (datos.adquisiciones.cotizaciones_compras || []).forEach(c => {
@@ -4907,16 +4939,16 @@
             ins.forEach(i => { if (i.fecha === hoy) pending.push({ texto: `🛒 Hoy: compra de ${i.articulo} (x${i.cantidad})`, fecha: i.fecha }); });
             pending.sort((a,b) => (a.fecha||'').localeCompare(b.fecha||''));
 
-            const kpis = [
+            const kpiCards = [
                 { clase: saldo >= 0 ? 'positivo' : 'negativo', label: 'Saldo Disponible', valor: formatearMoneda(saldo), sub: `Presupuesto: ${formatearMoneda(presupuesto)}` },
                 { clase: 'positivo', label: 'Ingresos', valor: formatearMoneda(totalIng), sub: `${(datos.caja_chica||[]).filter(m=>m.tipo==='ingreso').length} mov.` },
                 { clase: 'negativo', label: 'Egresos', valor: formatearMoneda(totalEgr), sub: `${(datos.caja_chica||[]).filter(m=>m.tipo==='egreso').length} mov.` },
-                { clase: 'ciano', label: 'Viajes', valor: String(viajes.length), sub: `${viajesPropios} propios · ${viajesAlq} alq.` },
+                { clase: 'ciano', label: 'Viajes', valor: String(totalViajes), sub: `${viajesPropios} propios · ${viajesAlq} alq.` },
                 { clase: 'purpura', label: 'Km recorridos', valor: numToF(kmTot) + ' km', sub: numToF(litrosTot) + ' L combust. aprox.' },
                 { clase: 'purpura', label: 'Mtto y Insumos', valor: formatearMoneda(totalMTTO), sub: `${ords.length} órdenes · ${ins.length} insumos` },
                 { clase: 'ciano', label: 'Nómina', valor: formatearMoneda(totalNomina), sub: `${regsAsist.length} registros` }
             ];
-            grid.innerHTML = kpis.map(k => `<div class="kpi-card ${_esc(k.clase)}"><div class="kpi-label">${_esc(k.label)}</div><div class="kpi-value">${_esc(k.valor)}</div><div class="kpi-sub">${_esc(k.sub || '')}</div></div>`).join('');
+            grid.innerHTML = kpiCards.map(k => `<div class="kpi-card ${_esc(k.clase)}"><div class="kpi-label">${_esc(k.label)}</div><div class="kpi-value">${_esc(k.valor)}</div><div class="kpi-sub">${_esc(k.sub || '')}</div></div>`).join('');
 
             const insLow = ins.filter(i => typeof i.stock_min === 'number' && i.cantidad < i.stock_min);
             let avisosHtml = '';
@@ -7019,6 +7051,7 @@ pag_.forEach(c => {
             saveDB(db);
             actualizarNombreEmpresaUI();
             actualizarTituloPagina();
+            actualizarDatosContactoPDF();
             showToast('✅ Identidad de la empresa actualizada', 'success');
         }
 
@@ -9243,11 +9276,13 @@ tbody.innerHTML = '';
                 csv += `,,,,TOTAL NÓMINA:,${total.toFixed(2)}\n`;
             } else if (tipo === 'viajes') {
                 csv += `${csvRow(['Reporte de Viajes de Camiones - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `# Período: ${periodoDisplay}\n`;
                 csv += `Fecha,Unidad,Material,No. Viajes,Km Total,Litros,Costo Combustible (Q),Costo Alquiler (Q),Total (Q)\n`;
-                const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha);
+                const enRangoV = (f) => f >= rango.inicio && f <= rango.fin;
+                const viajes = (datos.viajes_camiones.viajes||[]).filter(v => enRangoV(v.fecha)).sort((a,b) => a.fecha.localeCompare(b.fecha));
                 let totalV = 0;
                 if (viajes.length === 0) {
-                    csv += `"SIN VIAJES EN LA FECHA ${fecha}",,,,,,,,\n`;
+                    csv += `"SIN VIAJES EN EL PERIODO ${periodoDisplay}",,,,,,,,\n`;
                 } else {
                     viajes.forEach(v => {
                         const cam = (datos.viajes_camiones.camiones||[]).find(c => c.id === v.vehiculo_id);
@@ -9261,10 +9296,11 @@ tbody.innerHTML = '';
                 csv += `${csvRow(['Reporte de Mantenimiento e Insumos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
                 let totalM = 0;
-                const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
-                const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
+                const enRangoM = (f) => f >= rango.inicio && f <= rango.fin;
+                const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => enRangoM(i.fecha));
+                const ords = (datos.mantenimiento.ordenes||[]).filter(o => enRangoM(o.fecha));
                 if (ins.length === 0 && ords.length === 0) {
-                    csv += `"SIN MANTENIMIENTO/INSUMOS EN ${fecha}",,,\n`;
+                    csv += `"SIN MANTENIMIENTO/INSUMOS EN EL PERIODO ${periodoDisplay}",,,\n`;
                 } else {
                     ords.forEach(o => {
                         const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
@@ -9277,7 +9313,7 @@ tbody.innerHTML = '';
                     });
                 }
                 csv += `,,,\n`;
-                csv += `,,,,TOTAL MANTENIMIENTO E INSUMOS:,${totalM.toFixed(2)}\n`;
+                csv += `,,TOTAL MANTENIMIENTO E INSUMOS:,${totalM.toFixed(2)}\n`;
             } else if (tipo === 'categoria') {
                 csv += `${csvRow(['Reporte por Categoría de Gastos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Fecha,Categoría,Monto (Q),Porcentaje\n`;
@@ -9331,10 +9367,10 @@ tbody.innerHTML = '';
                         { nombre: 'Total Ingresos', valor: kpis.totalIngresos || 0, desc: 'Suma de todos los ingresos' },
                         { nombre: 'Total Egresos', valor: kpis.totalEgresos || 0, desc: 'Suma de todos los egresos' },
                         { nombre: 'Viajes Realizados', valor: kpis.totalViajes || 0, desc: 'Cantidad de viajes de camiones' },
-                        { nombre: 'Km Recorridos', valor: kpis.kmRecorridos || 0, desc: 'Kilometraje total recorrido' },
-                        { nombre: 'Litros Combustible', valor: kpis.litrosCombustible || 0, desc: 'Combustible consumido (L)' },
-                        { nombre: 'Costo Mantenimiento', valor: kpis.costoMantenimiento || 0, desc: 'Gastos en mantenimiento e insumos' },
-                        { nombre: 'Costo Nómina', valor: kpis.costoNomina || 0, desc: 'Pagos de nómina y horas extra' }
+                        { nombre: 'Km Recorridos', valor: kpis.totalKm || 0, desc: 'Kilometraje total recorrido' },
+                        { nombre: 'Litros Combustible', valor: kpis.totalLitros || 0, desc: 'Combustible consumido (L)' },
+                        { nombre: 'Costo Mantenimiento', valor: kpis.totalMantenimiento || 0, desc: 'Gastos en mantenimiento e insumos' },
+                        { nombre: 'Costo Nómina', valor: kpis.totalNomina || 0, desc: 'Pagos de nómina y horas extra' }
                     ];
                     
                     metricas.forEach(m => {
@@ -9378,7 +9414,7 @@ tbody.innerHTML = '';
                 const portadaEj = (typeof _leerCamposPortada === 'function') ? _leerCamposPortada() : {};
                 const CR_Ej = (typeof window !== 'undefined') ? window.CR_ReporteEjecutivo : undefined;
                 if (CR_Ej) {
-                    return CR_Ej.generarHTML(db, {
+                    return CR_Ej.generarHTML(Object.assign({}, db, getProyectoData()), {
                         empresa: cfgEj.nombre_empresa || 'CONSTRURAMSA',
                         logo: (cfgEj.logo_base64 && cfgEj.logo_base64.startsWith('data:image')) ? cfgEj.logo_base64 : undefined,
                         responsable: cfgEj.responsable || 'Gerente de Proyecto'
@@ -9498,12 +9534,13 @@ tbody.innerHTML = '';
                 html += `</tbody></table>`;
             } else if (tipo === 'viajes') {
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${_esc(fecha)} | Proyecto: ${_esc(proyNombre)}</p>`;
+                html += `<p style="color:#6B7280;margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
-                const viajes = (datos.viajes_camiones.viajes||[]).filter(v => v.fecha === fecha).sort((a,b) => a.fecha.localeCompare(b.fecha));
+                const enRangoVH = (f) => f >= rango.inicio && f <= rango.fin;
+                const viajes = (datos.viajes_camiones.viajes||[]).filter(v => enRangoVH(v.fecha)).sort((a,b) => a.fecha.localeCompare(b.fecha));
                 let totalV = 0;
                 if (viajes.length === 0) {
-                    html += `<tr><td colspan="9" style="text-align:center;color:#6B7280;padding:20px;">Sin viajes en esta fecha</td></tr>`;
+                    html += `<tr><td colspan="9" style="text-align:center;color:#6B7280;padding:20px;">Sin viajes en este período</td></tr>`;
                 } else {
                     viajes.forEach(v => {
                         const cam = (datos.viajes_camiones.camiones||[]).find(c => c.id === v.vehiculo_id);
@@ -9516,9 +9553,10 @@ tbody.innerHTML = '';
                 html += `</tbody></table>`;
             } else if (tipo === 'mantenimiento') {
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Mantenimiento e Insumos</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Fecha: ${_esc(fecha)} | Proyecto: ${_esc(proyNombre)}</p>`;
-                const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => i.fecha === fecha);
-                const ords = (datos.mantenimiento.ordenes||[]).filter(o => o.fecha === fecha);
+                html += `<p style="color:#6B7280;margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
+                const enRangoMH = (f) => f >= rango.inicio && f <= rango.fin;
+                const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => enRangoMH(i.fecha));
+                const ords = (datos.mantenimiento.ordenes||[]).filter(o => enRangoMH(o.fecha));
                 let totalM = 0;
                 
                 // Órdenes de mantenimiento
@@ -9662,15 +9700,20 @@ tbody.innerHTML = '';
             return document.getElementById('plantilla-reporte-impresion');
         }
 
-        // Esperar a que el logo y las firmas del membrete terminen de cargar
+        // Esperar a que el logo y las firmas del membrete terminen de cargar.
+        // FIX BUG-PDF: solo se espera por elementos <img>; los contenedores de
+        // firma son <div> y no disparan onload/onerror, por lo que colgaban la
+        // generación del PDF indefinidamente (el PDF nunca se descargaba).
         function esperarImagenesPlantilla() {
             return Promise.all(
                 ['pdf-logo-membrete', 'pdf-firma-jefe-proyectos', 'pdf-firma-gerente-comercial'].map(id => {
                     return new Promise(resolve => {
-                        const img = document.getElementById(id);
-                        if (!img || img.complete) return resolve();
-                        img.onload = () => resolve();
-                        img.onerror = () => resolve();
+                        const el = document.getElementById(id);
+                        if (!el) return resolve();
+                        if (el.tagName !== 'IMG') return resolve();
+                        if (el.complete) return resolve();
+                        el.onload = () => resolve();
+                        el.onerror = () => resolve();
                     });
                 })
             );
@@ -11027,4 +11070,3 @@ function validarDependenciasExportacion() {
     </script>
     
 </body>
-</html>

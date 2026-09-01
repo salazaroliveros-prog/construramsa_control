@@ -94,12 +94,16 @@
         fondo: '#f4f7fa',
         blanco: '#ffffff'
     });
-// ============================================================
-    // MOTOR DE KPIs — calcula métricas a partir de la BD real
+
+    // ============================================================
+    // MOTOR DE KPIs — delega a CR_KPIEngine cuando está disponible,
+    // o usa implementación local de respaldo para reportes ejecutivos.
     // ============================================================
 
     /**
      * Calcula los indicadores clave de gestión para el período dado.
+     * Delega a window.CR_KPIEngine.calcularKPIs si está disponible,
+     * adaptando el resultado al formato esperado por generarHTML.
      * @param {Object} db                 Base de datos completa
      * @param {Object} [opts]
      * @param {string} [opts.inicio]      'YYYY-MM-DD'
@@ -110,7 +114,97 @@
         opts = opts || {};
         var inicio = opts.inicio || '';
         var fin = opts.fin || '';
+        var db2 = db || {};
 
+        // Intentar delegar al motor centralizado si está cargado
+        if (typeof globalScope !== 'undefined' &&
+            globalScope.CR_KPIEngine &&
+            typeof globalScope.CR_KPIEngine.calcularKPIs === 'function') {
+            var datosProyecto = db2;
+            var cfg = db2.configuracion || {};
+            var kpisEngine = globalScope.CR_KPIEngine.calcularKPIs(
+                datosProyecto,
+                { presupuestoInicial: num(cfg.presupuesto_inicial_caja || cfg.presupuesto) },
+                'mes'
+            );
+            // Adaptar al formato de reporte ejecutivo (agrega porCategoria, porDia, alertas)
+            return _enriquecerKPIsParaReporte(kpisEngine, db2, inicio, fin);
+        }
+
+        // Implementación local de respaldo (usada en Node/testing sin CR_KPIEngine)
+        return _calcularKPIsLocal(db2, inicio, fin);
+    }
+
+    /**
+     * Enriquece el resultado de CR_KPIEngine con los campos extra
+     * que necesita el reporte ejecutivo (porCategoria, porDia, alertas, maquinaria).
+     * @private
+     */
+    function _enriquecerKPIsParaReporte(kpisEngine, db2, inicio, fin) {
+        var caja = Array.isArray(db2.caja_chica) ? db2.caja_chica : [];
+        var porCategoria = {};
+        var porDia = {};
+
+        caja.forEach(function (m) {
+            if (!m) return;
+            var key = fechaMov(m);
+            if (!enRango(key, inicio, fin)) return;
+            var monto = num(m.monto);
+            var tipo = String(m.tipo || '').toLowerCase();
+            porDia[key] = porDia[key] || { gastos: 0, ingresos: 0 };
+            if (tipo === 'apertura' || tipo === 'ingreso' || tipo === 'entrada') {
+                porDia[key].ingresos += Math.abs(monto);
+            } else {
+                porDia[key].gastos += Math.abs(monto);
+                var cat = String(m.categoria || 'Sin categoría').trim();
+                porCategoria[cat] = (porCategoria[cat] || 0) + Math.abs(monto);
+            }
+        });
+
+        var maquinaria = { galones: 0, costoCombustible: 0, costoMantenimiento: 0, registros: 0 };
+        var flota = db2.maquinaria_flota || {};
+        (Array.isArray(flota.registros) ? flota.registros : []).forEach(function (r) {
+            if (!r || !enRango(fechaMov(r), inicio, fin)) return;
+            maquinaria.registros++;
+            maquinaria.galones += num(r.combustible_galones);
+            maquinaria.costoCombustible += num(r.combustible_costo);
+            maquinaria.costoMantenimiento += num(r.mantenimiento_costo);
+        });
+
+        var viajesCount = 0;
+        (Array.isArray((db2.viajes_camiones || {}).viajes) ? db2.viajes_camiones.viajes : [])
+            .forEach(function (v) { if (v && enRango(fechaMov(v), inicio, fin)) viajesCount++; });
+
+        var asistencia = { registros: 0, ausencias: 0 };
+        (Array.isArray((db2.personal || {}).asistencia) ? db2.personal.asistencia : [])
+            .forEach(function (a) {
+                if (!a || !enRango(fechaMov(a), inicio, fin)) return;
+                asistencia.registros++;
+                var estado = String(a.estado || a.asistencia || '').toLowerCase();
+                if (estado.indexOf('aus') === 0 || estado === 'falta') asistencia.ausencias++;
+            });
+
+        var kpis = {
+            totalGastos: kpisEngine.totalEgresos || 0,
+            totalIngresos: kpisEngine.totalIngresos || 0,
+            saldo: kpisEngine.saldo || 0,
+            nMovimientos: (kpisEngine.movimientosIngreso || 0) + (kpisEngine.movimientosEgreso || 0),
+            nGastos: kpisEngine.movimientosEgreso || 0,
+            porCategoria: porCategoria,
+            porDia: porDia,
+            maquinaria: maquinaria,
+            viajes: viajesCount,
+            asistencia: asistencia,
+            alertas: []
+        };
+        return _alertas(kpis, db2);
+    }
+
+    /**
+     * Implementación local de cálculo de KPIs (respaldo cuando CR_KPIEngine no está disponible).
+     * @private
+     */
+    function _calcularKPIsLocal(db2, inicio, fin) {
         var kpis = {
             totalGastos: 0, totalIngresos: 0, saldo: 0,
             nMovimientos: 0, nGastos: 0,
@@ -120,8 +214,6 @@
             asistencia: { registros: 0, ausencias: 0 },
             alertas: []
         };
-
-        var db2 = db || {};
 
         var caja = Array.isArray(db2.caja_chica) ? db2.caja_chica : [];
         caja.forEach(function (m) {
@@ -147,11 +239,8 @@
         kpis.saldo = kpis.totalIngresos - kpis.totalGastos;
 
         var flota = db2.maquinaria_flota || {};
-        var registros = Array.isArray(flota.registros) ? flota.registros : [];
-        registros.forEach(function (r) {
-            if (!r) return;
-            var key = fechaMov(r);
-            if (!enRango(key, inicio, fin)) return;
+        (Array.isArray(flota.registros) ? flota.registros : []).forEach(function (r) {
+            if (!r || !enRango(fechaMov(r), inicio, fin)) return;
             kpis.maquinaria.registros++;
             kpis.maquinaria.galones += num(r.combustible_galones);
             kpis.maquinaria.costoCombustible += num(r.combustible_costo);
@@ -389,13 +478,30 @@
     }
 
     var CSS_CORPORATIVO =
-        '.ej-cover{font-family:Arial,Helvetica,sans-serif;}'
-        + 'body{font-family:Arial,Helvetica,sans-serif;color:#1f2a36;margin:0;padding:0;}'
-        + '.ej-grid{display:flex;flex-wrap:wrap;gap:10px;}'
-        + '.ej-page-break{page-break-before:auto;}'
-        + 'h2{page-break-after:avoid;}'
-        + 'tr{page-break-inside:avoid;}'
-        + '.ej-sin-datos{color:#5b6673;font-size:13px;padding:14px;background:#f4f7fa;border:1px dashed #dce3ea;border-radius:6px;}';
+        '@page{margin:10mm 12mm;}'
+        + '*{box-sizing:border-box;}'
+        + 'body{font-family:Arial,Helvetica,sans-serif;color:#1f2a36;margin:0;padding:0;font-size:10px;}'
+        + '.ej-cover{font-family:Arial,Helvetica,sans-serif;width:100%;max-width:100%;}'
+        + '.ej-grid{display:flex;flex-wrap:wrap;gap:8px;width:100%;}'
+        + '.ej-grid>div{flex:1 1 140px;min-width:120px;max-width:100%;}'
+        + '.ej-page-break{page-break-before:auto;break-before:auto;}'
+        + 'h2{page-break-after:avoid;break-after:avoid;font-size:13px;margin:0 0 10px;}'
+        + 'h3{page-break-after:avoid;break-after:avoid;font-size:11px;margin:14px 0 8px;}'
+        + 'table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9px;}'
+        + 'th{background:#0f6fb5;color:#fff;padding:6px 8px;text-align:left;font-size:8px;font-weight:700;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'
+        + 'td{padding:5px 8px;border:1px solid #dce3ea;vertical-align:middle;word-wrap:break-word;overflow-wrap:break-word;}'
+        + 'tr:nth-child(even){background:#f4f7fa;}'
+        + 'tr{page-break-inside:avoid;break-inside:avoid;}'
+        + 'svg{max-width:100%;height:auto;}'
+        + '.ej-sin-datos{color:#5b6673;font-size:11px;padding:12px;background:#f4f7fa;border:1px dashed #dce3ea;border-radius:6px;text-align:center;}'
+        + '.ej-total-row td{font-weight:700;background:#eff6ff;border-top:2px solid #0f6fb5;}'
+        + '.ej-total-egreso{color:#d33a2c;background:#fef2f2;border-top:2px solid #d33a2c;}'
+        + '.ej-total-ingreso{color:#1f9d55;background:#ecfdf5;border-top:2px solid #1f9d55;}'
+        + '@media print{'
+        + '.ej-page-break{page-break-before:always;break-before:always;}'
+        + '.ej-page-break:first-child{page-break-before:avoid;break-before:avoid;}'
+        + 'svg{max-width:100% !important;}'
+        + '}';
 
     // ============================================================
     // API PÚBLICA

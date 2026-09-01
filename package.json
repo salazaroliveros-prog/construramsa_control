@@ -40,5 +40,9 @@
   "devDependencies": {
     "playwright": "^1.62.1",
     "playwright-core": "^1.62.1"
+  },
+  "dependencies": {
+    "claude": "^0.1.1",
+    "cli": "^1.0.1"
   }
 }

@@ -9,6 +9,9 @@ const MIME = {
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.jpg': 'image/jpeg',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.webp': 'image/webp',
   '.ico': 'image/x-icon'
 };
 

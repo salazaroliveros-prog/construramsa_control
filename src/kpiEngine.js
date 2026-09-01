@@ -1,7 +1,15 @@
-// src/kpiEngine.js — Motor funcional de KPIs para el dashboard de Resumen
-// Clean Code: funciones puras (FP), sin efectos secundarios, reutilizables, tipadas con JSDoc.
-// No depende del DOM; recibe datos estructurados (ver getProyectoData) y devuelve cálculos.
-(function () {
+/**
+ * @fileoverview Motor funcional de KPIs para el dashboard de Resumen de CONSTRURAMSA.
+ *
+ * Funciones puras (FP), sin efectos secundarios, reutilizables y tipadas con JSDoc.
+ * No depende del DOM; recibe datos estructurados (ver getProyectoData) y devuelve cálculos.
+ *
+ * Se expone como `window.CR_KPIEngine` (IIFE, sin fuga de globales) y como
+ * CommonJS para testing en Node.
+ *
+ * @module kpiEngine
+ */
+(function (globalScope) {
     'use strict';
 
     /**
@@ -119,10 +127,15 @@
 
         (movimientos || []).forEach(m => {
             if (m.tipo === 'egreso' && m.categoria) {
-                const cat = m.categoria.toLowerCase().replace(/ /g, '_');
-                if (gastos.hasOwnProperty(cat)) {
-                    gastos[cat] += (m.monto || 0);
-                } else {
+                const categorias = m.categoria.split('/').map(c => c.trim().toLowerCase().replace(/ /g, '_'));
+                let matched = false;
+                categorias.forEach(cat => {
+                    if (gastos.hasOwnProperty(cat)) {
+                        gastos[cat] += (m.monto || 0);
+                        matched = true;
+                    }
+                });
+                if (!matched) {
                     gastos.otros += (m.monto || 0);
                 }
             }
@@ -143,31 +156,37 @@
         let inicio, fin;
 
         switch (periodo) {
-            case 'dia':
+            case 'dia': {
                 inicio = new Date(y, m, d);
                 fin = new Date(y, m, d);
                 break;
-            case 'semana':
+            }
+            case 'semana': {
                 const diaSemana = fechaHoy.getDay();
                 inicio = new Date(y, m, d - diaSemana);
                 fin = new Date(y, m, d + (6 - diaSemana));
                 break;
-            case 'mes':
+            }
+            case 'mes': {
                 inicio = new Date(y, m, 1);
                 fin = new Date(y, m + 1, 0);
                 break;
-            case 'trimestre':
+            }
+            case 'trimestre': {
                 const trimestreInicio = Math.floor(m / 3) * 3;
                 inicio = new Date(y, trimestreInicio, 1);
                 fin = new Date(y, trimestreInicio + 3, 0);
                 break;
-            case 'anio':
+            }
+            case 'anio': {
                 inicio = new Date(y, 0, 1);
                 fin = new Date(y, 11, 31);
                 break;
-            default:
+            }
+            default: {
                 inicio = new Date(y, m, 1);
                 fin = new Date(y, m + 1, 0);
+            }
         }
 
         return { inicio, fin };
@@ -257,10 +276,9 @@
         const kmPeriodo = viajesPeriodo.reduce((s, v) => s + (v.km_total || 0), 0);
         const litrosPeriodo = viajesPeriodo.reduce((s, v) => s + (v.litros || 0), 0);
         
-        const maquinariaRegistros = (db.maquinaria || []);
-        const totalHorasMaq = maquinariaRegistros.reduce((s, m) => s + ((m.val_final - m.val_inicial) || 0), 0);
+        const maquinariaRegistros = (db.maquinaria_flota?.registros || []);
+        const totalHorasMaq = maquinariaRegistros.reduce((s, m) => s + (m.horas || 0), 0);
         
-        const gastosCats = gastosPorCategoria(caja);
         const gastoMaqPeriodo = movimientosPeriodo
             .filter(m => m.categoria && m.categoria.toLowerCase().includes('maquinaria'))
             .reduce((s, m) => s + m.monto, 0);
@@ -285,7 +303,38 @@
         };
     };
 
-    // Export global (offline-friendly)
-    window.CR_KPIEngine = { calcularKPIs, gastosPorCategoria, sumaTipo, cuentaTipo };
-})();
+    /**
+     * API pública del módulo.
+     * @type {Readonly<object>}
+     */
+    const api = Object.freeze({
+        calcularKPIs,
+        gastosPorCategoria,
+        sumaTipo,
+        cuentaTipo
+    });
+
+    /**
+     * Exposición en navegador: un único global congelado y no enumerable.
+     */
+    if (globalScope) {
+        try {
+            Object.defineProperty(globalScope, 'CR_KPIEngine', {
+                value: api,
+                writable: false,
+                enumerable: false,
+                configurable: false
+            });
+        } catch (e) {
+            /* Entornos restringidos: la definición falla pero el módulo sigue vivo. */
+        }
+    }
+
+    /**
+     * Exposición CommonJS para testing / SSR.
+     */
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = api;
+    }
+})(typeof window !== 'undefined' ? window : globalThis);
 

@@ -33,6 +33,7 @@
      * @returns {Object} Instancia del componente con métodos de control
      */
     function createSignatureCapture(containerId, options) {
+        options = options || {};
         const container = document.getElementById(containerId);
         if (!container) {
             console.error('Contenedor no encontrado:', containerId);
@@ -253,9 +254,9 @@
     /**
      * API pública del módulo.
      */
-    const api = {
+    const api = Object.freeze({
         create: createSignatureCapture
-    };
+    });
 
     /**
      * Exposición en navegador: un único global congelado.

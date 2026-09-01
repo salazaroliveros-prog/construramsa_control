@@ -59,20 +59,8 @@
     }
 
     /**
-     * Serializa una fila (arreglo de celdas) a línea CSV.
-     * @param {Array<unknown>} celdas
-     * @returns {string}
-     */
-    function filaACsv(celdas) {
-        return celdas.map(escaparCampoCSV).join(';');
-    }
-
-    /**
-     * Serializa una celda CSV tal y como la exige el reporte consolidado de
-     * `index.html`: normaliza saltos de línea, neutraliza fórmulas maliciosas
-     * (prefixando una comilla simple), escapa comillas dobles y envuelve el
-     * contenido entre comillas dobles. REPLICA exactamente el comportamiento
-     * del helper local `csvCell` para no alterar el formato de salida.
+     * Serializa una celda CSV: normaliza saltos de línea, neutraliza fórmulas
+     * (prefija comilla simple), escapa comillas dobles y envuelve en comillas.
      * @param {unknown} valor
      * @returns {string}
      */
@@ -83,8 +71,8 @@
     }
 
     /**
-     * Serializa un arreglo de celdas a una línea CSV con separador ","
-     * (formato del reporte consolidado). Los números usan 2 decimales fijos.
+     * Serializa un arreglo de celdas a una línea CSV con separador ",".
+     * Los números se formatean con 2 decimales fijos; el resto pasa por celdaCSV.
      * @param {ReadonlyArray<unknown>} valores
      * @returns {string}
      */
@@ -99,18 +87,25 @@
     }
 
     /**
+     * Alias de filaCSV para compatibilidad con construirCSV.
+     * @param {Array<unknown>} celdas
+     * @returns {string}
+     */
+    function filaACsv(celdas) {
+        return filaCSV(celdas);
+    }
+
+    /**
      * Construye el contenido CSV completo a partir de cabeceras y filas.
      * Incluye BOM UTF-8 para compatibilidad con Excel en Windows.
+     * Separador: "," (RFC 4180). Fin de línea: CRLF.
      * @param {ReadonlyArray<string>} cabeceras
      * @param {ReadonlyArray<ReadonlyArray<unknown>>} filas
      * @returns {string}
      */
     function construirCSV(cabeceras, filas) {
-        const lineas = [];
-        lineas.push(filaACsv(cabeceras));
-        for (const fila of filas) {
-            lineas.push(filaACsv(fila));
-        }
+        const lineas = [filaCSV(cabeceras)];
+        for (const fila of filas) lineas.push(filaCSV(fila));
         return '\uFEFF' + lineas.join('\r\n');
     }
 

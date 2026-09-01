@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.4 — Validación de Contenido de Reportes
+ * CONSTRURAMSA v2.8.6 — Validación de Contenido de Reportes
  * Prueba: Verifica que los archivos generados contengan el contenido correcto
  */
 const { chromium } = require('playwright');
@@ -57,7 +57,7 @@ function log(tipo, formato, ok, detalle = '') {
 
   try {
     console.log('\n══════════════════════════════════════════════');
-    console.log('  CONSTRURAMSA v2.8.4 — VALIDACIÓN DE CONTENIDO DE REPORTES');
+    console.log('  CONSTRURAMSA v2.8.6 — VALIDACIÓN DE CONTENIDO DE REPORTES');
     console.log('══════════════════════════════════════════════\n');
 
     await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });

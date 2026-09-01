@@ -90,7 +90,28 @@ if (swHeaderMatches.length && swHeaderMatches.some(s => s.includes(`v${VERSION}`
   errors.push('sw.js header no menciona "Control de Obra v' + VERSION + '"');
 }
 
-// 4. manifest.json (informativo)
+// 4. src/config.js
+const configJs = read('src/config.js');
+const configVersionMatch = (configJs.match(/const APP_VERSION\s*=\s*'[^']+'/) || [null])[0];
+if (configVersionMatch && configVersionMatch.includes(`'${VERSION}'`)) {
+  notes.push(`src/config.js APP_VERSION = '${VERSION}'`);
+} else {
+  errors.push(`src/config.js APP_VERSION (${configVersionMatch || 'no encontrado'}) no coincide con '${VERSION}'`);
+}
+
+// 5. construramsa_db.json
+try {
+  const dbJson = JSON.parse(read('construramsa_db.json'));
+  if (dbJson.version === VERSION) {
+    notes.push(`construramsa_db.json version = '${VERSION}'`);
+  } else {
+    errors.push(`construramsa_db.json version es '${dbJson.version}' pero debería ser '${VERSION}'`);
+  }
+} catch (e) {
+  errors.push('construramsa_db.json no es JSON válido o no tiene campo version');
+}
+
+// 6. manifest.json (informativo)
 try {
   JSON.parse(read('manifest.json'));
   notes.push('manifest.json es JSON válido (no declara versión explícita)');
