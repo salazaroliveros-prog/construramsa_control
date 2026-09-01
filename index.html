@@ -5079,11 +5079,11 @@
                         `;
                     }).join('');
                     
-                    const labels = gastosConValor.map(([cat, monto]) => {
+
                     const labels = gastosConValor.map(([cat, monto]) => {
                         const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                         const porcentaje = ((monto / totalGastos) * 100).toFixed(1);
-                        return `<div style="flex:1;padding:0 2px;text-align:center;"><div style="font-size:9px;color:var(--texto-principal);font-weight:600;writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;max-height:55px;overflow:hidden;"></div><div style="font-size:9px;color:var(--acento-cian);margin-top:2px;">%</div></div>`;
+                        return `<div style="flex:1;padding:0 2px;text-align:center;"><div style="font-size:9px;color:var(--texto-principal);font-weight:600;writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;max-height:55px;overflow:hidden;">${etiquetaCat}</div><div style="font-size:9px;color:var(--acento-cian);margin-top:2px;">${porcentaje}%</div></div>`;
                     }).join('');
 
 
