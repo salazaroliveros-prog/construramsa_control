@@ -73,11 +73,7 @@
     <link rel="dns-prefetch" href="https://script.google.com">
     <link rel="dns-prefetch" href="https://accounts.google.com">
 
-    <!-- Preload críticos: vendor scripts (PDF, sanitización) cargados de forma sincrónica -->
-    <link rel="preload" as="script" href="./vendor/html2pdf.bundle.min.js">
-
-    <link rel="preload" as="script" href="./vendor/purify.min.js">
-
+    <!-- Vendor scripts cargados de forma sincrónica sin preload para evitar warnings de integridad -->
     <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
 
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
@@ -85,6 +81,9 @@
 <!-- Módulos tipados y config central (IIFE: no filtran globals, no colisionan con el bundle) -->
     <script src="./src/types.js"></script>
     <script src="./src/config.js"></script>
+    <script src="./src/syncOptimizer.js"></script>
+    <script src="./src/silentDownload.js"></script>
+    <script src="./src/backgroundSync.js"></script>
     <script src="./src/exportador.js"></script>
     <script src="./src/kpiEngine.js"></script>
     <script src="./src/reporteEjecutivo.js"></script>
@@ -5056,23 +5055,18 @@
                     // Crear barras con colores y etiquetas mejoradas
                     const colores = {
                         'mano_de_obra': '#f87171',
-
                         'salarios': '#fb923c',
                         'epi': '#fbbf24',
                         'alquiler_equipo': '#34d399',
                         'fletes': '#2dd4bf',
                         'viaticos': '#22d3ee',
-
                         'energia': '#38bdf8',
                         'senalizacion': '#60a5fa',
                         'demolicion': '#818cf8',
-
                         'instalaciones': '#a78bfa',
                         'desechos': '#c084fc',
-
                         'andamios': '#e879f9',
                         'botiquin': '#f472b6',
-
                         'vigilancia': '#fb7185',
                         'seguros': '#a8a29e',
                         'lubricantes': '#94a3b8',
@@ -5083,16 +5077,21 @@
                         'materiales': '#6ee7b7',
                         'herramientas': '#5eead4',
                         'combustible': '#7dd3fc',
-
                         'mantenimiento': '#93c5fd',
                         'maquinaria': '#a5b4fc',
                         'personal': '#6ee7b7',
-
                         'viajes': '#c4b5fd',
                         'insumos': '#f9a8d4',
-
                         'otros': '#d1d5db'
-                        
+                    };
+
+                    const barras = gastosConValor.map(([cat, monto]) => {
+                        const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        const porcentaje = ((monto / totalGastos) * 100).toFixed(1);
+                        const color = colores[cat] || '#7dd3fc';
+                        const altura = Math.max((monto / maxGasto) * 100, 8);
+                        const esAlerta = Number(porcentaje) > 25;
+
                         return `
                             <div class="css-chart-bar ${esAlerta ? 'alerta' : ''}" 
                                  style="height:${altura}%;background:linear-gradient(180deg,${color},${color}dd);"
@@ -5102,7 +5101,6 @@
                             </div>
                         `;
                     }).join('');
-                    
 
                     const labels = gastosConValor.map(([cat, monto]) => {
                         const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -8356,58 +8354,61 @@ pag_.forEach(c => {
             
             if (!c.od_connected || !c.od_token) return;
             
+            const syncOptimizer = typeof window !== 'undefined' && window.SyncOptimizer ? window.SyncOptimizer : null;
+            const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
+            
             try {
-                // NO mostrar estado — sincronizar silenciosamente
-                
-                // Obtener archivos remotos
-                const filesResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}/children`, {
+                const listUrl = `${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}/children`;
+                const fetchFiles = () => fetch(listUrl, {
                     headers: { 'Authorization': `Bearer ${c.od_token}` }
                 });
+                const filesResponse = syncOptimizer
+                    ? await syncOptimizer.fetchWithRetry(fetchFiles, 'onedrive-list-files')
+                    : await fetchFiles();
                 
+                if (!filesResponse.ok) throw new Error('HTTP ' + filesResponse.status);
                 const files = await filesResponse.json();
                 const jsonFiles = files.value?.filter(f => f.name.endsWith('.json')).sort((a, b) => 
                     new Date(b.lastModifiedDateTime) - new Date(a.lastModifiedDateTime)
                 );
                 
                 if (jsonFiles.length === 0) {
-                    // Sin archivos previos — nada que sincronizar
                     return;
                 }
                 
-                // Descargar el archivo más reciente diferente al local
                 const localLastSync = c.od_last_sync ? new Date(c.od_last_sync) : new Date(0);
                 const latestRemote = jsonFiles.find(f => new Date(f.lastModifiedDateTime) > localLastSync);
                 
                 if (latestRemote) {
-                    const downloadResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${latestRemote.id}/content`, {
-                        headers: { 'Authorization': `Bearer ${c.od_token}` }
-                    });
-                    if (!downloadResponse.ok) throw new Error('HTTP ' + downloadResponse.status);
-                    const remoteData = await downloadResponse.json();
+                    const downloadUrl = `${ONEDRIVE_BASE_URL}/me/drive/items/${latestRemote.id}/content`;
+                    const downloadData = async () => {
+                        const response = await fetch(downloadUrl, {
+                            headers: { 'Authorization': `Bearer ${c.od_token}` }
+                        });
+                        if (!response.ok) throw new Error('HTTP ' + response.status);
+                        return response.json();
+                    };
+
+                    const remoteData = syncOptimizer
+                        ? await syncOptimizer.downloadFileInChunks(downloadUrl, c.od_token, () => {})
+                        : await downloadData();
                     
-                    // Fusionar con datos locales
                     const fusionado = importarBaseDatosConFusion(remoteData);
-                    
-                    // Guardar en background
                     invalidarCacheDB();
                     saveDB(fusionado);
                     
-                    // Actualizar timestamp
                     c.od_last_sync = latestRemote.lastModifiedDateTime;
                     const db = getDB();
                     db.configuracion.nube = c;
                     saveDB(db);
                     
-                    // Actualizar solo la fecha en la UI (sin recargar)
                     _nubeSetUltimo(c.od_last_sync);
-                    
-                    // Mostrar notificación discreta que NO interrumpe si el usuario está escribiendo
                     console.log('✅ Datos sincronizados desde OneDrive en background');
-                    showDiscreetNotification('☁️ Datos actualizados desde nube', 'info', 2000);
-                    
-                    // NO recargar la UI completamente — los datos ya están actualizados
-                } else {
-                    // Sin cambios — sincronización exitosa pero sin novedades
+                    if (syncOptimizer) {
+                        syncOptimizer.addNotificationToBatch('☁️ Datos actualizados desde nube', 'info', showDiscreetNotification);
+                    } else {
+                        showDiscreetNotification('☁️ Datos actualizados desde nube', 'info', 2000);
+                    }
                 }
                 
             } catch (error) {
@@ -8418,8 +8419,16 @@ pag_.forEach(c => {
                     }
                 }
                 
-                // Solo registrar error en consola — no interrumpir
+                if (syncOptimizer && typeof syncOptimizer.addNotificationToBatch === 'function') {
+                    syncOptimizer.addNotificationToBatch('⚠️ Error de sincronización remota', 'warning', showDiscreetNotification);
+                }
                 console.error('Error al sincronizar OneDrive:', error);
+            } finally {
+                if (typeof window !== 'undefined' && window.SyncOptimizer) {
+                    const elapsed = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt;
+                    window.SyncOptimizer.getMetrics();
+                    console.log(`[SYNC] OneDrive finished in ${Math.round(elapsed)}ms`);
+                }
             }
         }
         
