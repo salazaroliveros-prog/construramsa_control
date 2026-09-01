@@ -4496,6 +4496,30 @@
             }, duration);
         }
 
+        /**
+         * Muestra notificación discreta que NO interrumpe si el usuario está escribiendo.
+         * Solo se muestra si:
+         * 1. No hay campo enfocado (input, textarea)
+         * 2. Es una notificación de sincronización exitosa
+         * Útil para actualizaciones en background que no necesitan atención inmediata.
+         */
+        function showDiscreetNotification(msg, type = 'info', duration = 2000) {
+            const focusedElement = document.activeElement;
+            const isInputFocused = focusedElement && 
+                (focusedElement.tagName === 'INPUT' || 
+                 focusedElement.tagName === 'TEXTAREA' || 
+                 focusedElement.contentEditable === 'true');
+            
+            // Si hay un campo enfocado (usuario escribiendo), no mostrar notificación
+            if (isInputFocused) {
+                console.log('ℹ️ Notificación postponida (usuario escribiendo):', msg);
+                return;
+            }
+            
+            // Mostrar notificación discreta con duración corta
+            showToast(msg, type, duration);
+        }
+
         function showLoading(txt = 'Procesando...') {
             document.getElementById('loading-text').textContent = txt;
             document.getElementById('loading-overlay').classList.remove('hidden');
@@ -8265,13 +8289,75 @@ pag_.forEach(c => {
             }
         }
         
+        /**
+         * Descarga silenciosa desde OneDrive sin interrupciones.
+         * Usada solo por la sincronización automática en background.
+         * No recarga, solo notifica si hay cambios significativos.
+         */
+        async function onedriveDescargarSilencioso() {
+            const c = _nubeCfg();
+            if (!c.od_connected || !c.od_token || !c.od_file_id) {
+                return null; // Silenciosamente ignorar si no está conectado
+            }
+            
+            try {
+                const filesResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}/children`, {
+                    headers: { 'Authorization': `Bearer ${c.od_token}` }
+                });
+                if (!filesResponse.ok) throw new Error('HTTP ' + filesResponse.status);
+                
+                const files = await filesResponse.json();
+                const jsonFiles = (files.value || []).filter(f => f.name.endsWith('.json'))
+                    .sort((a, b) => new Date(b.lastModifiedDateTime) - new Date(a.lastModifiedDateTime));
+                const latest = jsonFiles.find(f => f.name === 'control_obra_latest.json') || jsonFiles[0];
+                if (!latest) return null;
+                
+                const downloadResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${latest.id}/content`, {
+                    headers: { 'Authorization': `Bearer ${c.od_token}` }
+                });
+                if (!downloadResponse.ok) throw new Error('HTTP ' + downloadResponse.status);
+                return await downloadResponse.json();
+            } catch (error) {
+                if (error.message.includes('401') || error.message.includes('403')) {
+                    // Token expirado: renovar silenciosamente
+                    try {
+                        await onedriveRenovarToken();
+                        // Reintentar una sola vez
+                        const filesResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}/children`, {
+                            headers: { 'Authorization': `Bearer ${_nubeCfg().od_token}` }
+                        });
+                        if (!filesResponse.ok) return null;
+                        const files = await filesResponse.json();
+                        const latest = (files.value || [])
+                            .filter(f => f.name.endsWith('.json'))
+                            .sort((a, b) => new Date(b.lastModifiedDateTime) - new Date(a.lastModifiedDateTime))[0];
+                        if (!latest) return null;
+                        const downloadResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${latest.id}/content`, {
+                            headers: { 'Authorization': `Bearer ${_nubeCfg().od_token}` }
+                        });
+                        if (!downloadResponse.ok) return null;
+                        return await downloadResponse.json();
+                    } catch (e) {
+                        console.warn('⚠️ No se pudo renovar token:', e.message);
+                        return null;
+                    }
+                }
+                console.warn('⚠️ Error descarga silenciosa:', error.message);
+                return null;
+            }
+        }
+        
+        /**
+         * Sincronización silenciosa en background sin interrupciones visuales.
+         * No recarga la UI, solo actualiza datos y notifica si hay cambios.
+         */
         async function onedriveSincronizar() {
             const c = _nubeCfg();
             
             if (!c.od_connected || !c.od_token) return;
             
             try {
-                _nubeSetEstado('🔄 Sincronizando con OneDrive...');
+                // NO mostrar estado — sincronizar silenciosamente
                 
                 // Obtener archivos remotos
                 const filesResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}/children`, {
@@ -8284,7 +8370,7 @@ pag_.forEach(c => {
                 );
                 
                 if (jsonFiles.length === 0) {
-                    _nubeSetEstado('✅ OneDrive sincronizado (sin archivos previos)', true);
+                    // Sin archivos previos — nada que sincronizar
                     return;
                 }
                 
@@ -8302,7 +8388,7 @@ pag_.forEach(c => {
                     // Fusionar con datos locales
                     const fusionado = importarBaseDatosConFusion(remoteData);
                     
-                    // Guardar
+                    // Guardar en background
                     invalidarCacheDB();
                     saveDB(fusionado);
                     
@@ -8312,14 +8398,16 @@ pag_.forEach(c => {
                     db.configuracion.nube = c;
                     saveDB(db);
                     
-                    _nubeSetEstado('✅ Sincronizado con OneDrive completado', true);
+                    // Actualizar solo la fecha en la UI (sin recargar)
                     _nubeSetUltimo(c.od_last_sync);
-                    showToast('✅ Datos sincronizados desde OneDrive', 'success');
                     
-                    // Recargar datos
-                    recargarTodosLosDatos();
+                    // Mostrar notificación discreta que NO interrumpe si el usuario está escribiendo
+                    console.log('✅ Datos sincronizados desde OneDrive en background');
+                    showDiscreetNotification('☁️ Datos actualizados desde nube', 'info', 2000);
+                    
+                    // NO recargar la UI completamente — los datos ya están actualizados
                 } else {
-                    _nubeSetEstado('✅ OneDrive sincronizado (sin cambios)', true);
+                    // Sin cambios — sincronización exitosa pero sin novedades
                 }
                 
             } catch (error) {
@@ -8330,11 +8418,16 @@ pag_.forEach(c => {
                     }
                 }
                 
-                _nubeSetEstado('❌ Error al sincronizar: ' + error.message, false);
+                // Solo registrar error en consola — no interrumpir
                 console.error('Error al sincronizar OneDrive:', error);
             }
         }
         
+        /**
+         * Inicia sincronización periódica en background.
+         * Se ejecuta cada 5 minutos sin interrupciones visuales.
+         * Usa requestIdleCallback para máxima performance.
+         */
         function iniciarSincronizacionOneDrive() {
             if (_onedriveSyncTimer) {
                 clearInterval(_onedriveSyncTimer);
@@ -8343,13 +8436,34 @@ pag_.forEach(c => {
             const c = _nubeCfg();
             const intervalo = c.od_sync_interval || 300000; // 5 minutos por defecto
             
-            // Sincronizar inmediatamente
-            onedriveSincronizar();
+            // Helper: sincronizar cuando el navegador esté inactivo
+            const syncInIdle = () => {
+                if ('requestIdleCallback' in window) {
+                    // Moderno: esperar a que el navegador esté verdaderamente inactivo
+                    requestIdleCallback(() => {
+                        onedriveSincronizar().catch(err => {
+                            console.warn('⚠️ Error en sincronización:', err.message);
+                        });
+                    }, { timeout: intervalo + 10000 }); // No esperar más del intervalo
+                } else {
+                    // Fallback: setTimeout para no bloquear
+                    setTimeout(() => {
+                        onedriveSincronizar().catch(err => {
+                            console.warn('⚠️ Error en sincronización:', err.message);
+                        });
+                    }, 100);
+                }
+            };
             
-            // Luego sincronizar periódicamente
+            // Sincronizar inmediatamente en idle (primera sincronización)
+            syncInIdle();
+            
+            // Sincronizar periódicamente en background
             _onedriveSyncTimer = setInterval(() => {
-                onedriveSincronizar();
+                syncInIdle();
             }, intervalo);
+            
+            console.log('✅ Sincronización OneDrive iniciada (cada ' + (intervalo/1000/60) + ' minutos en background)');
         }
         
         // Sobrescribir scheduleNubeAuto para incluir OneDrive
