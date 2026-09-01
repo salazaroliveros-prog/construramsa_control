@@ -1,7 +1,7 @@
 {
   "name": "Control de Obra - Sistema de Gestión",
   "short_name": "Control Obra",
-  "description": "Sistema de control de gastos y gestión de obra 100% offline. v2.8.4. Personalizable para cualquier empresa.",
+  "description": "Sistema de control de gastos y gestión de obra 100% offline. v2.8.5. Personalizable para cualquier empresa.",
   "start_url": "./index.html?source=pwa",
   "id": "./index.html",
   "display": "standalone",
