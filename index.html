@@ -4265,6 +4265,8 @@
                 console.log('DB guardada exitosamente en localStorage');
                 // Auto-respaldo a la nube (si está configurado), con debounce
                 scheduleNubeAuto();
+                // Auto-refresh del resumen si está activo
+                if (typeof _refreshResumenDebounced === 'function') _refreshResumenDebounced();
             } catch (e) {
                 console.error('Error al guardar DB:', e.message, e.stack);
                 if (e.name === 'QuotaExceededError') {
@@ -5029,43 +5031,43 @@
                     
                     // Crear barras con colores y etiquetas mejoradas
                     const colores = {
-                        'mano_de_obra': '#ef4444',
-                        'salarios': '#f97316',
-                        'epi': '#eab308',
-                        'alquiler_equipo': '#22c55e',
-                        'fletes': '#14b8a6',
-                        'viaticos': '#06b6d4',
-                        'energia': '#0ea5e9',
-                        'senalizacion': '#3b82f6',
-                        'demolicion': '#6366f1',
-                        'instalaciones': '#8b5cf6',
-                        'desechos': '#a855f7',
-                        'andamios': '#d946ef',
-                        'botiquin': '#ec4899',
-                        'vigilancia': '#f43f5e',
-                        'seguros': '#78716c',
-                        'lubricantes': '#71717a',
-                        'neumaticos': '#52525b',
-                        'laboratorio': '#3f3f46',
-                        'permisos': '#18181b',
-                        'impuestos': '#dc2626',
-                        'materiales': '#059669',
-                        'herramientas': '#0d9488',
-                        'combustible': '#0891b2',
-                        'mantenimiento': '#0c4a6e',
-                        'maquinaria': '#1e3a8a',
-                        'personal': '#1e40af',
-                        'viajes': '#312e81',
-                        'insumos': '#4c1d95',
-                        'otros': '#6b7280'
-                    };
-                    
-                    const barras = gastosConValor.map(([cat, monto]) => {
-                        const altura = (monto / maxGasto) * 100;
-                        const porcentaje = ((monto / totalGastos) * 100).toFixed(1);
-                        const color = colores[cat] || '#6b7280';
-                        const esAlerta = presupuesto > 0 && monto > presupuesto * 0.3;
-                        const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        'mano_de_obra': '#f87171',
+
+                        'salarios': '#fb923c',
+                        'epi': '#fbbf24',
+                        'alquiler_equipo': '#34d399',
+                        'fletes': '#2dd4bf',
+                        'viaticos': '#22d3ee',
+
+                        'energia': '#38bdf8',
+                        'senalizacion': '#60a5fa',
+                        'demolicion': '#818cf8',
+
+                        'instalaciones': '#a78bfa',
+                        'desechos': '#c084fc',
+
+                        'andamios': '#e879f9',
+                        'botiquin': '#f472b6',
+
+                        'vigilancia': '#fb7185',
+                        'seguros': '#a8a29e',
+                        'lubricantes': '#94a3b8',
+                        'neumaticos': '#cbd5e1',
+                        'laboratorio': '#67e8f9',
+                        'permisos': '#86efac',
+                        'impuestos': '#fca5a5',
+                        'materiales': '#6ee7b7',
+                        'herramientas': '#5eead4',
+                        'combustible': '#7dd3fc',
+
+                        'mantenimiento': '#93c5fd',
+                        'maquinaria': '#a5b4fc',
+                        'personal': '#6ee7b7',
+
+                        'viajes': '#c4b5fd',
+                        'insumos': '#f9a8d4',
+
+                        'otros': '#d1d5db'
                         
                         return `
                             <div class="css-chart-bar ${esAlerta ? 'alerta' : ''}" 
@@ -5078,17 +5080,17 @@
                     }).join('');
                     
                     const labels = gastosConValor.map(([cat, monto]) => {
+                    const labels = gastosConValor.map(([cat, monto]) => {
                         const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                         const porcentaje = ((monto / totalGastos) * 100).toFixed(1);
-                        return `
-                            <div style="text-align:center;font-size:10px;color:var(--texto-secundario);flex:1;padding:0 2px;">
-                                <div style="font-weight:600;color:var(--texto-principal);">${etiquetaCat.substring(0, 8)}</div>
-                                <div style="font-size:9px;">${porcentaje}%</div>
-                            </div>
-                        `;
+                        return `<div style="flex:1;padding:0 2px;text-align:center;"><div style="font-size:9px;color:var(--texto-principal);font-weight:600;writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;max-height:55px;overflow:hidden;"></div><div style="font-size:9px;color:var(--acento-cian);margin-top:2px;">%</div></div>`;
                     }).join('');
-                    
-                    graficoContainer.innerHTML = barras + `<div style="display:flex;margin-top:8px;gap:2px;">${labels}</div>`;
+
+
+
+
+
+
                 } else {
                     graficoContainer.innerHTML = '<div class="grafico-placeholder">No hay datos para este período</div>';
                 }
@@ -5208,7 +5210,7 @@
                 variacionEl.className = `metrica-value ${kpis.variacionMensual > 0 ? 'negativo' : 'positivo'}`;
             }
             
-            showToast('Dashboard actualizado correctamente', 'success');
+            // toast eliminado — la actualización es silenciosa en auto-refresh
             } catch (error) {
                 console.error('Error al actualizar dashboard:', error);
                 showToast('❌ [Dashboard] Error al actualizar dashboard', 'error');
@@ -5231,6 +5233,22 @@
                 observer.observe(resumenModule, { attributes: true, attributeFilter: ['class'] });
             }
         }
+
+        // Auto-refresh del resumen cuando el módulo está activo
+        const _refreshResumenDebounced = (function() {
+            let _t = null;
+            return function() {
+                if (_t) clearTimeout(_t);
+                _t = setTimeout(function() {
+                    _t = null;
+                    const resumen = document.getElementById('resumen');
+                    if (resumen && resumen.classList.contains('active')) {
+                        cargarResumen();
+                        actualizarDashboard();
+                    }
+                }, 300);
+            };
+        })();
 
         // ============================================================
         // SISTEMA DE NOTIFICACIONES PUSH
