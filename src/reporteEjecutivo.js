@@ -133,7 +133,8 @@
             var kpisEngine = globalScope.CR_KPIEngine.calcularKPIs(
                 datosProyecto,
                 { presupuestoInicial: num(cfg.presupuesto_inicial_caja || cfg.presupuesto) },
-                'mes'
+                'mes',
+                { inicio: opts.inicio, fin: opts.fin }
             );
             // Adaptar al formato de reporte ejecutivo (agrega porCategoria, porDia, alertas)
             return _enriquecerKPIsParaReporte(kpisEngine, db2, inicio, fin);

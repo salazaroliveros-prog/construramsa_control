@@ -199,10 +199,23 @@
      * @param {Date} fin
      * @returns {Array}
      */
+    const _normalizarFecha = (v) => {
+        if (v == null || v === '') return '';
+        if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
+        var d = new Date(v);
+        if (isNaN(d.getTime())) return String(v);
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var di = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + di;
+    };
+
     const _filtrarPorRango = (registros, campoFecha, inicio, fin) => {
+        const i = _normalizarFecha(inicio);
+        const f = _normalizarFecha(fin);
         return (registros || []).filter(r => {
-            const fecha = new Date(r[campoFecha]);
-            return fecha >= inicio && fecha <= fin;
+            const fecha = _normalizarFecha(r[campoFecha]);
+            return (!i || fecha >= i) && (!f || fecha <= f);
         });
     };
 
@@ -215,16 +228,19 @@
      * @param {string} [periodo='mes']
      * @returns {KPIs}
      */
-    const calcularKPIs = (datos, config, periodo = 'mes') => {
+    const calcularKPIs = (datos, config, periodo = 'mes', rango = {}) => {
         const db = datos || {};
         const fechaHoy = new Date();
         const { diasEnMes, diasTranscurridos, diasRestantes } = _ventanaPeriodo(periodo, fechaHoy);
         const { inicio: periodoInicio, fin: periodoFin } = _obtenerRangoPeriodo(periodo, fechaHoy);
+        const _inicio = rango.inicio || '';
+        const _fin = rango.fin || '';
 
         // ── Caja chica ────────────────────────────────────────────────────────
         const caja = db.caja_chica || [];
-        const totalIngresos = sumaTipo(caja, 'ingreso');
-        const totalEgresos = sumaTipo(caja, 'egreso');
+        const cajaPeriodo = _filtrarPorRango(caja, 'fecha', _inicio, _fin);
+        const totalIngresos = sumaTipo(cajaPeriodo, 'ingreso');
+        const totalEgresos = sumaTipo(cajaPeriodo, 'egreso');
 
         const presupuesto = (config && Number(config.presupuestoInicial)) || 0;
         const saldo = presupuesto + totalIngresos - totalEgresos;
@@ -256,15 +272,20 @@
 
         // ── Nómina ───────────────────────────────────────────────────────────
         const asist = (db.personal && db.personal.asistencia) || [];
-        const regsAsist = asist.flatMap(dia =>
-            (dia.registros || []).map(r => ({ ...r, fecha: dia.fecha }))
-        );
+        const regsAsist = asist
+            .filter(dia => {
+                const f = _normalizarFecha(dia.fecha);
+                return (!_inicio || f >= _inicio) && (!_fin || f <= _fin);
+            })
+            .flatMap(dia =>
+                (dia.registros || []).map(r => ({ ...r, fecha: dia.fecha }))
+            );
         const totalNomina = regsAsist.reduce(
             (s, r) => s + ((r.calculos && r.calculos.total_diario) || 0), 0
         );
 
         // ── Gastos del período para proyección y análisis ────────────────────
-        const movimientosPeriodo = _filtrarPorRango(caja, 'fecha', periodoInicio, periodoFin)
+        const movimientosPeriodo = _filtrarPorRango(caja, 'fecha', _inicio, _fin)
             .filter(m => m.tipo === 'egreso');
         const gastoPeriodo = movimientosPeriodo.reduce((s, m) => s + (Number(m.monto) || 0), 0);
         const gastoDiarioPromedio = diasTranscurridos > 0 ? gastoPeriodo / diasTranscurridos : 0;
@@ -288,7 +309,7 @@
         }
 
         // ── Eficiencia con datos del período ─────────────────────────────────
-        const viajesPeriodo = _filtrarPorRango(viajes, 'fecha', periodoInicio, periodoFin);
+        const viajesPeriodo = _filtrarPorRango(viajes, 'fecha', _inicio, _fin);
         const kmPeriodo = viajesPeriodo.reduce((s, v) => s + (v.km_total || 0), 0);
         const litrosPeriodo = viajesPeriodo.reduce((s, v) => s + (v.litros || 0), 0);
 
@@ -316,9 +337,9 @@
             totalIngresos,
             totalEgresos,
             saldo,
-            movimientosIngreso: cuentaTipo(caja, 'ingreso'),
-            movimientosEgreso: cuentaTipo(caja, 'egreso'),
-            totalViajes: viajes.length,
+            movimientosIngreso: cuentaTipo(cajaPeriodo, 'ingreso'),
+            movimientosEgreso: cuentaTipo(cajaPeriodo, 'egreso'),
+            totalViajes: viajesPeriodo.length,
             viajesPropios,
             viajesAlquilados: viajesAlq,
             totalKm,
@@ -335,8 +356,8 @@
             eficienciaCombustible,
             gastosPorCategoria: gastosPorCategoriaPeriodo,
             gastoPeriodo,
-            periodoInicio,
-            periodoFin
+            periodoInicio: _inicio ? new Date(_inicio) : periodoInicio,
+            periodoFin: _fin ? new Date(_fin) : periodoFin
         };
     };
 

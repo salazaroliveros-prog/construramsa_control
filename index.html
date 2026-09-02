@@ -4288,10 +4288,10 @@
                         </div>
                         <!-- Línea de firma -->
                         <div style="border-top: 1.5px solid #374151; width: 88%; margin: 0 auto; padding-top: 7px;">
-                            <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
+                            <div id="pdf-nombre-jefe-proyectos" style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
                                 Arq. Wilson Dario Salazar
                             </div>
-                            <div style="font-size: 8px; color: var(--pdf-azul-oscuro); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <div id="pdf-cargo-jefe-proyectos" style="font-size: 8px; color: var(--pdf-azul-oscuro); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                                 Jefe de Proyectos
                             </div>
                         </div>
@@ -4302,13 +4302,13 @@
                         <!-- Espacio vacío para firma manuscrita -->
                         <div style="height: 60px; border-bottom: 1.5px solid #374151; width: 88%; margin: 0 auto;"></div>
                         <div style="width: 88%; margin: 0 auto; padding-top: 7px;">
-                            <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
+                            <div id="pdf-nombre-visto-bueno" style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
                                 &nbsp;
                             </div>
-                            <div style="font-size: 9.5px; font-weight: 800; color: var(--pdf-gris-oscuro); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px;">
+                            <div id="pdf-cargo-visto-bueno" style="font-size: 9.5px; font-weight: 800; color: var(--pdf-gris-oscuro); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px;">
                                 V°B° — Visto Bueno
                             </div>
-                            <div style="font-size: 8px; color: var(--pdf-gris-medio); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <div id="pdf-rol-visto-bueno" style="font-size: 8px; color: var(--pdf-gris-medio); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px;">
                                 Encargado de Obra
                             </div>
                         </div>
@@ -4322,10 +4322,10 @@
                             </div>
                         </div>
                         <div style="border-top: 1.5px solid #374151; width: 88%; margin: 0 auto; padding-top: 7px;">
-                            <div style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
+                            <div id="pdf-nombre-gerente-comercial" style="font-size: 10.5px; font-weight: 700; color: #111827; line-height: 1.4;">
                                 Ing. Juan Luis Ramirez Jimenez
                             </div>
-                            <div style="font-size: 8px; color: var(--pdf-azul-oscuro); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <div id="pdf-cargo-gerente-comercial" style="font-size: 8px; color: var(--pdf-azul-oscuro); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                                 Gerente Comercial
                             </div>
                         </div>
@@ -9746,7 +9746,7 @@ tbody.innerHTML = '';
                 
                 // Usar el motor de KPIs para obtener métricas ejecutivas
                 const kpis = typeof CR_KPIEngine !== 'undefined' && CR_KPIEngine.calcularKPIs
-                    ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: getPresupuestoActual() }, 'mes')
+                    ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: getPresupuestoActual() }, 'mes', { inicio: rango.inicio, fin: rango.fin })
                     : null;
                 
                 if (kpis) {
@@ -10273,12 +10273,46 @@ tbody.innerHTML = '';
                 logo.src = './icon.png';
             }
 
-            // ── Firmas: placeholders por defecto (configurable por usuario) ──
-            const firma1 = document.getElementById('pdf-firma-jefe-proyectos');
-            const firma2 = document.getElementById('pdf-firma-gerente-comercial');
-            // Firmas por defecto como texto placeholder
-            if (firma1) firma1.textContent = 'Firma Jefe de Proyectos';
-            if (firma2) firma2.textContent = 'Firma Gerente Comercial';
+            // ── Firmas: renderizar desde configuracion.firmas si está disponible ──
+            const firmas = (cfg.firmas || (typeof CR_CONFIG !== 'undefined' && CR_CONFIG.PLANTILLA_CORPORATIVA ? CR_CONFIG.PLANTILLA_CORPORATIVA.firmasAutorizadas : null) || [
+                { nombre: 'Arq. Wilson Dario Salazar', cargo: 'Jefe de Proyectos' },
+                { nombre: 'Ing. Juan Luis Ramirez Jimenez', cargo: 'Gerente Comercial' }
+            ]);
+
+            const matchFirma = (cargoRegex) => {
+                const found = firmas.find(f => cargoRegex.test(String(f.cargo || '')));
+                return found || null;
+            };
+
+            const firmaJefe = matchFirma(/jefe.*proyecto/i) || firmas[0] || { nombre: '', cargo: '' };
+            const firmaGerente = matchFirma(/gerente.*comercial/i) || firmas[1] || { nombre: '', cargo: '' };
+            const firmaVistoBueno = matchFirma(/visto.*bueno|encargado.*obra/i) || firmas[2] || null;
+
+            const aplicarFirma = (containerId, nombreId, cargoId, firma) => {
+                const cont = document.getElementById(containerId);
+                if (!cont) return;
+                if (firma.imagen_base64 && firma.imagen_base64.startsWith('data:image')) {
+                    cont.innerHTML = '<img src="' + firma.imagen_base64 + '" style="max-height:58px;max-width:140px;">';
+                } else {
+                    cont.textContent = firma.nombre || '';
+                }
+                const nEl = document.getElementById(nombreId);
+                const cEl = document.getElementById(cargoId);
+                if (nEl) nEl.textContent = firma.nombre || '';
+                if (cEl) cEl.textContent = firma.cargo || '';
+            };
+
+            aplicarFirma('pdf-firma-jefe-proyectos', 'pdf-nombre-jefe-proyectos', 'pdf-cargo-jefe-proyectos', firmaJefe);
+            aplicarFirma('pdf-firma-gerente-comercial', 'pdf-nombre-gerente-comercial', 'pdf-cargo-gerente-comercial', firmaGerente);
+
+            if (firmaVistoBueno) {
+                const nVisto = document.getElementById('pdf-nombre-visto-bueno');
+                const cVisto = document.getElementById('pdf-cargo-visto-bueno');
+                const rVisto = document.getElementById('pdf-rol-visto-bueno');
+                if (nVisto) nVisto.textContent = firmaVistoBueno.nombre || '';
+                if (cVisto) cVisto.textContent = firmaVistoBueno.cargo || '';
+                if (rVisto) rVisto.textContent = firmaVistoBueno.cargo || '';
+            }
 
             // ── Datos de contacto: desde configuración si están guardados ──
             const telEmail = cfg.telefono && cfg.email
@@ -10300,7 +10334,7 @@ tbody.innerHTML = '';
             // ── Contenido dinámico: limpiar antes de insertar (sanitizar XSS) ──
             const contenidoEl = document.getElementById('pdf-contenido-dinamico');
             contenidoEl.innerHTML = '';
-            contenidoEl.innerHTML = DOMPurify.sanitize(htmlData, {USE_PROFILES: {html: true}});
+            contenidoEl.innerHTML = DOMPurify.sanitize(htmlData, {USE_PROFILES: {html: true}, ADD_TAGS: ['style']});
 
             return document.getElementById('plantilla-reporte-impresion');
         }
@@ -10722,7 +10756,7 @@ function validarDependenciasExportacion() {
                 esloganEmpresa: cfg.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA'
             });
 
-            document.getElementById('vp-plantilla-preview').innerHTML = DOMPurify.sanitize(htmlPreview, {USE_PROFILES: {html: true}});
+            document.getElementById('vp-plantilla-preview').innerHTML = DOMPurify.sanitize(htmlPreview, {USE_PROFILES: {html: true}, ADD_TAGS: ['style']});
         }
 
         /** Lee los campos del editor y devuelve un objeto portada. */
