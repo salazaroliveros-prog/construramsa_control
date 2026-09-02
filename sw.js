@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
     './src/reporteEjecutivo.js',
     './src/signatureCapture.js',
     './src/nominaEngine.js',
+    './src/plantillaPremium.js',
     './src/backgroundSync.js',
     './src/syncOptimizer.js',
     './src/silentDownload.js',
