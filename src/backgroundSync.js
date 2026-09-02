@@ -42,17 +42,31 @@
     }
 
     /**
-     * Calcula hash simple de JSON para detectar cambios
+     * Calcula hash SHA-256 del JSON para detectar cambios de forma fiable.
+     * (Sustituye al hash de 32 bits anterior, que tenía alta tasa de
+     * colisiones y podía saltar sincronizaciones legítimas.)
      */
-    function simpleHash(obj) {
+    async function simpleHash(obj) {
+        try {
+            const str = JSON.stringify(obj);
+            if (self.crypto && self.crypto.subtle) {
+                const buf = await self.crypto.subtle.digest(
+                    'SHA-256',
+                    new TextEncoder().encode(str)
+                );
+                return Array.from(new Uint8Array(buf))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
+            }
+        } catch (e) { /* fallback abajo */ }
+        // Fallback (entornos sin SubtleCrypto): hash 32-bit.
         const str = JSON.stringify(obj);
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash = hash & hash;
         }
-        return hash;
+        return String(hash);
     }
 
     /**
@@ -109,7 +123,7 @@
 
             // Fase 1: Intentar subir cambios locales
             log('📤 Fase 1: Verificando cambios locales...');
-            const localHash = simpleHash(typeof getDB === 'function' ? getDB() : {});
+            const localHash = await simpleHash(typeof getDB === 'function' ? getDB() : {});
 
             if (_lastSyncHash === null || _lastSyncHash !== localHash) {
                 log('📊 Cambios locales detectados', {
@@ -135,7 +149,7 @@
                 const remoteData = await onedriveDescargarSilencioso();
                 
                 if (remoteData) {
-                    const remoteHash = simpleHash(remoteData);
+                    const remoteHash = await simpleHash(remoteData);
                     
                     if (_lastSyncHash === null || remoteHash !== localHash) {
                         log('📊 Cambios remotos detectados', {

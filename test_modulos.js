@@ -19,7 +19,7 @@ const check = (name, cond) => {
 };
 
 /* ── Configuración centralizada ───────────────────────────────────── */
-check('cfg.version = 2.9.0', cfg.APP_VERSION === '2.9.0');
+check('cfg.version = 2.9.1', cfg.APP_VERSION === '2.9.1');
 check('cfg.moneda = Q', cfg.APP_CONFIG.moneda === 'Q');
 check('cfg.APP_CONFIG congelado', Object.isFrozen(cfg.APP_CONFIG));
 check('cfg.dbKey', cfg.APP_CONFIG.dbKey === 'construramsa_db');

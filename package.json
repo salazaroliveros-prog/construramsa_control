@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "npm run audit && npm run test:smoke && npm run test:modulos && npm run test:crud && npm run test:reportes && npm run test:reportes:validation",
+
     "test:smoke": "node test_smoke.js",
     "test:crud": "node test_crud.js",
     "test:automatizado": "node tests-automatizados.js",
@@ -40,9 +41,5 @@
   "devDependencies": {
     "playwright": "^1.62.1",
     "playwright-core": "^1.62.1"
-  },
-  "dependencies": {
-    "claude": "^0.1.1",
-    "cli": "^1.0.1"
   }
 }

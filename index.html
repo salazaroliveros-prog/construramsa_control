@@ -4400,6 +4400,28 @@
             }
         }
 
+        /**
+         * Sanitiza la BD antes de subirla a la nube: elimina credenciales
+         * OAuth (secret, access/refresh tokens) para que nunca salgan del
+         * dispositivo ni queden almacenadas en el respaldo remoto.
+         */
+        function _nubeSanitizarPayload(db) {
+            try {
+                const clone = JSON.parse(JSON.stringify(db));
+                const n = clone && clone.configuracion && clone.configuracion.nube;
+                if (n) {
+                    delete n.od_secret;
+                    delete n.od_refresh_token;
+                    delete n.od_token;
+                    delete n.gd_token;
+                }
+                return clone;
+            } catch (e) {
+                console.warn('[nube] No se pudo sanitizar el payload:', e);
+                return db;
+            }
+        }
+
         function saveDB(db) {
             try {
                 _dbCache = db;
@@ -4612,6 +4634,14 @@
         const REGISTROS_POR_PAGINA = 20;
         const estadoPaginacion = {};
 
+        // ── Helper XSS: asignar HTML solo vía DOMPurify (si está disponible) ──
+        function safeSetHTML(el, html) {
+            if (!el) return;
+            el.innerHTML = (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function')
+                ? window.DOMPurify.sanitize(html, { RETURN_TRUSTED_TYPE: false })
+                : html;
+        }
+
         function renderPaginacion(containerId, total, paginaActual, onCambio) {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -4621,7 +4651,7 @@
             html += `<button class="btn-secundario" onclick="${onCambio}(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''} aria-label="Página anterior">◀</button>`;
             html += `<span class="paginacion-info">Página ${paginaActual} de ${totalPaginas} (${total} registros)</span>`;
             html += `<button class="btn-secundario" onclick="${onCambio}(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''} aria-label="Página siguiente">▶</button>`;
-            container.innerHTML = html;
+            safeSetHTML(container, html);
         }
 
         // ============================================================
@@ -7778,7 +7808,7 @@ pag_.forEach(c => {
             if (!c.url) { if (!auto) { _nubeSetEstado('⚠️ Configura la URL del Web App primero', false); showToast('⚠️ Sin URL de Web App', 'info'); } return; }
             try {
                 if (!auto) { _nubeSetEstado('⬆️ Subiendo a Google Drive...'); showLoading('Subiendo respaldo a la nube...'); }
-                const body = JSON.stringify({ data: db });
+                const body = JSON.stringify({ data: _nubeSanitizarPayload(db) });
                 const res = await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 // Persistir timestamp SIN pasar por saveDB (evita bucle de auto-sync)

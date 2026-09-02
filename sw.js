@@ -100,11 +100,17 @@ self.addEventListener('fetch', function (event) {
     event.respondWith(
         fetch(event.request)
             .then(function (response) {
+                // Solo cachear respuestas same-origin 'basic' con estado 200.
+                // Las 'opaque' (cross-origin) pueden ser errores opacos no
+                // inspeccionables y llenarían la cuota de almacenamiento.
                 if (!response || response.status !== 200) return response;
-                if (response.type !== 'basic' && response.type !== 'opaque') return response;
+                if (response.type !== 'basic') return response;
 
                 const clone = response.clone();
-                caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+                caches.open(CACHE_NAME).then(c => {
+                    c.put(event.request, clone);
+                    limitarCache(c);
+                });
                 return response;
             })
             .catch(function () {
@@ -116,6 +122,20 @@ self.addEventListener('fetch', function (event) {
             })
     );
 });
+
+// ── Límite de entradas en caché (LRU aproximado, FIFO) ───────
+const MAX_CACHE_ENTRIES = 200;
+async function limitarCache(cache) {
+    try {
+        const keys = await cache.keys();
+        if (keys.length <= MAX_CACHE_ENTRIES) return;
+        // Elimina las más antiguas primero (orden de inserción).
+        const exceso = keys.length - MAX_CACHE_ENTRIES;
+        for (let i = 0; i < exceso; i++) {
+            await cache.delete(keys[i]);
+        }
+    } catch (e) { /* no bloquear la respuesta por un fallo de limpieza */ }
+}
 
 // ── Mensajes ─────────────────────────────────────────────────
 self.addEventListener('message', function (event) {
