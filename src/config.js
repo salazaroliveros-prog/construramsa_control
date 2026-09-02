@@ -28,7 +28,7 @@
      *   - construramsa_db.json → db.version
      * @type {string}
      */
-    const APP_VERSION = '2.8.6';
+    const APP_VERSION = '2.9.0';
 
     /**
      * Clave en localStorage donde se persiste la base de datos.

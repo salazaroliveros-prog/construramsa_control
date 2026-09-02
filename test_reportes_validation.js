@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.6 — Validación de Contenido de Reportes
+ * CONSTRURAMSA v2.9.0 — Validación de Contenido de Reportes
  * Prueba: Verifica que los archivos generados contengan el contenido correcto
  */
 const { chromium } = require('playwright');

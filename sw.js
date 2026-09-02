@@ -1,9 +1,9 @@
 // ============================================================
-// SERVICE WORKER — Control de Obra v2.8.6
+// SERVICE WORKER — Control de Obra v2.9.0
 // Estrategia: Network First con fallback a Cache
 // ============================================================
 
-const CACHE_NAME = 'control-obra-v2.8.6';
+const CACHE_NAME = 'control-obra-v2.9.0';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -23,6 +23,10 @@ const STATIC_ASSETS = [
     './src/exportador.js',
     './src/reporteEjecutivo.js',
     './src/signatureCapture.js',
+    './src/nominaEngine.js',
+    './src/backgroundSync.js',
+    './src/syncOptimizer.js',
+    './src/silentDownload.js',
     './splash-640x1136.png',
     './splash-750x1334.png',
     './splash-1125x2436.png',

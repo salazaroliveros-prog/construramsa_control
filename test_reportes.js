@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.6 — Test Suite de Reportes
+ * CONSTRURAMSA v2.9.0 — Test Suite de Reportes
  * Prueba: Generación y validación de todos los tipos de reportes en todos los formatos
  */
 const { chromium } = require('playwright');

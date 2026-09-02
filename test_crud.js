@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.6 — Test CRUD completo
+ * CONSTRURAMSA v2.9.0 — Test CRUD completo
  * Prueba: Crear, Leer, Modificar y Eliminar en todos los módulos
  * IDs verificados directamente desde index.html
  */

@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.6 — Test Unitario de Módulos src/
+ * CONSTRURAMSA v2.9.0 — Test Unitario de Módulos src/
  * Cubre la configuración centralizada (CR_CONFIG), el módulo de exportación
  * (CR_Export), el motor de KPIs (CR_KPIEngine) y el reporte ejecutivo
  * (CR_ReporteEjecutivo): moneda, paleta, firmas, sanitización CSV anti-inyección,
@@ -19,7 +19,7 @@ const check = (name, cond) => {
 };
 
 /* ── Configuración centralizada ───────────────────────────────────── */
-check('cfg.version = 2.8.6', cfg.APP_VERSION === '2.8.6');
+check('cfg.version = 2.9.0', cfg.APP_VERSION === '2.9.0');
 check('cfg.moneda = Q', cfg.APP_CONFIG.moneda === 'Q');
 check('cfg.APP_CONFIG congelado', Object.isFrozen(cfg.APP_CONFIG));
 check('cfg.dbKey', cfg.APP_CONFIG.dbKey === 'construramsa_db');

@@ -87,6 +87,7 @@
     <script src="./src/exportador.js"></script>
     <script src="./src/kpiEngine.js"></script>
     <script src="./src/reporteEjecutivo.js"></script>
+    <script src="./src/nominaEngine.js"></script>
     <script src="./src/signatureCapture.js"></script>
     <style>
         :root {
@@ -374,10 +375,10 @@
             backdrop-filter: blur(22px) saturate(150%);
             border: 1px solid rgba(255,255,255,0.08);
             border-top-color: rgba(255,255,255,0.14);
-            border-radius: 18px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 16px 18px;
             box-shadow:
-                0 10px 28px -10px rgba(0, 0, 0, 0.6),
+                0 8px 24px -10px rgba(0, 0, 0, 0.6),
                 inset 0 1px 0 rgba(255, 255, 255, 0.08),
                 inset 0 0 22px rgba(0, 164, 228, 0.08);
             transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
@@ -649,10 +650,10 @@
 
         .nav-tabs {
             display: flex;
-            gap: 8px;
-            margin-bottom: 22px;
-            padding: 6px;
-            border-radius: 14px;
+            gap: 6px;
+            margin-bottom: 16px;
+            padding: 5px;
+            border-radius: 12px;
             background: rgba(9, 12, 18, 0.56);
             border: 1px solid rgba(255,255,255,0.08);
             overflow-x: auto;
@@ -741,7 +742,7 @@
             width: 100%;
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px 20px;
             box-sizing: border-box;
             /* Sin touch-action para permitir scroll nativo completo */
         }
@@ -771,25 +772,57 @@
             }
         }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
         table td, table th { font-variant-numeric: tabular-nums; }
 
         th {
             background: linear-gradient(135deg, rgba(11, 63, 143, 0.45), rgba(0, 164, 228, 0.25));
             color: var(--acento-cian);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            padding: 12px;
+            letter-spacing: 0.4px;
+            padding: 9px 10px;
             text-align: left;
             border-bottom: 1px solid var(--glass-border);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
 
         td {
-            padding: 12px;
+            padding: 9px 10px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 13px;
+            vertical-align: middle;
         }
+
+        /* Columna de acciones: fija a la derecha en pantallas grandes */
+        td.actions-cell, th.actions-cell {
+            white-space: nowrap;
+            text-align: right;
+            width: 1%;
+        }
+
+        /* Montos alineados a la derecha */
+        td.col-monto, th.col-monto {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Badge de estado */
+        .estado-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .estado-badge.asistio { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+        .estado-badge.falto   { background: rgba(239,68,68,0.15);   color: #f87171; border: 1px solid rgba(239,68,68,0.3);   }
+        .estado-badge.justificado { background: rgba(156,163,175,0.15); color: #9ca3af; border: 1px solid rgba(156,163,175,0.3); }
 
         tr:hover td { background: rgba(255,255,255,0.02); }
 
@@ -824,8 +857,8 @@
             font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
             color: #111827;
             background: #ffffff;
-            /* Padding optimizado para máximo uso de espacio */
-            padding: 8mm 12mm 10mm 12mm;
+            /* MEJORA PDF v2.9.1: Márgenes uniformes 12mm (ANALISIS_MODULO_REPORTES.md) */
+            padding: 12mm;
             box-sizing: border-box;
             opacity: 0;
             pointer-events: none;
@@ -936,6 +969,15 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             table-layout: fixed;
             word-break: break-word;
+        }
+        /* MEJORA PDF v2.9.1: thead se repite en cada página impresa */
+        #plantilla-reporte-impresion table.tabla-pdf thead {
+            display: table-header-group;
+        }
+        /* MEJORA PDF v2.9.1: evitar que una fila se corte entre páginas */
+        #plantilla-reporte-impresion table.tabla-pdf tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         #plantilla-reporte-impresion table.tabla-pdf th {
             background: linear-gradient(180deg, var(--pdf-azul-oscuro) 0%, var(--pdf-azul-claro) 100%);
@@ -1843,10 +1885,10 @@
 
         /* FIX secciones internas de módulos: contenedores sin desborde */
         .modulo-seccion {
-            margin-bottom: 25px;
-            padding: 20px;
+            margin-bottom: 18px;
+            padding: 16px;
             background: rgba(255,255,255,0.02);
-            border-radius: 12px;
+            border-radius: 10px;
             border: 1px solid var(--glass-border);
             overflow: visible;
         }
@@ -2319,9 +2361,9 @@
         /* ═══ RESULTADOS / DASHBOARD ═══ */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 14px;
-            margin-bottom: 22px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 18px;
         }
         .kpi-card {
             position: relative;
@@ -2330,14 +2372,14 @@
             backdrop-filter: blur(14px) saturate(150%);
             border: 1px solid rgba(255,255,255,0.08);
             border-top-color: rgba(51, 210, 255, 0.45);
-            border-radius: 14px;
-            padding: 16px 14px;
+            border-radius: 12px;
+            padding: 12px 12px;
             text-align: left;
-            min-height: 104px;
+            min-height: 90px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.07);
+            box-shadow: 0 6px 20px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.07);
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
         .kpi-card::after {
@@ -3733,6 +3775,7 @@
                         <option value="mensual">Reporte Mensual Consolidado</option>
                         <option value="categoria">Reporte por Categoría de Gastos</option>
                         <option value="asistencia">Reporte de Asistencia y Horas Extra</option>
+                        <option value="nomina">Reporte de Nómina Consolidada</option>
                         <option value="viajes">Reporte de Viajes de Camiones</option>
                         <option value="mantenimiento">Reporte de Mantenimiento e Insumos</option>
                         <option value="ejecutivo">Resumen Ejecutivo (KPIs Gerenciales)</option>
@@ -4093,7 +4136,7 @@
             <div>
                 <h3 class="historial-titulo">ℹ️ Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.8.6 (Sistema de actualizaciones mejorado: detección automática de versiones desde Vercel)<br>
+                    Versión: 2.9.0 (Refactorización Clean Code: KPIs por etiqueta, filtro de rango en asistencia, UI/UX optimizado — densidad de tablas y whitespace mejorados)<br>
                     Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV<br>
                     Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
@@ -4389,7 +4432,7 @@
         }
 
         function migrarDB(db) {
-            if (!db.version) db.version = '2.8.6';
+            if (!db.version) db.version = '2.9.0';
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
             if (!db.configuracion.nombre_empresa) db.configuracion.nombre_empresa = 'CONSTRURAMSA';
             if (!db.configuracion.eslogan) db.configuracion.eslogan = 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
@@ -4431,7 +4474,7 @@
 
         function inicializarDB() {
             const db = {
-                version: '2.8.6',
+                version: '2.9.0',
                 configuracion: { 
                     nombre_empresa:'CONSTRURAMSA', 
                     eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', 
@@ -9335,6 +9378,7 @@ tbody.innerHTML = '';
                 mensual: '📅 Reporte mensual completo con todos los gastos operativos, viajes, mantenimiento y nómina del mes seleccionado.',
                 categoria: '📈 Análisis detallado de gastos por categoría, mostrando distribución porcentual y totales acumulados.',
                 asistencia: '👷 Reporte de asistencia del personal con horas trabajadas, horas extra y cálculos de nómina.',
+                nomina: '💰 Nómina consolidada por trabajador: días asistidos, faltas, horas extra y total a pagar. Genera PDF profesional, CSV y XLSX.',
                 viajes: '🚛 Registro de viajes de camiones con kilómetros recorridos, consumo de combustible y costos de alquiler.',
                 mantenimiento: '🔧 Historial de órdenes de mantenimiento y compras de insumos con costos detallados.',
                 ejecutivo: '📊 Resumen gerencial con KPIs clave, métricas de eficiencia y proyecciones de gasto.'
@@ -9554,9 +9598,13 @@ tbody.innerHTML = '';
                 csv += `# \n`;
                 csv += `Fecha,Trabajador,Puesto,Estado,Horas Extra,Sueldo Diario (Q)\n`;
                 let total = 0;
-                const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
+                // BUG FIX v2.9.0: filtrar días por rango antes de expandir registros,
+                // para que el detalle de asistencia solo incluya el período seleccionado.
+                const regs = (datos.personal.asistencia||[])
+                    .filter(dia => enRango(dia.fecha))
+                    .flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
                 if (regs.length === 0) {
-                    csv += `"SIN REGISTROS DE ASISTENCIA",,,,,\n`;
+                    csv += `"SIN REGISTROS DE ASISTENCIA EN EL PERIODO",,,,,\n`;
                 } else {
                     regs.forEach(reg => {
                         const t = datos.personal.trabajadores.find(t => t.id === reg.trabajador_id);
@@ -9687,6 +9735,51 @@ tbody.innerHTML = '';
                     }
                 } else {
                     csv += `"Error: Motor de KPIs no disponible",,,\n`;
+                }
+            }
+
+            // ── Reporte de Nómina Consolidada ──────────────────────────────────
+            if (tipo === 'nomina') {
+                const fechaNom = rango.inicio || new Date().toISOString().slice(0, 10);
+                const rangNom = rango.fin || fechaNom;
+                csv += `${csvRow(['Reporte de Nómina Consolidada - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `# Período: ${periodoDisplay}\n`;
+                csv += `# Fecha de generación: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
+
+                if (typeof CR_NominaEngine === 'undefined' || !CR_NominaEngine.calcularNomina) {
+                    csv += `"ERROR: Motor de nómina (CR_NominaEngine) no disponible",,,,,,\n`;
+                } else {
+                    const personal = datos.personal || {};
+                    const nomina = CR_NominaEngine.calcularNomina(
+                        personal.trabajadores || [],
+                        personal.asistencia   || [],
+                        fechaNom,
+                        rangNom
+                    );
+
+                    csv += `Trabajador,Puesto,Pago/Hora Normal (Q),Pago/Hora Extra (Q),Días Asistidos,Días Falta,Días Justif.,Horas Extra,Pago Normal (Q),Pago Extra (Q),Total a Pagar (Q)\n`;
+
+                    if (nomina.trabajadores.length === 0) {
+                        csv += `"SIN REGISTROS DE PERSONAL EN EL PERÍODO",,,,,,,,,\n`;
+                    } else {
+                        nomina.trabajadores.forEach(t => {
+                            csv += `${csvRow([
+                                t.nombre, t.puesto,
+                                numToF(t.pagoHoraNormal), numToF(t.pagoHoraExtra),
+                                t.diasAsistidos, t.diasFalta, t.diasJustificados,
+                                numToF(t.horasExtra),
+                                numToF(t.pagoNormal), numToF(t.pagoExtra),
+                                numToF(t.totalPagar)
+                            ])}\n`;
+                        });
+                        csv += `\n`;
+                        csv += `${csvRow(['TOTALES', '', '', '',
+                            nomina.totalDiasAsistidos, nomina.totalDiasFalta, '',
+                            numToF(nomina.totalHorasExtra), '', '',
+                            numToF(nomina.totalPagable)])}\n`;
+                        csv += `# \n# Trabajadores: ${nomina.cantidadTrabajadores}\n`;
+                        csv += `# Total a pagar: Q${nomina.totalPagable.toFixed(2)}\n`;
+                    }
                 }
             }
 
@@ -9879,9 +9972,12 @@ tbody.innerHTML = '';
                 html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:18px 0 8px 0;">Detalle de asistencia por fecha</h3>`;
                 html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:28%"><col style="width:22%"><col style="width:14%"><col style="width:10%"><col style="width:14%"></colgroup><thead><tr><th>Fecha</th><th>Trabajador</th><th>Puesto</th><th>Estado</th><th>H. Extra</th><th style="text-align:right;">Sueldo (Q)</th></tr></thead><tbody>`;
                 let totalNomina = 0;
-                const regs = (datos.personal.asistencia||[]).flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
+                // BUG FIX v2.9.0: filtrar días por rango antes de expandir registros.
+                const regs = (datos.personal.asistencia||[])
+                    .filter(dia => enRango(dia.fecha))
+                    .flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
                 if (regs.length === 0) {
-                    html += `<tr><td colspan="6" style="text-align:center;color:#6B7280;padding:20px;">Sin registros de asistencia</td></tr>`;
+                    html += `<tr><td colspan="6" style="text-align:center;color:#6B7280;padding:20px;">Sin registros de asistencia en este período</td></tr>`;
                 } else {
                     regs.forEach(reg => {
                         const t = datos.personal.trabajadores.find(t => t.id === reg.trabajador_id);
@@ -9897,6 +9993,75 @@ tbody.innerHTML = '';
                 }
                 html += `<tr><td colspan="5" style="text-align:right;font-weight:bold;">TOTAL NÓMINA:</td><td class="total-destacado">${formatearMoneda(totalNomina)}</td></tr>`;
                 html += `</tbody></table>`;
+            } else if (tipo === 'nomina') {
+                // ── Reporte de Nómina Consolidada (usa CR_NominaEngine) ──────────
+                const cfg2 = db.configuracion || {};
+                const empresa2 = cfg2.nombre_empresa || 'CONSTRURAMSA';
+                const periodoTextoNom = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
+                const fechaGenNom = new Date().toLocaleDateString('es-GT', { day:'2-digit', month:'long', year:'numeric' });
+                const horaGenNom  = new Date().toLocaleTimeString('es-GT', { hour:'2-digit', minute:'2-digit' });
+
+                html += renderizarCabeceraPagina('Reporte de Nómina Consolidada', periodoTextoNom, '1');
+                html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">💰 Nómina Consolidada por Trabajador</h2>`;
+                html += `<p style="color:#6B7280;margin-bottom:16px;">Período: <strong>${_esc(periodoTextoNom)}</strong> | Proyecto: <strong>${_esc(proyNombre)}</strong> | Generado: ${_esc(fechaGenNom)} ${_esc(horaGenNom)}</p>`;
+
+                if (typeof CR_NominaEngine === 'undefined' || !CR_NominaEngine.calcularNomina) {
+                    html += `<div class="alert-box">⚠️ Motor de nómina (CR_NominaEngine) no disponible. Recarga la página.</div>`;
+                } else {
+                    const personal = datos.personal || {};
+                    const nomina = CR_NominaEngine.calcularNomina(
+                        personal.trabajadores || [],
+                        personal.asistencia   || [],
+                        rango.inicio, rango.fin
+                    );
+
+                    if (nomina.trabajadores.length === 0) {
+                        html += `<div class="info-box">📭 Sin registros de personal en el período seleccionado.</div>`;
+                    } else {
+                        // Tabla resumen por trabajador
+                        html += `<div class="info-box"><strong>Resumen de nómina:</strong> ${nomina.cantidadTrabajadores} trabajador(es) · ${nomina.totalDiasAsistidos} días asistidos · ${nomina.totalDiasFalta} faltas · ${nomina.totalHorasExtra.toFixed(1)}h extra · <strong style="color:#059669;">Total a pagar: ${formatearMoneda(nomina.totalPagable)}</strong></div>`;
+                        html += `<table class="tabla-pdf">`;
+                        html += `<colgroup><col style="width:22%"><col style="width:16%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:10%"></colgroup>`;
+                        html += `<thead><tr>`;
+                        html += `<th>Trabajador</th><th>Puesto</th>`;
+                        html += `<th style="text-align:center;">Asist.</th><th style="text-align:center;">Faltas</th><th style="text-align:center;">Justif.</th>`;
+                        html += `<th style="text-align:right;">H. Extra</th>`;
+                        html += `<th style="text-align:right;">P. Normal (Q)</th><th style="text-align:right;">P. Extra (Q)</th>`;
+                        html += `<th style="text-align:right;">Total (Q)</th>`;
+                        html += `</tr></thead><tbody>`;
+
+                        nomina.trabajadores.forEach(t => {
+                            html += `<tr>`;
+                            html += `<td style="font-weight:600;">${_esc(t.nombre)}</td>`;
+                            html += `<td style="color:#6B7280;">${_esc(t.puesto || '—')}</td>`;
+                            html += `<td style="text-align:center;color:#059669;font-weight:700;">${t.diasAsistidos}</td>`;
+                            html += `<td style="text-align:center;color:#DC2626;font-weight:700;">${t.diasFalta}</td>`;
+                            html += `<td style="text-align:center;color:#6B7280;">${t.diasJustificados}</td>`;
+                            html += `<td style="text-align:right;">${t.horasExtra.toFixed(1)}h</td>`;
+                            html += `<td style="text-align:right;">${formatearMoneda(t.pagoNormal)}</td>`;
+                            html += `<td style="text-align:right;">${formatearMoneda(t.pagoExtra)}</td>`;
+                            html += `<td style="text-align:right;font-weight:700;color:#004B93;">${formatearMoneda(t.totalPagar)}</td>`;
+                            html += `</tr>`;
+                        });
+
+                        html += `<tr>`;
+                        html += `<td colspan="2" style="text-align:right;font-weight:700;color:var(--pdf-azul-oscuro);">TOTALES</td>`;
+                        html += `<td style="text-align:center;font-weight:700;color:#059669;">${nomina.totalDiasAsistidos}</td>`;
+                        html += `<td style="text-align:center;font-weight:700;color:#DC2626;">${nomina.totalDiasFalta}</td>`;
+                        html += `<td></td>`;
+                        html += `<td style="text-align:right;font-weight:700;">${nomina.totalHorasExtra.toFixed(1)}h</td>`;
+                        html += `<td colspan="2"></td>`;
+                        html += `<td class="total-ingreso">${formatearMoneda(nomina.totalPagable)}</td>`;
+                        html += `</tr>`;
+                        html += `</tbody></table>`;
+
+                        // Footer con metadata de generación
+                        html += `<div style="margin-top:24px;padding-top:10px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;font-size:9px;color:#6B7280;">`;
+                        html += `<div>${_esc(empresa2)} — Nómina del período ${_esc(periodoTextoNom)}</div>`;
+                        html += `<div>Generado: ${_esc(fechaGenNom)} ${_esc(horaGenNom)}</div>`;
+                        html += `</div>`;
+                    }
+                }
             } else if (tipo === 'viajes') {
                 html += renderizarCabeceraPagina('Reporte de Viajes de Camiones', periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
@@ -10354,6 +10519,7 @@ function validarDependenciasExportacion() {
             mensual:       'Reporte Mensual Consolidado',
             categoria:     'Reporte por Categoría de Gastos',
             asistencia:    'Reporte de Asistencia y Horas Extra',
+            nomina:        'Reporte de Nómina Consolidada',
             viajes:        'Reporte de Viajes de Camiones',
             mantenimiento: 'Reporte de Mantenimiento e Insumos',
             ejecutivo:     'Resumen Ejecutivo (KPIs Gerenciales)'
@@ -10780,8 +10946,8 @@ function validarDependenciasExportacion() {
             }
         });
 
-        const APP_VERSION = '2.8.6';
-        // APP_VERSION_MARKER:2.8.6 (usado para detección de actualizaciones)
+        const APP_VERSION = '2.9.0';
+        // APP_VERSION_MARKER:2.9.0 (usado para detección de actualizaciones)
         const _scrollPositions = new Map();
         function guardarScrollModulo(mid) {
             const el = document.getElementById(mid);

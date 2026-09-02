@@ -82,17 +82,25 @@
         return fechaKey(m && m.fecha);
     }
 
-    // --- Paleta corporativa (constantes) ---
+    // --- Paleta corporativa (sincronizada con PALETA_CORPORATIVA de config.js) ---
+    // Usa los colores canónicos de CR_CONFIG.PALETA_CORPORATIVA cuando está disponible,
+    // con fallback a los valores definidos aquí para compatibilidad con Node/testing.
+    var _paleta = (typeof globalScope !== 'undefined' &&
+                   globalScope.CR_CONFIG &&
+                   globalScope.CR_CONFIG.PALETA_CORPORATIVA)
+        ? globalScope.CR_CONFIG.PALETA_CORPORATIVA
+        : null;
+
     var COLORES = Object.freeze({
-        primario: '#0f6fb5',
-        primarioOsc: '#0b4f82',
-        acento: '#1f9d55',
-        alerta: '#d33a2c',
-        tinta: '#1f2a36',
-        gris: '#5b6673',
-        lineas: '#dce3ea',
-        fondo: '#f4f7fa',
-        blanco: '#ffffff'
+        primario:    _paleta ? _paleta.primario   : '#004B93',   // Azul corporativo CONSTRURAMSA
+        primarioOsc: _paleta ? _paleta.primario   : '#004B93',
+        acento:      _paleta ? _paleta.secundario : '#00A4E4',   // Cian corporativo
+        alerta:      _paleta ? _paleta.rojo       : '#DC2626',
+        tinta:       _paleta ? _paleta.grisOscuro : '#374151',
+        gris:        _paleta ? _paleta.grisMedio  : '#6B7280',
+        lineas:      '#E5E7EB',
+        fondo:       _paleta ? _paleta.fondoClaro : '#F9FAFB',
+        blanco:      '#ffffff'
     });
 
     // ============================================================
@@ -175,13 +183,19 @@
         (Array.isArray((db2.viajes_camiones || {}).viajes) ? db2.viajes_camiones.viajes : [])
             .forEach(function (v) { if (v && enRango(fechaMov(v), inicio, fin)) viajesCount++; });
 
+        // Iteramos registros individuales dentro de cada día para contar
+        // trabajadores presentes/ausentes, no días completos de asistencia.
         var asistencia = { registros: 0, ausencias: 0 };
         (Array.isArray((db2.personal || {}).asistencia) ? db2.personal.asistencia : [])
-            .forEach(function (a) {
-                if (!a || !enRango(fechaMov(a), inicio, fin)) return;
-                asistencia.registros++;
-                var estado = String(a.estado || a.asistencia || '').toLowerCase();
-                if (estado.indexOf('aus') === 0 || estado === 'falta') asistencia.ausencias++;
+            .forEach(function (dia) {
+                if (!dia || !enRango(fechaMov(dia), inicio, fin)) return;
+                (Array.isArray(dia.registros) ? dia.registros : []).forEach(function (reg) {
+                    asistencia.registros++;
+                    var estado = String(reg.estado || '').toLowerCase();
+                    if (estado === 'falto' || estado === 'falta' || estado.indexOf('aus') === 0) {
+                        asistencia.ausencias++;
+                    }
+                });
             });
 
         var kpis = {
@@ -251,13 +265,18 @@
             .forEach(function (v) { if (v && enRango(fechaMov(v), inicio, fin)) kpis.viajes++; });
 
         (Array.isArray((db2.personal || {}).asistencia) ? db2.personal.asistencia : [])
-            .forEach(function (a) {
-                if (!a) return;
-                var key = fechaMov(a);
+            .forEach(function (dia) {
+                if (!dia) return;
+                var key = fechaMov(dia);
                 if (!enRango(key, inicio, fin)) return;
-                kpis.asistencia.registros++;
-                var estado = String(a.estado || a.asistencia || '').toLowerCase();
-                if (estado.indexOf('aus') === 0 || estado === 'falta') kpis.asistencia.ausencias++;
+                // Iterar registros individuales para contar trabajadores, no días.
+                (Array.isArray(dia.registros) ? dia.registros : []).forEach(function (reg) {
+                    kpis.asistencia.registros++;
+                    var estado = String(reg.estado || '').toLowerCase();
+                    if (estado === 'falto' || estado === 'falta' || estado.indexOf('aus') === 0) {
+                        kpis.asistencia.ausencias++;
+                    }
+                });
             });
 
         return _alertas(kpis, db2);
@@ -385,6 +404,7 @@
         var eslogan = esc((db && db.configuracion && db.configuracion.eslogan) || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA');
         var proyecto = esc(opts.proyecto || portada.proyecto || 'Proyecto');
         var fechaEmision = new Date().toLocaleDateString('es-GT', { day: '2-digit', month: 'long', year: 'numeric' });
+        var horaEmision  = new Date().toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' });
         var tipoLbl = esc(opts.tipo || 'ejecutivo');
 
         var kpiCards =
@@ -452,7 +472,14 @@
             + '<div style="font-size:13px;font-weight:600;color:' + COLORES.tinta + ';">' + esc(portada.responsable || 'Gerente de Proyecto') + '</div>'
             + '<div style="font-size:11px;color:' + COLORES.gris + ';">Firma y sello</div></div></div>'
             + '<div style="margin-top:16px;padding-top:12px;border-top:1px solid ' + COLORES.lineas + ';font-size:10px;color:' + COLORES.gris + ';text-align:center;">'
-            + 'Informe generado por CONSTRURAMSA · ' + empresa + ' · Documento confidencial de uso gerencial</div>';
+            + 'Informe generado por CONSTRURAMSA · ' + empresa + ' · Documento confidencial de uso gerencial</div>'
+            // ── Footer numerado (visible en pantalla; @page lo reemplaza en impresión/PDF) ──
+            + '<div class="ej-pdf-footer">'
+            + '<div class="ej-footer-left">' + empresa + ' — ' + eslogan
+            + '<br>' + proyecto + ' · ' + esc(rangoTxt) + '</div>'
+            + '<div class="ej-footer-right">Generado: ' + fechaEmision + ' ' + horaEmision
+            + '<br><span style="color:#004B93;font-weight:700;">Página 1</span></div>'
+            + '</div>';
     }
 
     function cardKPI(titulo, valor, sub, color) {
@@ -478,9 +505,12 @@
     }
 
     var CSS_CORPORATIVO =
-        '@page{margin:10mm 12mm;}'
+        '@page{margin:12mm;}'
+        + '@page{@bottom-left{content:"CONSTRURAMSA";font-size:8pt;color:#6B7280;}'
+        + '@bottom-center{content:"Generado el " attr(data-fecha-gen);font-size:8pt;color:#6B7280;}'
+        + '@bottom-right{content:counter(page) " / " counter(pages);font-size:8pt;color:#6B7280;}}'
         + '*{box-sizing:border-box;}'
-        + 'body{font-family:Arial,Helvetica,sans-serif;color:#1f2a36;margin:0;padding:0;font-size:10px;}'
+        + 'body{font-family:Arial,Helvetica,sans-serif;color:#374151;margin:0;padding:0;font-size:10px;}'
         + '.ej-cover{font-family:Arial,Helvetica,sans-serif;width:100%;max-width:100%;}'
         + '.ej-grid{display:flex;flex-wrap:wrap;gap:8px;width:100%;}'
         + '.ej-grid>div{flex:1 1 140px;min-width:120px;max-width:100%;}'
@@ -488,19 +518,25 @@
         + 'h2{page-break-after:avoid;break-after:avoid;font-size:13px;margin:0 0 10px;}'
         + 'h3{page-break-after:avoid;break-after:avoid;font-size:11px;margin:14px 0 8px;}'
         + 'table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9px;}'
-        + 'th{background:#0f6fb5;color:#fff;padding:6px 8px;text-align:left;font-size:8px;font-weight:700;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'
-        + 'td{padding:5px 8px;border:1px solid #dce3ea;vertical-align:middle;word-wrap:break-word;overflow-wrap:break-word;}'
-        + 'tr:nth-child(even){background:#f4f7fa;}'
+        + 'thead{display:table-header-group;}'
+        + 'th{background:#004B93;color:#fff;padding:7px 8px;text-align:left;font-size:8px;font-weight:700;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'
+        + 'td{padding:5px 8px;border:1px solid #E5E7EB;vertical-align:middle;word-wrap:break-word;overflow-wrap:break-word;}'
+        + 'tr:nth-child(even){background:#F9FAFB;}'
         + 'tr{page-break-inside:avoid;break-inside:avoid;}'
         + 'svg{max-width:100%;height:auto;}'
-        + '.ej-sin-datos{color:#5b6673;font-size:11px;padding:12px;background:#f4f7fa;border:1px dashed #dce3ea;border-radius:6px;text-align:center;}'
-        + '.ej-total-row td{font-weight:700;background:#eff6ff;border-top:2px solid #0f6fb5;}'
-        + '.ej-total-egreso{color:#d33a2c;background:#fef2f2;border-top:2px solid #d33a2c;}'
-        + '.ej-total-ingreso{color:#1f9d55;background:#ecfdf5;border-top:2px solid #1f9d55;}'
+        + '.ej-sin-datos{color:#6B7280;font-size:11px;padding:12px;background:#F9FAFB;border:1px dashed #E5E7EB;border-radius:6px;text-align:center;}'
+        + '.ej-total-row td{font-weight:700;background:#EFF6FF;border-top:2px solid #004B93;}'
+        + '.ej-total-egreso{color:#DC2626;background:#FEF2F2;border-top:2px solid #DC2626;}'
+        + '.ej-total-ingreso{color:#059669;background:#ECFDF5;border-top:2px solid #059669;}'
+        // Footer numerado visible dentro del HTML (complementa @page @bottom-*)
+        + '.ej-pdf-footer{margin-top:20px;padding-top:8px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#6B7280;}'
+        + '.ej-pdf-footer .ej-footer-left{text-align:left;}'
+        + '.ej-pdf-footer .ej-footer-right{text-align:right;}'
         + '@media print{'
         + '.ej-page-break{page-break-before:always;break-before:always;}'
         + '.ej-page-break:first-child{page-break-before:avoid;break-before:avoid;}'
         + 'svg{max-width:100% !important;}'
+        + '.ej-pdf-footer{display:none;}'   // @page ya numera — ocultamos el footer HTML en impresión
         + '}';
 
     // ============================================================
