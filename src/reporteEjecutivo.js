@@ -473,13 +473,15 @@
             + '<div style="font-size:11px;color:' + COLORES.gris + ';">Firma y sello</div></div></div>'
             + '<div style="margin-top:16px;padding-top:12px;border-top:1px solid ' + COLORES.lineas + ';font-size:10px;color:' + COLORES.gris + ';text-align:center;">'
             + 'Informe generado por CONSTRURAMSA · ' + empresa + ' · Documento confidencial de uso gerencial</div>'
-            // ── Footer numerado (visible en pantalla; @page lo reemplaza en impresión/PDF) ──
+            // ── Footer de metadata visible en el PDF generado por html2pdf ──
+            // (la numeración "Página i de N" la estampa generarPDFPlantilla() via jsPDF post-render)
             + '<div class="ej-pdf-footer">'
-            + '<div class="ej-footer-left">' + empresa + ' — ' + eslogan
-            + '<br>' + proyecto + ' · ' + esc(rangoTxt) + '</div>'
-            + '<div class="ej-footer-right">Generado: ' + fechaEmision + ' ' + horaEmision
-            + '<br><span style="color:#004B93;font-weight:700;">Página 1</span></div>'
-            + '</div>';
+            + '<div class="ej-footer-left">' + esc(empresa) + ' — ' + esc(eslogan)
+            + '<br>' + esc(proyecto) + ' · ' + esc(rangoTxt) + '</div>'
+            + '<div class="ej-footer-right">Generado: ' + esc(fechaEmision) + ' ' + esc(horaEmision)
+            + '<br><span style="color:#6B7280;">Documento confidencial</span></div>'
+            + '</div>'
+            + '</div>';  // ← cierre de div.ej-cover
     }
 
     function cardKPI(titulo, valor, sub, color) {
@@ -528,15 +530,14 @@
         + '.ej-total-row td{font-weight:700;background:#EFF6FF;border-top:2px solid #004B93;}'
         + '.ej-total-egreso{color:#DC2626;background:#FEF2F2;border-top:2px solid #DC2626;}'
         + '.ej-total-ingreso{color:#059669;background:#ECFDF5;border-top:2px solid #059669;}'
-        // Footer numerado visible dentro del HTML (complementa @page @bottom-*)
-        + '.ej-pdf-footer{margin-top:20px;padding-top:8px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#6B7280;}'
+        // Footer de metadatos visible en el PDF (html2canvas renderiza vista normal, no @media print)
+        + '.ej-pdf-footer{margin-top:24px;padding-top:8px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#6B7280;page-break-inside:avoid;break-inside:avoid;}'
         + '.ej-pdf-footer .ej-footer-left{text-align:left;}'
         + '.ej-pdf-footer .ej-footer-right{text-align:right;}'
         + '@media print{'
         + '.ej-page-break{page-break-before:always;break-before:always;}'
         + '.ej-page-break:first-child{page-break-before:avoid;break-before:avoid;}'
         + 'svg{max-width:100% !important;}'
-        + '.ej-pdf-footer{display:none;}'   // @page ya numera — ocultamos el footer HTML en impresión
         + '}';
 
     // ============================================================
