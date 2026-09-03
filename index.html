@@ -4160,6 +4160,7 @@
                     <button type="button" onclick="nubeGuardarConfig()" class="btn-primario" style="margin-top:0;">💾 Guardar Configuración</button>
                     <button type="button" onclick="nubeSubirAhora()" class="btn-primario" style="margin-top:0;">⬆️ Subir a la Nube ahora</button>
                     <button type="button" onclick="nubeRestaurar()" class="btn-secundario" style="margin-top:0;">⬇️ Restaurar desde la Nube</button>
+                    <button type="button" onclick="limpiarBackupRemoto()" class="btn-secundario" style="margin-top:0;border-color:var(--alerta-texto);color:var(--alerta-texto);" aria-label="Limpiar backup remoto en Google Drive">🧹 Limpiar backup en la nube</button>
                 </div>
 
                 <div id="nube-estado" role="status" aria-live="polite" style="margin-top:12px;font-size:12px;color:var(--texto-principal);">— Sin configurar —</div>
@@ -8247,11 +8248,20 @@ pag_.forEach(c => {
             "  if (files.hasNext()) { files.next().setContent(contenido); }",
             "  else { folder.createFile(Utilities.newBlob(contenido, 'application/json', nom)); }",
             "}",
+            "function borrarArchivo(nom){",
+            "  var folder = buscarCarpeta();",
+            "  var files = folder.getFilesByName(nom);",
+            "  while (files.hasNext()) { var f = files.next(); folder.removeFile(f); }",
+            "}",
             "function doPost(e){",
             "  try {",
             "    var body = JSON.parse(e.postData.contents);",
             "    var ts = new Date(), dia = ts.toISOString().slice(0,10);",
             "    var hoy = dia + '-' + ts.toTimeString().slice(0,2) + 'h';",
+            "    if (body.clear === true) {",
+            "      borrarArchivo('control_obra_latest.json');",
+            "      return ContentService.createTextOutput(JSON.stringify({ok:true,cleared:true}));",
+            "    }",
             "    guardarArchivo('control_obra_latest.json', JSON.stringify(body.data));",
             "    guardarArchivo('control_obra_' + dia + '.json', JSON.stringify(body.data));",
             "    return ContentService.createTextOutput(JSON.stringify({ok:true}));",
@@ -8349,6 +8359,27 @@ pag_.forEach(c => {
                 _nubeSetEstado('❌ Error al descargar: ' + err.message, false);
                 showToast('❌ Error al restaurar: ' + err.message, 'error');
             }
+        }
+        async function limpiarBackupRemoto() {
+            const c = _nubeCfg();
+            if (c.proveedor !== 'gas' || !c.url) { showToast('⚠️ Configura un respaldo en la nube primero', 'info'); return; }
+            showConfirmModal('Limpiar backup en la nube', 'Esto eliminará el backup remoto en Google Drive. Asegúrate de tener un respaldo local si lo necesitas. ¿Continuar?', async () => {
+                showLoading('Limpiando backup en la nube...');
+                try {
+                    let body = JSON.stringify({ clear: true });
+                    let res = await fetch(c.url, { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    let json = await res.json().catch(() => ({}));
+                    if (!json.ok) throw new Error(json.error || 'No se pudo limpiar el backup');
+                    hideLoading();
+                    _nubeSetEstado('✅ Backup remoto limpiado', true);
+                    showToast('✅ Backup en la nube eliminado correctamente', 'success', 4000);
+                } catch (err) {
+                    hideLoading();
+                    _nubeSetEstado('❌ Error al limpiar backup: ' + err.message, false);
+                    showToast('❌ No se pudo limpiar el backup: ' + err.message, 'error');
+                }
+            });
         }
         document.addEventListener('DOMContentLoaded', function () { setTimeout(nubeRenderUI, 600); });
         document.addEventListener('change', function (e) { if (e.target && e.target.id === 'nube-proveedor') nubeCambiarProveedor2(); });
