@@ -4098,9 +4098,11 @@
                     <label for="nube-gas-url" style="font-size:12px;color:var(--texto-principal);">URL del Web App (Google Apps Script)</label>
                     <input type="text" id="nube-gas-url" placeholder="https://script.google.com/macros/s/.../exec" aria-label="URL del Web App de Google Apps Script">
                     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-                        <button type="button" onclick="nubeCopiarScript()" class="btn-secundario" style="font-size:12px;">📋 Copiar Script (Apps Script)</button>
-                        <button type="button" onclick="nubeAbrirGuia()" class="btn-secundario" style="font-size:12px;">📖 Ver guía de instalación</button>
+                        <button type="button" onclick="nubeCopiarScript()" class="btn-secundario" style="font-size:12px;">📋 Copiar Script</button>
+                        <button type="button" onclick="nubeAbrirGuia()" class="btn-secundario" style="font-size:12px;">📖 Guía paso a paso</button>
+                        <button type="button" onclick="nubeAutoConectarGas()" class="btn-primario" style="font-size:12px;">🚀 Conectar automáticamente</button>
                     </div>
+                    <p id="nube-gas-auto-estado" style="margin-top:8px;font-size:11px;color:var(--texto-secundario);">Conecta automáticamente: valida tu /exec y guarda la configuración sin pasos extra.</p>
                 </div>
 
                 <!-- Campos: Google Drive OAuth automatico -->
@@ -8112,20 +8114,57 @@ pag_.forEach(c => {
             saveDB(db);
             _nubeSetEstado('Configuración de nube guardada', true);
             showToast('⚙️ Configuración de nube guardada', 'success');
-
-            // Si cambió a OneDrive y está conectado, reiniciar sincronización
+            if (c.proveedor === 'gas' && c.url) {
+                _nubeSetEstado('⬆️ Probando conexión...', true);
+                nubeSubirAhora(true);
+            }
             if (c.proveedor === 'onedrive' && c.od_connected) {
                 iniciarSincronizacionOneDrive();
             }
         }
         function nubeCopiarScript() {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(NUBE_SCRIPT).then(() => showToast('📋 Script Apps Script copiado', 'success'));
-            } else {
-                const ta = document.createElement('textarea'); ta.value = NUBE_SCRIPT; document.body.appendChild(ta); ta.select();
-                document.execCommand('copy'); document.body.removeChild(ta);
-                showToast('📋 Script copiado', 'success');
+            const copy = (text) => {
+                const done = () => showToast('📋 Script de Apps Script copiado', 'success');
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+                } else {
+                    fallbackCopy(text, done);
+                }
+            };
+            const fallbackCopy = (text, done) => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                done();
+            };
+            copy(NUBE_SCRIPT);
+        }
+        async function nubeAutoConectarGas() {
+            const urlInput = document.getElementById('nube-gas-url');
+            const estado = document.getElementById('nube-gas-auto-estado');
+            const url = (urlInput.value || '').trim();
+            if (!/https?:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(url)) {
+                if (estado) estado.textContent = 'Pega primero la URL de tu Web App (termina en /exec) y pulsa otra vez.';
+                if (urlInput) { urlInput.focus(); urlInput.scrollIntoView({ behavior:'smooth', block:'center' }); }
+                showToast('📋 Pega la URL /exec y usa “Conectar automáticamente”', 'info');
+                return;
             }
+            if (estado) estado.textContent = 'Validando conexión...';
+            try {
+                const probe = await fetch(url, { method:'GET', mode:'cors', cache:'no-store' });
+                if (!probe.ok) throw new Error('HTTP ' + probe.status);
+                const json = await probe.json();
+                if (!json || json.ok !== true) throw new Error('Respuesta inválida del Web App');
+            } catch (e) {
+                if (estado) estado.textContent = 'No se pudo validar ahora: ' + e.message + '. Si es nuevo, guarda igual y reintenta en 30s.';
+                showToast('⚠️ No validamos la URL ahora, pero la guardamos para reintentar', 'info');
+            }
+            nubeGuardarConfig();
+            if (estado) estado.textContent = '✅ Configuración guardada. La app sincronizará automáticamente.';
+            showToast('✅ Conexión automática configurada', 'success');
         }
         function nubeAbrirGuia() {
             showConfirmModal('☁️ Guía: Google Apps Script (Google Drive)',
