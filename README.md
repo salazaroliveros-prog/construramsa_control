@@ -1,5 +1,7 @@
 # CONSTRURAMSA - Control de Obra
 
+[![CI](https://github.com/salazaroliveros-prog/construramsa_control/actions/workflows/ci.yml/badge.svg)](https://github.com/salazaroliveros-prog/construramsa_control/actions/workflows/ci.yml)
+
 Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de CONSTRURAMSA.
 
 ## Características
