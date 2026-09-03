@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.8.4 — Test de Experiencia de Usuario en Archivos
+ * CONSTRURAMSA v2.9.1 — Test de Experiencia de Usuario en Archivos
  * Prueba: Valida el renderizado, legibilidad y scroll natural de archivos generados
  */
 const { chromium } = require('playwright');
@@ -49,7 +49,7 @@ function log(formato, aspecto, ok, detalle = '') {
 
   try {
     console.log('\n══════════════════════════════════════════════');
-    console.log('  CONSTRURAMSA v2.8.4 — TEST DE EXPERIENCIA DE USUARIO EN ARCHIVOS');
+    console.log('  CONSTRURAMSA v2.9.1 — TEST DE EXPERIENCIA DE USUARIO EN ARCHIVOS');
     console.log('══════════════════════════════════════════════\n');
 
     await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'domcontentloaded', timeout: 45000 });

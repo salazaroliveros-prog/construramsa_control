@@ -79,7 +79,7 @@ async function getDatos(page) {
 
   try {
     console.log('\n══════════════════════════════════════════════');
-    console.log('  CONSTRURAMSA v2.8.6 — TEST CRUD COMPLETO');
+    console.log('  CONSTRURAMSA v2.9.1 — TEST CRUD COMPLETO');
     console.log('══════════════════════════════════════════════\n');
 
     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 45000 });

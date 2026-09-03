@@ -1952,6 +1952,7 @@
                 max-width: none;
             }
             td button + button { margin-top: 8px; }
+            #btn-forzar-actualizacion { min-height: 44px; }
             /* FIX 5: min-width por columna para tablas de 9 columnas (Viajes/Mant.) */
             th:nth-child(1), td:nth-child(1) { min-width: 80px; }
             th:nth-child(2), td:nth-child(2) { min-width: 110px; }
@@ -2796,6 +2797,7 @@
                 </select>
                 <button onclick="mostrarModalCrearProyecto()" class="btn-secundario" style="padding:8px 16px;" aria-label="Crear nuevo proyecto" data-tooltip="Crear nuevo proyecto">➕</button>
                 <button id="btn-instalar-app" class="btn-primario" style="padding:8px 16px;display:none;" aria-label="Instalar aplicación" data-tooltip="Instalar como app nativa">📲 Instalar</button>
+                <button type="button" id="btn-forzar-actualizacion" class="btn-secundario" style="padding:8px 16px;display:none;" aria-label="Actualizar aplicación" data-tooltip="Buscar actualización">🔄 Actualizar</button>
                 <label class="file-label" for="logo-input">
                     📷 Logo
                     <input type="file" id="logo-input" class="file-input" accept="image/*" aria-label="Cargar logo de la empresa">
@@ -11833,6 +11835,14 @@ function validarDependenciasExportacion() {
         function ocultarBotonInstalar() {
             [btnInstallHeader, btnInstallConfig].forEach(b => { if (b) b.style.display = 'none'; });
         }
+        function mostrarBotonActualizacion() {
+            const btn = document.getElementById('btn-forzar-actualizacion');
+            if (btn) btn.style.display = '';
+        }
+        function ocultarBotonActualizacion() {
+            const btn = document.getElementById('btn-forzar-actualizacion');
+            if (btn) btn.style.display = 'none';
+        }
 
         function esIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -11872,6 +11882,26 @@ function validarDependenciasExportacion() {
             showToast('✅ App instalada. Buscala en tu home screen.', 'success', 4000);
         });
 
+        // Botón forzado de actualización
+        const btnForzarUpdate = document.getElementById('btn-forzar-actualizacion');
+        if (btnForzarUpdate) {
+            btnForzarUpdate.addEventListener('click', async () => {
+                showToast('🔍 Buscando actualizaciones...', 'info', 2000);
+                try {
+                    const reg = await navigator.serviceWorker.getRegistration();
+                    if (reg) {
+                        await reg.update();
+                        await verificarActualizacion();
+                        showToast('✅ App actualizada a la última versión', 'success', 3000);
+                    } else {
+                        showToast('ℹ️ Service Worker no disponible', 'info');
+                    }
+                } catch (err) {
+                    showToast('❌ Error al actualizar: ' + err.message, 'error');
+                }
+            });
+        }
+
         // ============================================================
         // ACTUALIZACIONES PWA — detección automática de nuevas versiones
         // desplegadas en Vercel: aviso al usuario + recarga controlada.
@@ -11902,22 +11932,34 @@ function validarDependenciasExportacion() {
                         const versionRemota = markerMatch[1];
                         const versionLocal = APP_VERSION;
 
+                        // Mostrar botón de actualización si hay versión nueva
+                        if (versionRemota !== versionLocal) {
+                            mostrarBotonActualizacion();
+                        } else {
+                            ocultarBotonActualizacion();
+                        }
+
                         // Solo notificar si la versión remota es diferente de la local
                         // y no estamos ya recargando por una actualización
                         if (versionRemota !== versionLocal && !_recargandoPorUpdate) {
                             console.log(`[Actualización] Versión local: ${versionLocal}, Versión remota: ${versionRemota}`);
                             _recargandoPorUpdate = true;
 
-                            showToast(`🔄 Nueva versión ${versionRemota} disponible. Recargando...`, 'info', 5000);
-
-                            setTimeout(() => {
-                                location.reload();
-                            }, 2000);
+                            showConfirmModal(
+                                'Actualización disponible',
+                                `Hay una nueva versión (${versionRemota}) disponible. ¿Actualizar ahora?`,
+                                () => {
+                                    showToast('🔄 Actualizando...', 'info', 2000);
+                                    setTimeout(() => location.reload(), 500);
+                                },
+                                'Ahora no',
+                                () => { _recargandoPorUpdate = false; }
+                            );
                         }
-                    } catch (err) {
-                        console.warn('[Actualización] Error al verificar versión:', err);
-                    }
-                }
+                     } catch (err) {
+                         console.warn('[Actualización] Error al verificar versión:', err);
+                     }
+                 }
 
                 navigator.serviceWorker.register('./sw.js', { scope: './' })
                     .then(reg => {
