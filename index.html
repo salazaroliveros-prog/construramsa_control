@@ -3199,7 +3199,6 @@
             <!-- Estadísticas rápidas de nómina -->
             <div style="margin-bottom:20px;padding:12px;background:rgba(0,164,228,0.08);border-radius:8px;border:1px solid rgba(0,164,228,0.2);">
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                    <div style="font-size:12px;color:var(--texto-principal);font-weight:700;">💰 Estadísticas de Nómina</div>
                     <div style="display:flex;gap:15px;flex-wrap:wrap;">
                         <div style="font-size:11px;color:var(--texto-secundario);">
                             <span style="color:var(--acento-cian);font-weight:600;" id="nomina-trabajadores">0</span> trabajadores
@@ -3211,6 +3210,8 @@
                             <span style="color:var(--acento-cian);font-weight:600;" id="nomina-total">Q0.00</span> total pagado
                         </div>
                     </div>
+                    <button type="button" onclick="generarPlanillaNomina()" class="btn-primario" style="padding:8px 16px;font-size:12px;" data-tooltip="Generar planilla de pago en PDF">📄 Generar Planilla</button>
+                    <button type="button" onclick="exportarPlanillaCSV(document.getElementById('fecha-asistencia').value)" class="btn-secundario" style="padding:8px 16px;font-size:12px;" data-tooltip="Exportar planilla de pago en CSV">📊 Exportar CSV</button>
                 </div>
             </div>
 
@@ -3252,10 +3253,14 @@
 
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;">
                 <h3 class="historial-titulo" style="margin:0;">📋 Pase de Lista</h3>
-                <div style="display:flex;gap:10px;align-items:center;">
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <label for="fecha-asistencia" style="font-size:12px;color:var(--texto-secundario);">Fecha:</label>
                     <input type="date" id="fecha-asistencia" style="width:auto;padding:6px 12px;" aria-label="Seleccionar fecha para pase de lista" autocomplete="off">
                     <button type="button" onclick="cargarAsistenciaExistente()" class="btn-secundario" style="padding:6px 12px;font-size:11px;" data-tooltip="Cargar asistencia existente de esta fecha">📂 Cargar Existente</button>
+                    <button type="button" onclick="copiarDiaAnterior()" class="btn-secundario" style="padding:6px 12px;font-size:11px;" data-tooltip="Copiar asistencia del día hábil anterior">📋 Copiar Ayer</button>
+                    <button type="button" onclick="marcarTodos('asistio')" class="btn-secundario" style="padding:6px 12px;font-size:11px;background:rgba(16,185,129,0.15);border:1px solid var(--exito);" data-tooltip="Marcar todos como Asistió">✅ Todos</button>
+                    <button type="button" onclick="marcarTodos('falto')" class="btn-secundario" style="padding:6px 12px;font-size:11px;background:rgba(239,68,68,0.15);border:1px solid var(--alerta);" data-tooltip="Marcar todos como Faltó">❌ Todos</button>
+                    <button type="button" onclick="marcarTodos('justificado')" class="btn-secundario" style="padding:6px 12px;font-size:11px;" data-tooltip="Marcar todos como Justificado">⚪ Todos</button>
                 </div>
             </div>
 
@@ -3284,7 +3289,31 @@
                 ✅ Cerrar y Guardar Planilla del Día
             </button>
 
+            <h3 class="historial-titulo" style="margin-top:25px;">📅 Calendario Mensual de Asistencia</h3>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px;">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button type="button" onclick="cambiarMesCalendario(-1)" class="btn-secundario" style="padding:6px 12px;font-size:11px;" data-tooltip="Mes anterior">◀ Anterior</button>
+                    <span id="calendario-mes-label" style="font-weight:700;font-size:14px;color:var(--texto-principal);min-width:140px;text-align:center;"></span>
+                    <button type="button" onclick="cambiarMesCalendario(1)" class="btn-secundario" style="padding:6px 12px;font-size:11px;" data-tooltip="Mes siguiente">Siguiente ▶</button>
+                </div>
+                <button type="button" onclick="irMesActualCalendario()" class="btn-secundario" style="padding:6px 12px;font-size:11px;" data-tooltip="Ir al mes actual">📅 Mes Actual</button>
+            </div>
+            <div id="calendario-asistencia" style="margin-bottom:20px;"></div>
+
             <h3 class="historial-titulo">📜 Historial de Asistencia</h3>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+                <input type="text" id="filtro-asistencia-texto" placeholder="🔍 Buscar trabajador..." style="padding:6px 12px;font-size:12px;border:1px solid var(--glass-border);border-radius:6px;background:rgba(255,255,255,0.05);color:var(--texto-principal);width:200px;" aria-label="Buscar en historial de asistencia">
+                <select id="filtro-asistencia-estado" style="padding:6px 12px;font-size:12px;border:1px solid var(--glass-border);border-radius:6px;background:rgba(255,255,255,0.05);color:var(--texto-principal);" aria-label="Filtrar por estado">
+                    <option value="">Todos los estados</option>
+                    <option value="asistio">Asistió</option>
+                    <option value="falto">Faltó</option>
+                    <option value="justificado">Justificado</option>
+                </select>
+                <input type="date" id="filtro-asistencia-desde" style="padding:6px 12px;font-size:12px;border:1px solid var(--glass-border);border-radius:6px;background:rgba(255,255,255,0.05);color:var(--texto-principal);" aria-label="Fecha desde">
+                <input type="date" id="filtro-asistencia-hasta" style="padding:6px 12px;font-size:12px;border:1px solid var(--glass-border);border-radius:6px;background:rgba(255,255,255,0.05);color:var(--texto-principal);" aria-label="Fecha hasta">
+                <button type="button" onclick="cargarTablaAsistencia()" class="btn-secundario" style="padding:6px 12px;font-size:11px;" data-tooltip="Aplicar filtros">🔍 Filtrar</button>
+                <button type="button" onclick="limpiarFiltrosAsistencia()" class="btn-secundario" style="padding:6px 12px;font-size:11px;" data-tooltip="Limpiar filtros">🔄 Limpiar</button>
+            </div>
             <div class="overflow-x-auto">
                 <table id="tabla-asistencia" class="table-responsive-cards" aria-label="Historial de asistencia de trabajadores">
                     <thead>
@@ -3294,6 +3323,7 @@
                             <th scope="col">Estado</th>
                             <th scope="col">Horas Extra</th>
                             <th scope="col">Sueldo Diario</th>
+                            <th scope="col">Aprobación</th>
                             <th scope="col">Acciones</th>
                         </tr>
                     </thead>
@@ -6099,7 +6129,7 @@
                         cargarResumen(); 
                         actualizarDashboard(); 
                     }
-                    if (mid === 'personal') { cargarListaAsistencia(); cargarTablaAsistencia(); actualizarEstadisticasNomina(); }
+                    if (mid === 'personal') { cargarListaAsistencia(); cargarTablaAsistencia(); actualizarEstadisticasNomina(); renderCalendarioAsistencia(); }
                     if (mid === 'adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
                     if (mid === 'viajes') { cargarCamiones(); cargarRutas(); cargarTablaViajes(); }
                     if (mid === 'mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }
@@ -6706,6 +6736,180 @@ tbody.innerHTML = '';
             statsTotal.textContent = formatearMoneda(totalPagado);
         }
 
+        function generarPlanillaNomina() {
+            const fecha = document.getElementById('fecha-asistencia').value;
+            if (!fecha) { showToast('⚠️ Seleccione una fecha para generar la planilla', 'error'); return; }
+            
+            const datos = getProyectoData();
+            const dia = datos.personal.asistencia.find(a => a.fecha === fecha);
+            if (!dia || !dia.registros.length) {
+                showToast('ℹ️ No hay registros de asistencia para esta fecha', 'info');
+                return;
+            }
+            
+            const db = getDB();
+            const cfg = db.configuracion || {};
+            const proy = db.proyectos.find(p => p.id === cfg.proyecto_actual);
+            const proyNombre = proy ? proy.nombre : 'General';
+            const empresa = cfg.nombre_empresa || 'CONSTRURAMSA';
+            
+            const personal = datos.personal || {};
+            const nomina = (typeof CR_NominaEngine !== 'undefined' && CR_NominaEngine.calcularNomina)
+                ? CR_NominaEngine.calcularNomina(personal.trabajadores || [], personal.asistencia || [], fecha, fecha)
+                : null;
+            
+            if (!nomina || nomina.trabajadores.length === 0) {
+                showToast('ℹ️ No hay datos de nómina para generar la planilla', 'info');
+                return;
+            }
+            
+            const ahora = new Date();
+            const fechaEmision = ahora.toLocaleDateString('es-GT', { day:'2-digit', month:'long', year:'numeric' });
+            const horaEmision = ahora.toLocaleTimeString('es-GT', { hour:'2-digit', minute:'2-digit' });
+            
+            const filas = nomina.trabajadores.map(t => `
+                <tr>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;font-weight:600;">${_esc(t.nombre)}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;color:#6B7280;">${_esc(t.puesto || '—')}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:center;">${t.diasAsistidos}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:center;color:#DC2626;font-weight:700;">${t.diasFalta}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:center;color:#6B7280;">${t.diasJustificados}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:right;">${t.horasExtra.toFixed(1)}h</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:right;">Q${numToF(t.pagoNormal)}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:right;">Q${numToF(t.pagoExtra)}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:right;font-weight:700;color:#004B93;">Q${numToF(t.totalPagar)}</td>
+                </tr>
+            `).join('');
+            
+            const html = `
+                <div class="pdf-page-header">
+                    <div class="brand-row">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div class="brand-badge">C</div>
+                            <div>
+                                <div class="brand-name">${_esc(empresa)}</div>
+                                <div class="brand-eslogan">Planilla de Pago</div>
+                            </div>
+                        </div>
+                        <div class="report-label">NÓMINA DEL DÍA</div>
+                    </div>
+                    <div class="meta-row">
+                        <span>Proyecto: ${_esc(proyNombre)}</span>
+                        <span>Fecha: ${fecha}</span>
+                        <span>Generado: ${fechaEmision} ${horaEmision}</span>
+                    </div>
+                </div>
+                <div style="padding:10px 4px;">
+                    <table class="tabla-pdf">
+                        <thead>
+                            <tr>
+                                <th>Trabajador</th><th>Puesto</th><th style="text-align:center;">Asist.</th><th style="text-align:center;">Faltas</th><th style="text-align:center;">Justif.</th><th style="text-align:right;">H. Extra</th><th style="text-align:right;">P. Normal</th><th style="text-align:right;">P. Extra</th><th style="text-align:right;">Total (Q)</th>
+                            </tr>
+                        </thead>
+                        <tbody>${filas}
+                            <tr style="background:#EFF6FF;">
+                                <td colspan="5" style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:#004B93;">TOTALES</td>
+                                <td style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;">${nomina.totalHorasExtra.toFixed(1)}h</td>
+                                <td colspan="2" style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:#059669;">TOTAL NÓMINA:</td>
+                                <td style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:#004B93;">Q${numToF(nomina.totalPagable)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top:40px;display:flex;justify-content:space-between;gap:20px;">
+                    <div style="flex:1;text-align:center;border-top:1.5px solid #374151;padding-top:8px;">
+                        <div style="font-size:10px;color:#6B7280;margin-bottom:4px;">Jefe de Proyectos</div>
+                        <div style="font-size:11px;font-weight:700;color:#111827;">Arq. Wilson Dario Salazar</div>
+                    </div>
+                    <div style="flex:1;text-align:center;border-top:1.5px solid #374151;padding-top:8px;">
+                        <div style="font-size:10px;color:#6B7280;margin-bottom:4px;">Gerente de Administración</div>
+                        <div style="font-size:11px;font-weight:700;color:#111827;">Ing. Juan Luis Ramirez Jimenez</div>
+                    </div>
+                    <div style="flex:1;text-align:center;border-top:1.5px solid #374151;padding-top:8px;">
+                        <div style="font-size:10px;color:#6B7280;margin-bottom:4px;">Revisor de Nómina</div>
+                        <div style="font-size:11px;font-weight:700;color:#111827;">&nbsp;</div>
+                    </div>
+                </div>
+                <div style="margin-top:30px;padding-top:10px;border-top:1px solid #E5E7EB;text-align:center;font-size:9px;color:#6B7280;">
+                    Documento confidencial · CONSTRURAMSA · Generado: ${fechaEmision} ${horaEmision}
+                </div>
+            `;
+            
+            const contenedor = prepararContenedorImpresion('Planilla de Pago - ' + fecha, html);
+            contenedor.classList.add('pdf-generating');
+            
+            generarPDFPlantilla(contenedor, `planilla_${fecha}.pdf`).then(pdf => {
+                const pdfBlob = pdf.output('blob');
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                const a = document.createElement('a');
+                a.href = pdfUrl;
+                a.download = `planilla_${fecha}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+                contenedor.classList.remove('pdf-generating');
+                showToast('✅ Planilla generada y descargada', 'success');
+            }).catch(err => {
+                console.error(err);
+                contenedor.classList.remove('pdf-generating');
+                showToast('❌ Error al generar planilla', 'error');
+            });
+        }
+
+        function exportarPlanillaCSV(fecha) {
+            const datos = getProyectoData();
+            const dia = datos.personal.asistencia.find(a => a.fecha === fecha);
+            if (!dia || !dia.registros.length) {
+                showToast('ℹ️ No hay registros de asistencia para esta fecha', 'info');
+                return;
+            }
+
+            const db = getDB();
+            const cfg = db.configuracion || {};
+            const proy = db.proyectos.find(p => p.id === cfg.proyecto_actual);
+            const proyNombre = proy ? proy.nombre : 'General';
+            const empresa = cfg.nombre_empresa || 'CONSTRURAMSA';
+
+            const csv = [];
+            csv.push(['EMPRESA', empresa].join(','));
+            csv.push(['PROYECTO', proyNombre].join(','));
+            csv.push(['FECHA', fecha].join(','));
+            csv.push(['GENERADO', new Date().toLocaleString('es-GT')].join(','));
+            csv.push([]);
+            csv.push(['Trabajador','Puesto','Asist.','Faltas','Justif.','H. Extra','P. Normal','P. Extra','Total (Q)']);
+
+            let totalHE = 0, totalPN = 0, totalPE = 0, totalPag = 0;
+            dia.registros.forEach(reg => {
+                const t = datos.personal.trabajadores.find(x => x.id === reg.trabajador_id);
+                const nombre = t ? t.nombre : 'Desconocido';
+                const puesto = t ? t.puesto : 'N/A';
+                const he = reg.horas_extras || reg.horas_extras_cantidad || 0;
+                let pn = 0, pe = 0, tp = 0;
+                if (reg.estado === 'asistio' && t) {
+                    pn = 8*(parseFloat(t.pago_hora_normal)||0);
+                    pe = he*(parseFloat(t.pago_hora_extra)||0);
+                    tp = pn + pe;
+                }
+                totalHE += he; totalPN += pn; totalPE += pe; totalPag += tp;
+                csv.push([nombre, puesto, reg.estado==='asistio'?1:0, reg.estado==='falto'?1:0, reg.estado==='justificado'?1:0, he.toFixed(1), numToF(pn), numToF(pe), numToF(tp)].join(','));
+            });
+            csv.push([]);
+            csv.push(['TOTALES','','','','',totalHE.toFixed(1),numToF(totalPN),numToF(totalPE),numToF(totalPag)].join(','));
+
+            const csvContent = '\uFEFF' + csv.map(r => r.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `planilla_${fecha}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast('✅ Planilla CSV exportada', 'success');
+        }
+
         function cargarAsistenciaExistente() {
             const fecha = document.getElementById('fecha-asistencia').value;
             if (!fecha) {
@@ -6749,7 +6953,6 @@ tbody.innerHTML = '';
             
             if (!resumenDiv || !fecha) return;
             
-            // Calcular resumen basado en el estado actual del formulario
             let asistencia = 0, faltas = 0, horasExtra = 0, totalPagar = 0;
             
             datos.personal.trabajadores.forEach(t => {
@@ -6773,6 +6976,45 @@ tbody.innerHTML = '';
             document.getElementById('nomina-dia-total').textContent = formatearMoneda(totalPagar);
             
             resumenDiv.style.display = asistencia + faltas > 0 ? 'block' : 'none';
+        }
+
+        function marcarTodos(estado) {
+            document.querySelectorAll('#lista-asistencia-dinamica input[type="radio"]').forEach(radio => {
+                if (radio.value === estado) radio.checked = true;
+            });
+            actualizarContador();
+            actualizarResumenNominaDia();
+            showToast(`✅ Todos marcados como ${estado}`, 'success');
+        }
+
+        function copiarDiaAnterior() {
+            const fecha = document.getElementById('fecha-asistencia').value;
+            if (!fecha) { showToast('⚠️ Seleccione una fecha primero', 'error'); return; }
+            
+            const datos = getProyectoData();
+            const fechaAnterior = new Date(fecha);
+            fechaAnterior.setDate(fechaAnterior.getDate() - 1);
+            const fechaAnteriorStr = fechaAnterior.toISOString().split('T')[0];
+            
+            const diaAnterior = datos.personal.asistencia.find(a => a.fecha === fechaAnteriorStr);
+            if (!diaAnterior) {
+                showToast(`ℹ️ No hay asistencia registrada para el ${fechaAnteriorStr}`, 'info');
+                return;
+            }
+            
+            datos.personal.trabajadores.forEach(t => {
+                const reg = diaAnterior.registros.find(r => r.trabajador_id === t.id);
+                if (reg) {
+                    const radio = document.querySelector(`input[name="asistencia-${t.id}"][value="${reg.estado}"]`);
+                    if (radio) radio.checked = true;
+                    const horasInput = document.getElementById(`horas-extra-${t.id}`);
+                    if (horasInput && reg.horas_extras) horasInput.value = reg.horas_extras;
+                }
+            });
+            
+            actualizarContador();
+            actualizarResumenNominaDia();
+            showToast(`✅ Asistencia del ${fechaAnteriorStr} copiada`, 'success');
         }
 
         function editarTrabajador(id) {
@@ -6815,6 +7057,13 @@ tbody.innerHTML = '';
 
         // Event listener para búsqueda de trabajadores
         document.getElementById('busqueda-trabajador').addEventListener('input', cargarListaAsistencia);
+
+        // Filtros de historial de asistencia
+        const filtroAsistenciaDebounced = debounce(cargarTablaAsistencia, 250);
+        document.getElementById('filtro-asistencia-texto')?.addEventListener('input', filtroAsistenciaDebounced);
+        document.getElementById('filtro-asistencia-estado')?.addEventListener('change', cargarTablaAsistencia);
+        document.getElementById('filtro-asistencia-desde')?.addEventListener('change', cargarTablaAsistencia);
+        document.getElementById('filtro-asistencia-hasta')?.addEventListener('change', cargarTablaAsistencia);
 
         function cargarListaAsistencia() {
             const datos = getProyectoData();
@@ -6888,7 +7137,7 @@ tbody.innerHTML = '';
                     if (checked) marcados++;
                 });
                 counterEl.textContent = marcados;
-                btnGuardar.disabled = marcados !== totalTrabajadores || !fechaInput.value;
+                btnGuardar.disabled = !fechaInput.value;
                 actualizarResumenNominaDia();
             }
             trabajadoresFiltrados.forEach(t => {
@@ -6930,9 +7179,10 @@ tbody.innerHTML = '';
             }
 
             datos.personal.asistencia = datos.personal.asistencia.filter(a => a.fecha !== fecha);
-            datos.personal.asistencia.push({ fecha, registros });
+            datos.personal.asistencia.push({ fecha, registros, aprobacion: { estado:'pendiente', aprobado_por:'', fecha_aprobacion:'', comentario:'' } });
             saveProyectoData(datos);
             cargarTablaAsistencia();
+            renderCalendarioAsistencia();
             actualizarEstadisticasNomina();
             // FIX #5: alert() → showToast()
             showToast(`✅ Planilla del ${fecha} guardada correctamente`, 'success', 5000);
@@ -6943,31 +7193,45 @@ tbody.innerHTML = '';
             const tbody = document.getElementById('tabla-asistencia-cuerpo');
             if (!tbody) return;
 
+            const textoFiltro = (document.getElementById('filtro-asistencia-texto')?.value || '').toLowerCase();
+            const estadoFiltro = document.getElementById('filtro-asistencia-estado')?.value || '';
+            const desde = document.getElementById('filtro-asistencia-desde')?.value || '';
+            const hasta = document.getElementById('filtro-asistencia-hasta')?.value || '';
+
             const registros_flat = [];
             const sorted = [...(datos.personal.asistencia || [])].sort((a,b) => new Date(b.fecha)-new Date(a.fecha));
             sorted.forEach(dia => {
+                if (desde && dia.fecha < desde) return;
+                if (hasta && dia.fecha > hasta) return;
                 dia.registros.forEach(reg => {
                     const t = datos.personal.trabajadores.find(t => t.id === reg.trabajador_id);
+                    const nombre = t ? t.nombre : 'Desconocido';
+                    const puesto = t ? t.puesto : 'N/A';
+                    if (textoFiltro && !nombre.toLowerCase().includes(textoFiltro) && !puesto.toLowerCase().includes(textoFiltro)) return;
+                    if (estadoFiltro && reg.estado !== estadoFiltro) return;
                     let sueldo = 0;
                     if (reg.calculos) { sueldo = reg.calculos.total_diario; }
                     else if (reg.estado === 'asistio' && t) {
                         const he = reg.horas_extras || reg.horas_extras_cantidad || 0;
                         sueldo = 8*(parseFloat(t.pago_hora_normal)||0) + he*(parseFloat(t.pago_hora_extra)||0);
                     }
-                    registros_flat.push({ fecha:dia.fecha, nombre:t?t.nombre:'Desconocido', estado:reg.estado, horasExtra:reg.horas_extras||reg.horas_extras_cantidad||0, sueldo, trabajador_id:reg.trabajador_id });
+                    registros_flat.push({ fecha:dia.fecha, nombre, estado:reg.estado, horasExtra:reg.horas_extras||reg.horas_extras_cantidad||0, sueldo, trabajador_id:reg.trabajador_id });
                 });
             });
 
-            // FIX #11: estado vacío
-            if (registros_flat.length === 0) { tbody.innerHTML = filaVacia(6, 'No hay registros de asistencia'); renderPaginacion('paginacion-asistencia', 0, 1, 'cambiarPaginaAsistencia'); return; }
+            if (registros_flat.length === 0) { tbody.innerHTML = filaVacia(7, 'No hay registros de asistencia'); renderPaginacion('paginacion-asistencia', 0, 1, 'cambiarPaginaAsistencia'); return; }
 
             const pag  = estadoPaginacion.asistencia;
             const ini_ = (pag-1)*REGISTROS_POR_PAGINA;
             const pag_ = registros_flat.slice(ini_, ini_+REGISTROS_POR_PAGINA);
 
-tbody.innerHTML = '';
+            tbody.innerHTML = '';
+            const mapaAprobacion = {};
+            (datos.personal.asistencia || []).forEach(d => { mapaAprobacion[d.fecha] = d.aprobacion || { estado:'pendiente' }; });
             pag_.forEach(r => {
                 const colEst = r.estado==='asistio'?'var(--exito)':r.estado==='falto'?'var(--alerta-texto)':'var(--texto-secundario)';
+                const ap = mapaAprobacion[r.fecha] || { estado:'pendiente' };
+                const colAp = ap.estado==='aprobada'?'var(--exito)':ap.estado==='rechazada'?'var(--alerta-texto)':'var(--advertencia-texto)';
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td data-label="Fecha">${r.fecha}</td>
@@ -6975,10 +7239,29 @@ tbody.innerHTML = '';
                     <td data-label="Estado" style="color:${colEst};font-weight:600;">${r.estado.toUpperCase()}</td>
                     <td data-label="Horas Extra">${r.horasExtra}h</td>
                     <td data-label="Sueldo Diario" style="font-weight:bold;color:var(--acento-cian);">${formatearMoneda(r.sueldo)}</td>
-                    <td class="actions-cell"><button onclick="eliminarRegistroAsistencia('${r.fecha}','${r.trabajador_id}')" class="btn-primario btn-eliminar" aria-label="Eliminar asistencia ${r.nombre} del ${r.fecha}">🗑️ Eliminar</button></td>`;
+                    <td data-label="Aprobación" style="color:${colAp};font-weight:600;">${ap.estado.toUpperCase()}</td>
+                    <td class="actions-cell">
+                        <button onclick="aprobarAsistencia('${r.fecha}')" class="btn-secundario" style="padding:4px 8px;font-size:10px;" data-tooltip="Aprobar planilla del ${r.fecha}">✅ Aprobar</button>
+                        <button onclick="rechazarAsistencia('${r.fecha}')" class="btn-secundario" style="padding:4px 8px;font-size:10px;background:rgba(239,68,68,0.15);border:1px solid var(--alerta);" data-tooltip="Rechazar planilla del ${r.fecha}">❌ Rechazar</button>
+                        <button onclick="eliminarRegistroAsistencia('${r.fecha}','${r.trabajador_id}')" class="btn-primario btn-eliminar" aria-label="Eliminar asistencia ${r.nombre} del ${r.fecha}">🗑️</button>
+                    </td>`;
                 tbody.appendChild(row);
             });
             renderPaginacion('paginacion-asistencia', registros_flat.length, pag, 'cambiarPaginaAsistencia');
+        }
+
+        function limpiarFiltrosAsistencia() {
+            const texto = document.getElementById('filtro-asistencia-texto');
+            const estado = document.getElementById('filtro-asistencia-estado');
+            const desde = document.getElementById('filtro-asistencia-desde');
+            const hasta = document.getElementById('filtro-asistencia-hasta');
+            if (texto) texto.value = '';
+            if (estado) estado.value = '';
+            if (desde) desde.value = '';
+            if (hasta) hasta.value = '';
+            cargarTablaAsistencia();
+            renderCalendarioAsistencia();
+            showToast('✅ Filtros limpiados', 'success');
         }
 
         function eliminarRegistroAsistencia(fecha, trabajadorId) {
@@ -6991,8 +7274,156 @@ tbody.innerHTML = '';
                 }
                 saveProyectoData(datos);
                 cargarTablaAsistencia();
+                renderCalendarioAsistencia();
                 showToast('✅ Registro eliminado', 'success');
             });
+        }
+
+        function aprobarAsistencia(fecha) {
+            showConfirmModal('Aprobar Planilla', `¿Aprobar la planilla del ${fecha}?`, () => {
+                const datos = getProyectoData();
+                const dia = datos.personal.asistencia.find(a => a.fecha === fecha);
+                if (dia) {
+                    dia.aprobacion = { estado:'aprobada', aprobado_por:'Usuario', fecha_aprobacion:new Date().toISOString(), comentario:'' };
+                    saveProyectoData(datos);
+                    cargarTablaAsistencia();
+                    renderCalendarioAsistencia();
+                    showToast('✅ Planilla aprobada', 'success');
+                }
+            });
+        }
+
+        function rechazarAsistencia(fecha) {
+            const comentario = prompt('Motivo del rechazo (opcional):');
+            if (comentario === null) return;
+            showConfirmModal('Rechazar Planilla', `¿Rechazar la planilla del ${fecha}?`, () => {
+                const datos = getProyectoData();
+                const dia = datos.personal.asistencia.find(a => a.fecha === fecha);
+                if (dia) {
+                    dia.aprobacion = { estado:'rechazada', aprobado_por:'Usuario', fecha_aprobacion:new Date().toISOString(), comentario: comentario || '' };
+                    saveProyectoData(datos);
+                    cargarTablaAsistencia();
+                    renderCalendarioAsistencia();
+                    showToast('❌ Planilla rechazada', 'info');
+                }
+            });
+        }
+
+        let calendarioAnio  = new Date().getFullYear();
+        let calendarioMes   = new Date().getMonth();
+
+        function renderCalendarioAsistencia() {
+            const datos = getProyectoData();
+            const cont = document.getElementById('calendario-asistencia');
+            if (!cont) return;
+
+            const diasSemana = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+            const primerDia  = new Date(calendarioAnio, calendarioMes, 1);
+            const ultimoDia  = new Date(calendarioAnio, calendarioMes + 1, 0);
+            const diasEnMes  = ultimoDia.getDate();
+            let diaSemanaInicio = primerDia.getDay();
+            diaSemanaInicio = diaSemanaInicio === 0 ? 6 : diaSemanaInicio - 1;
+
+            const asistenciaMap = {};
+            (datos.personal.asistencia || []).forEach(a => {
+                const [ay,am,ad] = a.fecha.split('-').map(Number);
+                if (ay === calendarioAnio && am === calendarioMes + 1) {
+                    asistenciaMap[a.fecha] = a.registros || [];
+                }
+            });
+
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+            let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">';
+            diasSemana.forEach(d => {
+                html += `<div style="font-size:11px;font-weight:700;color:var(--texto-secundario);padding:6px 0;">${d}</div>`;
+            });
+            for (let i = 0; i < diaSemanaInicio; i++) {
+                html += '<div></div>';
+            }
+            for (let d = 1; d <= diasEnMes; d++) {
+                const fechaStr = `${calendarioAnio}-${String(calendarioMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const regs = asistenciaMap[fechaStr] || [];
+                const total = regs.length;
+                const asistentes = regs.filter(r => r.estado === 'asistio').length;
+                const faltas = regs.filter(r => r.estado === 'falto').length;
+                const justificados = regs.filter(r => r.estado === 'justificado').length;
+                const ap = (datos.personal.asistencia || []).find(a => a.fecha === fechaStr);
+                const apEstado = ap ? (ap.aprobacion?.estado || 'pendiente') : 'sin_datos';
+                const esHoy = fechaStr === todayStr;
+                const tieneDatos = total > 0;
+
+                let bg = 'rgba(255,255,255,0.03)';
+                let border = '1px solid rgba(255,255,255,0.06)';
+                let indicator = '';
+
+                if (tieneDatos) {
+                    if (apEstado === 'aprobada') {
+                        bg = 'rgba(16,185,129,0.15)';
+                        border = '1px solid rgba(16,185,129,0.50)';
+                    } else if (apEstado === 'rechazada') {
+                        bg = 'rgba(239,68,68,0.15)';
+                        border = '1px solid rgba(239,68,68,0.50)';
+                    } else if (asistentes > 0 && faltas === 0 && justificados === 0) {
+                        bg = 'rgba(16,185,129,0.12)';
+                        border = '1px solid rgba(16,185,129,0.35)';
+                    } else if (faltas > 0 && asistentes === 0 && justificados === 0) {
+                        bg = 'rgba(239,68,68,0.12)';
+                        border = '1px solid rgba(239,68,68,0.35)';
+                    } else if (justificados > 0 && asistentes === 0 && faltas === 0) {
+                        bg = 'rgba(107,114,128,0.12)';
+                        border = '1px solid rgba(107,114,128,0.35)';
+                    } else {
+                        bg = 'rgba(245,158,11,0.10)';
+                        border = '1px solid rgba(245,158,11,0.30)';
+                    }
+                }
+
+                if (esHoy) {
+                    border = '2px solid var(--acento-cian)';
+                }
+
+                html += `<div style="min-height:52px;padding:4px;border-radius:6px;background:${bg};border:${border};cursor:pointer;transition:transform .1s;" onclick="seleccionarFechaCalendario('${fechaStr}')" title="${fechaStr}${tieneDatos ? `\\n✅ ${asistentes}  ❌ ${faltas}  ⚪ ${justificados}\\nAprobación: ${apEstado}` : ''}">`;
+                html += `<div style="font-size:12px;font-weight:${esHoy?'700':'500'};color:${esHoy?'var(--acento-cian)':'var(--texto-principal)'};">${d}</div>`;
+                if (tieneDatos) {
+                    html += `<div style="display:flex;gap:2px;justify-content:center;flex-wrap:wrap;margin-top:2px;">`;
+                    if (asistentes > 0) html += `<span style="font-size:10px;color:var(--exito);" title="Asistieron">✅${asistentes}</span>`;
+                    if (faltas > 0) html += `<span style="font-size:10px;color:var(--alerta-texto);" title="Faltaron">❌${faltas}</span>`;
+                    if (justificados > 0) html += `<span style="font-size:10px;color:var(--texto-secundario);" title="Justificados">⚪${justificados}</span>`;
+                    html += `</div>`;
+                    if (apEstado !== 'pendiente') {
+                        const apIcon = apEstado === 'aprobada' ? '🟢' : apEstado === 'rechazada' ? '🔴' : '';
+                        html += `<div style="font-size:10px;text-align:center;margin-top:1px;">${apIcon} ${apEstado}</div>`;
+                    }
+                }
+                html += `</div>`;
+            }
+            html += '</div>';
+
+            const mesNombre = primerDia.toLocaleDateString('es-GT', { month:'long', year:'numeric' });
+            document.getElementById('calendario-mes-label').textContent = mesNombre.charAt(0).toUpperCase() + mesNombre.slice(1);
+            cont.innerHTML = html;
+        }
+
+        function cambiarMesCalendario(delta) {
+            calendarioMes += delta;
+            if (calendarioMes > 11) { calendarioMes = 0; calendarioAnio++; }
+            if (calendarioMes < 0)  { calendarioMes = 11; calendarioAnio--; }
+            renderCalendarioAsistencia();
+        }
+
+        function irMesActualCalendario() {
+            const now = new Date();
+            calendarioAnio = now.getFullYear();
+            calendarioMes  = now.getMonth();
+            renderCalendarioAsistencia();
+        }
+
+        function seleccionarFechaCalendario(fecha) {
+            const fechaInput = document.getElementById('fecha-asistencia');
+            if (fechaInput) fechaInput.value = fecha;
+            cargarAsistenciaExistente();
         }
 
         // ============================================================
@@ -9348,6 +9779,7 @@ tbody.innerHTML = '';
                 mensual: 'Mensual',
                 categoria: 'Categoría',
                 asistencia: 'Asistencia',
+                nomina: 'Nómina',
                 viajes: 'Viajes',
                 mantenimiento: 'Mantenimiento',
                 ejecutivo: 'Ejecutivo'
@@ -9425,13 +9857,11 @@ tbody.innerHTML = '';
             const fechasRango = document.getElementById('reporte-fechas-rango');
 
             // Algunos tipos solo soportan fecha única
-            if (tipo === 'asistencia' || tipo === 'viajes' || tipo === 'mantenimiento' || tipo === 'categoria') {
+            if (tipo === 'diario' || tipo === 'asistencia' || tipo === 'viajes' || tipo === 'mantenimiento' || tipo === 'categoria') {
                 document.getElementById('reporte-modo-fecha').value = 'unica';
-                document.getElementById('reporte-modo-fecha').disabled = true;
                 fechasUnicas.style.display = 'grid';
                 fechasRango.style.display = 'none';
             } else {
-                document.getElementById('reporte-modo-fecha').disabled = false;
                 if (modo === 'rango') {
                     fechasUnicas.style.display = 'none';
                     fechasRango.style.display = 'grid';
@@ -9634,7 +10064,7 @@ tbody.innerHTML = '';
                         horasExtra,
                         totalPagar
                     };
-                }).filter(item => item.asistencias || item.faltas || item.justificados || item.horasExtra || item.totalPagar);
+                });
                 if (resumenPersonal.length === 0) {
                     csv += `"SIN REGISTROS DE PERSONAL EN EL PERIODO",,,,,,\n`;
                 } else {
@@ -9736,7 +10166,7 @@ tbody.innerHTML = '';
                     });
                     
                     csv += `,,,\n`;
-                    csv += `,,TOTAL GASTOS:,${categoriasConValor.reduce((s, [, v]) => s + v, 0).toFixed(2)},100.0%\n`;
+                    csv += `,,TOTAL GASTOS:,${categoriasConValor.reduce((s, [, v]) => s + v, 0).toFixed(2)}\n`;
                 } else {
                     csv += `"SIN GASTOS EN EL PERÍODO ${periodoDisplay}",,,\n`;
                 }
@@ -9834,7 +10264,18 @@ tbody.innerHTML = '';
             // ── Bloque de firmas autorizadas (membrete profesional) ──────────
             csv += `# \n`;
             csv += `# FIRMAS AUTORIZADAS\n`;
-            csv += `${csvCell('Elaborado por: Arq. Wilson Dario Salazar - Jefe de Proyectos')},,${csvCell('Visto Bueno - Encargado de Obra: ______________________')},,${csvCell('Ing. Juan Luis Ramirez Jimenez - Gerente Comercial')}\n`;
+            const firmasAutorizadas = (config.firmas && Array.isArray(config.firmas) && config.firmas.length)
+                ? config.firmas
+                : (typeof CR_CONFIG !== 'undefined' && CR_CONFIG.PLANTILLA_CORPORATIVA && Array.isArray(CR_CONFIG.PLANTILLA_CORPORATIVA.firmasAutorizadas))
+                    ? CR_CONFIG.PLANTILLA_CORPORATIVA.firmasAutorizadas
+                    : [
+                        { nombre: 'Arq. Wilson Dario Salazar', cargo: 'Jefe de Proyectos' },
+                        { nombre: 'Ing. Juan Luis Ramirez Jimenez', cargo: 'Gerente Comercial' }
+                      ];
+            const f0 = firmasAutorizadas[0] ? firmasAutorizadas[0].nombre + ' - ' + firmasAutorizadas[0].cargo : '';
+            const f1 = firmasAutorizadas[1] ? firmasAutorizadas[1].nombre + ' - ' + firmasAutorizadas[1].cargo : '';
+            const f2 = firmasAutorizadas[2] ? firmasAutorizadas[2].nombre + ' - ' + firmasAutorizadas[2].cargo : '';
+            csv += `${csvCell('Elaborado por: ' + f0)},,${csvCell(f1)},,${csvCell(f2)}\n`;
             csv = paginarCSV(csv);
             return csv;
         }
@@ -10025,7 +10466,7 @@ tbody.innerHTML = '';
                         }
                     });
                     return { trabajador, asistencias, faltas, justificados, horasExtra, totalPagar };
-                }).filter(item => item.asistencias || item.faltas || item.justificados || item.horasExtra || item.totalPagar);
+                });
                 html += renderizarCabeceraPagina('Reporte de Asistencia y Horas Extra', periodoTexto, '1');
                 html += `<div class="info-box"><strong>Resumen del personal</strong><br>Asistencias, faltas, horas extra y total correspondiente del personal en el período seleccionado.</div>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Trabajador</th><th>Puesto</th><th>Asist.</th><th>Faltas</th><th>Justif.</th><th>H. Extra</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
@@ -10405,10 +10846,10 @@ function validarDependenciasExportacion() {
                 const CSS_VARS = [
                     '--pdf-azul-oscuro:#004B93',
                     '--pdf-azul-claro:#00A4E4',
-                    '--pdf-gris-oscuro:#1F2937',
+                    '--pdf-gris-oscuro:#374151',
                     '--pdf-gris-medio:#6B7280',
                     '--pdf-rojo:#DC2626',
-                    '--pdf-verde:#16A34A'
+                    '--pdf-verde:#059669'
                 ].join(';');
 
                 const opts = {
@@ -11091,6 +11532,11 @@ function validarDependenciasExportacion() {
                 const form = document.querySelector('.module.active form');
                 if (form) { const btn = form.querySelector('button[type="submit"]'); if (btn) btn.click(); }
             }
+            if (e.altKey && document.querySelector('#personal.module.active')) {
+                if (e.key === 'a' || e.key === 'A') { e.preventDefault(); marcarTodos('asistio'); showToast('✅ Marcados como Asistió', 'info', 1500); }
+                if (e.key === 'f' || e.key === 'F') { e.preventDefault(); marcarTodos('falto'); showToast('❌ Marcados como Faltó', 'info', 1500); }
+                if (e.key === 'j' || e.key === 'J') { e.preventDefault(); marcarTodos('justificado'); showToast('⚪ Marcados como Justificado', 'info', 1500); }
+            }
         });
 
         // ============================================================
@@ -11259,7 +11705,7 @@ function validarDependenciasExportacion() {
                         cargarResumen(); 
                         actualizarDashboard(); 
                     }
-                    if (moduloURL === 'personal') { cargarListaAsistencia(); cargarTablaAsistencia(); }
+                    if (moduloURL === 'personal') { cargarListaAsistencia(); cargarTablaAsistencia(); renderCalendarioAsistencia(); }
                     if (moduloURL === 'adquisiciones') { cargarTablaProveedores(); cargarProveedores(); cargarTablaCotizaciones(); }
                     if (moduloURL === 'viajes') { cargarCamiones(); cargarRutas(); cargarTablaViajes(); }
                     if (moduloURL === 'mantenimiento') { cargarMaquinasCatalogo(); cargarTablaOrdenes(); cargarTablaInsumos(); buildFormatosInspeccion(); }

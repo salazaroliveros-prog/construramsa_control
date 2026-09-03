@@ -150,10 +150,10 @@
      * @private
      */
     function _enriquecerKPIsParaReporte(kpisEngine, db2, inicio, fin) {
-        var caja = Array.isArray(db2.caja_chica) ? db2.caja_chica : [];
-        var porCategoria = {};
+        var porCategoria = (kpisEngine && kpisEngine.gastosPorCategoria) ? kpisEngine.gastosPorCategoria : {};
         var porDia = {};
 
+        var caja = Array.isArray(db2.caja_chica) ? db2.caja_chica : [];
         caja.forEach(function (m) {
             if (!m) return;
             var key = fechaMov(m);
@@ -165,8 +165,6 @@
                 porDia[key].ingresos += Math.abs(monto);
             } else {
                 porDia[key].gastos += Math.abs(monto);
-                var cat = String(m.categoria || 'Sin categoría').trim();
-                porCategoria[cat] = (porCategoria[cat] || 0) + Math.abs(monto);
             }
         });
 
@@ -248,7 +246,8 @@
                 kpis.nGastos++;
                 kpis.porDia[key].gastos += gasto;
                 var cat = String(m.categoria || 'Sin categoría').trim();
-                kpis.porCategoria[cat] = (kpis.porCategoria[cat] || 0) + gasto;
+                var categoriaKey = cat.split('/')[0].trim() || 'Otros';
+                kpis.porCategoria[categoriaKey] = (kpis.porCategoria[categoriaKey] || 0) + gasto;
             }
         });
         kpis.saldo = kpis.totalIngresos - kpis.totalGastos;
@@ -420,6 +419,48 @@
             cardKPI('Viajes', String(kpis.viajes), 'viajes de camiones') +
             cardKPI('Asistencia', String(kpis.asistencia.registros), kpis.asistencia.ausencias + ' ausencias');
 
+        var adquisiciones = (db.adquisiciones || {}).cotizaciones_compras || [];
+        var comprasPeriodo = adquisiciones.filter(function(c) { return enRango(fechaMov(c), opts.inicio, opts.fin) && c.estado === 'aprobada'; });
+        var totalCompras = comprasPeriodo.reduce(function(s, c) { return s + num(c.total); }, 0);
+        var proveedoresUnicos = {};
+        comprasPeriodo.forEach(function(c) { proveedoresUnicos[c.proveedor_id] = true; });
+        var proveedoresActivos = Object.keys(proveedoresUnicos).length;
+
+        var kpiAdq = cardKPI('Compras', fmtQ(totalCompras), proveedoresActivos + ' proveedores activos');
+
+        var proveedoresDb = (db.adquisiciones || {}).proveedores || [];
+        var proveedorNombre = {};
+        proveedoresDb.forEach(function(p) { proveedorNombre[p.id] = p.nombre || 'Sin nombre'; });
+        var resumenProveedores = {};
+        comprasPeriodo.forEach(function(c) {
+            var pid = c.proveedor_id || 'sin_proveedor';
+            if (!resumenProveedores[pid]) resumenProveedores[pid] = { nombre: proveedorNombre[pid] || 'Desconocido', total: 0, cantidad: 0 };
+            resumenProveedores[pid].total += num(c.total);
+            resumenProveedores[pid].cantidad += 1;
+        });
+        var filasProv = Object.keys(resumenProveedores).sort(function(a, b) { return resumenProveedores[b].total - resumenProveedores[a].total; }).map(function(pid, i) {
+            var r = resumenProveedores[pid];
+            var share = totalCompras > 0 ? r.total / totalCompras * 100 : 0;
+            return '<tr>'
+                + '<td style="padding:7px 10px;border-bottom:1px solid ' + COLORES.lineas + ';color:' + COLORES.gris + ';font-size:12px;">' + (i + 1) + '</td>'
+                + '<td style="padding:7px 10px;border-bottom:1px solid ' + COLORES.lineas + ';color:' + COLORES.tinta + ';font-size:13px;font-weight:600;">' + esc(r.nombre) + '</td>'
+                + '<td style="padding:7px 10px;border-bottom:1px solid ' + COLORES.lineas + ';text-align:right;color:' + COLORES.tinta + ';font-size:13px;">' + r.cantidad + '</td>'
+                + '<td style="padding:7px 10px;border-bottom:1px solid ' + COLORES.lineas + ';text-align:right;color:' + COLORES.tinta + ';font-size:13px;">' + fmtQ(r.total) + '</td>'
+                + '<td style="padding:7px 10px;border-bottom:1px solid ' + COLORES.lineas + ';text-align:right;color:' + COLORES.gris + ';font-size:12px;">' + fmtPct(share, 1) + '</td>'
+                + '</tr>';
+        }).join('');
+
+        var tablaProvHtml = filasProv.length
+            ? '<div style="border:1px solid ' + COLORES.lineas + ';border-radius:8px;overflow:hidden;">'
+                + '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:' + COLORES.fondo + ';">'
+                + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:' + COLORES.gris + ';">#</th>'
+                + '<th style="padding:8px 10px;text-align:left;font-size:11px;color:' + COLORES.gris + ';">Proveedor</th>'
+                + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:' + COLORES.gris + ';">Compras</th>'
+                + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:' + COLORES.gris + ';">Total</th>'
+                + '<th style="padding:8px 10px;text-align:right;font-size:11px;color:' + COLORES.gris + ';">%</th>'
+                + '</tr></thead><tbody>' + filasProv + '</tbody></table></div>'
+            : '<div class="ej-sin-datos">Sin compras aprobadas en el período.</div>';
+
         var alertasHtml = kpis.alertas.map(function (a) {
             var color = a.nivel === 'danger' ? COLORES.alerta : a.nivel === 'warning' ? '#b67c1f' : COLORES.acento;
             var icono = a.nivel === 'danger' ? '▲' : a.nivel === 'warning' ? '⚠' : 'ℹ';
@@ -457,6 +498,7 @@
             // ---- KPIs ----
             + '<div class="ej-grid">' + kpiCards + '</div>'
             + '<div class="ej-grid" style="margin-top:10px;">' + kpiOp + '</div>'
+            + '<div class="ej-grid" style="margin-top:10px;">' + kpiAdq + '</div>'
             // ---- ANÁLISIS ----
             + '<div class="ej-page-break">' + tituloSeccion('Distribución de Gastos por Categoría') + '</div>'
             + '<div style="display:flex;gap:18px;align-items:flex-start;">'
@@ -467,6 +509,9 @@
             + svgTendencia(kpis.porDia)
             + '<div class="ej-page-break" style="margin-top:22px;">' + tituloSeccion('Alertas Gerenciales') + '</div>'
             + alertasHtml
+            + '<div class="ej-page-break" style="margin-top:22px;">' + tituloSeccion('Resumen de Adquisiciones') + '</div>'
+            + '<div class="info-box"><strong>Compras del período</strong> ' + proveedoresActivos + ' proveedor(es) activo(s) · Total: ' + fmtQ(totalCompras) + '</div>'
+            + tablaProvHtml
             // ---- cierre / espacio para firma ----
             + '<div style="margin-top:48px;display:flex;justify-content:flex-end;">'
             + '<div style="text-align:center;border-top:1px solid ' + COLORES.lineas + ';padding-top:8px;width:240px;">'
