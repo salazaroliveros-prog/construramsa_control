@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA v2.9.0 — Test Unitario de Módulos src/
+ * CONSTRURAMSA v2.9.1 — Test Unitario de Módulos src/
  * Cubre la configuración centralizada (CR_CONFIG), el módulo de exportación
  * (CR_Export), el motor de KPIs (CR_KPIEngine) y el reporte ejecutivo
  * (CR_ReporteEjecutivo): moneda, paleta, firmas, sanitización CSV anti-inyección,

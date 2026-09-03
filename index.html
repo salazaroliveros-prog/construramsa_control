@@ -7294,13 +7294,11 @@ tbody.innerHTML = '';
         }
 
         function rechazarAsistencia(fecha) {
-            const comentario = prompt('Motivo del rechazo (opcional):');
-            if (comentario === null) return;
             showConfirmModal('Rechazar Planilla', `¿Rechazar la planilla del ${fecha}?`, () => {
                 const datos = getProyectoData();
                 const dia = datos.personal.asistencia.find(a => a.fecha === fecha);
                 if (dia) {
-                    dia.aprobacion = { estado:'rechazada', aprobado_por:'Usuario', fecha_aprobacion:new Date().toISOString(), comentario: comentario || '' };
+                    dia.aprobacion = { estado:'rechazada', aprobado_por:'Usuario', fecha_aprobacion:new Date().toISOString(), comentario:'' };
                     saveProyectoData(datos);
                     cargarTablaAsistencia();
                     renderCalendarioAsistencia();
@@ -9822,12 +9820,12 @@ tbody.innerHTML = '';
         }
 
         function limpiarHistorialReportes() {
-            if (confirm('¿Estás seguro de que deseas limpiar el historial de reportes recientes?')) {
+            showConfirmModal('Limpiar Historial', '¿Estás seguro de que deseas limpiar el historial de reportes recientes?', () => {
                 cacheReportes = [];
                 renderizarReportesRecientes();
                 actualizarEstadisticasReportes();
                 showToast('✅ Historial de reportes limpiado', 'success');
-            }
+            });
         }
 
         function actualizarDescripcionReporte() {

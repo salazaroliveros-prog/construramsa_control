@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════════════════════
- * SYNC OPTIMIZER — Control de Obra v2.9.0
+ * SYNC OPTIMIZER — Control de Obra v2.9.1
  * ════════════════════════════════════════════════════════════════════════════════
  * 
  * Módulo para optimizar sincronización con Cloud (OneDrive, Google Drive):
