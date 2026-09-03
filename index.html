@@ -4023,6 +4023,17 @@
                 </div>
             </div>
 
+            <div style="margin-bottom:25px;padding:16px;border:1px solid var(--alerta-texto);border-radius:12px;background:linear-gradient(145deg,rgba(220,38,38,0.12),rgba(239,68,68,0.08));">
+                <h3 class="historial-titulo" style="color:var(--alerta-texto);">⚠️ Zona de Peligro</h3>
+                <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">
+                    Estas acciones eliminan datos de forma permanente. Asegúrate de tener un respaldo antes de continuar.
+                </p>
+                <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                    <button type="button" onclick="resetTotalDatos()" class="btn-primario" aria-label="Borrar todos los datos locales y reiniciar la app">🗑️ Borrar todos los datos locales</button>
+                    <button type="button" onclick="resetSoloLocalStorage()" class="btn-secundario" aria-label="Limpiar localStorage sin tocar el archivo JSON">🧹 Limpiar caché local</button>
+                </div>
+            </div>
+
             <div style="margin-bottom:25px;padding:16px;border:1px solid var(--glass-border);border-radius:12px;background:linear-gradient(145deg,rgba(11,63,143,0.25),rgba(139,92,246,0.12));">
                 <h3 class="historial-titulo" style="color:var(--acento-cian);">📱 Instalar como App Nativa</h3>
                 <p style="color:var(--texto-secundario);font-size:12px;margin-bottom:12px;">
@@ -9864,6 +9875,32 @@ tbody.innerHTML = '';
                 renderizarReportesRecientes();
                 actualizarEstadisticasReportes();
                 showToast('✅ Historial de reportes limpiado', 'success');
+            });
+        }
+
+        function resetSoloLocalStorage() {
+            showConfirmModal('Limpiar caché local', 'Esto borra localStorage y recarga la app para volver al estado inicial desde construramsa_db.json. ¿Continuar?', () => {
+                localStorage.removeItem(DB_KEY);
+                invalidarCacheDB();
+                showToast('✅ localStorage limpiado. Recargando...', 'success');
+                setTimeout(() => location.reload(), 600);
+            });
+        }
+
+        function resetTotalDatos() {
+            showConfirmModal('Borrar todos los datos locales', 'Se perderán todos los datos operativos locales. Asegúrate de tener un respaldo antes de continuar. ¿Deseas continuar?', () => {
+                try {
+                    localStorage.removeItem(DB_KEY);
+                    invalidarCacheDB();
+                    cacheReportes = [];
+                    if (typeof window.SyncOptimizer !== 'undefined' && typeof window.SyncOptimizer.clear === 'function') {
+                        window.SyncOptimizer.clear();
+                    }
+                    showToast('✅ Datos locales eliminados. Recargando aplicación...', 'success', 4000);
+                    setTimeout(() => location.reload(), 900);
+                } catch (e) {
+                    showToast('❌ No se pudo completar el reseteo: ' + e.message, 'error');
+                }
             });
         }
 
