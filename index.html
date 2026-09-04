@@ -196,9 +196,9 @@
             border-radius: 6px;
             border-left: 3px solid var(--acento-cian);
         }
-        #pruebas-panel .prueba-item.success { border-left-color: #10b981; }
-        #pruebas-panel .prueba-item.error { border-left-color: #ef4444; }
-        #pruebas-panel .prueba-item.warning { border-left-color: #f59e0b; }
+        #pruebas-panel .prueba-item.success { border-left-color: var(--exito); }
+        #pruebas-panel .prueba-item.error { border-left-color: var(--alerta); }
+        #pruebas-panel .prueba-item.warning { border-left-color: var(--advertencia-texto); }
         #pruebas-panel .prueba-label {
             font-weight: 600;
             color: var(--texto-principal);
@@ -284,7 +284,7 @@
             box-shadow: 0 0 10px rgba(0, 164, 228, 0.5);
         }
         .prueba-highlight-error {
-            outline: 3px solid #ef4444 !important;
+            outline: 3px solid var(--alerta) !important;
             outline-offset: 2px;
             box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
@@ -441,11 +441,11 @@
 
         /* Fix: opciones de select legibles en modo oscuro en todos los SO */
         select option {
-            background-color: #1a1f2e;
-            color: #f3f4f6;
+            background-color: var(--surface-1);
+            color: var(--texto-principal);
         }
         select option:disabled {
-            color: #6b7280;
+            color: var(--texto-secundario);
         }
 
         .btn-primario {
@@ -826,9 +826,9 @@
             font-weight: 700;
             text-transform: uppercase;
         }
-        .estado-badge.asistio { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-        .estado-badge.falto   { background: rgba(239,68,68,0.15);   color: #f87171; border: 1px solid rgba(239,68,68,0.3);   }
-        .estado-badge.justificado { background: rgba(156,163,175,0.15); color: #9ca3af; border: 1px solid rgba(156,163,175,0.3); }
+        .estado-badge.asistio { background: rgba(16,185,129,0.15); color: var(--exito); border: 1px solid rgba(16,185,129,0.3); }
+        .estado-badge.falto   { background: rgba(239,68,68,0.15);   color: var(--alerta-texto); border: 1px solid rgba(239,68,68,0.3);   }
+        .estado-badge.justificado { background: rgba(156,163,175,0.15); color: var(--texto-secundario); border: 1px solid rgba(156,163,175,0.3); }
 
         tr:hover td { background: rgba(255,255,255,0.02); }
 
@@ -861,8 +861,8 @@
             width: 210mm;
             min-height: 297mm;
             font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-            color: #111827;
-            background: #ffffff;
+            color: var(--pdf-gris-oscuro);
+            background: var(--pdf-blanco);
             /* MEJORA PDF v2.9.1: Márgenes uniformes 12mm (ANALISIS_MODULO_REPORTES.md) */
             padding: 12mm;
             box-sizing: border-box;
@@ -895,8 +895,8 @@
             page-break-after: auto;
         }
         #plantilla-reporte-impresion .pdf-page-header {
-            background: linear-gradient(135deg, #0b3b66 0%, #1d6fb8 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, var(--pdf-azul-oscuro) 0%, var(--pdf-azul-claro) 100%);
+            color: var(--pdf-blanco);
             border-radius: 10px 10px 0 0;
             padding: 8px 12px 10px 12px;
             margin-bottom: 12px;
@@ -987,7 +987,7 @@
         }
         #plantilla-reporte-impresion table.tabla-pdf th {
             background: linear-gradient(180deg, var(--pdf-azul-oscuro) 0%, var(--pdf-azul-claro) 100%);
-            color: #ffffff;
+            color: var(--pdf-blanco);
             font-size: 8.5px;
             font-weight: 700;
             text-transform: uppercase;
@@ -1013,10 +1013,10 @@
             max-width: 0;
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:nth-child(even) {
-            background-color: #F9FAFB;
+            background-color: var(--pdf-fondo-claro);
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:hover {
-            background-color: #EFF6FF;
+            background-color: var(--pdf-fondo-azul);
         }
         #plantilla-reporte-impresion table.tabla-pdf tr:first-child td {
             border-top: 2px solid var(--pdf-azul-oscuro);
@@ -1028,7 +1028,7 @@
             font-weight: 700;
             color: var(--pdf-azul-oscuro);
             text-align: right;
-            background: linear-gradient(90deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+            background: linear-gradient(90deg, var(--pdf-fondo-azul) 0%, var(--pdf-azul-claro) 100%) !important;
             border-top: 2px solid var(--pdf-azul-oscuro);
             border-bottom: 2px solid var(--pdf-azul-oscuro);
         }
@@ -1036,7 +1036,7 @@
             font-weight: 700;
             color: var(--pdf-rojo);
             text-align: right;
-            background: linear-gradient(90deg, #FEF2F2 0%, #FEE2E2 100%) !important;
+            background: linear-gradient(90deg, rgba(220,38,38,0.1) 0%, rgba(220,38,38,0.2) 100%) !important;
             border-top: 2px solid var(--pdf-rojo);
             border-bottom: 2px solid var(--pdf-rojo);
         }
@@ -1044,7 +1044,7 @@
             font-weight: 700;
             color: var(--pdf-verde);
             text-align: right;
-            background: linear-gradient(90deg, #ECFDF5 0%, #D1FAE5 100%) !important;
+            background: linear-gradient(90deg, rgba(5,150,105,0.1) 0%, rgba(5,150,105,0.2) 100%) !important;
             border-top: 2px solid var(--pdf-verde);
             border-bottom: 2px solid var(--pdf-verde);
         }
@@ -1071,8 +1071,8 @@
 
         /* Mejoras en contenedores de información */
         #plantilla-reporte-impresion .info-box {
-            background: #F9FAFB;
-            border: 1px solid #E5E7EB;
+            background: var(--pdf-fondo-claro);
+            border: 1px solid var(--pdf-gris-borde);
             border-left: 4px solid var(--pdf-azul-claro);
             border-radius: 4px;
             padding: 10px 12px;
@@ -1081,8 +1081,8 @@
             line-height: 1.5;
         }
         #plantilla-reporte-impresion .alert-box {
-            background: #FEF2F2;
-            border: 1px solid #FEE2E2;
+            background: rgba(220,38,38,0.05);
+            border: 1px solid rgba(220,38,38,0.2);
             border-left: 4px solid var(--pdf-rojo);
             border-radius: 4px;
             padding: 10px 12px;
@@ -1091,8 +1091,8 @@
             line-height: 1.5;
         }
         #plantilla-reporte-impresion .success-box {
-            background: #ECFDF5;
-            border: 1px solid #D1FAE5;
+            background: rgba(5,150,105,0.05);
+            border: 1px solid rgba(5,150,105,0.2);
             border-left: 4px solid var(--pdf-verde);
             border-radius: 4px;
             padding: 10px 12px;
@@ -1144,7 +1144,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #9ca3af;
+            color: var(--texto-secundario);
             pointer-events: none;
             font-size: 14px;
             user-select: none;
@@ -1170,7 +1170,7 @@
             position: relative;
         }
         .css-chart-bar.alerta {
-            background: linear-gradient(180deg, #ef4444, #dc2626);
+            background: linear-gradient(180deg, var(--alerta), var(--pdf-rojo));
         }
         .css-chart-bar:hover {
             opacity: 0.9;
@@ -1189,7 +1189,7 @@
             border-color: var(--alerta);
         }
         .proyeccion-card.alerta {
-            border-color: #ef4444;
+            border-color: var(--alerta);
             background: rgba(239, 68, 68, 0.1);
         }
         .metricas-grid {
@@ -1220,10 +1220,10 @@
             color: var(--texto-principal);
         }
         .metrica-value.positivo {
-            color: #10b981;
+            color: var(--exito);
         }
         .metrica-value.negativo {
-            color: #ef4444;
+            color: var(--alerta);
         }
         .barra-progreso {
             background: rgba(255, 255, 255, 0.1);
@@ -1791,7 +1791,7 @@
             white-space: nowrap;
         }
         .css-chart-bar.alerta {
-            background: linear-gradient(180deg, var(--alerta), #fbbf24);
+            background: linear-gradient(180deg, var(--alerta), var(--advertencia-texto));
         }
         .chart-legend {
             display: flex;
@@ -2228,7 +2228,7 @@
             z-index: 3000;
             transform: translateY(-160%);
             background: var(--acento-cian);
-            color: #06121c;
+            color: var(--bg-principal);
             border-radius: 8px;
             box-sizing: border-box;
             min-height: 44px;
