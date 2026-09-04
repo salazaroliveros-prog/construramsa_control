@@ -12103,8 +12103,8 @@ function validarDependenciasExportacion() {
             }
         });
 
-        const APP_VERSION = '2.9.1';
-        // APP_VERSION_MARKER:2.9.1 (usado para detección de actualizaciones)
+        const APP_VERSION = '2.9.2';
+        // APP_VERSION_MARKER:2.9.2 (usado para detección de actualizaciones)
         const _scrollPositions = new Map();
         function guardarScrollModulo(mid) {
             const el = document.getElementById(mid);
@@ -12432,17 +12432,30 @@ function validarDependenciasExportacion() {
                         if (now - _ultimoCheckVersion < VERSION_CHECK_INTERVAL) return;
                         _ultimoCheckVersion = now;
 
-                        // Fetch del index.html para verificar si cambió
-                        const response = await fetch('./index.html?' + now, { cache: 'no-store' });
-                        if (!response.ok) return;
+                        console.log('[Actualización] Verificando versión remota...');
+
+                        // Fetch del index.html con timestamp para forzar bypass de cache
+                        const response = await fetch('./index.html?t=' + now, { 
+                            cache: 'no-store',
+                            headers: { 'Cache-Control': 'no-cache' }
+                        });
+                        if (!response.ok) {
+                            console.warn('[Actualización] Error fetching index.html:', response.status);
+                            return;
+                        }
 
                         const html = await response.text();
                         // Extraer la versión del HTML buscando el marcador especial en comentario
                         const markerMatch = html.match(/\/\/ APP_VERSION_MARKER:([\d.]+)/);
-                        if (!markerMatch) return;
+                        if (!markerMatch) {
+                            console.warn('[Actualización] No se encontró marcador de versión');
+                            return;
+                        }
 
                         const versionRemota = markerMatch[1];
                         const versionLocal = APP_VERSION;
+
+                        console.log(`[Actualización] Versión local: ${versionLocal}, Versión remota: ${versionRemota}`);
 
                         // Mostrar botón de actualización si hay versión nueva
                         if (versionRemota !== versionLocal) {
@@ -12454,19 +12467,22 @@ function validarDependenciasExportacion() {
                         // Solo notificar si la versión remota es diferente de la local
                         // y no estamos ya recargando por una actualización
                         if (versionRemota !== versionLocal && !_recargandoPorUpdate) {
-                            console.log(`[Actualización] Versión local: ${versionLocal}, Versión remota: ${versionRemota}`);
+                            console.log(`[Actualización] ¡Nueva versión detectada! ${versionLocal} -> ${versionRemota}`);
                             _recargandoPorUpdate = true;
 
                             showConfirmModal(
                                 'Actualización disponible',
-                                `Hay una nueva versión (${versionRemota}) disponible. ¿Actualizar ahora?`,
+                                `Hay una nueva versión (${versionRemota}) disponible. La versión actual es ${versionLocal}. ¿Actualizar ahora?`,
                                 () => {
                                     showToast('🔄 Actualizando...', 'info', 2000);
-                                    setTimeout(() => location.reload(), 500);
+                                    // Forzar recarga con timestamp para evitar cache
+                                    setTimeout(() => location.reload(true), 500);
                                 },
                                 'Ahora no',
                                 () => { _recargandoPorUpdate = false; }
                             );
+                        } else {
+                            console.log('[Actualización] Versión actualizada');
                         }
                      } catch (err) {
                          console.warn('[Actualización] Error al verificar versión:', err);
@@ -12479,14 +12495,22 @@ function validarDependenciasExportacion() {
 
                         // Aviso cuando el navegador detecta e instala un SW nuevo
                         reg.addEventListener('updatefound', function () {
+                            console.log('[SW] Nueva versión detectada por updatefound');
                             const w = reg.installing;
                             if (!w) return;
                             w.addEventListener('statechange', function () {
+                                console.log('[SW] SW state:', w.state);
                                 if (w.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[SW] SW nuevo instalado, solicitando actualización');
                                     showConfirmModal(
                                         'Actualización disponible',
-                                        'Hay una nueva versión de la app. ¿Actualizar ahora?',
-                                        () => w.postMessage({ action: 'skipWaiting' })
+                                        'Hay una nueva versión de la app disponible. ¿Actualizar ahora para obtener las últimas mejoras?',
+                                        () => {
+                                            console.log('[SW] Usuario confirmó actualización');
+                                            w.postMessage({ action: 'skipWaiting' });
+                                        },
+                                        'Ahora no',
+                                        () => { console.log('[SW] Usuario rechazó actualización'); }
                                     );
                                 }
                             });
@@ -12494,11 +12518,16 @@ function validarDependenciasExportacion() {
 
                         // Comprobación periódica: PWA standalone puede quedar abierta
                         // días sin recargar; sin esto el usuario nunca vería el aviso.
-                        setInterval(() => { reg.update().catch(() => {}); }, 60 * 60 * 1000);
+                        // REDUCIDO a 5 minutos para detección más rápida
+                        setInterval(() => { 
+                            console.log('[SW] Verificando actualización SW (5 min)...');
+                            reg.update().catch(() => {}); 
+                        }, 5 * 60 * 1000);
 
                         // Comprobar al volver a la app (pestaña visible / app enfocada)
                         document.addEventListener('visibilitychange', function () {
                             if (document.visibilityState === 'visible') {
+                                console.log('[SW] App visible, verificando actualización...');
                                 reg.update().catch(() => {});
                                 verificarActualizacion();
                             }
@@ -12507,8 +12536,11 @@ function validarDependenciasExportacion() {
                         // Verificar versión inicialmente después de 3 segundos
                         setTimeout(verificarActualizacion, 3000);
                         
-                        // Verificar versión periódicamente cada 2 minutos
-                        setInterval(verificarActualizacion, 120000);
+                        // Verificar versión periódicamente cada 30 segundos (reducido de 2 minutos)
+                        setInterval(() => {
+                            console.log('[SW] Verificando versión (30 seg)...');
+                            verificarActualizacion();
+                        }, 30000);
                     })
                     .catch(err => console.warn('SW no disponible:', err));
 

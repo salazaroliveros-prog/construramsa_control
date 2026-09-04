@@ -1,9 +1,11 @@
 // ============================================================
 // SERVICE WORKER — Control de Obra v2.9.1
 // Estrategia: Network First con fallback a Cache
+// Mejora: Skip waiting in install para actualizaciones inmediatas
 // ============================================================
 
-const CACHE_NAME = 'control-obra-v2.9.1';
+const CACHE_VERSION = '2.9.2';
+const CACHE_NAME = `control-obra-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -44,30 +46,42 @@ const STATIC_ASSETS = [
 
 // ── Instalación ───────────────────────────────────────────────
 self.addEventListener('install', function (event) {
+    console.log('[SW] Instalando nueva versión:', CACHE_NAME);
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(function (cache) {
-                console.log('[SW] Instalando cache:', CACHE_NAME);
+                console.log('[SW] Cache abierto:', CACHE_NAME);
                 const locales = STATIC_ASSETS.filter(u => !u.startsWith('http'));
                 const remotos = STATIC_ASSETS.filter(u => u.startsWith('http'));
                 return cache.addAll(locales)
                     .then(() => Promise.allSettled(remotos.map(u => cache.add(u))));
             })
-            .then(() => self.skipWaiting())
+            .then(() => {
+                console.log('[SW] Cache instalado, activando inmediatamente');
+                return self.skipWaiting(); // Forzar activación inmediata
+            })
     );
 });
 
 // ── Activación ───────────────────────────────────────────────
 self.addEventListener('activate', function (event) {
+    console.log('[SW] Activando:', CACHE_NAME);
     event.waitUntil(
         caches.keys()
             .then(function (names) {
+                console.log('[SW] Caches existentes:', names);
                 return Promise.all(
                     names.filter(n => n !== CACHE_NAME)
-                         .map(n => { console.log('[SW] Eliminando cache obsoleto:', n); return caches.delete(n); })
+                         .map(n => { 
+                             console.log('[SW] Eliminando cache obsoleto:', n); 
+                             return caches.delete(n); 
+                         })
                 );
             })
-            .then(() => self.clients.claim())
+            .then(() => {
+                console.log('[SW] Claiming clients');
+                return self.clients.claim();
+            })
     );
 });
 
