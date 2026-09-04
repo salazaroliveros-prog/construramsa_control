@@ -16,6 +16,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+*.backup
 
 # Build files
 dist/

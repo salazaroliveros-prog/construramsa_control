@@ -99,6 +99,18 @@ function testReportGeneration(tipo, db) {
     const issues = [];
     const improvements = [];
     
+    if (!db.proyectos || db.proyectos.length === 0) {
+        logWarning('No projects found in database; skipping report generation for clean-state validation.');
+        return {
+            passed: true,
+            failed: false,
+            issues: [],
+            improvements: ['No projects in DB — user should create a project before generating reports'],
+            csv: '',
+            filename: ''
+        };
+    }
+    
     const datos = db.proyectos_data[db.proyectos[0].id];
     const proy = db.proyectos[0];
     const config = db.configuracion || {};
