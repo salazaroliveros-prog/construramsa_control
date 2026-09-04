@@ -23,7 +23,7 @@ jobs:
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs: validate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
@@ -33,32 +33,24 @@ jobs:
           node-version: 20
       - name: Instalar Vercel CLI
         run: npm install -g vercel@latest
+      - name: Vincular proyecto Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          vercel link --yes --project=construramsacontrolgastos --scope=proyectoswm
+          vercel whoami --scope=proyectoswm
       - name: Deploy a produccion con token
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          # Ejecutar el deploy en segundo plano y verificar el resultado via API,
-          # para evitar el cuelgue del event stream del CLI
-          vercel deploy --prod --yes --name=construramsa_control_gastos --scope=proyectoswm --token="$VERCEL_TOKEN" > deploy.log 2>&1 &
-          VPID=$!
-          echo "Deploy disparado (PID $VPID). Esperando resultado..."
-          NEW_URL=""
-          for i in $(seq 1 60); do
-            kill -0 $VPID 2>/dev/null || break
-            # Capturar la URL del deployment apenas aparezca en el log
-            if [ -z "$NEW_URL" ]; then
-              NEW_URL=$(grep -oE "https://construramsacontrolgastos-[a-z0-9]+-proyectoswm\.vercel\.app" deploy.log | head -1 || true)
-            fi
-            sleep 10
-          done
-          # Si el CLI sigue vivo tras 10 min, es el bug del event stream; el deployment ya existe
-          if kill -0 $VPID 2>/dev/null; then
-            kill $VPID 2>/dev/null || true
-            echo "CLI no finalizo (bug de event stream). Verificando deployment via HTTP..."
-          fi
+          # Proyecto ya vinculado en el paso anterior; el deploy es bloqueante
+          # y devuelve la URL al terminar.
+          vercel deploy --prod --yes > deploy.log 2>&1
+          EXIT_CODE=$?
           tail -20 deploy.log || true
-          if [ -z "$NEW_URL" ]; then
-            echo "ERROR: no se obtuvo URL del deployment"
+          NEW_URL=$(grep -oE "https://construramsacontrolgastos[a-z0-9-]*\.vercel\.app" deploy.log | head -1 || true)
+          if [ $EXIT_CODE -ne 0 ] || [ -z "$NEW_URL" ]; then
+            echo "ERROR: el deploy fallo (exit $EXIT_CODE, url: $NEW_URL)"
             cat deploy.log
             exit 1
           fi
