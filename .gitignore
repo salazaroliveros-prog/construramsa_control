@@ -79,7 +79,9 @@ exports/
   
 # Artefactos de pruebas generados  
 report_*.csv  
-report_test_results.json  
-functional_test_results.json  
-comprehensive_audit_results.json  
+report_*.json
+report_*.md
+visual_verification_report.html
+functional_test_results.json
+comprehensive_audit_results.json
 e2e_validation_report.html  
