@@ -860,6 +860,7 @@
             top: -9999px;
             width: 210mm;
             min-height: 297mm;
+            max-height: 297mm;
             font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
             color: var(--pdf-gris-oscuro);
             background: var(--pdf-blanco);
@@ -869,8 +870,7 @@
             opacity: 0;
             pointer-events: none;
             z-index: -1;
-            overflow-x: hidden;
-            overflow-y: visible;
+            overflow: hidden;
         }
 
         /* Clase para hacer visible la plantilla durante la generación de PDF.
@@ -10552,6 +10552,31 @@ tbody.innerHTML = '';
             csv += `# ${eslogan}\n`;
             csv += `# ${direccion} | Tel: ${telefono} | Email: ${email} | ${website}\n`;
             csv += `# \n`;
+            
+            // Firmas para el CSV (al final del documento)
+            const generarFirmasCSV = () => {
+                const firmas = (config.firmas || [
+                    { nombre: 'Arq. Wilson Dario Salazar', cargo: 'Jefe de Proyectos' },
+                    { nombre: 'Ing. Juan Luis Ramirez Jimenez', cargo: 'Gerente Comercial' }
+                ]);
+                
+                let firmasCSV = `\n# ============================================================\n`;
+                firmasCSV += `# FIRMAS DE APROBACIÓN\n`;
+                firmasCSV += `# ============================================================\n`;
+                firmasCSV += `# \n`;
+                
+                firmas.forEach((firma, index) => {
+                    firmasCSV += `# ${index + 1}. ${firma.nombre}\n`;
+                    firmasCSV += `#    Cargo: ${firma.cargo}\n`;
+                    firmasCSV += `# \n`;
+                });
+                
+                firmasCSV += `# ============================================================\n`;
+                firmasCSV += `# Generado el: ${new Date().toLocaleDateString('es-GT')} ${new Date().toLocaleTimeString('es-GT')}\n`;
+                firmasCSV += `# ============================================================\n`;
+                
+                return firmasCSV;
+            };
 
             const enRango = (f) => f >= rango.inicio && f <= rango.fin;
             const periodoDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
@@ -10629,6 +10654,7 @@ tbody.innerHTML = '';
                     }
                 }
                 csv += `,,,,\n,,,TOTAL INGRESOS:,${numToF(totalIng)}\n,,,TOTAL EGRESOS:,${numToF(totalEgr)}\n,,,SALDO NETO:,${numToF(totalIng - totalEgr)}\n`;
+                csv += generarFirmasCSV();
             } else if (tipo === 'asistencia') {
                 csv += `${csvRow(['Reporte de Asistencia - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `# Resumen del personal por periodo\n`;
@@ -10692,6 +10718,7 @@ tbody.innerHTML = '';
                     });
                 }
                 csv += `,,,,TOTAL NÓMINA:,${total.toFixed(2)}\n`;
+                csv += generarFirmasCSV();
             } else if (tipo === 'viajes') {
                 csv += `${csvRow(['Reporte de Viajes de Camiones - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `# Período: ${periodoDisplay}\n`;
@@ -10710,6 +10737,7 @@ tbody.innerHTML = '';
                 }
                 csv += `\n`;
                 csv += `${csvRow(['', '', '', '', '', '', '', 'TOTAL VIAJES (Q):', totalV])}\n`;
+                csv += generarFirmasCSV();
             } else if (tipo === 'mantenimiento') {
                 csv += `${csvRow(['Reporte de Mantenimiento e Insumos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
@@ -10732,6 +10760,7 @@ tbody.innerHTML = '';
                 }
                 csv += `\n`;
                 csv += `${csvRow(['', '', 'TOTAL MANTENIMIENTO E INSUMOS:', totalM])}\n`;
+                csv += generarFirmasCSV();
             } else if (tipo === 'categoria') {
                 csv += `${csvRow(['Reporte por Categoría de Gastos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Período,Categoría,Monto (Q),Porcentaje\n`;
@@ -10764,6 +10793,7 @@ tbody.innerHTML = '';
                 } else {
                     csv += `"SIN GASTOS EN EL PERÍODO ${periodoDisplay}",,,\n`;
                 }
+                csv += generarFirmasCSV();
             } else if (tipo === 'ejecutivo') {
                 csv += `${csvRow(['Resumen Ejecutivo (KPIs Gerenciales) - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `KPI,Valor,Descripcion\n`;
@@ -10808,6 +10838,7 @@ tbody.innerHTML = '';
                 } else {
                     csv += `"Error: Motor de KPIs no disponible",,,\n`;
                 }
+                csv += generarFirmasCSV();
             }
 
             // ── Reporte de Nómina Consolidada ──────────────────────────────────
@@ -10853,24 +10884,9 @@ tbody.innerHTML = '';
                         csv += `# Total a pagar: Q${nomina.totalPagable.toFixed(2)}\n`;
                     }
                 }
+                csv += generarFirmasCSV();
             }
 
-            // ── Bloque de firmas autorizadas (membrete profesional) ──────────
-            csv += `# \n`;
-            csv += `# FIRMAS AUTORIZADAS\n`;
-            const firmasAutorizadas = (config.firmas && Array.isArray(config.firmas) && config.firmas.length)
-                ? config.firmas
-                : (typeof CR_CONFIG !== 'undefined' && CR_CONFIG.PLANTILLA_CORPORATIVA && Array.isArray(CR_CONFIG.PLANTILLA_CORPORATIVA.firmasAutorizadas))
-                    ? CR_CONFIG.PLANTILLA_CORPORATIVA.firmasAutorizadas
-                    : [
-                        { nombre: 'Arq. Wilson Dario Salazar', cargo: 'Jefe de Proyectos' },
-                        { nombre: 'Ing. Juan Luis Ramirez Jimenez', cargo: 'Gerente Comercial' }
-                      ];
-            const f0 = firmasAutorizadas[0] ? firmasAutorizadas[0].nombre + ' - ' + firmasAutorizadas[0].cargo : '';
-            const f1 = firmasAutorizadas[1] ? firmasAutorizadas[1].nombre + ' - ' + firmasAutorizadas[1].cargo : '';
-            const f2 = firmasAutorizadas[2] ? firmasAutorizadas[2].nombre + ' - ' + firmasAutorizadas[2].cargo : '';
-            csv += `${csvCell('Elaborado por: ' + f0)},,${csvCell(f1)},,${csvCell(f2)}\n`;
-            csv = paginarCSV(csv);
             return csv;
         }
 
