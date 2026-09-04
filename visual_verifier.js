@@ -66,9 +66,10 @@ let page = null;
 
 async function setupBrowser() {
     logInfo('Initializing Playwright browser...');
+    const isCI = Boolean(process.env.CI);
     browser = await chromium.launch({
-        headless: false,
-        slowMo: 500 // Slow down actions for better visibility
+        headless: true,
+        slowMo: isCI ? 0 : 500
     });
     page = await browser.newPage();
     
