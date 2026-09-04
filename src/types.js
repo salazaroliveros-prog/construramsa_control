@@ -48,6 +48,7 @@
  * @property {string|null} [telefono]              - Teléfono de contacto.
  * @property {string|null} [email]                 - Email de contacto.
  * @property {string|null} [direccion]             - Dirección de la empresa.
+ * @property {string|null} [website]               - Sitio web corporativo.
  */
 
 /**
@@ -83,7 +84,7 @@
  * @property {ID}        id
  * @property {string}    tipo           - 'ingreso' | 'egreso'
  * @property {MontoQ}    monto
- * @property {string}    concepto
+ * @property {string}    descripcion
  * @property {FechaISO}  fecha
  * @property {string}    [categoria]
  * @property {string}    [detalle]
@@ -94,12 +95,13 @@
 /**
  * @typedef {Object} RegistroMaquinaria
  * @property {ID}        id
- * @property {ID}        vehiculo_id
- * @property {number}    horas
- * @property {number}    [galones]
- * @property {MontoQ}    [costo_combustible]
- * @property {MontoQ}    [costo_hora]
- * @property {string}    [observaciones]
+ * @property {ID}        [vehiculo_id]
+ * @property {string}    tipo
+ * @property {number}    [horas]
+ * @property {number}    [combustible_galones]
+ * @property {MontoQ}    [combustible_costo]
+ * @property {MontoQ}    [mantenimiento_costo]
+ * @property {string}    [codigo]
  * @property {FechaISO}  fecha
  * @property {boolean}   [es_propio]
  */
@@ -108,19 +110,24 @@
  * @typedef {Object} Trabajador
  * @property {ID}        id
  * @property {string}    nombre
- * @property {string}    cargo
- * @property {MontoQ}    salario_diario
+ * @property {string}    puesto
+ * @property {MontoQ}    pago_hora_normal
+ * @property {MontoQ}    pago_hora_extra
  * @property {boolean}   [activo]
  */
 
 /**
- * @typedef {Object} AsistenciaDiaria
- * @property {ID}        id
+ * @typedef {Object} RegistroAsistencia
  * @property {ID}        trabajador_id
+ * @property {'asistio'|'falto'|'justificado'} estado
+ * @property {number}    [horas_extras]
+ * @property {{total_diario?: MontoQ}} [calculos]
+ */
+
+/**
+ * @typedef {Object} AsistenciaDiaria
  * @property {FechaISO}  fecha
- * @property {number}    horas
- * @property {number}    [horas_extra]
- * @property {boolean}   [ausente]
+ * @property {RegistroAsistencia[]} registros
  */
 
 /**
@@ -136,8 +143,8 @@
  * @typedef {Object} CotizacionCompra
  * @property {ID}        id
  * @property {ID|null}   proveedor_id
- * @property {MontoQ}    monto
- * @property {string}    concepto
+ * @property {MontoQ}    total
+ * @property {string}    material_descripcion
  * @property {FechaISO}  fecha
  * @property {'pendiente'|'aprobada'|'rechazada'} estado
  */
@@ -146,17 +153,22 @@
  * @typedef {Object} ViajeCamion
  * @property {ID}        id
  * @property {string}    [tipo]         - 'propio' | 'alquilado'
- * @property {MontoQ}    costo
+ * @property {MontoQ}    total
  * @property {string}    [observaciones]
  * @property {FechaISO}  fecha
- * @property {string}    [ruta]
- * @property {number}    [distancia]
+ * @property {ID}        [vehiculo_id]
+ * @property {string}    [material]
+ * @property {number}    [numero]
+ * @property {number}    [km_total]
+ * @property {number}    [litros]
+ * @property {MontoQ}    [costo_combustible]
+ * @property {MontoQ}    [costo_alquiler]
  */
 
 /**
  * @typedef {Object} OrdenMantenimiento
  * @property {ID}        id
- * @property {ID}        maquina_id
+ * @property {ID}        maquinaria_id
  * @property {string}    tipo       - 'preventivo' | 'correctivo'
  * @property {MontoQ}    costo
  * @property {string}    [observaciones]
@@ -166,9 +178,9 @@
 /**
  * @typedef {Object} CompraInsumo
  * @property {ID}        id
- * @property {string}    categoria     - 'repuestos' | 'aceites' | 'hidraulicos' | 'combustible'
- * @property {string}    concepto
- * @property {MontoQ}    monto
+ * @property {string}    tipo
+ * @property {string}    articulo
+ * @property {MontoQ}    costo
  * @property {FechaISO}  fecha
  * @property {number}    [cantidad]
  * @property {boolean}   [es_critico]
@@ -177,11 +189,11 @@
 /**
  * @typedef {Object} ProyectoData
  * @property {MovimientoCaja[]}             caja_chica
- * @property {{vehiculos: any[], registros: RegistroMaquinaria[]}} maquinaria_flota
+ * @property {{vehiculos: Object[], registros: RegistroMaquinaria[]}} maquinaria_flota
  * @property {{trabajadores: Trabajador[], asistencia: AsistenciaDiaria[]}} personal
  * @property {{proveedores: Proveedor[], cotizaciones_compras: CotizacionCompra[]}} adquisiciones
- * @property {{rutas_botadero: any[], camiones: any[], equipo_alquilado: any[], viajes: ViajeCamion[]}} viajes_camiones
- * @property {{maquinaria: any[], formatos: Object<string,any>, ordenes: OrdenMantenimiento[], compras_insumos: CompraInsumo[]}} mantenimiento
+ * @property {{rutas_botadero: Object[], camiones: Object[], equipo_alquilado: Object[], viajes: ViajeCamion[]}} viajes_camiones
+ * @property {{maquinaria: Object[], formatos: Object<string,Object>, ordenes: OrdenMantenimiento[], compras_insumos: CompraInsumo[]}} mantenimiento
  */
 
 /**
@@ -200,7 +212,7 @@
 /**
  * @typedef {Object} ReporteGuardado
  * @property {ID}        id
- * @property {'diario'|'semanal'|'mensual'} tipo
+ * @property {'diario'|'semanal'|'mensual'|'asistencia'|'nomina'|'viajes'|'mantenimiento'|'categoria'|'ejecutivo'} tipo
  * @property {FechaISO}  fecha
  * @property {string}    proyecto_id
  * @property {FechaISO}  [desde]
@@ -208,7 +220,7 @@
  * @property {MontoQ}    total_ingresos
  * @property {MontoQ}    total_egresos
  * @property {MontoQ}    saldo
- * @property {Object<string, any>} [detalle]
+ * @property {Object<string, Object>} [detalle]
  */
 
 /**

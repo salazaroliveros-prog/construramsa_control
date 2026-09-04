@@ -19,5 +19,5 @@ jobs:
       - run: |
           node -e "JSON.parse(require('fs').readFileSync('construramsa_db.json','utf8')); console.log('DB JSON OK')"
       - run: |
-          node -e "['sw.js','src/config.js','src/kpiEngine.js','src/exportador.js','src/reporteEjecutivo.js','src/nominaEngine.js','src/plantillaPremium.js','src/signatureCapture.js','src/backgroundSync.js','src/syncOptimizer.js','src/silentDownload.js','src/types.js'].forEach(f=>{try{new Function(require('fs').readFileSync(f,'utf8'));console.log(f+': OK')}catch(e){console.error(f+': SYNTAX ERROR: '+e.message);process.exit(1);}})"
+          node -e "['sw.js','src/config.js','src/reportDataAdapter.js','src/kpiEngine.js','src/exportador.js','src/reporteEjecutivo.js','src/nominaEngine.js','src/plantillaPremium.js','src/signatureCapture.js','src/backgroundSync.js','src/syncOptimizer.js','src/silentDownload.js','src/types.js'].forEach(f=>{try{new Function(require('fs').readFileSync(f,'utf8'));console.log(f+': OK')}catch(e){console.error(f+': SYNTAX ERROR: '+e.message);process.exit(1);}})"
       - run: npm test

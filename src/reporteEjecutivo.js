@@ -123,6 +123,15 @@
         var inicio = opts.inicio || '';
         var fin = opts.fin || '';
         var db2 = db || {};
+        if (globalScope.CR_ReportData && typeof globalScope.CR_ReportData.resolve === 'function' &&
+            db2.proyectos_data && db2.configuracion) {
+            var resolved = globalScope.CR_ReportData.resolve(db2, opts.projectId);
+            db2 = Object.assign({}, db2, resolved.data);
+            db2.configuracion = resolved.configuration;
+        }
+        if (globalScope.CR_ReportData && typeof globalScope.CR_ReportData.normalizeProjectData === 'function') {
+            db2 = Object.assign({}, db2, globalScope.CR_ReportData.normalizeProjectData(db2));
+        }
 
         // Intentar delegar al motor centralizado si está cargado
         if (typeof globalScope !== 'undefined' &&
@@ -218,6 +227,8 @@
      * @private
      */
     function _calcularKPIsLocal(db2, inicio, fin) {
+        var cfg = db2.configuracion || {};
+        var presupuesto = num(cfg.presupuesto) || num(cfg.presupuesto_inicial_caja);
         var kpis = {
             totalGastos: 0, totalIngresos: 0, saldo: 0,
             nMovimientos: 0, nGastos: 0,
@@ -250,7 +261,7 @@
                 kpis.porCategoria[categoriaKey] = (kpis.porCategoria[categoriaKey] || 0) + gasto;
             }
         });
-        kpis.saldo = kpis.totalIngresos - kpis.totalGastos;
+        kpis.saldo = presupuesto + kpis.totalIngresos - kpis.totalGastos;
 
         var flota = db2.maquinaria_flota || {};
         (Array.isArray(flota.registros) ? flota.registros : []).forEach(function (r) {

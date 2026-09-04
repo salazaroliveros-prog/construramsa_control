@@ -253,7 +253,8 @@
         let totalKm = 0;
         let totalLitros = 0;
 
-        viajes.forEach(v => {
+        const viajesPeriodo = _filtrarPorRango(viajes, 'fecha', _inicio, _fin);
+        viajesPeriodo.forEach(v => {
             totalKm += (v.km_total || 0);
             totalLitros += (v.litros || 0);
             // La propiedad puede estar en el viaje (datos nuevos) o hay que buscarla
@@ -265,8 +266,8 @@
         });
 
         // ── Mantenimiento e insumos ──────────────────────────────────────────
-        const ordenes = (db.mantenimiento && db.mantenimiento.ordenes) || [];
-        const insumos = (db.mantenimiento && db.mantenimiento.compras_insumos) || [];
+        const ordenes = _filtrarPorRango((db.mantenimiento && db.mantenimiento.ordenes) || [], 'fecha', _inicio, _fin);
+        const insumos = _filtrarPorRango((db.mantenimiento && db.mantenimiento.compras_insumos) || [], 'fecha', _inicio, _fin);
         const totalMantenimiento = ordenes.reduce((s, o) => s + (Number(o.costo) || 0), 0)
             + insumos.reduce((s, i) => s + (Number(i.costo) || 0), 0);
 
@@ -280,9 +281,21 @@
             .flatMap(dia =>
                 (dia.registros || []).map(r => ({ ...r, fecha: dia.fecha }))
             );
-        const totalNomina = regsAsist.reduce(
-            (s, r) => s + ((r.calculos && r.calculos.total_diario) || 0), 0
-        );
+        const personal = db.personal || {};
+        const totalNomina = (typeof globalScope.CR_NominaEngine !== 'undefined' &&
+            typeof globalScope.CR_NominaEngine.calcularNomina === 'function')
+            ? globalScope.CR_NominaEngine.calcularNomina(
+                personal.trabajadores || [], personal.asistencia || [], _inicio, _fin
+            ).totalPagable
+            : regsAsist.reduce((s, r) => {
+                if (r.calculos && Number.isFinite(Number(r.calculos.total_diario))) {
+                    return s + Number(r.calculos.total_diario);
+                }
+                const trabajador = (personal.trabajadores || []).find(t => t.id === r.trabajador_id);
+                const normal = Number(trabajador?.pago_hora_normal) || 0;
+                const extra = Number(trabajador?.pago_hora_extra) || 0;
+                return s + (r.estado === 'asistio' ? 8 * normal + (Number(r.horas_extras) || 0) * extra : 0);
+            }, 0);
 
         // ── Gastos del período para proyección y análisis ────────────────────
         const movimientosPeriodo = _filtrarPorRango(caja, 'fecha', _inicio, _fin)
@@ -309,11 +322,10 @@
         }
 
         // ── Eficiencia con datos del período ─────────────────────────────────
-        const viajesPeriodo = _filtrarPorRango(viajes, 'fecha', _inicio, _fin);
         const kmPeriodo = viajesPeriodo.reduce((s, v) => s + (v.km_total || 0), 0);
         const litrosPeriodo = viajesPeriodo.reduce((s, v) => s + (v.litros || 0), 0);
 
-        const maquinariaRegistros = (db.maquinaria_flota && db.maquinaria_flota.registros) || [];
+        const maquinariaRegistros = _filtrarPorRango((db.maquinaria_flota && db.maquinaria_flota.registros) || [], 'fecha', _inicio, _fin);
         const totalHorasMaq = maquinariaRegistros.reduce((s, r) => s + (r.horas || 0), 0);
 
         const gastoMaqPeriodo = movimientosPeriodo

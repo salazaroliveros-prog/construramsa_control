@@ -22,6 +22,7 @@ const STATIC_ASSETS = [
     './vendor/exceljs.min.js',
     './src/types.js',
     './src/config.js',
+    './src/reportDataAdapter.js',
     './src/kpiEngine.js',
     './src/exportador.js',
     './src/reporteEjecutivo.js',

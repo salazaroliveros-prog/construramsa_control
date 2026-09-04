@@ -81,6 +81,7 @@
 <!-- Módulos tipados y config central (IIFE: no filtran globals, no colisionan con el bundle) -->
     <script src="./src/types.js" defer></script>
     <script src="./src/config.js" defer></script>
+    <script src="./src/reportDataAdapter.js" defer></script>
     <script src="./src/syncOptimizer.js" defer></script>
     <script src="./src/silentDownload.js" defer></script>
     <script src="./src/backgroundSync.js" defer></script>
@@ -4228,7 +4229,7 @@
             <div>
                 <h3 class="historial-titulo">ℹ️ Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.9.1 (Refactorización Clean Code: KPIs por etiqueta, filtro de rango en asistencia, UI/UX optimizado — densidad de tablas y whitespace mejorados)<br>
+                    Versión: 2.9.2 (Refactorización Clean Code: KPIs por etiqueta, filtro de rango en asistencia, UI/UX optimizado — densidad de tablas y whitespace mejorados)<br>
                     Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV<br>
                     Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
@@ -4549,7 +4550,7 @@
         }
 
         function migrarDB(db) {
-            if (!db.version) db.version = '2.9.1';
+            if (!db.version) db.version = '2.9.2';
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
             if (!db.configuracion.nombre_empresa) db.configuracion.nombre_empresa = 'CONSTRURAMSA';
             if (!db.configuracion.eslogan) db.configuracion.eslogan = 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
@@ -4591,7 +4592,7 @@
 
         function inicializarDB() {
             const db = {
-                version: '2.9.1',
+                version: '2.9.2',
                 configuracion: { 
                     nombre_empresa:'CONSTRURAMSA', 
                     eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', 
@@ -10565,10 +10566,11 @@ tbody.innerHTML = '';
                 return '\uFEFFError: Debe seleccionar una fecha para generar el reporte.';
             }
             
-            const datos = getProyectoData();
             const db    = getDB();
-            const proy  = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
-            const proyNombre = proy ? proy.nombre : 'General';
+            const adaptador = typeof CR_ReportData !== 'undefined' ? CR_ReportData.resolve(db) : null;
+            const datos = adaptador ? adaptador.data : getProyectoData();
+            const proy  = adaptador ? adaptador.project : db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
+            const proyNombre = adaptador ? adaptador.projectName : (proy ? proy.nombre : 'General');
             const config = db.configuracion || {};
             const empresa = config.nombre_empresa || 'CONSTRURAMSA';
             const eslogan = config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
@@ -10588,7 +10590,7 @@ tbody.innerHTML = '';
             const csvCell = value => _ExportCSV ? _ExportCSV.celdaCSV(value)
                 : (() => { const text = String(value ?? '').replace(/\r?\n/g, ' '); const safeText = /^[=+\-@]/.test(text.trim()) ? "'" + text : text; return '"' + safeText.replace(/"/g, '""') + '"'; })();
             const csvRow = values => _ExportCSV ? _ExportCSV.filaCSV(values) : values.map(value => typeof value === 'number' ? numToF(value) : csvCell(value)).join(',');
-            const paginarCSV = (contenidoMultilinea, paginaTamano = 20) => {
+            const paginarCSV = (contenidoMultilinea, paginaTamano = ((typeof CR_CONFIG !== 'undefined' && CR_CONFIG.EXPORT_CONFIG) ? CR_CONFIG.EXPORT_CONFIG.maxRowsPerPage : 40)) => {
                 const lineas = contenidoMultilinea.split('\n');
                 const headerIndex = lineas.findIndex(linea => /^Fecha,|^Trabajador,|^KPI,|^Categoria,|^Resumen/.test(linea));
                 const header = headerIndex >= 0 ? lineas.slice(0, headerIndex + 1) : lineas.slice(0, 8);
@@ -10650,11 +10652,13 @@ tbody.innerHTML = '';
                 const viajesAll = datos.viajes_camiones.viajes || [];
                 const ordsAll   = datos.mantenimiento.ordenes || [];
                 const insAll    = datos.mantenimiento.compras_insumos || [];
-                const idsExternos = new Set([
-                    ...viajesAll.map(v => v.gasto_id).filter(Boolean),
-                    ...ordsAll.map(o => o.gasto_id).filter(Boolean),
-                    ...insAll.map(i => i.gasto_id).filter(Boolean)
-                ]);
+                const idsExternos = typeof CR_ReportData !== 'undefined'
+                    ? CR_ReportData.linkedExpenseIds(datos)
+                    : new Set([
+                        ...viajesAll.map(v => v.gasto_id).filter(Boolean),
+                        ...ordsAll.map(o => o.gasto_id).filter(Boolean),
+                        ...insAll.map(i => i.gasto_id).filter(Boolean)
+                    ]);
                 // Solo movimientos de caja chica propios (sin gasto_id externo)
                 const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha) && !idsExternos.has(g.id));
                 let totalIng = 0, totalEgr = 0;
@@ -10949,10 +10953,11 @@ tbody.innerHTML = '';
         }
 
         function generarHTMLReporte(tipo, fecha, rangoPersonalizado) {
-            const datos = getProyectoData();
             const db    = getDB();
-            const proy  = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
-            const proyNombre = proy ? proy.nombre : 'General';
+            const adaptador = typeof CR_ReportData !== 'undefined' ? CR_ReportData.resolve(db) : null;
+            const datos = adaptador ? adaptador.data : getProyectoData();
+            const proy  = adaptador ? adaptador.project : db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
+            const proyNombre = adaptador ? adaptador.projectName : (proy ? proy.nombre : 'General');
             let html = '';
 
             // ── REPORTE EJECUTIVO (Resumen Gerencial con KPIs) ──
@@ -11026,7 +11031,9 @@ tbody.innerHTML = '';
                 const _idsViajesGasto = new Set((datos.viajes_camiones.viajes||[]).map(v=>v.gasto_id).filter(Boolean));
                 const _idsOrdsGasto   = new Set((datos.mantenimiento.ordenes||[]).map(o=>o.gasto_id).filter(Boolean));
                 const _idsInsGasto    = new Set((datos.mantenimiento.compras_insumos||[]).map(i=>i.gasto_id).filter(Boolean));
-                const _idsExternosHTML = new Set([..._idsViajesGasto, ..._idsOrdsGasto, ..._idsInsGasto]);
+                const _idsExternosHTML = typeof CR_ReportData !== 'undefined'
+                    ? CR_ReportData.linkedExpenseIds(datos)
+                    : new Set([..._idsViajesGasto, ..._idsOrdsGasto, ..._idsInsGasto]);
                 const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha) && !_idsExternosHTML.has(g.id)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
@@ -11044,14 +11051,14 @@ tbody.innerHTML = '';
                 if (viajesC.length > 0) {
                     let totalVTmp = 0;
                     html += `<h3 style="color:var(--acento-purpura);font-size:13px;margin:15px 0 8px 0;">🚛 Viajes de Camiones</h3>`;
-                    html += `<table class="tabla-pdf"><colgroup><col style="width:18%"><col style="width:20%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:12%"><col style="width:12%"><col style="width:10%"></colgroup><thead><tr><th>Unidad</th><th>Material</th><th>No.</th><th>Km</th><th>Litros</th><th style="text-align:right;">Comb. (Q)</th><th style="text-align:right;">Alquiler (Q)</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
+                    html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:16%"><col style="width:18%"><col style="width:7%"><col style="width:9%"><col style="width:9%"><col style="width:11%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No.</th><th>Km</th><th>Litros</th><th style="text-align:right;">Comb. (Q)</th><th style="text-align:right;">Alquiler (Q)</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                     viajesC.forEach(v => {
                         const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A',propiedad:'propio'};
                         const prop = c.propiedad==='alquilado' ? ' (Alq.)' : '';
                         totalVTmp += v.total || 0; totalEgr += v.total || 0;
-                        html += `<tr><td>${_esc(c.nombre)}${_esc(prop)}</td><td>${_esc(v.material)}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:var(--pdf-rojo);">${formatearMoneda(v.total)}</td></tr>`;
+                        html += `<tr><td>${_esc(v.fecha)}</td><td>${_esc(c.nombre)}${_esc(prop)}</td><td>${_esc(v.material)}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:var(--pdf-rojo);">${formatearMoneda(v.total)}</td></tr>`;
                     });
-                    html += `<tr><td colspan="7" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalVTmp)}</td></tr>`;
+                    html += `<tr><td colspan="8" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalVTmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
                 /* MANTENIMIENTO */
@@ -11060,7 +11067,7 @@ tbody.innerHTML = '';
                     let totalMTmp = 0;
                     const tieneFirmas = ordsMT.some(o => o.firma);
                     html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">🔩 Mantenimiento</h3>`;
-                    html += `<table class="tabla-pdf"><colgroup><col style="width:25%"><col style="width:15%"><col style="width:${tieneFirmas?'35':'45'}%"><col style="width:15%">${tieneFirmas ? '<col style="width:10%">' : ''}</colgroup><thead><tr><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
+                    html += `<table class="tabla-pdf"><colgroup><col style="width:22%"><col style="width:14%"><col style="width:${tieneFirmas?'39':'49'}%"><col style="width:15%">${tieneFirmas ? '<col style="width:10%">' : ''}</colgroup><thead><tr><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                     ordsMT.forEach(o => { 
                         const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; 
                         totalMTmp += o.costo||0; 
@@ -11431,6 +11438,14 @@ tbody.innerHTML = '';
                     : 'Tel: +502 5997 9501 &nbsp;|&nbsp; contacto@construramsa.com');
             const telEmailEl = document.getElementById('pdf-tel-email-empresa');
             if (telEmailEl) telEmailEl.textContent = telEmail.replace(/&nbsp;/g, ' ');
+            const empresaEl = document.getElementById('pdf-nombre-empresa');
+            const esloganEl = document.getElementById('pdf-eslogan-empresa');
+            const direccionEl = document.getElementById('pdf-direccion-empresa');
+            const websiteEl = document.getElementById('pdf-website-empresa');
+            if (empresaEl) empresaEl.textContent = cfg.nombre_empresa || 'CONSTRURAMSA';
+            if (esloganEl) esloganEl.textContent = cfg.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            if (direccionEl) direccionEl.textContent = cfg.direccion || 'Guatemala, C.A.';
+            if (websiteEl) websiteEl.textContent = cfg.website || 'construramsa.com';
 
             // ── Metadatos del reporte ──
             const proy = db.proyectos.find(p => p.id === cfg.proyecto_actual);
