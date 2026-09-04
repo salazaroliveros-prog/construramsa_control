@@ -5768,9 +5768,51 @@
                 const categoria = elemCategoria.value;
                 const proyecto = elemProyecto.value;
                 
-                const datos = getProyectoData();
                 const db = getDB();
-                const presupuesto = getPresupuestoActual();
+                let datos = getProyectoData();
+                let presupuesto = getPresupuestoActual();
+                
+                if (proyecto === 'todos') {
+                    const merged = {
+                        caja_chica: [],
+                        maquinaria_flota: { vehiculos: [], registros: [] },
+                        personal: { trabajadores: [], asistencia: [] },
+                        adquisiciones: { proveedores: [], cotizaciones_compras: [] },
+                        viajes_camiones: { rutas_botadero: [], camiones: [], equipo_alquilado: [], viajes: [] },
+                        mantenimiento: { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] }
+                    };
+                    
+                    const pushArray = (target, source) => {
+                        if (Array.isArray(source)) target.push(...source);
+                    };
+                    const mergeModule = (target, source) => {
+                        if (!source) return;
+                        pushArray((target.caja_chica || (target.caja_chica = [])), source.caja_chica);
+                        pushArray((target.maquinaria_flota || (target.maquinaria_flota = { vehiculos: [], registros: [] })).vehiculos || [], (source.maquinaria_flota || {}).vehiculos || []);
+                        pushArray((target.maquinaria_flota || (target.maquinaria_flota = { vehiculos: [], registros: [] })).registros || [], (source.maquinaria_flota || {}).registros || []);
+                        pushArray((target.personal || (target.personal = { trabajadores: [], asistencia: [] })).trabajadores || [], (source.personal || {}).trabajadores || []);
+                        pushArray((target.personal || (target.personal = { trabajadores: [], asistencia: [] })).asistencia || [], (source.personal || {}).asistencia || []);
+                        pushArray((target.adquisiciones || (target.adquisiciones = { proveedores: [], cotizaciones_compras: [] })).proveedores || [], (source.adquisiciones || {}).proveedores || []);
+                        pushArray((target.adquisiciones || (target.adquisiciones = { proveedores: [], cotizaciones_compras: [] })).cotizaciones_compras || [], (source.adquisiciones || {}).cotizaciones_compras || []);
+                        pushArray((target.viajes_camiones || (target.viajes_camiones = { rutas_botadero: [], camiones: [], equipo_alquilado: [], viajes: [] })).rutas_botadero || [], (source.viajes_camiones || {}).rutas_botadero || []);
+                        pushArray((target.viajes_camiones || (target.viajes_camiones = { rutas_botadero: [], camiones: [], equipo_alquilado: [], viajes: [] })).camiones || [], (source.viajes_camiones || {}).camiones || []);
+                        pushArray((target.viajes_camiones || (target.viajes_camiones = { rutas_botadero: [], camiones: [], equipo_alquilado: [], viajes: [] })).equipo_alquilado || [], (source.viajes_camiones || {}).equipo_alquilado || []);
+                        pushArray((target.viajes_camiones || (target.viajes_camiones = { rutas_botadero: [], camiones: [], equipo_alquilado: [], viajes: [] })).viajes || [], (source.viajes_camiones || {}).viajes || []);
+                        pushArray((target.mantenimiento || (target.mantenimiento = { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] })).maquinaria || [], (source.mantenimiento || {}).maquinaria || []);
+                        if ((source.mantenimiento || {}).formatos) {
+                            Object.assign((target.mantenimiento || (target.mantenimiento = { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] })).formatos || {}, (source.mantenimiento || {}).formatos || {});
+                        }
+                        pushArray((target.mantenimiento || (target.mantenimiento = { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] })).ordenes || [], (source.mantenimiento || {}).ordenes || []);
+                        pushArray((target.mantenimiento || (target.mantenimiento = { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] })).compras_insumos || [], (source.mantenimiento || {}).compras_insumos || []);
+                    };
+                    
+                    mergeModule(merged, datos);
+                    for (const pid in db.proyectos_data) {
+                        mergeModule(merged, db.proyectos_data[pid]);
+                    }
+                    datos = merged;
+                    presupuesto = (db.configuracion.presupuesto_inicial_caja || 0) + (db.proyectos || []).reduce((s, p) => s + (Number(p.presupuesto_inicial) || 0), 0);
+                }
                 
                 // Usar el motor de KPIs mejorado
                 const kpis = typeof CR_KPIEngine !== 'undefined' && CR_KPIEngine.calcularKPIs
