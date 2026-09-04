@@ -11,6 +11,7 @@
     "audit": "node comprehensive_audit.js",
     "test-data": "node populate_test_data.js",
     "test-reports": "node test_all_reports.js",
+    "test-functional": "node functional_test.js",
     "clean": "node -e \"const fs=require('fs'); const path=require('path'); const nm=path.join(__dirname,'node_modules'); const pl=path.join(__dirname,'package-lock.json'); if(fs.existsSync(nm))fs.rmSync(nm,{recursive:true,force:true}); if(fs.existsSync(pl))fs.unlinkSync(pl); console.log('Cleaned node_modules and package-lock.json');\""
   },
   "repository": {
