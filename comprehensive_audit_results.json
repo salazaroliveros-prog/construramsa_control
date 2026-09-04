@@ -1,0 +1,66 @@
+{
+  "moduleLogic": {
+    "passed": 3,
+    "failed": 2,
+    "warnings": [
+      "Potentially undefined functions: rgba, clamp, var, scale, translateX",
+      "51 TODO/FIXME comments found"
+    ],
+    "errors": []
+  },
+  "dataIntegrity": {
+    "passed": 4,
+    "failed": 0,
+    "warnings": [],
+    "errors": []
+  },
+  "uiUx": {
+    "passed": 2,
+    "failed": 3,
+    "warnings": [
+      "Excessive inline styles: 705",
+      "188 hardcoded colors"
+    ],
+    "errors": [
+      "1 images missing alt"
+    ]
+  },
+  "formValidation": {
+    "passed": 4,
+    "failed": 0,
+    "warnings": [],
+    "errors": []
+  },
+  "accessibility": {
+    "passed": 5,
+    "failed": 0,
+    "warnings": [],
+    "errors": []
+  },
+  "pwaConfig": {
+    "passed": 4,
+    "failed": 0,
+    "warnings": [],
+    "errors": []
+  },
+  "security": {
+    "passed": 2,
+    "failed": 3,
+    "warnings": [
+      "innerHTML usage: 72",
+      "Local storage usage: 24",
+      "Inline event handlers: 96"
+    ],
+    "errors": []
+  },
+  "performance": {
+    "passed": 2,
+    "failed": 3,
+    "warnings": [
+      "Large HTML: 714.68 KB",
+      "1 large inline scripts",
+      "querySelector in loops: 22"
+    ],
+    "errors": []
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "csv": {
+    "diario": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "Fecha",
+        "Tipo",
+        "Categoria",
+        "Descripcion",
+        "Monto (Q)"
+      ]
+    },
+    "semanal": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "Fecha",
+        "Tipo",
+        "Categoria",
+        "Descripcion",
+        "Monto (Q)"
+      ]
+    },
+    "mensual": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "Fecha",
+        "Tipo",
+        "Categoria",
+        "Descripcion",
+        "Monto (Q)"
+      ]
+    },
+    "asistencia": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "Trabajador",
+        "Fecha",
+        "Estado",
+        "Horas",
+        "Pago"
+      ]
+    },
+    "viajes": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "Fecha",
+        "Unidad",
+        "Material",
+        "No.",
+        "Km",
+        "Litros",
+        "Combustible (Q)",
+        "Alquiler (Q)",
+        "Total (Q)"
+      ]
+    },
+    "mantenimiento": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "Fecha",
+        "Módulo",
+        "Descripción",
+        "Monto (Q)"
+      ]
+    },
+    "categoria": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "Período",
+        "Categoría",
+        "Monto (Q)",
+        "Porcentaje"
+      ]
+    },
+    "nomina": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "Trabajador",
+        "Días Asistidos",
+        "Faltas",
+        "Horas Extra",
+        "Total a Pagar"
+      ]
+    },
+    "ejecutivo": {
+      "passed": true,
+      "issues": [],
+      "headers": [
+        "KPI",
+        "Valor",
+        "Descripción"
+      ]
+    }
+  },
+  "pdf": {
+    "diario": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    },
+    "semanal": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    },
+    "mensual": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    },
+    "asistencia": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    },
+    "viajes": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    },
+    "mantenimiento": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    },
+    "categoria": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    },
+    "nomina": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    },
+    "ejecutivo": {
+      "passed": true,
+      "issues": [],
+      "overflowRisk": false
+    }
+  },
+  "overall": {
+    "passed": 18,
+    "failed": 0,
+    "warnings": 0,
+    "templateMatching": "verified"
+  }
+}

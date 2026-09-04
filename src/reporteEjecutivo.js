@@ -319,7 +319,15 @@
         maxItems = maxItems || 6;
         items = items.slice(0, maxItems);
         var total = items.reduce(function (s, it) { return s + it.value; }, 0);
-        if (total <= 0) return '<p class="ej-sin-datos">Sin datos para graficar.</p>';
+        
+        // Enhanced empty state with visual feedback
+        if (total <= 0) {
+            return '<div style="text-align:center;padding:24px;background:' + COLORES.fondo + ';border:1px dashed ' + COLORES.lineas + ';border-radius:8px;">'
+                + '<div style="font-size:32px;margin-bottom:8px;">📊</div>'
+                + '<div style="font-size:13px;color:' + COLORES.gris + ';font-weight:600;">Sin datos para graficar</div>'
+                + '<div style="font-size:11px;color:' + COLORES.gris + ';margin-top:4px;">Registra movimientos de gastos para visualizar la distribución</div>'
+                + '</div>';
+        }
 
         var w = 660, rowH = 34, padL = 165, padR = 100, topPad = 10;
         var h = topPad + items.length * rowH + 14;
@@ -329,8 +337,13 @@
             var y = topPad + i * rowH;
             var bw = (it.value / maxVal) * usable;
             var pct = total > 0 ? Math.round(it.value / total * 100) : 0;
-            return '<text x="' + (padL - 10) + '" y="' + (y + 17) + '" text-anchor="end" font-size="12" fill="' + COLORES.gris + '">' + esc(it.name) + '</text>'
-                + '<rect x="' + padL + '" y="' + (y + 5) + '" width="' + bw + '" height="20" rx="3" fill="' + COLORES.primario + '"></rect>'
+            // Truncate long names to prevent overflow
+            var displayName = it.name.length > 25 ? it.name.substring(0, 22) + '...' : it.name;
+            // Enhanced bar with gradient and better visual feedback
+            var barColor = pct > 30 ? COLORES.primario : (pct > 15 ? COLORES.acento : COLORES.gris);
+            return '<text x="' + (padL - 10) + '" y="' + (y + 17) + '" text-anchor="end" font-size="12" fill="' + COLORES.tinta + '">' + esc(displayName) + '</text>'
+                + '<rect x="' + padL + '" y="' + (y + 5) + '" width="' + bw + '" height="20" rx="3" fill="' + barColor + '">'
+                + '<animate attributeName="width" from="0" to="' + bw + '" dur="0.5s" fill="freeze" /></rect>'
                 + '<text x="' + (padL + bw + 8) + '" y="' + (y + 19) + '" font-size="12" fill="' + COLORES.tinta + '" font-weight="600">' + fmtQ(it.value) + ' <tspan fill="' + COLORES.gris + '">(' + pct + '%)</tspan></text>';
         }).join('');
 
@@ -339,7 +352,16 @@
 
     function svgTendencia(porDia) {
         var dias = Object.keys(porDia || {}).sort();
-        if (dias.length === 0) return '<p class="ej-sin-datos">Sin tendencia disponible.</p>';
+        
+        // Enhanced empty state with visual feedback
+        if (dias.length === 0) {
+            return '<div style="text-align:center;padding:24px;background:' + COLORES.fondo + ';border:1px dashed ' + COLORES.lineas + ';border-radius:8px;">'
+                + '<div style="font-size:32px;margin-bottom:8px;">📈</div>'
+                + '<div style="font-size:13px;color:' + COLORES.gris + ';font-weight:600;">Sin tendencia disponible</div>'
+                + '<div style="font-size:11px;color:' + COLORES.gris + ';margin-top:4px;">Registra movimientos diarios para visualizar la tendencia de gastos</div>'
+                + '</div>';
+        }
+        
         var w = 660, h = 200, padL = 60, padB = 34, padT = 15, padR = 15;
         var innerW = w - padL - padR, innerH = h - padT - padB;
         var vals = dias.map(function (d) { return num((porDia[d] || {}).gastos); });
@@ -366,18 +388,23 @@
         dias.forEach(function (d, i) {
             if (i % step !== 0 && i !== dias.length - 1) return;
             var p = px(i, 0);
-            xLabels += '<text x="' + p.x + '" y="' + (h - 10) + '" text-anchor="middle" font-size="10" fill="' + COLORES.gris + '">' + esc(d) + '</text>';
+            // Truncate date labels to prevent overflow
+            var label = d.length > 10 ? d.substring(5, 10) : d;
+            xLabels += '<text x="' + p.x + '" y="' + (h - 10) + '" text-anchor="middle" font-size="10" fill="' + COLORES.gris + '">' + esc(label) + '</text>';
         });
 
         var dots = dias.map(function (d, i) {
             var p = px(i, num((porDia[d] || {}).gastos));
-            return '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.2" fill="' + COLORES.acento + '"></circle>';
+            return '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.2" fill="' + COLORES.acento + '">'
+                + '<animate attributeName="r" values="3.2;5;3.2" dur="2s" repeatCount="indefinite" /></circle>';
         }).join('');
 
         return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" role="img" aria-label="Tendencia de gastos diarios">'
             + grid
-            + '<polygon points="' + polyArea + '" fill="' + COLORES.primario + '" fill-opacity="0.12"></polygon>'
-            + '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + COLORES.primarioOsc + '" stroke-width="2.5"></polyline>'
+            + '<polygon points="' + polyArea + '" fill="' + COLORES.primario + '" fill-opacity="0.12">'
+            + '<animate attributeName="fill-opacity" values="0.12;0.2;0.12" dur="3s" repeatCount="indefinite" /></polygon>'
+            + '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + COLORES.primarioOsc + '" stroke-width="2.5">'
+            + '<animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="1.5s" fill="freeze" /></polyline>'
             + dots + xLabels + '</svg>';
     }
 

@@ -1,0 +1,133 @@
+{
+  "version": "2.9.1",
+  "configuracion": {
+    "nombre_empresa": "CONSTRURAMSA",
+    "eslogan": "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
+    "logo_base64": "",
+    "presupuesto_inicial_caja": 0,
+    "proyecto_actual": "PROY-h77rq13smtkrksov",
+    "telefono": "+502 5997 9501",
+    "email": "contacto@construramsa.com",
+    "direccion": "17av. Villa Mariscal, Apto. 116, Torre 2, Zona 11, Ciudad de Guatemala",
+    "website": "construramsa.com",
+    "firmas": [
+      {
+        "id": "FIR-zqhg5lydmtkrksov",
+        "nombre": "Arq. Wilson Dario Salazar",
+        "cargo": "Jefe de Proyectos",
+        "activa": true,
+        "imagen_base64": ""
+      },
+      {
+        "id": "FIR-h2ftsr1jmtkrksov",
+        "nombre": "Ing. Juan Luis Ramirez Jimenez",
+        "cargo": "Gerente Comercial",
+        "activa": true,
+        "imagen_base64": ""
+      }
+    ]
+  },
+  "proyectos": [
+    {
+      "id": "PROY-h77rq13smtkrksov",
+      "nombre": "Proyecto Residencial Altos de la Cañada",
+      "descripcion": "Desarrollo residencial de 50 unidades habitacionales",
+      "presupuesto": 2500000,
+      "fecha_creacion": "2026-07-05",
+      "responsable": "Arq. Wilson Dario Salazar",
+      "color": "#004B93",
+      "activo": true
+    },
+    {
+      "id": "PROY-w7wd8jetmtkrksow",
+      "nombre": "Centro Comercial Plaza del Sol",
+      "descripcion": "Construcción de centro comercial 3 niveles",
+      "presupuesto": 8500000,
+      "fecha_creacion": "2026-08-04",
+      "responsable": "Ing. Juan Luis Ramirez Jimenez",
+      "color": "#00A4E4",
+      "activo": true
+    }
+  ],
+  "proyectos_data": {
+    "PROY-h77rq13smtkrksov": {
+      "caja_chica": [],
+      "maquinaria_flota": {
+        "vehiculos": [],
+        "registros": []
+      },
+      "personal": {
+        "trabajadores": [],
+        "asistencia": []
+      },
+      "adquisiciones": {
+        "proveedores": [],
+        "cotizaciones_compras": []
+      },
+      "viajes_camiones": {
+        "rutas_botadero": [],
+        "camiones": [],
+        "equipo_alquilado": [],
+        "viajes": []
+      },
+      "mantenimiento": {
+        "maquinaria": [],
+        "formatos": {},
+        "ordenes": [],
+        "compras_insumos": []
+      }
+    },
+    "PROY-w7wd8jetmtkrksow": {
+      "caja_chica": [],
+      "maquinaria_flota": {
+        "vehiculos": [],
+        "registros": []
+      },
+      "personal": {
+        "trabajadores": [],
+        "asistencia": []
+      },
+      "adquisiciones": {
+        "proveedores": [],
+        "cotizaciones_compras": []
+      },
+      "viajes_camiones": {
+        "rutas_botadero": [],
+        "camiones": [],
+        "equipo_alquilado": [],
+        "viajes": []
+      },
+      "mantenimiento": {
+        "maquinaria": [],
+        "formatos": {},
+        "ordenes": [],
+        "compras_insumos": []
+      }
+    }
+  },
+  "caja_chica": [],
+  "maquinaria_flota": {
+    "vehiculos": [],
+    "registros": []
+  },
+  "personal": {
+    "trabajadores": [],
+    "asistencia": []
+  },
+  "adquisiciones": {
+    "proveedores": [],
+    "cotizaciones_compras": []
+  },
+  "viajes_camiones": {
+    "rutas_botadero": [],
+    "camiones": [],
+    "equipo_alquilado": [],
+    "viajes": []
+  },
+  "mantenimiento": {
+    "maquinaria": [],
+    "formatos": {},
+    "ordenes": [],
+    "compras_insumos": []
+  }
+}

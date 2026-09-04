@@ -79,17 +79,17 @@
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
     <script src="./vendor/purify.min.js" integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF" crossorigin="anonymous"></script>
 <!-- Módulos tipados y config central (IIFE: no filtran globals, no colisionan con el bundle) -->
-    <script src="./src/types.js"></script>
-    <script src="./src/config.js"></script>
-    <script src="./src/syncOptimizer.js"></script>
-    <script src="./src/silentDownload.js"></script>
-    <script src="./src/backgroundSync.js"></script>
-    <script src="./src/exportador.js"></script>
-    <script src="./src/kpiEngine.js"></script>
-    <script src="./src/reporteEjecutivo.js"></script>
-    <script src="./src/nominaEngine.js"></script>
-    <script src="./src/plantillaPremium.js"></script>
-    <script src="./src/signatureCapture.js"></script>
+    <script src="./src/types.js" defer></script>
+    <script src="./src/config.js" defer></script>
+    <script src="./src/syncOptimizer.js" defer></script>
+    <script src="./src/silentDownload.js" defer></script>
+    <script src="./src/backgroundSync.js" defer></script>
+    <script src="./src/exportador.js" defer></script>
+    <script src="./src/kpiEngine.js" defer></script>
+    <script src="./src/reporteEjecutivo.js" defer></script>
+    <script src="./src/nominaEngine.js" defer></script>
+    <script src="./src/plantillaPremium.js" defer></script>
+    <script src="./src/signatureCapture.js" defer></script>
     <style>
         :root {
             /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */
@@ -119,13 +119,18 @@
             /* Colores para plantillas PDF - variables CSS para consistencia */
             --pdf-azul-oscuro: #004B93;
             --pdf-azul-claro: #00A4E4;
+            --pdf-azul-cian: #38BDF8;
             --pdf-gris-oscuro: #374151;
             --pdf-gris-medio: #6B7280;
             --pdf-gris-claro: #9CA3AF;
+            --pdf-gris-borde: #E5E7EB;
             --pdf-rojo: #DC2626;
             --pdf-verde: #059669;
             --pdf-blanco: #ffffff;
             --pdf-fondo-claro: #F9FAFB;
+            --pdf-fondo-azul: #EFF6FF;
+            --pdf-fondo-gris: #F8FAFC;
+            --pdf-negro: #000000;
             --texto-secundario: #9ca3af;
             --exito: #10b981;
             --alerta: #ef4444;
@@ -1178,6 +1183,11 @@
             border: 2px dashed var(--glass-border);
             border-radius: 8px;
         }
+        .grafico-placeholder.error {
+            color: var(--alerta-texto);
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--alerta);
+        }
         .proyeccion-card.alerta {
             border-color: #ef4444;
             background: rgba(239, 68, 68, 0.1);
@@ -1450,6 +1460,10 @@
         @media (max-width: 768px) {
             .dashboard-costos {
                 padding: 15px;
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                overflow-x: hidden;
             }
             .dashboard-filtros {
                 grid-template-columns: 1fr;
@@ -1459,6 +1473,10 @@
                 width: 100%;
                 min-height: 44px;
                 font-size: 16px;
+            }
+            .metricas-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
             }
             .grafico-container {
                 min-height: 200px;
@@ -1518,6 +1536,10 @@
             }
             .metricas-grid {
                 grid-template-columns: 1fr;
+            }
+            .dashboard-costos {
+                padding: 12px;
+                overflow-x: hidden;
             }
             .kpi-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1607,13 +1629,18 @@
             border: 1px solid rgba(255,255,255,0.08);
             overflow: visible;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
         }
         .dashboard-filtros {
             display: grid;
-            grid-template-columns: repeat(3, minmax(170px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
             margin-bottom: 20px;
             align-items: end;
+            width: 100%;
+            box-sizing: border-box;
         }
         .dashboard-filtros select, .dashboard-filtros input {
             flex: 1;
@@ -1723,6 +1750,24 @@
             gap: 8px;
             height: 200px;
             padding: 10px 0;
+        }
+        .css-chart-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .css-chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 160px;
+            padding: 10px 0;
+        }
+        .css-chart-labels {
+            display: flex;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid var(--glass-border);
         }
         .css-chart-bar {
             flex: 1;
@@ -2649,7 +2694,7 @@
             </div>
             <div style="margin-bottom:20px;">
                 <label for="proyecto-presupuesto" style="display:block;margin-bottom:5px;color:var(--texto-principal);">Presupuesto Inicial (Q)</label>
-                <input type="number" inputmode="decimal" id="proyecto-presupuesto" placeholder="0.00" step="0.01" min="0" max="99999999" required aria-required="true">
+                <input type="number" inputmode="decimal" id="proyecto-presupuesto" placeholder="0.00" step="0.01" min="0" max="99999999" pattern="^\d+(\.\d{1,2})?$" required aria-required="true">
             </div>
             <div class="modal-buttons">
                 <button type="button" onclick="cerrarModalCrearProyecto()" class="btn-secundario">Cancelar</button>
@@ -3052,7 +3097,7 @@
                 </div>
                 <div style="margin-bottom:15px;">
                     <label for="caja-monto">Monto (Q)</label>
-                    <input type="number" inputmode="decimal" step="0.01" id="caja-monto" required aria-required="true" min="0.01" max="999999">
+                    <input type="number" inputmode="decimal" step="0.01" id="caja-monto" required aria-required="true" min="0.01" max="999999" pattern="^\d+(\.\d{1,2})?$">
                 </div>
                 <div class="btn-row">
                     <button type="submit" class="btn-primario" style="flex:1;" data-tooltip="Registrar nuevo movimiento en caja chica">💾 Registrar Movimiento</button>
@@ -3120,11 +3165,11 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="maq-val-inicial">Horómetro/Odómetro Inicial</label>
-                        <input type="number" inputmode="decimal" step="0.1" id="maq-val-inicial" required aria-required="true" min="0" max="999999">
+                        <input type="number" inputmode="decimal" step="0.1" id="maq-val-inicial" required aria-required="true" min="0" max="999999" pattern="^\d+(\.\d{1,1})?$">
                     </div>
                     <div>
                         <label for="maq-val-final">Horómetro/Odómetro Final</label>
-                        <input type="number" inputmode="decimal" step="0.1" id="maq-val-final" required aria-required="true" min="0" max="999999">
+                        <input type="number" inputmode="decimal" step="0.1" id="maq-val-final" required aria-required="true" min="0" max="999999" pattern="^\d+(\.\d{1,1})?$">
                     </div>
                 </div>
                 <span id="maq-error-uso" style="color:var(--alerta);font-size:12px;display:block;margin-top:-10px;margin-bottom:10px;" role="alert"></span>
@@ -3133,11 +3178,11 @@
                 <div class="form-grid-2">
                     <div>
                         <label for="maq-galones">Galones Suministrados</label>
-                        <input type="number" inputmode="decimal" step="0.01" id="maq-galones" value="0" min="0" max="9999">
+                        <input type="number" inputmode="decimal" step="0.01" id="maq-galones" value="0" min="0" max="9999" pattern="^\d+(\.\d{1,2})?$">
                     </div>
                     <div>
                         <label for="maq-precio-galon">Precio por Galón (Q)</label>
-                        <input type="number" inputmode="decimal" step="0.01" id="maq-precio-galon" value="0" min="0" max="999">
+                        <input type="number" inputmode="decimal" step="0.01" id="maq-precio-galon" value="0" min="0" max="999" pattern="^\d+(\.\d{1,2})?$">
                     </div>
                 </div>
 
@@ -3148,7 +3193,7 @@
                 </div>
                 <div style="margin-bottom:20px;">
                     <label for="maq-costo-mantenimiento">Costo del Mantenimiento (Q)</label>
-                    <input type="number" inputmode="decimal" step="0.01" id="maq-costo-mantenimiento" value="0" min="0" max="999999">
+                    <input type="number" inputmode="decimal" step="0.01" id="maq-costo-mantenimiento" value="0" min="0" max="999999" pattern="^\d+(\.\d{1,2})?$">
                 </div>
 
                 <!-- Panel en tiempo real -->
@@ -3159,7 +3204,7 @@
                         <div>Costo Combustible: <strong id="lbl-costo-combustible">Q0.00</strong></div>
                         <!-- FIX #21: rendimiento muestra N/A cuando galones=0 -->
                         <div>Rendimiento: <strong id="lbl-rendimiento" style="color:var(--exito);">N/A</strong></div>
-                        <div>Gasto Total: <strong id="lbl-gasto-total" style="color:#fff;font-size:14px;">Q0.00</strong></div>
+                        <div>Gasto Total: <strong id="lbl-gasto-total" style="color:var(--texto-principal);font-size:14px;">Q0.00</strong></div>
                     </div>
                 </div>
 
@@ -3239,11 +3284,11 @@
                     <div class="form-grid-2-sm">
                         <div>
                             <label for="trab-pago-normal">Pago hora normal (Q/h)</label>
-                            <input type="number" inputmode="decimal" step="0.01" id="trab-pago-normal" placeholder="0.00" required aria-required="true" min="0" max="9999">
+                            <input type="number" inputmode="decimal" step="0.01" id="trab-pago-normal" placeholder="0.00" required aria-required="true" min="0" max="9999" pattern="^\d+(\.\d{1,2})?$">
                         </div>
                         <div>
                             <label for="trab-pago-extra">Pago hora extra (Q/h)</label>
-                            <input type="number" inputmode="decimal" step="0.01" id="trab-pago-extra" placeholder="0.00" required aria-required="true" min="0" max="9999">
+                            <input type="number" inputmode="decimal" step="0.01" id="trab-pago-extra" placeholder="0.00" required aria-required="true" min="0" max="9999" pattern="^\d+(\.\d{1,2})?$">
                         </div>
                     </div>
                     <div class="btn-row">
@@ -3401,13 +3446,13 @@
                     </div>
                     <div>
                         <label for="cot-precio">Precio Unitario (Q)</label>
-                        <input type="number" inputmode="decimal" step="0.01" id="cot-precio" required aria-required="true" min="0.01" max="999999">
+                        <input type="number" inputmode="decimal" step="0.01" id="cot-precio" required aria-required="true" min="0.01" max="999999" pattern="^\d+(\.\d{1,2})?$">
                     </div>
                 </div>
                 <div class="form-grid-2" style="margin-bottom:15px;">
                     <div>
                         <label for="cot-cantidad">Cantidad</label>
-                        <input type="number" inputmode="decimal" id="cot-cantidad" required aria-required="true" min="1" max="99999">
+                        <input type="number" inputmode="decimal" id="cot-cantidad" required aria-required="true" min="1" max="99999" pattern="^\d+$">
                     </div>
                 </div>
                 <div class="btn-row">
@@ -3462,15 +3507,15 @@
                     <div class="form-grid-3">
                         <div>
                             <label for="cam-capacidad">Capacidad (m³)</label>
-                            <input type="number" inputmode="decimal" step="0.1" id="cam-capacidad" value="12" min="1" max="100" aria-label="Capacidad en metros cúbicos">
+                            <input type="number" inputmode="decimal" step="0.1" id="cam-capacidad" value="12" min="1" max="100" aria-label="Capacidad en metros cúbicos" pattern="^\d+(\.\d{1,1})?$">
                         </div>
                         <div>
                             <label for="cam-consumo">Consumo (L/km)</label>
-                            <input type="number" inputmode="decimal" step="0.01" id="cam-consumo" value="0.35" min="0" max="10" aria-label="Consumo estimado en litros por kilómetro">
+                            <input type="number" inputmode="decimal" step="0.01" id="cam-consumo" value="0.35" min="0" max="10" aria-label="Consumo estimado en litros por kilómetro" pattern="^\d+(\.\d{1,2})?$">
                         </div>
                         <div>
                             <label for="cam-tarifa">Tarifa Alquiler (Q)</label>
-                            <input type="number" inputmode="decimal" step="0.01" id="cam-tarifa" value="0" min="0" max="999999" aria-label="Tarifa de alquiler por día o por viaje">
+                            <input type="number" inputmode="decimal" step="0.01" id="cam-tarifa" value="0" min="0" max="999999" aria-label="Tarifa de alquiler por día o por viaje" pattern="^\d+(\.\d{1,2})?$">
                         </div>
                     </div>
                     <div class="form-grid-2-sm" style="margin-bottom:10px;">
@@ -3502,7 +3547,7 @@
                         </div>
                         <div>
                             <label for="ruta-distancia">Distancia (km ida)</label>
-                            <input type="number" inputmode="decimal" step="0.1" id="ruta-distancia" placeholder="0.0" required aria-required="true" min="0.1" max="9999" aria-label="Distancia de ida en kilómetros">
+                            <input type="number" inputmode="decimal" step="0.1" id="ruta-distancia" placeholder="0.0" required aria-required="true" min="0.1" max="9999" aria-label="Distancia de ida en kilómetros" pattern="^\d+(\.\d{1,1})?$">
                         </div>
                     </div>
                     <button type="submit" class="btn-secundario" style="width:100%;font-size:12px;" data-tooltip="Registrar ruta">💾 Registrar Ruta</button>
@@ -3552,15 +3597,15 @@
                 <div class="form-grid-3">
                     <div>
                         <label for="viaje-numero">No. de Viajes</label>
-                        <input type="number" inputmode="decimal" id="viaje-numero" value="1" min="1" max="999" aria-label="Número de viajes realizados">
+                        <input type="number" inputmode="decimal" id="viaje-numero" value="1" min="1" max="999" aria-label="Número de viajes realizados" pattern="^\d+$">
                     </div>
                     <div id="div-viaje-diesel">
                         <label for="viaje-precio-diesel">Precio Diesel (Q/L)</label>
-                        <input type="number" inputmode="decimal" step="0.01" id="viaje-precio-diesel" value="0" min="0" max="999" aria-label="Precio del diesel por litro">
+                        <input type="number" inputmode="decimal" step="0.01" id="viaje-precio-diesel" value="0" min="0" max="999" aria-label="Precio del diesel por litro" pattern="^\d+(\.\d{1,2})?$">
                     </div>
                     <div>
                         <label for="viaje-extra">Tarifa Excedente (Q)</label>
-                        <input type="number" inputmode="decimal" step="0.01" id="viaje-extra" value="0" min="0" max="999999" aria-label="Costo adicional o ajuste de tarifa">
+                        <input type="number" inputmode="decimal" step="0.01" id="viaje-extra" value="0" min="0" max="999999" aria-label="Costo adicional o ajuste de tarifa" pattern="^\d+(\.\d{1,2})?$">
                     </div>
                 </div>
                 <!-- Indicador para camiones alquilados -->
@@ -3663,7 +3708,7 @@
                     </div>
                     <div>
                         <label for="ord-costo">Costo (Q)</label>
-                        <input type="number" inputmode="decimal" step="0.01" id="ord-costo" value="0" min="0" max="999999" aria-label="Costo del mantenimiento">
+                        <input type="number" inputmode="decimal" step="0.01" id="ord-costo" value="0" min="0" max="999999" aria-label="Costo del mantenimiento" pattern="^\d+(\.\d{1,2})?$">
                     </div>
                 </div>
                 <div style="margin-bottom:10px;">
@@ -3742,16 +3787,16 @@
                     </div>
                     <div>
                         <label for="insumo-cantidad">Cantidad</label>
-                        <input type="number" inputmode="decimal" id="insumo-cantidad" placeholder="1" min="1" max="99999" aria-label="Cantidad de insumo">
+                        <input type="number" inputmode="decimal" id="insumo-cantidad" placeholder="1" min="1" max="99999" aria-label="Cantidad de insumo" pattern="^\d+$">
                     </div>
                     <div>
                         <label for="insumo-costo">Costo Total (Q)</label>
-                        <input type="number" inputmode="decimal" step="0.01" id="insumo-costo" placeholder="0.00" min="0" max="999999" aria-label="Costo total del insumo">
+                        <input type="number" inputmode="decimal" step="0.01" id="insumo-costo" placeholder="0.00" min="0" max="999999" aria-label="Costo total del insumo" pattern="^\d+(\.\d{1,2})?$">
                     </div>
                 </div>
                 <div style="margin-top:12px;">
                     <label for="insumo-stock-min">Stock Mínimo (Alerta)</label>
-                    <input type="number" inputmode="decimal" id="insumo-stock-min" min="0" max="99999" placeholder="Opcional: alerta al bajar de este valor" aria-label="Stock mínimo de alerta">
+                    <input type="number" inputmode="decimal" id="insumo-stock-min" min="0" max="99999" placeholder="Opcional: alerta al bajar de este valor" aria-label="Stock mínimo de alerta" pattern="^\d+$">
                 </div>
                 
                 <!-- Firma Digital de Recepción -->
@@ -3886,7 +3931,7 @@
             <div style="margin-top:15px;padding:12px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid var(--glass-border);">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                     <div style="font-size:12px;color:var(--texto-principal);font-weight:700;">📁 Reportes Recientes</div>
-                    <button onclick="limpiarHistorialReportes()" style="font-size:10px;padding:4px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:4px;color:#ef4444;cursor:pointer;" title="Limpiar historial">Limpiar</button>
+                    <button onclick="limpiarHistorialReportes()" style="font-size:10px;padding:4px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:4px;color:var(--alerta);cursor:pointer;" title="Limpiar historial">Limpiar</button>
                 </div>
                 <div id="reportes-recientes" style="font-size:11px;color:var(--texto-secundario);max-height:200px;overflow-y:auto;">
                     No hay reportes generados recientemente
@@ -3913,7 +3958,7 @@
                 <h3 class="historial-titulo">💰 Presupuesto Inicial de Caja Chica</h3>
                 <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
                     <label for="config-presupuesto" class="visually-hidden">Presupuesto inicial</label>
-                    <input type="number" inputmode="decimal" step="0.01" id="config-presupuesto" placeholder="Monto inicial (Q)" aria-label="Monto inicial de caja chica" min="0" max="9999999" required aria-required="true" style="flex:1;min-width:150px;">
+                    <input type="number" inputmode="decimal" step="0.01" id="config-presupuesto" placeholder="Monto inicial (Q)" aria-label="Monto inicial de caja chica" min="0" max="9999999" required aria-required="true" pattern="^\d+(\.\d{1,2})?$" style="flex:1;min-width:150px;">
                     <button onclick="guardarPresupuesto()" class="btn-primario" aria-label="Guardar presupuesto inicial">Guardar</button>
                 </div>
             </div>
@@ -3940,11 +3985,11 @@
                 <div class="form-grid-2" style="margin-top:10px;">
                     <div>
                         <label for="cfg-telefono" style="font-size:12px;color:var(--texto-principal);">Teléfono</label>
-                        <input type="tel" id="cfg-telefono" placeholder="+502 0000 0000" aria-label="Teléfono de la empresa" maxlength="30" required aria-required="true">
+                        <input type="tel" id="cfg-telefono" placeholder="+502 0000 0000" aria-label="Teléfono de la empresa" maxlength="30" pattern="^\+502\s?\d{4}\s?\d{4}$" required aria-required="true">
                     </div>
                     <div>
                         <label for="cfg-email" style="font-size:12px;color:var(--texto-principal);">Email</label>
-                        <input type="email" id="cfg-email" placeholder="contacto@empresa.com" aria-label="Correo electrónico de la empresa" maxlength="80" required aria-required="true">
+                        <input type="email" id="cfg-email" placeholder="contacto@empresa.com" aria-label="Correo electrónico de la empresa" maxlength="80" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" required aria-required="true">
                     </div>
                 </div>
                 <div style="margin-top:10px;">
@@ -3953,7 +3998,7 @@
                 </div>
                 <div style="margin-top:10px;">
                     <label for="cfg-website" style="font-size:12px;color:var(--texto-principal);">Sitio Web</label>
-                    <input type="url" id="cfg-website" placeholder="www.miempresa.com" aria-label="Sitio web de la empresa" maxlength="50">
+                    <input type="url" id="cfg-website" placeholder="www.miempresa.com" aria-label="Sitio web de la empresa" maxlength="50" pattern="^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*$">
                 </div>
                 <div style="margin-top:12px;">
                     <button onclick="guardarDatosContacto()" class="btn-primario" aria-label="Guardar datos de contacto">💾 Guardar Datos de Contacto</button>
@@ -4282,33 +4327,33 @@
             <table style="width:100%; border-collapse:collapse; margin-bottom: 10px;">
                 <tr>
                     <td style="width:50%; vertical-align:top; padding-right:12px;">
-                        <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:#9CA3AF; letter-spacing:0.6px; margin-bottom:2px;">Fecha</div>
-                        <div id="pdf-portada-fecha" style="font-size:10px; color:#374151; font-weight:600;"></div>
+                        <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:var(--pdf-gris-claro); letter-spacing:0.6px; margin-bottom:2px;">Fecha</div>
+                        <div id="pdf-portada-fecha" style="font-size:10px; color:var(--pdf-gris-oscuro); font-weight:600;"></div>
                     </td>
-                    <td style="width:50%; vertical-align:top; padding-left:12px; border-left:1px solid #E5E7EB;">
-                        <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:#9CA3AF; letter-spacing:0.6px; margin-bottom:2px;">Elaborado por</div>
-                        <div id="pdf-portada-remitente" style="font-size:10px; color:#374151; font-weight:600;"></div>
+                    <td style="width:50%; vertical-align:top; padding-left:12px; border-left:1px solid var(--pdf-gris-borde);">
+                        <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:var(--pdf-gris-claro); letter-spacing:0.6px; margin-bottom:2px;">Elaborado por</div>
+                        <div id="pdf-portada-remitente" style="font-size:10px; color:var(--pdf-gris-oscuro); font-weight:600;"></div>
                     </td>
                 </tr>
             </table>
 
             <!-- Destinatario -->
             <div id="pdf-portada-destinatario-bloque" style="display:none; margin-bottom:8px;">
-                <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:#9CA3AF; letter-spacing:0.6px; margin-bottom:2px;">Dirigido a</div>
-                <div id="pdf-portada-destinatario" style="font-size:10px; color:#374151; font-weight:600;"></div>
+                <div style="font-size:8px; font-weight:700; text-transform:uppercase; color:var(--pdf-gris-claro); letter-spacing:0.6px; margin-bottom:2px;">Dirigido a</div>
+                <div id="pdf-portada-destinatario" style="font-size:10px; color:var(--pdf-gris-oscuro); font-weight:600;"></div>
             </div>
 
             <!-- Saludo -->
             <div id="pdf-portada-saludo-bloque" style="display:none; margin-bottom:8px;">
-                <div id="pdf-portada-saludo" style="font-size:10.5px; color:#1F2937; font-style:italic;"></div>
+                <div id="pdf-portada-saludo" style="font-size:10.5px; color:var(--pdf-gris-oscuro); font-style:italic;"></div>
             </div>
 
             <!-- Línea divisora fina -->
-            <div style="height:1px; background:#E5E7EB; margin: 8px 0;"></div>
+            <div style="height:1px; background:var(--pdf-gris-borde); margin: 8px 0;"></div>
 
             <!-- Descripción / introducción -->
             <div id="pdf-portada-descripcion-bloque" style="display:none;">
-                <div id="pdf-portada-descripcion" style="font-size:9.5px; color:#374151; line-height:1.65; text-align:justify; white-space:pre-wrap;"></div>
+                <div id="pdf-portada-descripcion" style="font-size:9.5px; color:var(--pdf-gris-oscuro); line-height:1.65; text-align:justify; white-space:pre-wrap;"></div>
             </div>
         </div>
 
@@ -4654,6 +4699,7 @@
         }
 
         function numToF(v) { const n = parseFloat(v); return (Number.isFinite(n) ? n : 0).toFixed(2); }
+        function numToInt(v) { const n = parseFloat(v); return (Number.isFinite(n) ? Math.round(n) : 0).toString(); }
         // Símbolo de moneda centralizado en CR_CONFIG (fallback a 'Q' si el módulo no cargó).
         const _SIMBOLO_MONEDA = (typeof CR_CONFIG !== 'undefined' && CR_CONFIG.APP_CONFIG) ? CR_CONFIG.APP_CONFIG.moneda : 'Q';
         function formatearMoneda(v) { 
@@ -4698,6 +4744,260 @@
             html += `<span class="paginacion-info">Página ${paginaActual} de ${totalPaginas} (${total} registros)</span>`;
             html += `<button class="btn-secundario" onclick="${onCambio}(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''} aria-label="Página siguiente">▶</button>`;
             safeSetHTML(container, html);
+        }
+
+        // ============================================================
+        // VALIDACIÓN EN TIEMPO REAL
+        // ============================================================
+        
+        /**
+         * Sistema de validación en tiempo real para formularios
+         * Proporciona feedback inmediato mientras el usuario ingresa datos
+         */
+        const validadorTiempoReal = {
+            errores: {},
+            
+            /**
+             * Valida un campo específico y muestra error si corresponde
+             */
+            validarCampo: function(campoId, reglas) {
+                const campo = document.getElementById(campoId);
+                if (!campo) return true;
+                
+                const valor = campo.value.trim();
+                const errorElement = document.getElementById(`${campoId}-error`);
+                
+                // Limpiar error anterior
+                if (errorElement) {
+                    errorElement.textContent = '';
+                    errorElement.style.display = 'none';
+                }
+                delete this.errores[campoId];
+                
+                // Aplicar reglas de validación
+                for (const regla of reglas) {
+                    const resultado = this.ejecutarRegla(valor, regla, campo);
+                    if (!resultado.valido) {
+                        this.mostrarError(campoId, resultado.mensaje, errorElement);
+                        this.errores[campoId] = resultado.mensaje;
+                        campo.style.borderColor = 'var(--alerta)';
+                        return false;
+                    }
+                }
+                
+                // Campo válido
+                campo.style.borderColor = 'var(--exito)';
+                return true;
+            },
+            
+            /**
+             * Ejecuta una regla de validación específica
+             */
+            ejecutarRegla: function(valor, regla, campo) {
+                switch (regla.tipo) {
+                    case 'requerido':
+                        return { valido: valor.length > 0, mensaje: regla.mensaje || 'Este campo es requerido' };
+                    
+                    case 'minimo':
+                        return { valido: valor.length >= regla.valor, mensaje: regla.mensaje || `Mínimo ${regla.valor} caracteres` };
+                    
+                    case 'maximo':
+                        return { valido: valor.length <= regla.valor, mensaje: regla.mensaje || `Máximo ${regla.valor} caracteres` };
+                    
+                    case 'numero':
+                        const num = parseFloat(valor);
+                        return { valido: !isNaN(num) && num > 0, mensaje: regla.mensaje || 'Debe ser un número positivo' };
+                    
+                    case 'rango':
+                        const numRango = parseFloat(valor);
+                        return { valido: !isNaN(numRango) && numRango >= regla.min && numRango <= regla.max, 
+                                mensaje: regla.mensaje || `Debe estar entre ${regla.min} y ${regla.max}` };
+                    
+                    case 'fecha':
+                        if (!valor) return { valido: false, mensaje: 'La fecha es requerida' };
+                        const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
+                        return { valido: regexFecha.test(valor), mensaje: 'Formato de fecha inválido (YYYY-MM-DD)' };
+                    
+                    case 'email':
+                        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        return { valido: regexEmail.test(valor), mensaje: 'Formato de email inválido' };
+                    
+                    case 'telefono':
+                        const regexTel = /^\+?[\d\s\-()]+$/;
+                        return { valido: regexTel.test(valor) && valor.replace(/\D/g, '').length >= 8, 
+                                mensaje: 'Formato de teléfono inválido' };
+                    
+                    case 'montoMaximo':
+                        const monto = parseFloat(valor);
+                        return { valido: !isNaN(monto) && monto <= regla.valor, 
+                                mensaje: regla.mensaje || `El monto no puede exceder ${regla.valor}` };
+                    
+                    default:
+                        return { valido: true, mensaje: '' };
+                }
+            },
+            
+            /**
+             * Muestra el mensaje de error en el elemento correspondiente
+             */
+            mostrarError: function(campoId, mensaje, errorElement) {
+                if (errorElement) {
+                    errorElement.textContent = mensaje;
+                    errorElement.style.display = 'block';
+                    errorElement.style.color = 'var(--alerta-texto)';
+                    errorElement.style.fontSize = '11px';
+                    errorElement.style.marginTop = '4px';
+                } else {
+                    // Crear elemento de error si no existe
+                    const campo = document.getElementById(campoId);
+                    if (campo) {
+                        const nuevoError = document.createElement('div');
+                        nuevoError.id = `${campoId}-error`;
+                        nuevoError.className = 'campo-error';
+                        nuevoError.textContent = mensaje;
+                        nuevoError.style.color = 'var(--alerta-texto)';
+                        nuevoError.style.fontSize = '11px';
+                        nuevoError.style.marginTop = '4px';
+                        campo.parentNode.appendChild(nuevoError);
+                    }
+                }
+            },
+            
+            /**
+             * Valida un formulario completo
+             */
+            validarFormulario: function(formularioId, configuracion) {
+                let formularioValido = true;
+                
+                Object.entries(configuracion).forEach(([campoId, reglas]) => {
+                    const campoValido = this.validarCampo(campoId, reglas);
+                    if (!campoValido) {
+                        formularioValido = false;
+                    }
+                });
+                
+                return formularioValido;
+            },
+            
+            /**
+             * Limpia todos los errores de validación
+             */
+            limpiarErrores: function() {
+                Object.keys(this.errores).forEach(campoId => {
+                    const campo = document.getElementById(campoId);
+                    const errorElement = document.getElementById(`${campoId}-error`);
+                    
+                    if (campo) {
+                        campo.style.borderColor = '';
+                    }
+                    if (errorElement) {
+                        errorElement.textContent = '';
+                        errorElement.style.display = 'none';
+                    }
+                });
+                
+                this.errores = {};
+            },
+            
+            /**
+             * Obtiene el estado actual de validación
+             */
+            obtenerEstado: function() {
+                return {
+                    valido: Object.keys(this.errores).length === 0,
+                    errores: { ...this.errores },
+                    totalErrores: Object.keys(this.errores).length
+                };
+            }
+        };
+        
+        /**
+         * Configuración de validación para cada formulario
+         */
+        const configuracionValidacion = {
+            'caja-chica': {
+                'caja-fecha': [{ tipo: 'fecha' }],
+                'caja-descripcion': [{ tipo: 'requerido' }, { tipo: 'minimo', valor: 3 }],
+                'caja-monto': [{ tipo: 'numero' }, { tipo: 'montoMaximo', valor: 999999 }],
+                'caja-responsable': [{ tipo: 'minimo', valor: 2 }]
+            },
+            'maquinaria': {
+                'maq-fecha': [{ tipo: 'fecha' }],
+                'maq-val-inicial': [{ tipo: 'numero' }],
+                'maq-val-final': [{ tipo: 'numero' }],
+                'maq-galones': [{ tipo: 'numero' }],
+                'maq-precio-galon': [{ tipo: 'numero' }],
+                'maq-costo-mantenimiento': [{ tipo: 'numero' }]
+            },
+            'personal': {
+                'trab-nombre': [{ tipo: 'requerido' }, { tipo: 'minimo', valor: 3 }],
+                'trab-puesto': [{ tipo: 'requerido' }, { tipo: 'minimo', valor: 2 }],
+                'trab-tarifa': [{ tipo: 'numero' }]
+            },
+            'proveedor': {
+                'prov-nombre': [{ tipo: 'requerido' }, { tipo: 'minimo', valor: 3 }],
+                'prov-telefono': [{ tipo: 'telefono' }],
+                'prov-email': [{ tipo: 'email' }]
+            },
+            'viaje': {
+                'viaje-fecha': [{ tipo: 'fecha' }],
+                'viaje-km-total': [{ tipo: 'numero' }],
+                'viaje-litros': [{ tipo: 'numero' }]
+            },
+            'mantenimiento': {
+                'ord-fecha': [{ tipo: 'fecha' }],
+                'ord-costo': [{ tipo: 'numero' }],
+                'ins-costo': [{ tipo: 'numero' }]
+            },
+            'configuracion': {
+                'conf-telefono': [{ tipo: 'telefono' }],
+                'conf-email': [{ tipo: 'email' }],
+                'conf-direccion': [{ tipo: 'minimo', valor: 5 }]
+            }
+        };
+        
+        /**
+         * Inicializa validación en tiempo real para un formulario
+         */
+        function inicializarValidacionTiempoReal(formularioId) {
+            const config = configuracionValidacion[formularioId];
+            if (!config) return;
+            
+            Object.entries(config).forEach(([campoId, reglas]) => {
+                const campo = document.getElementById(campoId);
+                if (campo) {
+                    // Validar al perder el foco
+                    campo.addEventListener('blur', () => {
+                        validadorTiempoReal.validarCampo(campoId, reglas);
+                    });
+                    
+                    // Validar al cambiar el valor
+                    campo.addEventListener('input', () => {
+                        // Solo validar si ya hubo un error anterior
+                        if (validadorTiempoReal.errores[campoId]) {
+                            validadorTiempoReal.validarCampo(campoId, reglas);
+                        }
+                    });
+                }
+            });
+        }
+        
+        /**
+         * Valida automáticamente antes de enviar un formulario
+         */
+        function validarAntesDeEnviar(formularioId, event) {
+            const config = configuracionValidacion[formularioId];
+            if (!config) return true;
+            
+            const formularioValido = validadorTiempoReal.validarFormulario(formularioId, config);
+            
+            if (!formularioValido) {
+                event.preventDefault();
+                showToast('❌ Corrige los errores antes de continuar', 'error');
+                return false;
+            }
+            
+            return true;
         }
 
         // ============================================================
@@ -4793,40 +5093,144 @@
         // ============================================================
         function crearProyecto(nombre, descripcion, presupuesto) {
             const db = getDB();
+            
+            // Validaciones de negocio
+            if (!nombre || nombre.trim().length < 3) {
+                showToast('❌ El nombre del proyecto debe tener al menos 3 caracteres', 'error');
+                return null;
+            }
+            
+            if (db.proyectos.some(p => p.nombre.toLowerCase() === nombre.toLowerCase().trim())) {
+                showToast('❌ Ya existe un proyecto con ese nombre', 'error');
+                return null;
+            }
+            
+            const presupuestoNum = parseFloat(presupuesto);
+            if (isNaN(presupuestoNum) || presupuestoNum < 0) {
+                showToast('❌ El presupuesto debe ser un número positivo', 'error');
+                return null;
+            }
+            
+            if (presupuestoNum > 100000000) {
+                showToast('❌ El presupuesto excede el límite permitido (Q100,000,000)', 'error');
+                return null;
+            }
+            
             const id = generarId();
-            db.proyectos.push({ id, nombre, descripcion: descripcion || '', presupuesto_inicial: presupuesto || 0, fecha_creacion: new Date().toISOString().split('T')[0], fecha_ultima_modificacion: new Date().toISOString() });
-            db.proyectos_data[id] = { caja_chica:[], maquinaria_flota:{vehiculos:[],registros:[]}, personal:{trabajadores:[],asistencia:[]}, adquisiciones:{proveedores:[],cotizaciones_compras:[]}, viajes_camiones:{rutas_botadero:[],camiones:[],equipo_alquilado:[],viajes:[]}, mantenimiento:{maquinaria:[],formatos:{},ordenes:[],compras_insumos:[]} };
+            db.proyectos.push({ 
+                id, 
+                nombre: nombre.trim(), 
+                descripcion: descripcion ? descripcion.trim() : '', 
+                presupuesto_inicial: presupuestoNum, 
+                fecha_creacion: new Date().toISOString().split('T')[0], 
+                fecha_ultima_modificacion: new Date().toISOString(),
+                activo: true,
+                color: '#004B93' // Color corporativo por defecto
+            });
+            
+            // Crear estructura de datos completa para el proyecto
+            db.proyectos_data[id] = { 
+                caja_chica:[], 
+                maquinaria_flota:{vehiculos:[],registros:[]}, 
+                personal:{trabajadores:[],asistencia:[]}, 
+                adquisiciones:{proveedores:[],cotizaciones_compras:[]}, 
+                viajes_camiones:{rutas_botadero:[],camiones:[],equipo_alquilado:[],viajes:[]}, 
+                mantenimiento:{maquinaria:[],formatos:{},ordenes:[],compras_insumos:[]} 
+            };
+            
             saveDB(db);
+            logInfo(`Proyecto creado: ${nombre} (ID: ${id}, Presupuesto: Q${presupuestoNum.toLocaleString('es-GT')})`);
             return db.proyectos[db.proyectos.length - 1];
         }
 
         function seleccionarProyecto(pid) {
             const db = getDB();
             const proy = db.proyectos.find(p => p.id === pid);
-            if (!proy) { showToast('❌ Proyecto no encontrado', 'error'); return false; }
+            
+            // Validación de negocio: verificar que el proyecto existe y está activo
+            if (!proy) {
+                showToast('❌ Proyecto no encontrado', 'error');
+                return false;
+            }
+            
+            if (proy.activo === false) {
+                showToast('❌ Este proyecto está inactivo y no puede seleccionarse', 'error');
+                return false;
+            }
+            
+            // Validación de negocio: verificar que la estructura de datos existe
+            if (!db.proyectos_data[pid]) {
+                showToast('❌ Error de integridad: el proyecto no tiene datos asociados', 'error');
+                return false;
+            }
+            
             db.configuracion.proyecto_actual = pid;
             saveDB(db);
             actualizarBadgeProyecto(proy.nombre);
             recargarTodosLosDatos();
             showToast(`✅ Proyecto "${proy.nombre}" seleccionado`, 'success');
+            logInfo(`Proyecto seleccionado: ${proy.nombre} (ID: ${pid})`);
             return true;
         }
 
         function eliminarProyecto(pid) {
-            showConfirmModal('Eliminar Proyecto', '¿Eliminar este proyecto y TODOS sus datos? Esta acción no se puede deshacer.', () => {
-                const db = getDB();
-                db.proyectos = db.proyectos.filter(p => p.id !== pid);
-                delete db.proyectos_data[pid];
-                if (db.configuracion.proyecto_actual === pid) {
-                    db.configuracion.proyecto_actual = null;
-                    actualizarBadgeProyecto(null);
+            const db = getDB();
+            const proy = db.proyectos.find(p => p.id === pid);
+            
+            // Validación de negocio: verificar que el proyecto existe
+            if (!proy) {
+                showToast('❌ Proyecto no encontrado', 'error');
+                return;
+            }
+            
+            // Validación de negocio: no permitir eliminar si tiene datos asociados
+            const datosProyecto = db.proyectos_data[pid];
+            if (datosProyecto) {
+                const tieneDatos = 
+                    (datosProyecto.caja_chica && datosProyecto.caja_chica.length > 0) ||
+                    (datosProyecto.maquinaria_flota.registros && datosProyecto.maquinaria_flota.registros.length > 0) ||
+                    (datosProyecto.personal.trabajadores && datosProyecto.personal.trabajadores.length > 0) ||
+                    (datosProyecto.adquisiciones.cotizaciones_compras && datosProyecto.adquisiciones.cotizaciones_compras.length > 0) ||
+                    (datosProyecto.viajes_camiones.viajes && datosProyecto.viajes_camiones.viajes.length > 0) ||
+                    (datosProyecto.mantenimiento.ordenes && datosProyecto.mantenimiento.ordenes.length > 0);
+                
+                if (tieneDatos) {
+                    showConfirmModal(
+                        'Eliminar Proyecto con Datos', 
+                        `⚠️ Este proyecto tiene datos asociados (movimientos, registros, etc.).\n\n¿Está seguro de eliminar "${proy.nombre}" y TODOS sus datos?\n\nEsta acción NO se puede deshacer.`, 
+                        () => {
+                            _ejecutarEliminacionProyecto(db, pid);
+                        }
+                    );
+                } else {
+                    showConfirmModal(
+                        'Eliminar Proyecto', 
+                        `¿Eliminar el proyecto "${proy.nombre}"?\n\nEste proyecto no tiene datos asociados.`, 
+                        () => {
+                            _ejecutarEliminacionProyecto(db, pid);
+                        }
+                    );
                 }
-                saveDB(db);
-                cargarListaProyectos();
-                cargarListaProyectosConfig();
-                recargarTodosLosDatos();
-                showToast('✅ Proyecto eliminado', 'success');
-            });
+            } else {
+                _ejecutarEliminacionProyecto(db, pid);
+            }
+        }
+        
+        function _ejecutarEliminacionProyecto(db, pid) {
+            db.proyectos = db.proyectos.filter(p => p.id !== pid);
+            delete db.proyectos_data[pid];
+            
+            if (db.configuracion.proyecto_actual === pid) {
+                db.configuracion.proyecto_actual = null;
+                actualizarBadgeProyecto(null);
+            }
+            
+            saveDB(db);
+            cargarListaProyectos();
+            cargarListaProyectosConfig();
+            recargarTodosLosDatos();
+            showToast('✅ Proyecto eliminado', 'success');
+            logInfo(`Proyecto eliminado: ID ${pid}`);
         }
 
         // FIX #16: badge prominente con estado visual
@@ -4967,52 +5371,67 @@
         // ============================================================
         function cancelarEdicionCaja() {
             const form = document.getElementById('form-caja-chica');
-            delete form.dataset.editando;
-            form.reset();
-            document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
-            form.querySelector('button[type="submit"]').textContent = '💾 Registrar Movimiento';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btn = document.getElementById('btn-cancelar-caja');
+            if (form) {
+                delete form.dataset.editando;
+                form.reset();
+                document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
+            }
+            if (submitBtn) submitBtn.textContent = '💾 Registrar Movimiento';
             if (btn) btn.style.display = 'none';
         }
         function cancelarEdicionMaquinaria() {
             const form = document.getElementById('form-maquinaria');
-            delete form.dataset.editando;
-            form.reset();
-            document.getElementById('maq-fecha').value = new Date().toISOString().split('T')[0];
-            form.querySelector('button[type="submit"]').textContent = '💾 Guardar Registro de Maquinaria';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btn = document.getElementById('btn-cancelar-maq');
+            if (form) {
+                delete form.dataset.editando;
+                form.reset();
+                document.getElementById('maq-fecha').value = new Date().toISOString().split('T')[0];
+            }
+            if (submitBtn) submitBtn.textContent = '💾 Guardar Registro de Maquinaria';
             if (btn) btn.style.display = 'none';
             resetPanelMaquinaria();
         }
         function cancelarEdicionViaje() {
             const form = document.getElementById('form-viaje');
-            delete form.dataset.editando;
-            form.reset();
-            document.getElementById('viaje-fecha').value  = new Date().toISOString().split('T')[0];
-            document.getElementById('viaje-numero').value = 1;
-            form.querySelector('button[type="submit"]').textContent = '📦 Registrar Viaje';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btn = document.getElementById('btn-cancelar-viaje');
+            if (form) {
+                delete form.dataset.editando;
+                form.reset();
+                document.getElementById('viaje-fecha').value  = new Date().toISOString().split('T')[0];
+                document.getElementById('viaje-numero').value = 1;
+            }
+            if (submitBtn) submitBtn.textContent = '📦 Registrar Viaje';
             if (btn) btn.style.display = 'none';
         }
         function cancelarEdicionOrden() {
             const form = document.getElementById('form-orden');
-            delete form.dataset.editando;
-            form.reset();
-            document.getElementById('ord-fecha').value = new Date().toISOString().split('T')[0];
-            form.querySelector('button[type="submit"]').textContent = '💾 Guardar Orden';
-            buildFormatosInspeccion();
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btn = document.getElementById('btn-cancelar-orden');
+            if (form) {
+                delete form.dataset.editando;
+                form.reset();
+                document.getElementById('ord-fecha').value = new Date().toISOString().split('T')[0];
+            }
+            if (submitBtn) submitBtn.textContent = '💾 Guardar Orden';
+            buildFormatosInspeccion();
             if (btn) btn.style.display = 'none';
             // Limpiar fotos al cancelar
             limpiarFotos();
         }
         function cancelarEdicionInsumo() {
             const form = document.getElementById('form-insumo');
-            delete form.dataset.editando;
-            form.reset();
-            document.getElementById('insumo-fecha').value     = new Date().toISOString().split('T')[0];
-            form.querySelector('button[type="submit"]').textContent = '💾 Registrar Compra';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btn = document.getElementById('btn-cancelar-insumo');
+            if (form) {
+                delete form.dataset.editando;
+                form.reset();
+                document.getElementById('insumo-fecha').value     = new Date().toISOString().split('T')[0];
+            }
+            if (submitBtn) submitBtn.textContent = '💾 Registrar Compra';
             if (btn) btn.style.display = 'none';
         }
 
@@ -5036,11 +5455,12 @@
             document.getElementById('viaje-extra').value    = v.extra || 0;
             calcularMetricasViaje();
             const form = document.getElementById('form-viaje');
-            form.dataset.editando = id;
-            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Viaje';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btn = document.getElementById('btn-cancelar-viaje');
+            if (form) form.dataset.editando = id;
+            if (submitBtn) submitBtn.textContent = '💾 Actualizar Viaje';
             if (btn) btn.style.display = '';
-            form.scrollIntoView({ behavior: 'smooth' });
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
         }
 
         // ============================================================
@@ -5074,11 +5494,12 @@
             
             buildFormatosInspeccion();
             const form = document.getElementById('form-orden');
-            form.dataset.editando = id;
-            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Orden';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btn = document.getElementById('btn-cancelar-orden');
+            if (form) form.dataset.editando = id;
+            if (submitBtn) submitBtn.textContent = '💾 Actualizar Orden';
             if (btn) btn.style.display = '';
-            form.scrollIntoView({ behavior: 'smooth' });
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
         }
 
         // ============================================================
@@ -5105,11 +5526,12 @@
             }
             
             const form = document.getElementById('form-insumo');
-            form.dataset.editando = id;
-            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Insumo';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btn = document.getElementById('btn-cancelar-insumo');
+            if (form) form.dataset.editando = id;
+            if (submitBtn) submitBtn.textContent = '💾 Actualizar Insumo';
             if (btn) btn.style.display = '';
-            form.scrollIntoView({ behavior: 'smooth' });
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
         }
 
         // ============================================================
@@ -5222,6 +5644,14 @@
         // ============================================================
         // DASHBOARD DE COSTOS AVANZADO
         // ============================================================
+        
+        function mostrarErrorDashboard(mensaje) {
+            const graficoContainer = document.getElementById('grafico-gastos');
+            if (graficoContainer) {
+                graficoContainer.innerHTML = `<div class="grafico-placeholder error">⚠️ ${mensaje}</div>`;
+            }
+        }
+
         function actualizarDashboard() {
             try {
                 const elemPeriodo = document.getElementById('dashboard-periodo');
@@ -5248,6 +5678,7 @@
                 
                 if (!kpis) {
                     console.warn('Motor de KPIs no disponible');
+                    mostrarErrorDashboard('Motor de KPIs no disponible');
                     return;
                 }
             
@@ -5317,7 +5748,9 @@
                                  style="height:${altura}%;background:linear-gradient(180deg,${color},${color}dd);"
                                  data-value="${formatearMoneda(monto)}"
                                  data-category="${etiquetaCat}"
-                                 data-percentage="${porcentaje}%">
+                                 data-percentage="${porcentaje}%"
+                                 role="img"
+                                 aria-label="${etiquetaCat}: ${formatearMoneda(monto)} (${porcentaje}%)">
                             </div>
                         `;
                     }).join('');
@@ -5327,6 +5760,25 @@
                         const porcentaje = ((monto / totalGastos) * 100).toFixed(1);
                         return `<div style="flex:1;padding:0 2px;text-align:center;"><div style="font-size:9px;color:var(--texto-principal);font-weight:600;writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;max-height:55px;overflow:hidden;">${etiquetaCat}</div><div style="font-size:9px;color:var(--acento-cian);margin-top:2px;">${porcentaje}%</div></div>`;
                     }).join('');
+
+                    // Only update the container if we have valid data
+                    if (gastosConValor.length > 0 && barras && labels) {
+                        graficoContainer.innerHTML = `<div class="css-chart-content"><div class="css-chart-bars">${barras}</div><div class="css-chart-labels">${labels}</div></div>`;
+                        
+                        // Add hover effects for interactivity
+                        setTimeout(() => {
+                            graficoContainer.querySelectorAll('.css-chart-bar').forEach(bar => {
+                                bar.addEventListener('mouseenter', function() {
+                                    const value = this.getAttribute('data-value');
+                                    const category = this.getAttribute('data-category');
+                                    const percentage = this.getAttribute('data-percentage');
+                                    showToast(`${category}: ${value} (${percentage})`, 'info', 2000);
+                                });
+                            });
+                        }, 100);
+                    } else {
+                        graficoContainer.innerHTML = '<div class="grafico-placeholder">No hay datos para este período</div>';
+                    }
 
 
 
@@ -5878,8 +6330,8 @@
                     ventana.document.write(`
                         <html>
                             <head><title>Foto de Mantenimiento</title></head>
-                            <body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000;">
-                                <img src="${foto.data}" style="max-width:100%;max-height:100vh;" alt="Foto">
+                            <body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:var(--pdf-negro);">
+                                <img src="${foto.data}" style="max-width:100%;max-height:100vh;" alt="Foto de mantenimiento - ${_esc(foto.id)}">
                             </body>
                         </html>
                     `);
@@ -6363,53 +6815,60 @@ tbody.innerHTML = '';
 
         document.getElementById('form-caja-chica').addEventListener('submit', function(e) {
             e.preventDefault();
-            const tipo        = document.getElementById('caja-tipo').value;
-            const categoria   = document.getElementById('caja-categoria').value;
-            const descripcion = document.getElementById('caja-descripcion').value.trim();
-            const monto       = parseFloat(document.getElementById('caja-monto').value);
-            const fecha       = document.getElementById('caja-fecha').value;
-            const responsable = document.getElementById('caja-responsable').value.trim() || 'Usuario';
+            
+            // Validar usando el sistema en tiempo real
+            if (!validarAntesDeEnviar('caja-chica', e)) {
+                return;
+            }
+            
+            try {
+                const tipo        = document.getElementById('caja-tipo').value;
+                const categoria   = document.getElementById('caja-categoria').value;
+                const descripcion = document.getElementById('caja-descripcion').value.trim();
+                const monto       = parseFloat(document.getElementById('caja-monto').value);
+                const fecha       = document.getElementById('caja-fecha').value;
+                const responsable = document.getElementById('caja-responsable').value.trim() || 'Usuario';
 
-            if (!fecha) { showToast('❌ Seleccione la fecha del movimiento', 'error'); return; }
-            if (!descripcion || descripcion.length < 3) { showToast('❌ La descripción debe tener al menos 3 caracteres', 'error'); return; }
-            if (isNaN(monto) || monto <= 0) { showToast('❌ El monto debe ser un número positivo', 'error'); return; }
-            if (monto > 999999) { showToast('❌ El monto excede el límite permitido', 'error'); return; }
+                const datos = getProyectoData();
+                const editandoId = this.dataset.editando;
 
-            const datos = getProyectoData();
-            const editandoId = this.dataset.editando;
-
-            if (editandoId) {
-                // Modo edición
-                const idx = datos.caja_chica.findIndex(m => m.id === editandoId);
-                if (idx !== -1) {
-                    // Validar saldo excluyendo el registro que se edita
-                    if (tipo === 'egreso') {
-                        const presupuesto = getPresupuestoActual();
-                        let saldoSinEste = presupuesto;
-                        datos.caja_chica.forEach((m, i) => {
-                            if (i === idx) return;
-                            if (m.tipo === 'ingreso') saldoSinEste += m.monto;
-                            else saldoSinEste -= m.monto;
-                        });
-                        if (monto > saldoSinEste) { showToast(`❌ Fondos insuficientes. Saldo disponible: ${formatearMoneda(saldoSinEste)}`, 'error'); return; }
+                if (editandoId) {
+                    // Modo edición
+                    const idx = datos.caja_chica.findIndex(m => m.id === editandoId);
+                    if (idx !== -1) {
+                        // Validar saldo excluyendo el registro que se edita
+                        if (tipo === 'egreso') {
+                            const presupuesto = getPresupuestoActual();
+                            let saldoSinEste = presupuesto;
+                            datos.caja_chica.forEach((m, i) => {
+                                if (i === idx) return;
+                                if (m.tipo === 'ingreso') saldoSinEste += m.monto;
+                                else saldoSinEste -= m.monto;
+                            });
+                            if (monto > saldoSinEste) { showToast(`❌ Fondos insuficientes. Saldo disponible: ${formatearMoneda(saldoSinEste)}`, 'error'); return; }
+                        }
+                        datos.caja_chica[idx] = { ...datos.caja_chica[idx], fecha, tipo, categoria, descripcion, monto, responsable };
+                        saveProyectoData(datos);
+                        delete this.dataset.editando;
+                        const submitBtn = this.querySelector('button[type="submit"]');
+                        if (submitBtn) submitBtn.textContent = '💾 Registrar Movimiento';
+                        const btnCcS = document.getElementById('btn-cancelar-caja');
+                        if (btnCcS) btnCcS.style.display = 'none';
+                        showToast('✅ Movimiento actualizado', 'success');
                     }
-                    datos.caja_chica[idx] = { ...datos.caja_chica[idx], fecha, tipo, categoria, descripcion, monto, responsable };
+                } else {
+                    // Nuevo registro
+                    if (tipo === 'egreso') {
+                        const saldo = actualizarSaldoCajaChica();
+                        if (monto > saldo) { showToast(`❌ Fondos insuficientes. Saldo: ${formatearMoneda(saldo)}`, 'error'); return; }
+                    }
+                    datos.caja_chica.push({ id:generarId(), fecha, tipo, categoria, descripcion, monto, responsable });
                     saveProyectoData(datos);
-                    delete this.dataset.editando;
-                    this.querySelector('button[type="submit"]').textContent = '💾 Registrar Movimiento';
-                    const btnCcS = document.getElementById('btn-cancelar-caja');
-                    if (btnCcS) btnCcS.style.display = 'none';
-                    showToast('✅ Movimiento actualizado', 'success');
+                    showToast('✅ Movimiento registrado exitosamente', 'success');
                 }
-            } else {
-                // Nuevo registro
-                if (tipo === 'egreso') {
-                    const saldo = actualizarSaldoCajaChica();
-                    if (monto > saldo) { showToast(`❌ Fondos insuficientes. Saldo: ${formatearMoneda(saldo)}`, 'error'); return; }
-                }
-                datos.caja_chica.push({ id:generarId(), fecha, tipo, categoria, descripcion, monto, responsable });
-                saveProyectoData(datos);
-                showToast('✅ Movimiento registrado exitosamente', 'success');
+            } catch (error) {
+                console.error('Error al procesar movimiento de caja:', error);
+                showToast('❌ Error al procesar el movimiento. Intente nuevamente.', 'error');
             }
             this.reset();
             estadoPaginacion.cajaChica = 1;
@@ -6428,11 +6887,12 @@ tbody.innerHTML = '';
             document.getElementById('caja-monto').value         = mov.monto;
             document.getElementById('caja-responsable').value   = mov.responsable || '';
             const form = document.getElementById('form-caja-chica');
-            form.dataset.editando = id;
-            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Movimiento';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btnCc = document.getElementById('btn-cancelar-caja');
+            if (form) form.dataset.editando = id;
+            if (submitBtn) submitBtn.textContent = '💾 Actualizar Movimiento';
             if (btnCc) btnCc.style.display = '';
-            form.scrollIntoView({ behavior: 'smooth' });
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
         }
 
         // FIX #7 + #8: eliminar simplemente filtra; NO agrega reembolso fantasma
@@ -6494,24 +6954,29 @@ tbody.innerHTML = '';
         }
 
         function calcularMetricasMaquinaria() {
-            const tipo   = getDomElement('maq-tipo').value;
-            const ini    = parseFloat(getDomElement('maq-val-inicial').value) || 0;
-            const fin    = parseFloat(getDomElement('maq-val-final').value)   || 0;
-            const gal    = parseFloat(getDomElement('maq-galones').value)     || 0;
-            const precio = parseFloat(getDomElement('maq-precio-galon').value)|| 0;
-            const mant   = parseFloat(getDomElement('maq-costo-mantenimiento').value) || 0;
-            const unidad = esHorasMaquinaria(tipo) ? 'Hrs' : 'Km';
-            const uso    = fin - ini;
-            const errEl  = getDomElement('maq-error-uso');
-            if (uso < 0) { errEl.textContent = 'El valor final debe ser mayor o igual al inicial'; return; }
-            errEl.textContent = '';
-            const costoComb = gal * precio;
-            // FIX #21: N/A si galones=0
-            const rendimiento = gal > 0 ? (uso / gal).toFixed(2) + ` ${unidad}/Gal` : 'N/A';
-            getDomElement('lbl-uso-total').textContent        = uso.toFixed(2) + ' ' + unidad;
-            getDomElement('lbl-costo-combustible').textContent = formatearMoneda(costoComb);
-            getDomElement('lbl-rendimiento').textContent      = rendimiento;
-            getDomElement('lbl-gasto-total').textContent      = formatearMoneda(costoComb + mant);
+            try {
+                const tipo   = getDomElement('maq-tipo').value;
+                const ini    = parseFloat(getDomElement('maq-val-inicial').value) || 0;
+                const fin    = parseFloat(getDomElement('maq-val-final').value)   || 0;
+                const gal    = parseFloat(getDomElement('maq-galones').value)     || 0;
+                const precio = parseFloat(getDomElement('maq-precio-galon').value)|| 0;
+                const mant   = parseFloat(getDomElement('maq-costo-mantenimiento').value) || 0;
+                const unidad = esHorasMaquinaria(tipo) ? 'Hrs' : 'Km';
+                const uso    = fin - ini;
+                const errEl  = getDomElement('maq-error-uso');
+                if (uso < 0) { errEl.textContent = 'El valor final debe ser mayor o igual al inicial'; return; }
+                errEl.textContent = '';
+                const costoComb = gal * precio;
+                // FIX #21: N/A si galones=0
+                const rendimiento = gal > 0 ? (uso / gal).toFixed(2) + ` ${unidad}/Gal` : 'N/A';
+                getDomElement('lbl-uso-total').textContent        = uso.toFixed(2) + ' ' + unidad;
+                getDomElement('lbl-costo-combustible').textContent = formatearMoneda(costoComb);
+                getDomElement('lbl-rendimiento').textContent      = rendimiento;
+                getDomElement('lbl-gasto-total').textContent      = formatearMoneda(costoComb + mant);
+            } catch (error) {
+                console.error('Error al calcular métricas de maquinaria:', error);
+                showToast('❌ Error al calcular métricas. Verifique los valores ingresados.', 'error');
+            }
         }
 
         estadoPaginacion.maquinaria = 1;
@@ -6601,7 +7066,8 @@ tbody.innerHTML = '';
                         saveProyectoData(datos);
                     }
                     delete this.dataset.editando;
-                    this.querySelector('button[type="submit"]').textContent = '💾 Guardar Registro de Maquinaria';
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) submitBtn.textContent = '💾 Guardar Registro de Maquinaria';
                     const btnMaqS = document.getElementById('btn-cancelar-maq');
                     if (btnMaqS) btnMaqS.style.display = 'none';
                     this.reset(); resetPanelMaquinaria();
@@ -6660,11 +7126,12 @@ tbody.innerHTML = '';
             document.getElementById('maq-costo-mantenimiento').value    = reg.mantenimiento_costo || 0;
             calcularMetricasMaquinaria();
             const form = document.getElementById('form-maquinaria');
-            form.dataset.editando = id;
-            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Registro';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
             const btnMaq = document.getElementById('btn-cancelar-maq');
+            if (form) form.dataset.editando = id;
+            if (submitBtn) submitBtn.textContent = '💾 Actualizar Registro';
             if (btnMaq) btnMaq.style.display = '';
-            form.scrollIntoView({ behavior: 'smooth' });
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
         }
 
         // FIX #7: eliminar maquinaria tampoco crea reembolso fantasma
@@ -6785,15 +7252,15 @@ tbody.innerHTML = '';
             
             const filas = nomina.trabajadores.map(t => `
                 <tr>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;font-weight:600;">${_esc(t.nombre)}</td>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;color:#6B7280;">${_esc(t.puesto || '—')}</td>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:center;">${t.diasAsistidos}</td>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:center;color:#DC2626;font-weight:700;">${t.diasFalta}</td>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:center;color:#6B7280;">${t.diasJustificados}</td>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:right;">${t.horasExtra.toFixed(1)}h</td>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:right;">Q${numToF(t.pagoNormal)}</td>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:right;">Q${numToF(t.pagoExtra)}</td>
-                    <td style="padding:8px 10px;border-bottom:1px solid #E5E7EB;text-align:right;font-weight:700;color:#004B93;">Q${numToF(t.totalPagar)}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);font-weight:600;">${_esc(t.nombre)}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);color:var(--pdf-gris-medio);">${_esc(t.puesto || '—')}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);text-align:center;">${t.diasAsistidos}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);text-align:center;color:var(--pdf-rojo);font-weight:700;">${t.diasFalta}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);text-align:center;color:var(--pdf-gris-medio);">${t.diasJustificados}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);text-align:right;">${t.horasExtra.toFixed(1)}h</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);text-align:right;">Q${numToF(t.pagoNormal)}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);text-align:right;">Q${numToF(t.pagoExtra)}</td>
+                    <td style="padding:8px 10px;border-bottom:1px solid var(--pdf-gris-borde);text-align:right;font-weight:700;color:var(--pdf-azul-oscuro);">Q${numToF(t.totalPagar)}</td>
                 </tr>
             `).join('');
             
@@ -6823,30 +7290,30 @@ tbody.innerHTML = '';
                             </tr>
                         </thead>
                         <tbody>${filas}
-                            <tr style="background:#EFF6FF;">
-                                <td colspan="5" style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:#004B93;">TOTALES</td>
+                            <tr style="background:var(--pdf-fondo-azul);">
+                                <td colspan="5" style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:var(--pdf-azul-oscuro);">TOTALES</td>
                                 <td style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;">${nomina.totalHorasExtra.toFixed(1)}h</td>
-                                <td colspan="2" style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:#059669;">TOTAL NÓMINA:</td>
-                                <td style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:#004B93;">Q${numToF(nomina.totalPagable)}</td>
+                                <td colspan="2" style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:var(--pdf-verde);">TOTAL NÓMINA:</td>
+                                <td style="padding:10px;border-top:2px solid #004B93;text-align:right;font-weight:700;color:var(--pdf-azul-oscuro);">Q${numToF(nomina.totalPagable)}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div style="margin-top:40px;display:flex;justify-content:space-between;gap:20px;">
                     <div style="flex:1;text-align:center;border-top:1.5px solid #374151;padding-top:8px;">
-                        <div style="font-size:10px;color:#6B7280;margin-bottom:4px;">Jefe de Proyectos</div>
-                        <div style="font-size:11px;font-weight:700;color:#111827;">Arq. Wilson Dario Salazar</div>
+                        <div style="font-size:10px;color:var(--pdf-gris-medio);margin-bottom:4px;">Jefe de Proyectos</div>
+                        <div style="font-size:11px;font-weight:700;color:var(--pdf-gris-oscuro);">Arq. Wilson Dario Salazar</div>
                     </div>
                     <div style="flex:1;text-align:center;border-top:1.5px solid #374151;padding-top:8px;">
-                        <div style="font-size:10px;color:#6B7280;margin-bottom:4px;">Gerente de Administración</div>
-                        <div style="font-size:11px;font-weight:700;color:#111827;">Ing. Juan Luis Ramirez Jimenez</div>
+                        <div style="font-size:10px;color:var(--pdf-gris-medio);margin-bottom:4px;">Gerente de Administración</div>
+                        <div style="font-size:11px;font-weight:700;color:var(--pdf-gris-oscuro);">Ing. Juan Luis Ramirez Jimenez</div>
                     </div>
                     <div style="flex:1;text-align:center;border-top:1.5px solid #374151;padding-top:8px;">
-                        <div style="font-size:10px;color:#6B7280;margin-bottom:4px;">Revisor de Nómina</div>
-                        <div style="font-size:11px;font-weight:700;color:#111827;">&nbsp;</div>
+                        <div style="font-size:10px;color:var(--pdf-gris-medio);margin-bottom:4px;">Revisor de Nómina</div>
+                        <div style="font-size:11px;font-weight:700;color:var(--pdf-gris-oscuro);">&nbsp;</div>
                     </div>
                 </div>
-                <div style="margin-top:30px;padding-top:10px;border-top:1px solid #E5E7EB;text-align:center;font-size:9px;color:#6B7280;">
+                <div style="margin-top:30px;padding-top:10px;border-top:1px solid var(--pdf-gris-borde);text-align:center;font-size:9px;color:var(--pdf-gris-medio);">
                     Documento confidencial · CONSTRURAMSA · Generado: ${fechaEmision} ${horaEmision}
                 </div>
             `;
@@ -6935,6 +7402,7 @@ tbody.innerHTML = '';
             
             const datos = getProyectoData();
             const diaExistente = datos.personal.asistencia.find(a => a.fecha === fecha);
+            const form = document.getElementById('form-asistencia');
             
             if (!diaExistente) {
                 showToast('ℹ️ No hay asistencia registrada para esta fecha', 'info');
@@ -6945,9 +7413,9 @@ tbody.innerHTML = '';
             datos.personal.trabajadores.forEach(t => {
                 const reg = diaExistente.registros.find(r => r.trabajador_id === t.id);
                 if (reg) {
-                    const radioAsistio = document.querySelector(`input[name="asistencia-${t.id}"][value="asistio"]`);
-                    const radioFalto = document.querySelector(`input[name="asistencia-${t.id}"][value="falto"]`);
-                    const radioJustif = document.querySelector(`input[name="asistencia-${t.id}"][value="justificado"]`);
+                    const radioAsistio = form ? form.querySelector(`input[name="asistencia-${t.id}"][value="asistio"]`) : null;
+                    const radioFalto = form ? form.querySelector(`input[name="asistencia-${t.id}"][value="falto"]`) : null;
+                    const radioJustif = form ? form.querySelector(`input[name="asistencia-${t.id}"][value="justificado"]`) : null;
                     const inputHoras = document.getElementById(`horas-extra-${t.id}`);
                     
                     if (reg.estado === 'asistio' && radioAsistio) radioAsistio.checked = true;
@@ -6966,13 +7434,14 @@ tbody.innerHTML = '';
             const datos = getProyectoData();
             const resumenDiv = document.getElementById('resumen-nomina-dia');
             const fecha = document.getElementById('fecha-asistencia').value;
+            const form = document.getElementById('form-asistencia');
             
             if (!resumenDiv || !fecha) return;
             
             let asistencia = 0, faltas = 0, horasExtra = 0, totalPagar = 0;
             
             datos.personal.trabajadores.forEach(t => {
-                const estadoInput = document.querySelector(`input[name="asistencia-${t.id}"]:checked`);
+                const estadoInput = form ? form.querySelector(`input[name="asistencia-${t.id}"]:checked`) : null;
                 const horasInput = document.getElementById(`horas-extra-${t.id}`);
                 const estado = estadoInput ? estadoInput.value : null;
                 const he = horasInput ? parseFloat(horasInput.value) || 0 : 0;
@@ -7013,6 +7482,7 @@ tbody.innerHTML = '';
             const fechaAnteriorStr = fechaAnterior.toISOString().split('T')[0];
             
             const diaAnterior = datos.personal.asistencia.find(a => a.fecha === fechaAnteriorStr);
+            const form = document.getElementById('form-asistencia');
             if (!diaAnterior) {
                 showToast(`ℹ️ No hay asistencia registrada para el ${fechaAnteriorStr}`, 'info');
                 return;
@@ -7021,7 +7491,7 @@ tbody.innerHTML = '';
             datos.personal.trabajadores.forEach(t => {
                 const reg = diaAnterior.registros.find(r => r.trabajador_id === t.id);
                 if (reg) {
-                    const radio = document.querySelector(`input[name="asistencia-${t.id}"][value="${reg.estado}"]`);
+                    const radio = form ? form.querySelector(`input[name="asistencia-${t.id}"][value="${reg.estado}"]`) : null;
                     if (radio) radio.checked = true;
                     const horasInput = document.getElementById(`horas-extra-${t.id}`);
                     if (horasInput && reg.horas_extras) horasInput.value = reg.horas_extras;
@@ -7042,18 +7512,22 @@ tbody.innerHTML = '';
             document.getElementById('trab-pago-normal').value = t.pago_hora_normal;
             document.getElementById('trab-pago-extra').value  = t.pago_hora_extra;
             const form = document.getElementById('form-trabajador');
-            form.dataset.editando = id;
-            form.querySelector('button[type="submit"]').textContent = '💾 Actualizar Trabajador';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+            if (form) form.dataset.editando = id;
+            if (submitBtn) submitBtn.textContent = '💾 Actualizar Trabajador';
             document.getElementById('btn-cancelar-trab').style.display = 'block';
-            form.scrollIntoView({ behavior: 'smooth' });
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
         }
 
         function cancelarEdicionTrabajador() {
             const form = document.getElementById('form-trabajador');
-            delete form.dataset.editando;
-            form.querySelector('button[type="submit"]').textContent = '➕ Agregar Trabajador';
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+            if (form) {
+                delete form.dataset.editando;
+                form.reset();
+            }
+            if (submitBtn) submitBtn.textContent = '➕ Agregar Trabajador';
             document.getElementById('btn-cancelar-trab').style.display = 'none';
-            form.reset();
         }
 
         function eliminarTrabajador(id) {
@@ -10028,9 +10502,11 @@ tbody.innerHTML = '';
         function generarCSVReporte(tipo, fecha, rangoPersonalizado) {
             const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
             
+            // Validación de datos antes de exportar
             if (!rango.inicio && tipo !== 'asistencia') {
                 return '\uFEFFError: Debe seleccionar una fecha para generar el reporte.';
             }
+            
             const datos = getProyectoData();
             const db    = getDB();
             const proy  = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
@@ -10042,6 +10518,11 @@ tbody.innerHTML = '';
             const email = config.email || 'contacto@construramsa.com';
             const direccion = config.direccion || 'Guatemala, C.A.';
             const website = config.website || 'construramsa.com';
+            
+            // Validación de integridad de datos
+            if (!datos || typeof datos !== 'object') {
+                return '\uFEFFError: No se pudo acceder a los datos del proyecto.';
+            }
             
             // Escapado CSV centralizado en el módulo CR_Export (celdaCSV/filaCSV).
             // Si el módulo no está disponible, se usa el fallback local idéntico.
@@ -10067,9 +10548,9 @@ tbody.innerHTML = '';
             let csv = '\uFEFF'; // BOM UTF-8 para Excel
             
             // Encabezado con información de la empresa (como comentarios para Excel)
-            csv += `# ${csvCell(empresa)}\n`;
-            csv += `# ${csvCell(eslogan)}\n`;
-            csv += `# ${csvCell(direccion)} | Tel: ${csvCell(telefono)} | Email: ${csvCell(email)} | ${csvCell(website)}\n`;
+            csv += `# ${empresa}\n`;
+            csv += `# ${eslogan}\n`;
+            csv += `# ${direccion} | Tel: ${telefono} | Email: ${email} | ${website}\n`;
             csv += `# \n`;
 
             const enRango = (f) => f >= rango.inicio && f <= rango.fin;
@@ -10100,18 +10581,23 @@ tbody.innerHTML = '';
                     csv += `${csvRow([g.fecha, g.tipo, g.categoria, desc, g.monto])}\n`; 
                     if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto; 
                 }); }
+                csv += `\n`;
+                csv += `${csvRow(['', '', 'TOTAL INGRESOS:', totalIng])}\n`;
+                csv += `${csvRow(['', '', 'TOTAL EGRESOS:', totalEgr])}\n`;
+                csv += `${csvRow(['', '', 'SALDO:', totalIng - totalEgr])}\n`;
                 /* ===== SECCION CONSOLIDADA: VIAJES ===== */
                 const viajes = viajesAll.filter(v => enRango(v.fecha));
                 let totalViajes = 0;
                 if (viajes.length > 0) {
-                    csv += `,,,,,,\n--- VIAJES DE CAMIONES ---\nFecha,Unidad,Material,No.,Km,Litros,Combustible (Q),Alquiler (Q),Total (Q)\n`;
+                    csv += `\n--- VIAJES DE CAMIONES ---\nFecha,Unidad,Material,No.,Km,Litros,Combustible (Q),Alquiler (Q),Total (Q)\n`;
                     viajes.forEach(v => {
                         const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A'};
                         totalViajes += v.total || 0;
                         totalEgr += v.total || 0;
-                        csv += `${csvRow([v.fecha, c.nombre, v.material, v.numero, numToF(v.km_total), numToF(v.litros), numToF(v.costo_combustible), numToF(v.costo_alquiler), numToF(v.total)])}\n`;
+                        csv += `${csvRow([v.fecha, c.nombre, v.material, numToInt(v.numero), numToF(v.km_total), numToF(v.litros), numToF(v.costo_combustible), numToF(v.costo_alquiler), numToF(v.total)])}\n`;
                     });
-                    csv += `,,,,,,,TOTAL VIAJES (Q):,${numToF(totalViajes)}\n`;
+                    csv += `\n`;
+                    csv += `${csvRow(['', '', '', '', '', '', '', 'TOTAL VIAJES (Q):', totalViajes])}\n`;
                 }
                 /* ===== CONSOLIDADO: MANTENIMIENTO E INSUMOS ===== */
                 const ordsMT = ordsAll.filter(o => enRango(o.fecha));
@@ -10120,8 +10606,9 @@ tbody.innerHTML = '';
                 if (ordsMT.length > 0 || insMT.length > 0) {
                     csv += '\n--- MANTENIMIENTO E INSUMOS ---\n';
                     ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMT += o.costo||0; totalEgr += o.costo||0; csv += `${csvRow([o.fecha, 'Mantenimiento ' + o.tipo, (o.observaciones||'N/A') + ' - ' + m.nombre, o.costo])}\n`; });
-                    insMT.forEach(i => { totalMT += i.costo||0; totalEgr += i.costo||0; csv += `${csvRow([i.fecha, 'Insumo ' + i.tipo, i.articulo + ' (x' + i.cantidad + ')', i.costo])}\n`; });
-                    csv += `,,TOTAL MTTO E INSUMOS:,${numToF(totalMT)}\n`;
+                    insMT.forEach(i => { totalMT += i.costo||0; totalEgr += i.costo||0; csv += `${csvRow([i.fecha, 'Insumo ' + i.tipo, i.articulo + ' (x' + numToInt(i.cantidad) + ')', i.costo])}\n`; });
+                    csv += `\n`;
+                    csv += `${csvRow(['', '', 'TOTAL MANTENIMIENTO E INSUMOS:', totalMT])}\n`;
                 }
                 /* NÓMINA — solo en mensual */
                 if (tipo === 'mensual' && typeof CR_NominaEngine !== 'undefined' && CR_NominaEngine.calcularNomina) {
@@ -10218,11 +10705,11 @@ tbody.innerHTML = '';
                     viajes.forEach(v => {
                         const cam = (datos.viajes_camiones.camiones||[]).find(c => c.id === v.vehiculo_id);
                         totalV += v.total || 0;
-                        csv += `${csvRow([v.fecha, cam?cam.nombre:'N/A', v.material, v.numero, numToF(v.km_total || 0), numToF(v.litros || 0), numToF(v.costo_combustible || 0), numToF(v.costo_alquiler || 0), numToF(v.total || 0)])}\n`;
+                        csv += `${csvRow([v.fecha, cam?cam.nombre:'N/A', v.material, numToInt(v.numero), numToF(v.km_total || 0), numToF(v.litros || 0), numToF(v.costo_combustible || 0), numToF(v.costo_alquiler || 0), numToF(v.total || 0)])}\n`;
                     });
                 }
-                csv += `,,,,,,,,\n`;
-                csv += `,,,,,,,TOTAL VIAJES (Q):,${totalV.toFixed(2)}\n`;
+                csv += `\n`;
+                csv += `${csvRow(['', '', '', '', '', '', '', 'TOTAL VIAJES (Q):', totalV])}\n`;
             } else if (tipo === 'mantenimiento') {
                 csv += `${csvRow(['Reporte de Mantenimiento e Insumos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
@@ -10240,11 +10727,11 @@ tbody.innerHTML = '';
                     });
                     ins.forEach(i => {
                         totalM += i.costo || 0;
-                        csv += `${csvRow([i.fecha, 'Insumo ' + i.tipo, i.articulo, i.costo || 0])}\n`;
+                        csv += `${csvRow([i.fecha, 'Insumo ' + i.tipo, i.articulo + ' (x' + numToInt(i.cantidad) + ')', i.costo || 0])}\n`;
                     });
                 }
-                csv += `,,,\n`;
-                csv += `,,TOTAL MANTENIMIENTO E INSUMOS:,${totalM.toFixed(2)}\n`;
+                csv += `\n`;
+                csv += `${csvRow(['', '', 'TOTAL MANTENIMIENTO E INSUMOS:', totalM])}\n`;
             } else if (tipo === 'categoria') {
                 csv += `${csvRow(['Reporte por Categoría de Gastos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
                 csv += `Período,Categoría,Monto (Q),Porcentaje\n`;
@@ -10457,8 +10944,8 @@ tbody.innerHTML = '';
                 const tipoNombre = tipo === 'diario' ? 'Reporte Diario Consolidado' : tipo === 'semanal' ? 'Informe Semanal Consolidado' : 'Reporte Mensual Consolidado';
                 html += renderizarCabeceraPagina(tipoNombre, periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">${_esc(tipoNombre)}</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(rango.inicio)) : ('Período: ' + _esc(periodoDisplay))} | Proyecto: ${_esc(proyNombre)}</p>`;
-                html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:#6B7280;">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
+                html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(rango.inicio)) : ('Período: ' + _esc(periodoDisplay))} | Proyecto: ${_esc(proyNombre)}</p>`;
+                html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:var(--pdf-gris-medio);">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
                 html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:10%"><col style="width:18%"><col style="width:40%"><col style="width:20%"></colgroup><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
                 /* FIX DUPLICIDAD: armar Set de gasto_id vinculados a viajes y mantenimiento
                    para excluirlos de la sección de caja chica y no contarlos dos veces */
@@ -10473,24 +10960,24 @@ tbody.innerHTML = '';
                     html += `<tr><td>${_esc(g.fecha)}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${_esc(g.tipo.toUpperCase())}</td><td>${_esc(etiquetaCategoria(g.categoria))}</td><td>${_esc(g.descripcion)}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
                     if (esIng) totalIng += g.monto; else totalEgr += g.monto;
                 });
-                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px;">Sin movimientos de caja directos en este período</td></tr>`;
-                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#059669;">TOTAL INGRESOS:</td><td class="total-ingreso">${formatearMoneda(totalIng)}</td></tr>`;
-                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:#dc2626;">TOTAL EGRESOS DIRECTOS:</td><td class="total-egreso">${formatearMoneda(totalEgr)}</td></tr>`;
+                if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:var(--pdf-gris-medio);padding:20px;">Sin movimientos de caja directos en este período</td></tr>`;
+                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:var(--pdf-verde);">TOTAL INGRESOS:</td><td class="total-ingreso">${formatearMoneda(totalIng)}</td></tr>`;
+                html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:var(--pdf-rojo);">TOTAL EGRESOS DIRECTOS:</td><td class="total-egreso">${formatearMoneda(totalEgr)}</td></tr>`;
                 html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;">SUBTOTAL CAJA:</td><td class="total-destacado">${formatearMoneda(totalIng-totalEgr)}</td></tr>`;
                 html += `</tbody></table>`;
                 /* VIAJES (consolidado) */
                 const viajesC = (datos.viajes_camiones.viajes||[]).filter(v => enRango(v.fecha)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
                 if (viajesC.length > 0) {
                     let totalVTmp = 0;
-                    html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🚛 Viajes de Camiones</h3>`;
+                    html += `<h3 style="color:var(--acento-purpura);font-size:13px;margin:15px 0 8px 0;">🚛 Viajes de Camiones</h3>`;
                     html += `<table class="tabla-pdf"><colgroup><col style="width:18%"><col style="width:20%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:12%"><col style="width:12%"><col style="width:10%"></colgroup><thead><tr><th>Unidad</th><th>Material</th><th>No.</th><th>Km</th><th>Litros</th><th style="text-align:right;">Comb. (Q)</th><th style="text-align:right;">Alquiler (Q)</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                     viajesC.forEach(v => {
                         const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A',propiedad:'propio'};
                         const prop = c.propiedad==='alquilado' ? ' (Alq.)' : '';
                         totalVTmp += v.total || 0; totalEgr += v.total || 0;
-                        html += `<tr><td>${_esc(c.nombre)}${_esc(prop)}</td><td>${_esc(v.material)}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:#dc2626;">${formatearMoneda(v.total)}</td></tr>`;
+                        html += `<tr><td>${_esc(c.nombre)}${_esc(prop)}</td><td>${_esc(v.material)}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:var(--pdf-rojo);">${formatearMoneda(v.total)}</td></tr>`;
                     });
-                    html += `<tr><td colspan="7" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalVTmp)}</td></tr>`;
+                    html += `<tr><td colspan="7" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalVTmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
                 /* MANTENIMIENTO */
@@ -10504,10 +10991,10 @@ tbody.innerHTML = '';
                         const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; 
                         totalMTmp += o.costo||0; 
                         totalEgr += o.costo||0; 
-                        const firmaHtml = o.firma ? `<img src="${o.firma}" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
+                        const firmaHtml = o.firma ? `<img src="${o.firma}" alt="Firma de aprobación" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
                         html += `<tr><td>${_esc(m.nombre)}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td>${tieneFirmas ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`; 
                     });
-                    html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMTmp)}</td></tr>`;
+                    html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMTmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
                 /* INSUMOS */
@@ -10515,19 +11002,19 @@ tbody.innerHTML = '';
                 if (insMT.length > 0) {
                     let totalITmp = 0;
                     const tieneFirmas = insMT.some(i => i.firma);
-                    html += `<h3 style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
+                    html += `<h3 style="color:var(--acento-purpura);font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
                     html += `<table class="tabla-pdf"><colgroup><col style="width:15%"><col style="width:${tieneFirmas?'40':'50'}%"><col style="width:10%"><col style="width:20%">${tieneFirmas ? '<col style="width:15%">' : ''}</colgroup><thead><tr><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmas ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                     insMT.forEach(i => { 
                         totalITmp += i.costo||0; 
                         totalEgr += i.costo||0; 
-                        const firmaHtml = i.firma ? `<img src="${i.firma}" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
+                        const firmaHtml = i.firma ? `<img src="${i.firma}" alt="Firma de aprobación de insumos" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
                         html += `<tr><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td>${tieneFirmas ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`; 
                     });
-                    html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:#B45393;">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalITmp)}</td></tr>`;
+                    html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalITmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
                 if (movs.length === 0 && viajesC.length === 0 && ordsMT.length === 0 && insMT.length === 0) {
-                    html += `<p style="text-align:center;color:#6B7280;padding:20px;">Sin registros en este período</p>`;
+                    html += `<p style="text-align:center;color:var(--pdf-gris-medio);padding:20px;">Sin registros en este período</p>`;
                 }
                 /* NÓMINA MENSUAL — solo se muestra en el reporte mensual */
                 if (tipo === 'mensual') {
@@ -10541,19 +11028,19 @@ tbody.innerHTML = '';
                         );
                         if (nominaMes.trabajadores.length > 0) {
                             totalEgr += nominaMes.totalPagable;
-                            html += `<h3 style="color:#059669;font-size:13px;margin:15px 0 8px 0;">👷 Nómina del Período</h3>`;
+                            html += `<h3 style="color:var(--pdf-verde);font-size:13px;margin:15px 0 8px 0;">👷 Nómina del Período</h3>`;
                             html += `<table class="tabla-pdf"><colgroup><col style="width:30%"><col style="width:20%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:20%"></colgroup>`;
                             html += `<thead><tr><th>Trabajador</th><th>Puesto</th><th style="text-align:center;">Asist.</th><th style="text-align:center;">Faltas</th><th style="text-align:right;">H. Extra</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                             nominaMes.trabajadores.forEach(t => {
-                                html += `<tr><td>${_esc(t.nombre)}</td><td style="color:#6B7280;">${_esc(t.puesto||'—')}</td><td style="text-align:center;">${t.diasAsistidos}</td><td style="text-align:center;color:#DC2626;">${t.diasFalta}</td><td style="text-align:right;">${t.horasExtra.toFixed(1)}h</td><td style="text-align:right;font-weight:700;color:#059669;">${formatearMoneda(t.totalPagar)}</td></tr>`;
+                                html += `<tr><td>${_esc(t.nombre)}</td><td style="color:var(--pdf-gris-medio);">${_esc(t.puesto||'—')}</td><td style="text-align:center;">${t.diasAsistidos}</td><td style="text-align:center;color:var(--pdf-rojo);">${t.diasFalta}</td><td style="text-align:right;">${t.horasExtra.toFixed(1)}h</td><td style="text-align:right;font-weight:700;color:var(--pdf-verde);">${formatearMoneda(t.totalPagar)}</td></tr>`;
                             });
-                            html += `<tr><td colspan="5" style="text-align:right;font-weight:bold;color:#059669;">TOTAL NÓMINA:</td><td class="total-ingreso" style="color:#059669;">${formatearMoneda(nominaMes.totalPagable)}</td></tr>`;
+                            html += `<tr><td colspan="5" style="text-align:right;font-weight:bold;color:var(--pdf-verde);">TOTAL NÓMINA:</td><td class="total-ingreso" style="color:var(--pdf-verde);">${formatearMoneda(nominaMes.totalPagable)}</td></tr>`;
                             html += `</tbody></table>`;
                         }
                     }
                 }
-                html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:#EFF6FF;padding:10px;margin-top:10px;">GRAN TOTAL EGRESOS: ${formatearMoneda(totalEgr)}</div>`;
-                html += `<div style="text-align:right;font-weight:bold;color:#059669;">SALDO NETO (ingresos − egresos): ${formatearMoneda(totalIng - totalEgr)}</div>`;
+                html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:var(--pdf-fondo-azul);padding:10px;margin-top:10px;">GRAN TOTAL EGRESOS: ${formatearMoneda(totalEgr)}</div>`;
+                html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-verde);">SALDO NETO (ingresos − egresos): ${formatearMoneda(totalIng - totalEgr)}</div>`;
             } else if (tipo === 'asistencia') {
                 const periodoTexto = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
                 const resumenPersonal = datos.personal.trabajadores.map(trabajador => {
@@ -10579,11 +11066,11 @@ tbody.innerHTML = '';
                 html += `<table class="tabla-pdf"><thead><tr><th>Trabajador</th><th>Puesto</th><th>Asist.</th><th>Faltas</th><th>Justif.</th><th>H. Extra</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                 let totalPersonal = 0;
                 if (!resumenPersonal.length) {
-                    html += `<tr><td colspan="7" style="text-align:center;color:#6B7280;padding:20px;">Sin registros del personal en este período</td></tr>`;
+                    html += `<tr><td colspan="7" style="text-align:center;color:var(--pdf-gris-medio);padding:20px;">Sin registros del personal en este período</td></tr>`;
                 } else {
                     resumenPersonal.forEach(({ trabajador, asistencias, faltas, justificados, horasExtra, totalPagar }) => {
                         totalPersonal += totalPagar;
-                        html += `<tr><td>${_esc(trabajador.nombre)}</td><td>${_esc(trabajador.puesto)}</td><td>${asistencias}</td><td>${faltas}</td><td>${justificados}</td><td>${horasExtra}h</td><td style="text-align:right;font-weight:700;color:#059669;">${formatearMoneda(totalPagar)}</td></tr>`;
+                        html += `<tr><td>${_esc(trabajador.nombre)}</td><td>${_esc(trabajador.puesto)}</td><td>${asistencias}</td><td>${faltas}</td><td>${justificados}</td><td>${horasExtra}h</td><td style="text-align:right;font-weight:700;color:var(--pdf-verde);">${formatearMoneda(totalPagar)}</td></tr>`;
                     });
                     html += `<tr><td colspan="6" style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);">TOTAL PERSONAL:</td><td class="total-ingreso" style="text-align:right;">${formatearMoneda(totalPersonal)}</td></tr>`;
                 }
@@ -10596,7 +11083,7 @@ tbody.innerHTML = '';
                     .filter(dia => enRango(dia.fecha))
                     .flatMap(dia => dia.registros.map(reg => ({...reg, fecha: dia.fecha})));
                 if (regs.length === 0) {
-                    html += `<tr><td colspan="6" style="text-align:center;color:#6B7280;padding:20px;">Sin registros de asistencia en este período</td></tr>`;
+                    html += `<tr><td colspan="6" style="text-align:center;color:var(--pdf-gris-medio);padding:20px;">Sin registros de asistencia en este período</td></tr>`;
                 } else {
                     regs.forEach(reg => {
                         const t = datos.personal.trabajadores.find(t => t.id === reg.trabajador_id);
@@ -10622,7 +11109,7 @@ tbody.innerHTML = '';
 
                 html += renderizarCabeceraPagina('Reporte de Nómina Consolidada', periodoTextoNom, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">💰 Nómina Consolidada por Trabajador</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:16px;">Período: <strong>${_esc(periodoTextoNom)}</strong> | Proyecto: <strong>${_esc(proyNombre)}</strong> | Generado: ${_esc(fechaGenNom)} ${_esc(horaGenNom)}</p>`;
+                html += `<p style="color:var(--pdf-gris-medio);margin-bottom:16px;">Período: <strong>${_esc(periodoTextoNom)}</strong> | Proyecto: <strong>${_esc(proyNombre)}</strong> | Generado: ${_esc(fechaGenNom)} ${_esc(horaGenNom)}</p>`;
 
                 if (typeof CR_NominaEngine === 'undefined' || !CR_NominaEngine.calcularNomina) {
                     html += `<div class="alert-box">⚠️ Motor de nómina (CR_NominaEngine) no disponible. Recarga la página.</div>`;
@@ -10638,7 +11125,7 @@ tbody.innerHTML = '';
                         html += `<div class="info-box">📭 Sin registros de personal en el período seleccionado.</div>`;
                     } else {
                         // Tabla resumen por trabajador
-                        html += `<div class="info-box"><strong>Resumen de nómina:</strong> ${nomina.cantidadTrabajadores} trabajador(es) · ${nomina.totalDiasAsistidos} días asistidos · ${nomina.totalDiasFalta} faltas · ${nomina.totalHorasExtra.toFixed(1)}h extra · <strong style="color:#059669;">Total a pagar: ${formatearMoneda(nomina.totalPagable)}</strong></div>`;
+                        html += `<div class="info-box"><strong>Resumen de nómina:</strong> ${nomina.cantidadTrabajadores} trabajador(es) · ${nomina.totalDiasAsistidos} días asistidos · ${nomina.totalDiasFalta} faltas · ${nomina.totalHorasExtra.toFixed(1)}h extra · <strong style="color:var(--pdf-verde);">Total a pagar: ${formatearMoneda(nomina.totalPagable)}</strong></div>`;
                         html += `<table class="tabla-pdf">`;
                         html += `<colgroup><col style="width:22%"><col style="width:16%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:10%"></colgroup>`;
                         html += `<thead><tr>`;
@@ -10652,21 +11139,21 @@ tbody.innerHTML = '';
                         nomina.trabajadores.forEach(t => {
                             html += `<tr>`;
                             html += `<td style="font-weight:600;">${_esc(t.nombre)}</td>`;
-                            html += `<td style="color:#6B7280;">${_esc(t.puesto || '—')}</td>`;
-                            html += `<td style="text-align:center;color:#059669;font-weight:700;">${t.diasAsistidos}</td>`;
-                            html += `<td style="text-align:center;color:#DC2626;font-weight:700;">${t.diasFalta}</td>`;
-                            html += `<td style="text-align:center;color:#6B7280;">${t.diasJustificados}</td>`;
+                            html += `<td style="color:var(--pdf-gris-medio);">${_esc(t.puesto || '—')}</td>`;
+                            html += `<td style="text-align:center;color:var(--pdf-verde);font-weight:700;">${t.diasAsistidos}</td>`;
+                            html += `<td style="text-align:center;color:var(--pdf-rojo);font-weight:700;">${t.diasFalta}</td>`;
+                            html += `<td style="text-align:center;color:var(--pdf-gris-medio);">${t.diasJustificados}</td>`;
                             html += `<td style="text-align:right;">${t.horasExtra.toFixed(1)}h</td>`;
                             html += `<td style="text-align:right;">${formatearMoneda(t.pagoNormal)}</td>`;
                             html += `<td style="text-align:right;">${formatearMoneda(t.pagoExtra)}</td>`;
-                            html += `<td style="text-align:right;font-weight:700;color:#004B93;">${formatearMoneda(t.totalPagar)}</td>`;
+                            html += `<td style="text-align:right;font-weight:700;color:var(--pdf-azul-oscuro);">${formatearMoneda(t.totalPagar)}</td>`;
                             html += `</tr>`;
                         });
 
                         html += `<tr>`;
                         html += `<td colspan="2" style="text-align:right;font-weight:700;color:var(--pdf-azul-oscuro);">TOTALES</td>`;
-                        html += `<td style="text-align:center;font-weight:700;color:#059669;">${nomina.totalDiasAsistidos}</td>`;
-                        html += `<td style="text-align:center;font-weight:700;color:#DC2626;">${nomina.totalDiasFalta}</td>`;
+                        html += `<td style="text-align:center;font-weight:700;color:var(--pdf-verde);">${nomina.totalDiasAsistidos}</td>`;
+                        html += `<td style="text-align:center;font-weight:700;color:var(--pdf-rojo);">${nomina.totalDiasFalta}</td>`;
                         html += `<td></td>`;
                         html += `<td style="text-align:right;font-weight:700;">${nomina.totalHorasExtra.toFixed(1)}h</td>`;
                         html += `<td colspan="2"></td>`;
@@ -10675,7 +11162,7 @@ tbody.innerHTML = '';
                         html += `</tbody></table>`;
 
                         // Footer con metadata de generación
-                        html += `<div style="margin-top:24px;padding-top:10px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;font-size:9px;color:#6B7280;">`;
+                        html += `<div style="margin-top:24px;padding-top:10px;border-top:1px solid var(--pdf-gris-borde);display:flex;justify-content:space-between;font-size:9px;color:var(--pdf-gris-medio);">`;
                         html += `<div>${_esc(empresa2)} — Nómina del período ${_esc(periodoTextoNom)}</div>`;
                         html += `<div>Generado: ${_esc(fechaGenNom)} ${_esc(horaGenNom)}</div>`;
                         html += `</div>`;
@@ -10684,19 +11171,19 @@ tbody.innerHTML = '';
             } else if (tipo === 'viajes') {
                 html += renderizarCabeceraPagina('Reporte de Viajes de Camiones', periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
+                html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<table class="tabla-pdf"><colgroup><col style="width:10%"><col style="width:22%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                 const enRangoVH = (f) => f >= rango.inicio && f <= rango.fin;
                 const viajes = (datos.viajes_camiones.viajes||[]).filter(v => enRangoVH(v.fecha)).sort((a,b) => a.fecha.localeCompare(b.fecha));
                 let totalV = 0;
                 if (viajes.length === 0) {
-                    html += `<tr><td colspan="9" style="text-align:center;color:#6B7280;padding:20px;">Sin viajes en este período</td></tr>`;
+                    html += `<tr><td colspan="9" style="text-align:center;color:var(--pdf-gris-medio);padding:20px;">Sin viajes en este período</td></tr>`;
                 } else {
                     viajes.forEach(v => {
                         const cam = (datos.viajes_camiones.camiones||[]).find(c => c.id === v.vehiculo_id);
                         const prop = (cam&&cam.propiedad==='alquilado')?' (Alq.)':'';
                         totalV += v.total || 0;
-                        html += `<tr><td>${_esc(v.fecha)}</td><td>${_esc(cam?cam.nombre:'N/A')}${_esc(prop)}</td><td>${_esc(v.material)}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:#dc2626;">${formatearMoneda(v.total)}</td></tr>`;
+                        html += `<tr><td>${_esc(v.fecha)}</td><td>${_esc(cam?cam.nombre:'N/A')}${_esc(prop)}</td><td>${_esc(v.material)}</td><td>${v.numero}</td><td>${numToF(v.km_total)} km</td><td>${numToF(v.litros)} L</td><td style="text-align:right;">${formatearMoneda(v.costo_combustible)}</td><td style="text-align:right;">${formatearMoneda(v.costo_alquiler)}</td><td style="text-align:right;font-weight:bold;color:var(--pdf-rojo);">${formatearMoneda(v.total)}</td></tr>`;
                     });
                 }
                 html += `<tr><td colspan="8" style="text-align:right;font-weight:bold;">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalV)}</td></tr>`;
@@ -10704,7 +11191,7 @@ tbody.innerHTML = '';
             } else if (tipo === 'mantenimiento') {
                 html += renderizarCabeceraPagina('Reporte de Mantenimiento e Insumos', periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Mantenimiento e Insumos</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
+                html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 const enRangoMH = (f) => f >= rango.inicio && f <= rango.fin;
                 const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => enRangoMH(i.fecha));
                 const ords = (datos.mantenimiento.ordenes||[]).filter(o => enRangoMH(o.fecha));
@@ -10715,12 +11202,12 @@ tbody.innerHTML = '';
                 html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">🔩 Órdenes de Mantenimiento</h3>`;
                 html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:26%"><col style="width:13%"><col style="width:37%"><col style="width:12%"></colgroup><thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Observaciones</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmasOrdenes ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                 if (ords.length === 0) {
-                    html += `<tr><td colspan="${5 + (tieneFirmasOrdenes ? 1 : 0)}" style="text-align:center;color:#6B7280;padding:15px;">Sin órdenes en esta fecha</td></tr>`;
+                    html += `<tr><td colspan="${5 + (tieneFirmasOrdenes ? 1 : 0)}" style="text-align:center;color:var(--pdf-gris-medio);padding:15px;">Sin órdenes en esta fecha</td></tr>`;
                 } else {
                     ords.forEach(o => {
                         const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
                         totalM += o.costo || 0;
-                        const firmaHtml = o.firma ? `<img src="${o.firma}" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
+                        const firmaHtml = o.firma ? `<img src="${o.firma}" alt="Firma de aprobación de orden de mantenimiento" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
                         html += `<tr><td>${_esc(o.fecha)}</td><td>${_esc(m?m.nombre:'N/A')}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td>${tieneFirmasOrdenes ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`;
                     });
                 }
@@ -10728,24 +11215,24 @@ tbody.innerHTML = '';
                 
                 // Compras de insumos
                 const tieneFirmasInsumos = ins.some(i => i.firma);
-                html += `<h3 class="tabla-titulo" style="color:#B45393;font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
+                html += `<h3 class="tabla-titulo" style="color:var(--acento-purpura);font-size:13px;margin:15px 0 8px 0;">🛒 Compras de Insumos</h3>`;
                 html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:14%"><col style="width:47%"><col style="width:9%"><col style="width:12%"><col style="width:6%"></colgroup><thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cant.</th><th style="text-align:right;">Costo (Q)</th>${tieneFirmasInsumos ? '<th>Firma</th>' : ''}</tr></thead><tbody>`;
                 if (ins.length === 0) {
-                    html += `<tr><td colspan="${5 + (tieneFirmasInsumos ? 1 : 0)}" style="text-align:center;color:#6B7280;padding:15px;">Sin compras en esta fecha</td></tr>`;
+                    html += `<tr><td colspan="${5 + (tieneFirmasInsumos ? 1 : 0)}" style="text-align:center;color:var(--pdf-gris-medio);padding:15px;">Sin compras en esta fecha</td></tr>`;
                 } else {
                     ins.forEach(i => {
                         totalM += i.costo || 0;
-                        const firmaHtml = i.firma ? `<img src="${i.firma}" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
+                        const firmaHtml = i.firma ? `<img src="${i.firma}" alt="Firma de aprobación de compra de insumos" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
                         html += `<tr><td>${_esc(i.fecha)}</td><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td>${tieneFirmasInsumos ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`;
                     });
                 }
                 html += `</tbody></table>`;
-                html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:#EFF6FF;padding:10px;margin-top:10px;">TOTAL MANTENIMIENTO E INSUMOS: ${formatearMoneda(totalM)}</div>`;
+                html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:var(--pdf-fondo-azul);padding:10px;margin-top:10px;">TOTAL MANTENIMIENTO E INSUMOS: ${formatearMoneda(totalM)}</div>`;
             } else if (tipo === 'categoria') {
                 // Reporte por Categoría de Gastos
                 html += renderizarCabeceraPagina('Reporte por Categoría de Gastos', periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte por Categoría de Gastos</h2>`;
-                html += `<p style="color:#6B7280;margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
+                html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 
                 // Calcular gastos por categoría filtrando por el rango seleccionado
                 const movsCategoria = (datos.caja_chica || []).filter(m =>
@@ -10776,7 +11263,7 @@ tbody.innerHTML = '';
                     html += `</tbody></table>`;
                     
                     // Gráfico de barras simple en HTML
-                    html += `<div style="margin-top:20px;padding:15px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">`;
+                    html += `<div style="margin-top:20px;padding:15px;background:var(--pdf-fondo-claro);border:1px solid var(--pdf-gris-borde);border-radius:8px;">`;
                     html += `<h4 style="color:var(--pdf-azul-oscuro);font-size:12px;margin-bottom:10px;">Distribución de Gastos por Categoría</h4>`;
                     html += `<div style="display:flex;flex-direction:column;gap:8px;">`;
                     
@@ -10789,19 +11276,19 @@ tbody.innerHTML = '';
                             : cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                         html += `
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <div style="width:140px;font-size:10px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_esc(etiquetaCat)}</div>
-                                    <div style="flex:1;background:#e5e7eb;border-radius:4px;height:16px;overflow:hidden;">
+                                <div style="width:140px;font-size:10px;color:var(--pdf-gris-oscuro);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_esc(etiquetaCat)}</div>
+                                    <div style="flex:1;background:var(--pdf-gris-borde);border-radius:4px;height:16px;overflow:hidden;">
                                         <div style="width:${barraWidth}%;background:linear-gradient(90deg,var(--pdf-azul-claro),var(--pdf-azul-oscuro));height:100%;"></div>
                                     </div>
-                                    <div style="width:80px;text-align:right;font-size:11px;color:#374151;">${porcentaje}%</div>
-                                    <div style="width:80px;text-align:right;font-size:11px;font-weight:600;color:#374151;">${formatearMoneda(monto)}</div>
+                                    <div style="width:80px;text-align:right;font-size:11px;color:var(--pdf-gris-oscuro);">${porcentaje}%</div>
+                                    <div style="width:80px;text-align:right;font-size:11px;font-weight:600;color:var(--pdf-gris-oscuro);">${formatearMoneda(monto)}</div>
                                 </div>
                             `;
                     });
                     
                     html += `</div></div>`;
                 } else {
-                    html += `<p style="text-align:center;color:#6B7280;padding:20px;">Sin gastos registrados en el período <strong>${_esc(periodoDisplay)}</strong></p>`;
+                    html += `<p style="text-align:center;color:var(--pdf-gris-medio);padding:20px;">Sin gastos registrados en el período <strong>${_esc(periodoDisplay)}</strong></p>`;
                 }
             }
             return html;
@@ -10840,7 +11327,7 @@ tbody.innerHTML = '';
                 const cont = document.getElementById(containerId);
                 if (!cont) return;
                 if (firma.imagen_base64 && firma.imagen_base64.startsWith('data:image')) {
-                    cont.innerHTML = '<img src="' + firma.imagen_base64 + '" style="max-height:58px;max-width:140px;">';
+                    cont.innerHTML = '<img src="' + firma.imagen_base64 + '" alt="Firma digital" style="max-height:58px;max-width:140px;">';
                 } else {
                     cont.textContent = firma.nombre || '';
                 }
@@ -11329,32 +11816,32 @@ function validarDependenciasExportacion() {
                 || portada.saludo || portada.descripcion;
             if (tienePortada) {
                 portadaHTML = `
-                <div style="margin-bottom:14px;padding:12px 14px;border:1px solid #E5E7EB;border-left:4px solid var(--pdf-azul-oscuro);border-radius:4px;background:#F8FAFC;">
+                <div style="margin-bottom:14px;padding:12px 14px;border:1px solid var(--pdf-gris-borde);border-left:4px solid var(--pdf-azul-oscuro);border-radius:4px;background:var(--pdf-fondo-gris);">
                     ${(portada.fecha || portada.remitente) ? `
                     <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
                         <tr>
                             ${portada.fecha ? `<td style="width:50%;vertical-align:top;padding-right:10px;">
-                                <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:1px;">Fecha</div>
-                                <div style="font-size:9.5px;color:#374151;font-weight:600;">${_esc(portada.fecha)}</div>
+                                <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:var(--pdf-gris-claro);letter-spacing:0.5px;margin-bottom:1px;">Fecha</div>
+                                <div style="font-size:9.5px;color:var(--pdf-gris-oscuro);font-weight:600;">${_esc(portada.fecha)}</div>
                             </td>` : '<td style="width:50%;"></td>'}
-                            ${portada.remitente ? `<td style="width:50%;vertical-align:top;padding-left:10px;border-left:1px solid #E5E7EB;">
-                                <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:1px;">Elaborado por</div>
-                                <div style="font-size:9.5px;color:#374151;font-weight:600;">${_esc(portada.remitente)}</div>
+                            ${portada.remitente ? `<td style="width:50%;vertical-align:top;padding-left:10px;border-left:1px solid var(--pdf-gris-borde);">
+                                <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:var(--pdf-gris-claro);letter-spacing:0.5px;margin-bottom:1px;">Elaborado por</div>
+                                <div style="font-size:9.5px;color:var(--pdf-gris-oscuro);font-weight:600;">${_esc(portada.remitente)}</div>
                             </td>` : '<td style="width:50%;"></td>'}
                         </tr>
                     </table>` : ''}
                     ${portada.destinatario ? `
                     <div style="margin-bottom:7px;">
-                        <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:1px;">Dirigido a</div>
-                        <div style="font-size:9.5px;color:#374151;font-weight:600;">${_esc(portada.destinatario)}</div>
+                        <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:var(--pdf-gris-claro);letter-spacing:0.5px;margin-bottom:1px;">Dirigido a</div>
+                        <div style="font-size:9.5px;color:var(--pdf-gris-oscuro);font-weight:600;">${_esc(portada.destinatario)}</div>
                     </div>` : ''}
                     ${portada.saludo ? `
                     <div style="margin-bottom:7px;">
-                        <div style="font-size:10px;color:#1F2937;font-style:italic;">${_esc(portada.saludo)}</div>
+                        <div style="font-size:10px;color:var(--pdf-gris-oscuro);font-style:italic;">${_esc(portada.saludo)}</div>
                     </div>` : ''}
-                    ${(portada.saludo || portada.fecha || portada.remitente) && portada.descripcion ? `<div style="height:1px;background:#E5E7EB;margin:7px 0;"></div>` : ''}
+                    ${(portada.saludo || portada.fecha || portada.remitente) && portada.descripcion ? `<div style="height:1px;background:var(--pdf-gris-borde);margin:7px 0;"></div>` : ''}
                     ${portada.descripcion ? `
-                    <div style="font-size:9px;color:#374151;line-height:1.65;text-align:justify;white-space:pre-wrap;">${_esc(portada.descripcion)}</div>` : ''}
+                    <div style="font-size:9px;color:var(--pdf-gris-oscuro);line-height:1.65;text-align:justify;white-space:pre-wrap;">${_esc(portada.descripcion)}</div>` : ''}
                 </div>`;
             }
 
@@ -11363,35 +11850,35 @@ function validarDependenciasExportacion() {
             <div style="height:5px;background:linear-gradient(90deg,var(--pdf-azul-oscuro) 0%,#00A4E4 50%,var(--pdf-azul-oscuro) 100%);"></div>
 
             <!-- Membrete -->
-            <div style="background:#fff;padding:14px 18px 12px 18px;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">
+            <div style="background:var(--pdf-blanco);padding:14px 18px 12px 18px;border-left:1px solid var(--pdf-gris-borde);border-right:1px solid var(--pdf-gris-borde);">
                 <table style="width:100%;border-collapse:collapse;">
                     <tr>
-                        <td style="width:22%;vertical-align:top;padding:3px 10px 0 0;border-right:1px solid #E5E7EB;">
+                        <td style="width:22%;vertical-align:top;padding:3px 10px 0 0;border-right:1px solid var(--pdf-gris-borde);">
                             <div style="margin-bottom:6px;">
-                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.7px;margin-bottom:1px;">Tipo de Reporte</div>
+                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:var(--pdf-gris-claro);letter-spacing:0.7px;margin-bottom:1px;">Tipo de Reporte</div>
                                 <div style="font-size:9px;font-weight:800;color:var(--pdf-azul-oscuro);">${tipoReporte}</div>
                             </div>
                             <div style="margin-bottom:6px;">
-                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.7px;margin-bottom:1px;">Fecha de Emisión</div>
-                                <div style="font-size:9px;font-weight:600;color:#374151;">${fechaEmision}</div>
+                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:var(--pdf-gris-claro);letter-spacing:0.7px;margin-bottom:1px;">Fecha de Emisión</div>
+                                <div style="font-size:9px;font-weight:600;color:var(--pdf-gris-oscuro);">${fechaEmision}</div>
                             </div>
                             <div>
-                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:0.7px;margin-bottom:1px;">Proyecto</div>
-                                <div style="font-size:9px;font-weight:600;color:#374151;">${_esc(proyNombre)}</div>
+                                <div style="font-size:7px;font-weight:700;text-transform:uppercase;color:var(--pdf-gris-claro);letter-spacing:0.7px;margin-bottom:1px;">Proyecto</div>
+                                <div style="font-size:9px;font-weight:600;color:var(--pdf-gris-oscuro);">${_esc(proyNombre)}</div>
                             </div>
                         </td>
                         <td style="width:56%;text-align:center;vertical-align:middle;padding:0 12px;">
                             <img src="${logoSrc}" alt="${_esc(nombreEmpresa)}"
                                  style="max-height:72px;max-width:200px;width:auto;object-fit:contain;display:block;margin:0 auto 6px auto;">
                             <div style="font-size:17px;font-weight:800;letter-spacing:5px;color:var(--pdf-azul-oscuro);text-transform:uppercase;margin-bottom:3px;">${_esc(nombreEmpresa)}</div>
-                            <div style="font-size:7.5px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;">${_esc(esloganEmpresa)}</div>
-                            <div style="font-size:7px;color:#6B7280;line-height:1.5;">${_esc(telEmail)}</div>
+                            <div style="font-size:7.5px;font-weight:700;color:var(--pdf-azul-claro);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;">${_esc(esloganEmpresa)}</div>
+                            <div style="font-size:7px;color:var(--pdf-gris-medio);line-height:1.5;">${_esc(telEmail)}</div>
                         </td>
-                        <td style="width:22%;vertical-align:top;padding:3px 0 0 10px;border-left:1px solid #E5E7EB;text-align:center;">
-                            <div style="border:1.5px dashed #D1D5DB;border-radius:4px;height:58px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;">
-                                <span style="font-size:7px;color:#D1D5DB;text-transform:uppercase;font-weight:600;">Sello / Timbre</span>
+                        <td style="width:22%;vertical-align:top;padding:3px 0 0 10px;border-left:1px solid var(--pdf-gris-borde);text-align:center;">
+                            <div style="border:1.5px dashed var(--pdf-gris-claro);border-radius:4px;height:58px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;">
+                                <span style="font-size:7px;color:var(--pdf-gris-claro);text-transform:uppercase;font-weight:600;">Sello / Timbre</span>
                             </div>
-                            <div style="font-size:7px;color:#9CA3AF;line-height:1.4;">Documento oficial<br>${_esc(nombreEmpresa)}</div>
+                            <div style="font-size:7px;color:var(--pdf-gris-claro);line-height:1.4;">Documento oficial<br>${_esc(nombreEmpresa)}</div>
                         </td>
                     </tr>
                 </table>
@@ -11399,7 +11886,7 @@ function validarDependenciasExportacion() {
 
             <!-- Franja divisoria azul-cian -->
             <div style="height:4px;background:linear-gradient(90deg,var(--pdf-azul-oscuro) 0%,#00A4E4 60%,#38BDF8 100%);"></div>
-            <div style="height:1px;background:#E5E7EB;margin-bottom:14px;"></div>
+            <div style="height:1px;background:var(--pdf-gris-borde);margin-bottom:14px;"></div>
 
             <!-- Portada personalizada -->
             ${portadaHTML}
@@ -11408,35 +11895,35 @@ function validarDependenciasExportacion() {
             <div style="font-size:10px;">${htmlReporte}</div>
 
             <!-- Separador firmas -->
-            <div style="margin-top:36px;padding-top:12px;border-top:1px solid #E5E7EB;"></div>
+            <div style="margin-top:36px;padding-top:12px;border-top:1px solid var(--pdf-gris-borde);"></div>
             <table style="width:100%;border-collapse:collapse;">
                 <tr>
                     <td style="width:32%;text-align:center;vertical-align:bottom;padding:0 6px;">
-                        <div style="height:48px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:8px;opacity:0.85;margin-bottom:0;">Firma Jefe de Proyectos</div>
+                        <div style="height:48px;display:flex;align-items:center;justify-content:center;color:var(--pdf-gris-claro);font-size:8px;opacity:0.85;margin-bottom:0;">Firma Jefe de Proyectos</div>
                         <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
-                            <div style="font-size:9.5px;font-weight:700;color:#111827;">Arq. Wilson Dario Salazar</div>
+                            <div style="font-size:9.5px;font-weight:700;color:var(--pdf-gris-oscuro);">Arq. Wilson Dario Salazar</div>
                             <div style="font-size:7.5px;color:var(--pdf-azul-oscuro);font-weight:600;text-transform:uppercase;margin-top:1px;">Jefe de Proyectos</div>
                         </div>
                     </td>
                     <td style="width:36%;text-align:center;vertical-align:bottom;padding:0 6px;">
                         <div style="height:48px;border-bottom:1.5px solid #374151;width:88%;margin:0 auto;"></div>
                         <div style="width:88%;margin:0 auto;padding-top:5px;">
-                            <div style="font-size:9px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">V°B° — Visto Bueno</div>
-                            <div style="font-size:7.5px;color:#6B7280;text-transform:uppercase;margin-top:1px;">Encargado de Obra</div>
+                            <div style="font-size:9px;font-weight:800;color:var(--pdf-gris-oscuro);text-transform:uppercase;letter-spacing:0.5px;">V°B° — Visto Bueno</div>
+                            <div style="font-size:7.5px;color:var(--pdf-gris-medio);text-transform:uppercase;margin-top:1px;">Encargado de Obra</div>
                         </div>
                     </td>
                     <td style="width:32%;text-align:center;vertical-align:bottom;padding:0 6px;">
-                        <div style="height:48px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:8px;opacity:0.85;margin-bottom:0;">Firma Gerente Comercial</div>
+                        <div style="height:48px;display:flex;align-items:center;justify-content:center;color:var(--pdf-gris-claro);font-size:8px;opacity:0.85;margin-bottom:0;">Firma Gerente Comercial</div>
                         <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
-                            <div style="font-size:9.5px;font-weight:700;color:#111827;">Ing. Juan Luis Ramirez Jimenez</div>
+                            <div style="font-size:9.5px;font-weight:700;color:var(--pdf-gris-oscuro);">Ing. Juan Luis Ramirez Jimenez</div>
                             <div style="font-size:7.5px;color:var(--pdf-azul-oscuro);font-weight:600;text-transform:uppercase;margin-top:1px;">Gerente Comercial</div>
                         </div>
                     </td>
                 </tr>
             </table>
-            <div style="margin-top:16px;padding-top:10px;border-top:1px solid #E5E7EB;">
-                <div style="font-size:7.5px;color:#9CA3AF;text-align:center;">
-                    <strong style="color:#6B7280;">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura &nbsp;·&nbsp; Confidencial — Uso interno autorizado
+            <div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--pdf-gris-borde);">
+                <div style="font-size:7.5px;color:var(--pdf-gris-claro);text-align:center;">
+                    <strong style="color:var(--pdf-gris-medio);">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura &nbsp;·&nbsp; Confidencial — Uso interno autorizado
                 </div>
             </div>`;
         }
@@ -11684,7 +12171,16 @@ function validarDependenciasExportacion() {
             cargarConfiguracionExportacion();
             inicializarDashboardObserver();
             
-            // Paso 3.1: inicializar módulo de reportes
+            // Paso 3.1: inicializar validación en tiempo real
+            inicializarValidacionTiempoReal('caja-chica');
+            inicializarValidacionTiempoReal('maquinaria');
+            inicializarValidacionTiempoReal('personal');
+            inicializarValidacionTiempoReal('proveedor');
+            inicializarValidacionTiempoReal('viaje');
+            inicializarValidacionTiempoReal('mantenimiento');
+            inicializarValidacionTiempoReal('configuracion');
+            
+            // Paso 3.2: inicializar módulo de reportes
             actualizarDescripcionReporte();
             actualizarEstadisticasReportes();
             

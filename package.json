@@ -4,19 +4,13 @@
   "description": "Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra. Personalizable para cualquier empresa con sincronización en la nube.",
   "main": "server.js",
   "scripts": {
-    "test": "npm run audit && npm run test:smoke && npm run test:modulos && npm run test:crud && npm run test:reportes && npm run test:reportes:validation",
-
-    "test:smoke": "node test_smoke.js",
-    "test:crud": "node test_crud.js",
-    "test:automatizado": "node tests-automatizados.js",
-    "test:reportes": "node test_reportes.js",
-    "test:reportes:validation": "node test_reportes_validation.js",
-    "test:modulos": "node test_modulos.js",
-    "test:ux:files": "node test_ux_files.js",
-    "audit": "npm run audit:versions && npm run audit:assets",
-    "audit:versions": "node check_versions.js",
-    "audit:assets": "node check_assets.js",
     "start": "node server.js",
+    "validate": "node validador_datos_reales.js",
+    "verify": "node visual_verifier.js",
+    "reports": "node report_validator.js",
+    "audit": "node comprehensive_audit.js",
+    "test-data": "node populate_test_data.js",
+    "test-reports": "node test_all_reports.js",
     "clean": "node -e \"const fs=require('fs'); const path=require('path'); const nm=path.join(__dirname,'node_modules'); const pl=path.join(__dirname,'package-lock.json'); if(fs.existsSync(nm))fs.rmSync(nm,{recursive:true,force:true}); if(fs.existsSync(pl))fs.unlinkSync(pl); console.log('Cleaned node_modules and package-lock.json');\""
   },
   "repository": {
