@@ -26,9 +26,15 @@ jobs:
     needs: validate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - name: Trigger Vercel Deploy Hook
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar Vercel CLI
+        run: npm install -g vercel@latest
+      - name: Deploy a produccion con token
         env:
-          DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          curl -s -X POST "$DEPLOY_HOOK" > /dev/null
-          echo "Deploy triggered successfully"
+          vercel deploy --prod --yes --name=construramsa_control_gastos --scope=proyectoswm --token="$VERCEL_TOKEN"
+          echo "Deploy completed successfully"
