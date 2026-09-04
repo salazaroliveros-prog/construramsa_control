@@ -11058,40 +11058,6 @@ tbody.innerHTML = '';
             let html = '';
 
             // ── REPORTE EJECUTIVO (Resumen Gerencial con KPIs) ──
-            const renderizarCabeceraPagina = (tituloReporte, periodoTexto, pageLabel = '') => {
-                const cfg = db.configuracion || {};
-                const empresa = cfg.nombre_empresa || 'CONSTRURAMSA';
-                const eslogan = cfg.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
-                const direccion = cfg.direccion || 'Guatemala, C.A.';
-                const telefono = cfg.telefono || '+502 5997 9501';
-                const email = cfg.email || 'contacto@construramsa.com';
-                const website = cfg.website || 'construramsa.com';
-                const paginaTxt = pageLabel ? `<span>Página ${pageLabel}</span>` : '';
-                return `
-                    <div class="pdf-page-header">
-                        <div class="brand-row">
-                            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-                                <div class="brand-badge">C</div>
-                                <div style="min-width:0;">
-                                    <div class="brand-name">${_esc(empresa)}</div>
-                                    <div class="brand-eslogan">${_esc(eslogan)}</div>
-                                </div>
-                            </div>
-                            <div class="report-label">${_esc(tituloReporte)}</div>
-                        </div>
-                        <div class="meta-row">
-                            <span>Proyecto: ${_esc(proyNombre)}</span>
-                            <span>Periodo: ${_esc(periodoTexto)}</span>
-                            <span>${_esc(direccion)}</span>
-                            <span>${_esc(telefono)}</span>
-                            <span>${_esc(email)}</span>
-                            <span>${_esc(website)}</span>
-                            ${paginaTxt}
-                        </div>
-                    </div>
-                `;
-            };
-
             if (tipo === 'ejecutivo') {
                 const rangoEj = rangoPersonalizado || (fecha ? { inicio: fecha, fin: fecha } : { inicio: '', fin: '' });
                 const cfgEj = db.configuracion || {};
@@ -11118,7 +11084,6 @@ tbody.innerHTML = '';
 
             if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
                 const tipoNombre = tipo === 'diario' ? 'Reporte Diario Consolidado' : tipo === 'semanal' ? 'Informe Semanal Consolidado' : 'Reporte Mensual Consolidado';
-                html += renderizarCabeceraPagina(tipoNombre, periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">${_esc(tipoNombre)}</h2>`;
                 html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(rango.inicio)) : ('Período: ' + _esc(periodoDisplay))} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:var(--pdf-gris-medio);">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
@@ -11239,7 +11204,6 @@ tbody.innerHTML = '';
                     });
                     return { trabajador, asistencias, faltas, justificados, horasExtra, totalPagar };
                 });
-                html += renderizarCabeceraPagina('Reporte de Asistencia y Horas Extra', periodoTexto, '1');
                 html += `<div class="info-box"><strong>Resumen del personal</strong><br>Asistencias, faltas, horas extra y total correspondiente del personal en el período seleccionado.</div>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Trabajador</th><th>Puesto</th><th>Asist.</th><th>Faltas</th><th>Justif.</th><th>H. Extra</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                 let totalPersonal = 0;
@@ -11285,7 +11249,6 @@ tbody.innerHTML = '';
                 const fechaGenNom = new Date().toLocaleDateString('es-GT', { day:'2-digit', month:'long', year:'numeric' });
                 const horaGenNom  = new Date().toLocaleTimeString('es-GT', { hour:'2-digit', minute:'2-digit' });
 
-                html += renderizarCabeceraPagina('Reporte de Nómina Consolidada', periodoTextoNom, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">💰 Nómina Consolidada por Trabajador</h2>`;
                 html += `<p style="color:var(--pdf-gris-medio);margin-bottom:16px;">Período: <strong>${_esc(periodoTextoNom)}</strong> | Proyecto: <strong>${_esc(proyNombre)}</strong> | Generado: ${_esc(fechaGenNom)} ${_esc(horaGenNom)}</p>`;
 
@@ -11347,7 +11310,6 @@ tbody.innerHTML = '';
                     }
                 }
             } else if (tipo === 'viajes') {
-                html += renderizarCabeceraPagina('Reporte de Viajes de Camiones', periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
                 html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 html += `<table class="tabla-pdf"><colgroup><col style="width:10%"><col style="width:22%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
@@ -11367,7 +11329,6 @@ tbody.innerHTML = '';
                 html += `<tr><td colspan="8" style="text-align:right;font-weight:bold;">TOTAL VIAJES:</td><td class="total-egreso">${formatearMoneda(totalV)}</td></tr>`;
                 html += `</tbody></table>`;
             } else if (tipo === 'mantenimiento') {
-                html += renderizarCabeceraPagina('Reporte de Mantenimiento e Insumos', periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Mantenimiento e Insumos</h2>`;
                 html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 const enRangoMH = (f) => f >= rango.inicio && f <= rango.fin;
@@ -11408,7 +11369,6 @@ tbody.innerHTML = '';
                 html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:var(--pdf-fondo-azul);padding:10px;margin-top:10px;">TOTAL MANTENIMIENTO E INSUMOS: ${formatearMoneda(totalM)}</div>`;
             } else if (tipo === 'categoria') {
                 // Reporte por Categoría de Gastos
-                html += renderizarCabeceraPagina('Reporte por Categoría de Gastos', periodoDisplay, '1');
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte por Categoría de Gastos</h2>`;
                 html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
                 

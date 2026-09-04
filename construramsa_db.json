@@ -5,7 +5,7 @@
     "eslogan": "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
     "logo_base64": "",
     "presupuesto_inicial_caja": 0,
-    "proyecto_actual": null,
+    "proyecto_actual": "proj_mtnfyvfa_r6ygi0lco",
     "telefono": "+502 5997 9501",
     "email": "contacto@construramsa.com",
     "direccion": "17av. Villa Mariscal, Apto. 116, Torre 2, Zona 11, Ciudad de Guatemala",
@@ -27,8 +27,3651 @@
       }
     ]
   },
-  "proyectos": [],
-  "proyectos_data": {},
+  "proyectos": [
+    {
+      "id": "proj_mtnfyvfa_r6ygi0lco",
+      "nombre": "Proyecto de Prueba Integral",
+      "descripcion": "Proyecto para pruebas completas de todos los módulos",
+      "presupuesto_inicial": 500000,
+      "fecha_creacion": "2026-07-21",
+      "fecha_ultima_modificacion": "2026-09-04",
+      "activo": true,
+      "color": "#004B93"
+    }
+  ],
+  "proyectos_data": {
+    "proj_mtnfyvfa_r6ygi0lco": {
+      "caja_chica": [
+        {
+          "id": "cc_mtnfyvfb_80shg871d",
+          "tipo": "ingreso",
+          "monto": 50000,
+          "descripcion": "Aporte inicial de capital",
+          "fecha": "2026-08-06",
+          "categoria": "capital",
+          "responsable": "Administrador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "cc_mtnfyvfb_1rysajc4f",
+          "tipo": "ingreso",
+          "monto": 16329,
+          "descripcion": "Aporte semanal de capital",
+          "fecha": "2026-08-06",
+          "categoria": "capital",
+          "responsable": "Administrador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "cc_mtnfyvfb_id8j3uepp",
+          "tipo": "ingreso",
+          "monto": 15400,
+          "descripcion": "Aporte semanal de capital",
+          "fecha": "2026-08-13",
+          "categoria": "capital",
+          "responsable": "Administrador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "cc_mtnfyvfb_5cxn5leo4",
+          "tipo": "ingreso",
+          "monto": 18739,
+          "descripcion": "Aporte semanal de capital",
+          "fecha": "2026-08-20",
+          "categoria": "capital",
+          "responsable": "Administrador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "cc_mtnfyvfb_8w4zvw5kd",
+          "tipo": "ingreso",
+          "monto": 16525,
+          "descripcion": "Aporte semanal de capital",
+          "fecha": "2026-08-27",
+          "categoria": "capital",
+          "responsable": "Administrador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "cc_mtnfyvfb_ylyp5zo9s",
+          "tipo": "ingreso",
+          "monto": 16153,
+          "descripcion": "Aporte semanal de capital",
+          "fecha": "2026-09-03",
+          "categoria": "capital",
+          "responsable": "Administrador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_wsdsox1vk",
+          "tipo": "egreso",
+          "monto": 4826.39,
+          "descripcion": "Compra aprobada: Cemento Portland Tipo I",
+          "fecha": "2026-08-06",
+          "categoria": "materiales",
+          "proveedor": "Constructora Los Ángeles S.A.",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_hoewejb68",
+          "tipo": "egreso",
+          "monto": 33553.67,
+          "descripcion": "Compra aprobada: Varilla de acero #4",
+          "fecha": "2026-08-07",
+          "categoria": "materiales",
+          "proveedor": "Distribuidora de Cemento Nacional",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_glne0mth3",
+          "tipo": "egreso",
+          "monto": 15393.4,
+          "descripcion": "Compra aprobada: Bloque de concreto 6\"",
+          "fecha": "2026-08-08",
+          "categoria": "materiales",
+          "proveedor": "Hierros y Aceros del Norte",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_tzyt8rpom",
+          "tipo": "egreso",
+          "monto": 11547.02,
+          "descripcion": "Compra aprobada: Arena de río",
+          "fecha": "2026-08-09",
+          "categoria": "materiales",
+          "proveedor": "Materiales de Construcción Bella Vista",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_v743zdpcd",
+          "tipo": "egreso",
+          "monto": 5824.28,
+          "descripcion": "Compra aprobada: Grava triturada 3/4\"",
+          "fecha": "2026-08-10",
+          "categoria": "materiales",
+          "proveedor": "Constructora Los Ángeles S.A.",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_ny0lekbhr",
+          "tipo": "egreso",
+          "monto": 5665.57,
+          "descripcion": "Compra aprobada: Pintura látex blanca",
+          "fecha": "2026-08-11",
+          "categoria": "materiales",
+          "proveedor": "Distribuidora de Cemento Nacional",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_cun35hfzt",
+          "tipo": "egreso",
+          "monto": 8976.4,
+          "descripcion": "Compra aprobada: Tubo PVC 4\"",
+          "fecha": "2026-08-12",
+          "categoria": "materiales",
+          "proveedor": "Hierros y Aceros del Norte",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_ni2t1rlgi",
+          "tipo": "egreso",
+          "monto": 35356.18,
+          "descripcion": "Compra aprobada: Cable eléctrico #12",
+          "fecha": "2026-08-13",
+          "categoria": "materiales",
+          "proveedor": "Materiales de Construcción Bella Vista",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_hapc0425b",
+          "tipo": "egreso",
+          "monto": 13633.4,
+          "descripcion": "Compra aprobada: Cerámica para piso",
+          "fecha": "2026-08-14",
+          "categoria": "materiales",
+          "proveedor": "Constructora Los Ángeles S.A.",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_hzzmfnoc8",
+          "tipo": "egreso",
+          "monto": 22702.44,
+          "descripcion": "Compra aprobada: Puerta de madera",
+          "fecha": "2026-08-15",
+          "categoria": "materiales",
+          "proveedor": "Distribuidora de Cemento Nacional",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_f44xwx8uw",
+          "tipo": "egreso",
+          "monto": 1200,
+          "descripcion": "Viaje Camión de carga pesado - Ruta Principal - Botadero Central",
+          "fecha": "2026-08-06",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_qwi8axeg8",
+          "tipo": "egreso",
+          "monto": 2252.8,
+          "descripcion": "Viaje Scania R450 - Ruta Norte - Botadero San Juan",
+          "fecha": "2026-08-07",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_33th3tjf2",
+          "tipo": "egreso",
+          "monto": 1313.28,
+          "descripcion": "Viaje Mercedes-Benz Actros - Ruta Sur - Botadero Las Flores",
+          "fecha": "2026-08-08",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_9w0cbaf0z",
+          "tipo": "egreso",
+          "monto": 672,
+          "descripcion": "Viaje Volvo FH16 - Ruta Principal - Botadero Central",
+          "fecha": "2026-08-09",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_2h8loiyp1",
+          "tipo": "egreso",
+          "monto": 1200,
+          "descripcion": "Viaje Camión de carga pesado - Ruta Norte - Botadero San Juan",
+          "fecha": "2026-08-10",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_4j9o1r328",
+          "tipo": "egreso",
+          "monto": 2626.56,
+          "descripcion": "Viaje Mercedes-Benz Actros - Ruta Sur - Botadero Las Flores",
+          "fecha": "2026-08-11",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_x2uprd0e2",
+          "tipo": "egreso",
+          "monto": 2352,
+          "descripcion": "Viaje Volvo FH16 - Ruta Principal - Botadero Central",
+          "fecha": "2026-08-12",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_ldr1lvh41",
+          "tipo": "egreso",
+          "monto": 901.12,
+          "descripcion": "Viaje Scania R450 - Ruta Norte - Botadero San Juan",
+          "fecha": "2026-08-13",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_l0vsevzo9",
+          "tipo": "egreso",
+          "monto": 1200,
+          "descripcion": "Viaje Camión de carga pesado - Ruta Sur - Botadero Las Flores",
+          "fecha": "2026-08-14",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_r7e5q6qfx",
+          "tipo": "egreso",
+          "monto": 2016,
+          "descripcion": "Viaje Volvo FH16 - Ruta Principal - Botadero Central",
+          "fecha": "2026-08-15",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_acxdxwo4s",
+          "tipo": "egreso",
+          "monto": 1351.68,
+          "descripcion": "Viaje Scania R450 - Ruta Norte - Botadero San Juan",
+          "fecha": "2026-08-16",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_oi57a01n0",
+          "tipo": "egreso",
+          "monto": 1751.04,
+          "descripcion": "Viaje Mercedes-Benz Actros - Ruta Sur - Botadero Las Flores",
+          "fecha": "2026-08-17",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_4hlwenbcz",
+          "tipo": "egreso",
+          "monto": 1200,
+          "descripcion": "Viaje Camión de carga pesado - Ruta Principal - Botadero Central",
+          "fecha": "2026-08-18",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_pfqzu9hxv",
+          "tipo": "egreso",
+          "monto": 1802.24,
+          "descripcion": "Viaje Scania R450 - Ruta Norte - Botadero San Juan",
+          "fecha": "2026-08-19",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_gndjqc3mg",
+          "tipo": "egreso",
+          "monto": 3064.32,
+          "descripcion": "Viaje Mercedes-Benz Actros - Ruta Sur - Botadero Las Flores",
+          "fecha": "2026-08-20",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_aq6dtpn0b",
+          "tipo": "egreso",
+          "monto": 672,
+          "descripcion": "Viaje Volvo FH16 - Ruta Principal - Botadero Central",
+          "fecha": "2026-08-21",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_jz97c6y4t",
+          "tipo": "egreso",
+          "monto": 1200,
+          "descripcion": "Viaje Camión de carga pesado - Ruta Norte - Botadero San Juan",
+          "fecha": "2026-08-22",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_1abrim26e",
+          "tipo": "egreso",
+          "monto": 2626.56,
+          "descripcion": "Viaje Mercedes-Benz Actros - Ruta Sur - Botadero Las Flores",
+          "fecha": "2026-08-23",
+          "categoria": "transporte",
+          "responsable": "Transportista",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_93ancx08j",
+          "tipo": "egreso",
+          "monto": 2985.69,
+          "descripcion": "Mantenimiento preventivo: Excavadora CAT 320",
+          "fecha": "2026-08-06",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_ikhduvx0m",
+          "tipo": "egreso",
+          "monto": 2092.63,
+          "descripcion": "Mantenimiento correctivo: Camión Volvo FH16",
+          "fecha": "2026-08-07",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_wftl02efn",
+          "tipo": "egreso",
+          "monto": 2369.76,
+          "descripcion": "Mantenimiento preventivo: Compactor Vibratorio",
+          "fecha": "2026-08-08",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_phjx0e6u3",
+          "tipo": "egreso",
+          "monto": 2362.35,
+          "descripcion": "Mantenimiento correctivo: Retroexcavadora John Deere",
+          "fecha": "2026-08-09",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_9o4n1wa2r",
+          "tipo": "egreso",
+          "monto": 2983.56,
+          "descripcion": "Mantenimiento preventivo: Excavadora CAT 320",
+          "fecha": "2026-08-10",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_zh0ni19ae",
+          "tipo": "egreso",
+          "monto": 776.08,
+          "descripcion": "Mantenimiento correctivo: Camión Volvo FH16",
+          "fecha": "2026-08-11",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_5snm73kco",
+          "tipo": "egreso",
+          "monto": 990.06,
+          "descripcion": "Mantenimiento preventivo: Compactor Vibratorio",
+          "fecha": "2026-08-12",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_lrj2zegda",
+          "tipo": "egreso",
+          "monto": 620.18,
+          "descripcion": "Mantenimiento correctivo: Retroexcavadora John Deere",
+          "fecha": "2026-08-13",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_1vhaa1ks7",
+          "tipo": "egreso",
+          "monto": 2229.88,
+          "descripcion": "Mantenimiento preventivo: Excavadora CAT 320",
+          "fecha": "2026-08-14",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_734eehrrk",
+          "tipo": "egreso",
+          "monto": 2517.54,
+          "descripcion": "Mantenimiento correctivo: Camión Volvo FH16",
+          "fecha": "2026-08-15",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_6arxzhitr",
+          "tipo": "egreso",
+          "monto": 2406.24,
+          "descripcion": "Mantenimiento preventivo: Compactor Vibratorio",
+          "fecha": "2026-08-16",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_nqkpux3z0",
+          "tipo": "egreso",
+          "monto": 1216.9,
+          "descripcion": "Mantenimiento correctivo: Retroexcavadora John Deere",
+          "fecha": "2026-08-17",
+          "categoria": "mantenimiento",
+          "responsable": "Jefe de Mantenimiento",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfc_1gg7qwdv3",
+          "tipo": "egreso",
+          "monto": 541.9,
+          "descripcion": "Compra insumo: Aceite motor 15W-40",
+          "fecha": "2026-08-11",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_hxni60hcv",
+          "tipo": "egreso",
+          "monto": 506.69,
+          "descripcion": "Compra insumo: Filtro de aceite",
+          "fecha": "2026-08-12",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_m339wqmfb",
+          "tipo": "egreso",
+          "monto": 1114.58,
+          "descripcion": "Compra insumo: Filtro de aire",
+          "fecha": "2026-08-13",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_hvcjz4bek",
+          "tipo": "egreso",
+          "monto": 1188.48,
+          "descripcion": "Compra insumo: Aceite hidráulico",
+          "fecha": "2026-08-14",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_0ebg3mhzv",
+          "tipo": "egreso",
+          "monto": 1069.92,
+          "descripcion": "Compra insumo: Correa de transmisión",
+          "fecha": "2026-08-15",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_hglyib52c",
+          "tipo": "egreso",
+          "monto": 1372.34,
+          "descripcion": "Compra insumo: Bujía de encendido",
+          "fecha": "2026-08-16",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_451msyd4l",
+          "tipo": "egreso",
+          "monto": 1250.85,
+          "descripcion": "Compra insumo: Líquido de frenos",
+          "fecha": "2026-08-17",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_j5164ie5d",
+          "tipo": "egreso",
+          "monto": 468.36,
+          "descripcion": "Compra insumo: Grasa multiusos",
+          "fecha": "2026-08-18",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_pigdbk3vt",
+          "tipo": "egreso",
+          "monto": 806.75,
+          "descripcion": "Compra insumo: Juego de empaques",
+          "fecha": "2026-08-19",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_by48pdjm4",
+          "tipo": "egreso",
+          "monto": 478.92,
+          "descripcion": "Compra insumo: Aceite motor 15W-40",
+          "fecha": "2026-08-20",
+          "categoria": "insumos",
+          "responsable": "Almacén",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_01xd4skk3",
+          "tipo": "egreso",
+          "monto": 765.2,
+          "descripcion": "Combustible y mantenimiento Retroexcavadora CAT 320D",
+          "fecha": "2026-08-06",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_do1bzk6hq",
+          "tipo": "egreso",
+          "monto": 1321.68,
+          "descripcion": "Combustible y mantenimiento Excavadora Hidráulica",
+          "fecha": "2026-08-07",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_0td8uo90c",
+          "tipo": "egreso",
+          "monto": 712.95,
+          "descripcion": "Combustible y mantenimiento Camión de Volteo",
+          "fecha": "2026-08-08",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_vk6noxozl",
+          "tipo": "egreso",
+          "monto": 862.57,
+          "descripcion": "Combustible y mantenimiento Retroexcavadora CAT 320D",
+          "fecha": "2026-08-09",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_94l1jdppw",
+          "tipo": "egreso",
+          "monto": 977.36,
+          "descripcion": "Combustible y mantenimiento Excavadora Hidráulica",
+          "fecha": "2026-08-10",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_1q2ve0xqy",
+          "tipo": "egreso",
+          "monto": 1057.32,
+          "descripcion": "Combustible y mantenimiento Camión de Volteo",
+          "fecha": "2026-08-11",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_a21hfbgf7",
+          "tipo": "egreso",
+          "monto": 1167.41,
+          "descripcion": "Combustible y mantenimiento Retroexcavadora CAT 320D",
+          "fecha": "2026-08-12",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_0buz7scfr",
+          "tipo": "egreso",
+          "monto": 1262.38,
+          "descripcion": "Combustible y mantenimiento Excavadora Hidráulica",
+          "fecha": "2026-08-13",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_rptq5nqcq",
+          "tipo": "egreso",
+          "monto": 1058.99,
+          "descripcion": "Combustible y mantenimiento Camión de Volteo",
+          "fecha": "2026-08-14",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_5nvf3v4b7",
+          "tipo": "egreso",
+          "monto": 1215.72,
+          "descripcion": "Combustible y mantenimiento Retroexcavadora CAT 320D",
+          "fecha": "2026-08-15",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_kqmem9h05",
+          "tipo": "egreso",
+          "monto": 749.32,
+          "descripcion": "Combustible y mantenimiento Excavadora Hidráulica",
+          "fecha": "2026-08-16",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_q46d36ebq",
+          "tipo": "egreso",
+          "monto": 1091.39,
+          "descripcion": "Combustible y mantenimiento Camión de Volteo",
+          "fecha": "2026-08-17",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_i939oss29",
+          "tipo": "egreso",
+          "monto": 1328.92,
+          "descripcion": "Combustible y mantenimiento Retroexcavadora CAT 320D",
+          "fecha": "2026-08-18",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_2a44zoli5",
+          "tipo": "egreso",
+          "monto": 1495.53,
+          "descripcion": "Combustible y mantenimiento Excavadora Hidráulica",
+          "fecha": "2026-08-19",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        },
+        {
+          "id": "gasto_mtnfyvfd_ri3xxncmi",
+          "tipo": "egreso",
+          "monto": 910.53,
+          "descripcion": "Combustible y mantenimiento Camión de Volteo",
+          "fecha": "2026-08-20",
+          "categoria": "combustible",
+          "responsable": "Operador",
+          "proyecto_id": "proj_mtnfyvfa_r6ygi0lco"
+        }
+      ],
+      "maquinaria_flota": {
+        "vehiculos": [
+          {
+            "id": "veh_mtnfyvfd_okmnx82zh",
+            "nombre": "Retroexcavadora CAT 320D",
+            "tipo": "retroexcavadora",
+            "marca_modelo": "CAT 320D"
+          },
+          {
+            "id": "veh_mtnfyvfd_yfmrf0j7y",
+            "nombre": "Excavadora Hidráulica",
+            "tipo": "excavadora",
+            "marca_modelo": "Komatsu PC200"
+          },
+          {
+            "id": "veh_mtnfyvfd_w59kcv42j",
+            "nombre": "Camión de Volteo",
+            "tipo": "camion",
+            "marca_modelo": "Volvo FM12"
+          }
+        ],
+        "registros": [
+          {
+            "id": "reg_mtnfyvfd_yx766w3i3",
+            "vehiculo_id": "veh_mtnfyvfd_okmnx82zh",
+            "fecha": "2026-08-06",
+            "odometro_inicial": 10000,
+            "odometro_final": 10092,
+            "horas_trabajadas": 7,
+            "combustible_galones": 18.31,
+            "combustible_costo": 585.76,
+            "mantenimiento_detalles": "Revisión de niveles",
+            "mantenimiento_costo": 179.44,
+            "gasto_id": "gasto_mtnfyvfd_01xd4skk3"
+          },
+          {
+            "id": "reg_mtnfyvfd_00hjri3z5",
+            "vehiculo_id": "veh_mtnfyvfd_yfmrf0j7y",
+            "fecha": "2026-08-07",
+            "odometro_inicial": 10100,
+            "odometro_final": 10218,
+            "horas_trabajadas": 9,
+            "combustible_galones": 32.02,
+            "combustible_costo": 1024.57,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 297.11,
+            "gasto_id": "gasto_mtnfyvfd_do1bzk6hq"
+          },
+          {
+            "id": "reg_mtnfyvfd_twv17ja3g",
+            "vehiculo_id": "veh_mtnfyvfd_w59kcv42j",
+            "fecha": "2026-08-08",
+            "odometro_inicial": 10200,
+            "odometro_final": 10281,
+            "horas_trabajadas": 9,
+            "combustible_galones": 16.32,
+            "combustible_costo": 522.28,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 190.67,
+            "gasto_id": "gasto_mtnfyvfd_0td8uo90c"
+          },
+          {
+            "id": "reg_mtnfyvfd_pdegqw0q6",
+            "vehiculo_id": "veh_mtnfyvfd_okmnx82zh",
+            "fecha": "2026-08-09",
+            "odometro_inicial": 10300,
+            "odometro_final": 10366,
+            "horas_trabajadas": 6,
+            "combustible_galones": 18.75,
+            "combustible_costo": 600.05,
+            "mantenimiento_detalles": "Revisión de niveles",
+            "mantenimiento_costo": 262.52,
+            "gasto_id": "gasto_mtnfyvfd_vk6noxozl"
+          },
+          {
+            "id": "reg_mtnfyvfd_6l29iguj9",
+            "vehiculo_id": "veh_mtnfyvfd_yfmrf0j7y",
+            "fecha": "2026-08-10",
+            "odometro_inicial": 10400,
+            "odometro_final": 10475,
+            "horas_trabajadas": 9,
+            "combustible_galones": 22.39,
+            "combustible_costo": 716.62,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 260.74,
+            "gasto_id": "gasto_mtnfyvfd_94l1jdppw"
+          },
+          {
+            "id": "reg_mtnfyvfd_b4pj9ncpi",
+            "vehiculo_id": "veh_mtnfyvfd_w59kcv42j",
+            "fecha": "2026-08-11",
+            "odometro_inicial": 10500,
+            "odometro_final": 10599,
+            "horas_trabajadas": 6,
+            "combustible_galones": 26.57,
+            "combustible_costo": 850.39,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 206.92,
+            "gasto_id": "gasto_mtnfyvfd_1q2ve0xqy"
+          },
+          {
+            "id": "reg_mtnfyvfd_nwgm7eybw",
+            "vehiculo_id": "veh_mtnfyvfd_okmnx82zh",
+            "fecha": "2026-08-12",
+            "odometro_inicial": 10600,
+            "odometro_final": 10746,
+            "horas_trabajadas": 8,
+            "combustible_galones": 31.98,
+            "combustible_costo": 1023.25,
+            "mantenimiento_detalles": "Revisión de niveles",
+            "mantenimiento_costo": 144.17,
+            "gasto_id": "gasto_mtnfyvfd_a21hfbgf7"
+          },
+          {
+            "id": "reg_mtnfyvfd_64i37on6c",
+            "vehiculo_id": "veh_mtnfyvfd_yfmrf0j7y",
+            "fecha": "2026-08-13",
+            "odometro_inicial": 10700,
+            "odometro_final": 10779,
+            "horas_trabajadas": 8,
+            "combustible_galones": 31.32,
+            "combustible_costo": 1002.35,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 260.04,
+            "gasto_id": "gasto_mtnfyvfd_0buz7scfr"
+          },
+          {
+            "id": "reg_mtnfyvfd_oyfe4qmsq",
+            "vehiculo_id": "veh_mtnfyvfd_w59kcv42j",
+            "fecha": "2026-08-14",
+            "odometro_inicial": 10800,
+            "odometro_final": 10898,
+            "horas_trabajadas": 6,
+            "combustible_galones": 22.21,
+            "combustible_costo": 710.76,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 348.23,
+            "gasto_id": "gasto_mtnfyvfd_rptq5nqcq"
+          },
+          {
+            "id": "reg_mtnfyvfd_04pntr58v",
+            "vehiculo_id": "veh_mtnfyvfd_okmnx82zh",
+            "fecha": "2026-08-15",
+            "odometro_inicial": 10900,
+            "odometro_final": 11015,
+            "horas_trabajadas": 6,
+            "combustible_galones": 33.95,
+            "combustible_costo": 1086.32,
+            "mantenimiento_detalles": "Revisión de niveles",
+            "mantenimiento_costo": 129.4,
+            "gasto_id": "gasto_mtnfyvfd_5nvf3v4b7"
+          },
+          {
+            "id": "reg_mtnfyvfd_o7iljss52",
+            "vehiculo_id": "veh_mtnfyvfd_yfmrf0j7y",
+            "fecha": "2026-08-16",
+            "odometro_inicial": 11000,
+            "odometro_final": 11095,
+            "horas_trabajadas": 6,
+            "combustible_galones": 15.04,
+            "combustible_costo": 481.36,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 267.95,
+            "gasto_id": "gasto_mtnfyvfd_kqmem9h05"
+          },
+          {
+            "id": "reg_mtnfyvfd_0xgcmits8",
+            "vehiculo_id": "veh_mtnfyvfd_w59kcv42j",
+            "fecha": "2026-08-17",
+            "odometro_inicial": 11100,
+            "odometro_final": 11222,
+            "horas_trabajadas": 6,
+            "combustible_galones": 21.65,
+            "combustible_costo": 692.74,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 398.65,
+            "gasto_id": "gasto_mtnfyvfd_q46d36ebq"
+          },
+          {
+            "id": "reg_mtnfyvfd_0uxfwbi2l",
+            "vehiculo_id": "veh_mtnfyvfd_okmnx82zh",
+            "fecha": "2026-08-18",
+            "odometro_inicial": 11200,
+            "odometro_final": 11302,
+            "horas_trabajadas": 8,
+            "combustible_galones": 31.59,
+            "combustible_costo": 1010.75,
+            "mantenimiento_detalles": "Revisión de niveles",
+            "mantenimiento_costo": 318.18,
+            "gasto_id": "gasto_mtnfyvfd_i939oss29"
+          },
+          {
+            "id": "reg_mtnfyvfd_b7fxsuy59",
+            "vehiculo_id": "veh_mtnfyvfd_yfmrf0j7y",
+            "fecha": "2026-08-19",
+            "odometro_inicial": 11300,
+            "odometro_final": 11406,
+            "horas_trabajadas": 8,
+            "combustible_galones": 31.59,
+            "combustible_costo": 1010.99,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 484.54,
+            "gasto_id": "gasto_mtnfyvfd_2a44zoli5"
+          },
+          {
+            "id": "reg_mtnfyvfd_r40wcyfyh",
+            "vehiculo_id": "veh_mtnfyvfd_w59kcv42j",
+            "fecha": "2026-08-20",
+            "odometro_inicial": 11400,
+            "odometro_final": 11482,
+            "horas_trabajadas": 8,
+            "combustible_galones": 17.03,
+            "combustible_costo": 545.02,
+            "mantenimiento_detalles": "",
+            "mantenimiento_costo": 365.5,
+            "gasto_id": "gasto_mtnfyvfd_ri3xxncmi"
+          }
+        ]
+      },
+      "personal": {
+        "trabajadores": [
+          {
+            "id": "t_mtnfyvfb_cst5w9t97",
+            "nombre": "Juan Pérez García",
+            "puesto": "Albañil",
+            "pago_hora_normal": 25,
+            "pago_hora_extra": 35
+          },
+          {
+            "id": "t_mtnfyvfb_4k5n03iuz",
+            "nombre": "María García López",
+            "puesto": "Ayudante",
+            "pago_hora_normal": 20,
+            "pago_hora_extra": 28
+          },
+          {
+            "id": "t_mtnfyvfb_818m8olph",
+            "nombre": "Carlos López Martínez",
+            "puesto": "Maestro de Obra",
+            "pago_hora_normal": 30,
+            "pago_hora_extra": 42
+          },
+          {
+            "id": "t_mtnfyvfb_93qoqlt4u",
+            "nombre": "Ana Martínez Sánchez",
+            "puesto": "Soldador",
+            "pago_hora_normal": 28,
+            "pago_hora_extra": 38
+          },
+          {
+            "id": "t_mtnfyvfb_cu7gg59fk",
+            "nombre": "Pedro Sánchez Rodríguez",
+            "puesto": "Ayudante General",
+            "pago_hora_normal": 20,
+            "pago_hora_extra": 28
+          },
+          {
+            "id": "t_mtnfyvfb_9w2gcj5jk",
+            "nombre": "Luis Hernández Díaz",
+            "puesto": "Electricista",
+            "pago_hora_normal": 32,
+            "pago_hora_extra": 45
+          },
+          {
+            "id": "t_mtnfyvfb_8e2gklgcq",
+            "nombre": "Roberto Gómez Ruiz",
+            "puesto": "Fontanero",
+            "pago_hora_normal": 28,
+            "pago_hora_extra": 38
+          }
+        ],
+        "asistencia": [
+          {
+            "fecha": "2026-08-06",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_ajaziebv7",
+                "fecha": "2026-08-06",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 270,
+                  "pago_normal": 200,
+                  "pago_extra": 70
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_z8gife9x0",
+                "fecha": "2026-08-06",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 188,
+                  "pago_normal": 160,
+                  "pago_extra": 28
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_cvwezv9cg",
+                "fecha": "2026-08-06",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ve0u62x3k",
+                "fecha": "2026-08-06",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_1u4r2kuhu",
+                "fecha": "2026-08-06",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 216,
+                  "pago_normal": 160,
+                  "pago_extra": 56
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_aiiukidvc",
+                "fecha": "2026-08-06",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_rl2z5zq0v",
+                "fecha": "2026-08-06",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-07",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_maa57iahv",
+                "fecha": "2026-08-07",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 235,
+                  "pago_normal": 200,
+                  "pago_extra": 35
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_dr9znc0b1",
+                "fecha": "2026-08-07",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 216,
+                  "pago_normal": 160,
+                  "pago_extra": 56
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_321n3skal",
+                "fecha": "2026-08-07",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_71t51jfhs",
+                "fecha": "2026-08-07",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_4w1kim8b8",
+                "fecha": "2026-08-07",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "justificado",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_y2f69xp76",
+                "fecha": "2026-08-07",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 346,
+                  "pago_normal": 256,
+                  "pago_extra": 90
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_oifcozb4n",
+                "fecha": "2026-08-07",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-08",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_gy7oj3ls8",
+                "fecha": "2026-08-08",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_rjrl3itlw",
+                "fecha": "2026-08-08",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_d0kmq32dh",
+                "fecha": "2026-08-08",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_9l523bfkz",
+                "fecha": "2026-08-08",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_v1cr3z4mz",
+                "fecha": "2026-08-08",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_kzabttt8k",
+                "fecha": "2026-08-08",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 301,
+                  "pago_normal": 256,
+                  "pago_extra": 45
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_whf5evvpn",
+                "fecha": "2026-08-08",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-09",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_o5ffzcg09",
+                "fecha": "2026-08-09",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_yscqyqk5i",
+                "fecha": "2026-08-09",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_my5tqzm58",
+                "fecha": "2026-08-09",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 324,
+                  "pago_normal": 240,
+                  "pago_extra": 84
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_1gppb30j4",
+                "fecha": "2026-08-09",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_zr0ld912p",
+                "fecha": "2026-08-09",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_8m7n0ukhw",
+                "fecha": "2026-08-09",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_2lf9bt55k",
+                "fecha": "2026-08-09",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "falto",
+                "horas_extras": 0
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-10",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_ua3do5m5o",
+                "fecha": "2026-08-10",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_iylja5448",
+                "fecha": "2026-08-10",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "justificado",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_f2wla1v4f",
+                "fecha": "2026-08-10",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 324,
+                  "pago_normal": 240,
+                  "pago_extra": 84
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_xm2ln61ha",
+                "fecha": "2026-08-10",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 262,
+                  "pago_normal": 224,
+                  "pago_extra": 38
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_3rlgwmuto",
+                "fecha": "2026-08-10",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_c2wgiae18",
+                "fecha": "2026-08-10",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_xbrq9mekx",
+                "fecha": "2026-08-10",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-11",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_hbeii3m09",
+                "fecha": "2026-08-11",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_3t4ws8dn6",
+                "fecha": "2026-08-11",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ahxpo9lsu",
+                "fecha": "2026-08-11",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_qls3mfywu",
+                "fecha": "2026-08-11",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_54himxrho",
+                "fecha": "2026-08-11",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_2tivqpu61",
+                "fecha": "2026-08-11",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 301,
+                  "pago_normal": 256,
+                  "pago_extra": 45
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_i5mn63tkq",
+                "fecha": "2026-08-11",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-12",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_v5coe1ztg",
+                "fecha": "2026-08-12",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ihe6kvon7",
+                "fecha": "2026-08-12",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_u3nwfl20w",
+                "fecha": "2026-08-12",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 282,
+                  "pago_normal": 240,
+                  "pago_extra": 42
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_3g0g4w88n",
+                "fecha": "2026-08-12",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_bd7thxwg2",
+                "fecha": "2026-08-12",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "justificado",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_uabzxt253",
+                "fecha": "2026-08-12",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_juwzdo2nx",
+                "fecha": "2026-08-12",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-13",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_wdwjs907g",
+                "fecha": "2026-08-13",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ozv9iljfq",
+                "fecha": "2026-08-13",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_wr4q3mi81",
+                "fecha": "2026-08-13",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_udx7soihh",
+                "fecha": "2026-08-13",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_efsq2m48w",
+                "fecha": "2026-08-13",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_gbtulyfdn",
+                "fecha": "2026-08-13",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_w6ckd3vmt",
+                "fecha": "2026-08-13",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-14",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_ufkdmka6m",
+                "fecha": "2026-08-14",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 235,
+                  "pago_normal": 200,
+                  "pago_extra": 35
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_g6oo47ynl",
+                "fecha": "2026-08-14",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_9bqhca0mu",
+                "fecha": "2026-08-14",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "justificado",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_i8u3zxqrx",
+                "fecha": "2026-08-14",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_lchtuoi5f",
+                "fecha": "2026-08-14",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_qbibbi0c9",
+                "fecha": "2026-08-14",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ymqwcdupe",
+                "fecha": "2026-08-14",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-15",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_lu1gqrbsa",
+                "fecha": "2026-08-15",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_sdmdui90d",
+                "fecha": "2026-08-15",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_k6thm2oix",
+                "fecha": "2026-08-15",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 282,
+                  "pago_normal": 240,
+                  "pago_extra": 42
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_pf4ntzak7",
+                "fecha": "2026-08-15",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_21egeqsb1",
+                "fecha": "2026-08-15",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 188,
+                  "pago_normal": 160,
+                  "pago_extra": 28
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_scazuq6ek",
+                "fecha": "2026-08-15",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_fhp2e8ksk",
+                "fecha": "2026-08-15",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-16",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_q700usowz",
+                "fecha": "2026-08-16",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_sgy5b3nul",
+                "fecha": "2026-08-16",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_zcpq6kknw",
+                "fecha": "2026-08-16",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_bmcnc8117",
+                "fecha": "2026-08-16",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 300,
+                  "pago_normal": 224,
+                  "pago_extra": 76
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_wf2h6ytnt",
+                "fecha": "2026-08-16",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_nyovcje42",
+                "fecha": "2026-08-16",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_np38ds6bu",
+                "fecha": "2026-08-16",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "falto",
+                "horas_extras": 0
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-17",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_kis17xxxi",
+                "fecha": "2026-08-17",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 270,
+                  "pago_normal": 200,
+                  "pago_extra": 70
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_e4838is7b",
+                "fecha": "2026-08-17",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 188,
+                  "pago_normal": 160,
+                  "pago_extra": 28
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_vdjj9mg8b",
+                "fecha": "2026-08-17",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_mz3opjdmm",
+                "fecha": "2026-08-17",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_vsf1s6i6k",
+                "fecha": "2026-08-17",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_pg132bwvs",
+                "fecha": "2026-08-17",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_2zf6verwk",
+                "fecha": "2026-08-17",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "justificado",
+                "horas_extras": 0
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-18",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_eur99ypmf",
+                "fecha": "2026-08-18",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 270,
+                  "pago_normal": 200,
+                  "pago_extra": 70
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_n0nfdcp7y",
+                "fecha": "2026-08-18",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_6kx3q62qq",
+                "fecha": "2026-08-18",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_9cc0uf5ib",
+                "fecha": "2026-08-18",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_o4t4s3ahj",
+                "fecha": "2026-08-18",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_kr1wesgwf",
+                "fecha": "2026-08-18",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_94sjx0y9s",
+                "fecha": "2026-08-18",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-19",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_9piga872k",
+                "fecha": "2026-08-19",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_365a5q0kj",
+                "fecha": "2026-08-19",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 188,
+                  "pago_normal": 160,
+                  "pago_extra": 28
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_cf6hiipu6",
+                "fecha": "2026-08-19",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_s92roml5b",
+                "fecha": "2026-08-19",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_6wabo77av",
+                "fecha": "2026-08-19",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_wqj7pro3l",
+                "fecha": "2026-08-19",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_9vr85aapg",
+                "fecha": "2026-08-19",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-20",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_dztv6l2bu",
+                "fecha": "2026-08-20",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_oypq6g1gj",
+                "fecha": "2026-08-20",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_fv5mkvwrq",
+                "fecha": "2026-08-20",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_dhts5zc5y",
+                "fecha": "2026-08-20",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_uhnkntui0",
+                "fecha": "2026-08-20",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_83x012h2g",
+                "fecha": "2026-08-20",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_frcn5g3mo",
+                "fecha": "2026-08-20",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-21",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_4jvfaxs7c",
+                "fecha": "2026-08-21",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_i7uq5xyqs",
+                "fecha": "2026-08-21",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 188,
+                  "pago_normal": 160,
+                  "pago_extra": 28
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ks9kfc3tv",
+                "fecha": "2026-08-21",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 282,
+                  "pago_normal": 240,
+                  "pago_extra": 42
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_37k5q877i",
+                "fecha": "2026-08-21",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_yoqji2mhp",
+                "fecha": "2026-08-21",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_tfthxs0n5",
+                "fecha": "2026-08-21",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 346,
+                  "pago_normal": 256,
+                  "pago_extra": 90
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ff6qm1ppr",
+                "fecha": "2026-08-21",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-22",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_x07sqg78w",
+                "fecha": "2026-08-22",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_nj6lddkyd",
+                "fecha": "2026-08-22",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 188,
+                  "pago_normal": 160,
+                  "pago_extra": 28
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_a1rpfc0u9",
+                "fecha": "2026-08-22",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_sxsosqrv3",
+                "fecha": "2026-08-22",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 300,
+                  "pago_normal": 224,
+                  "pago_extra": 76
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_u5is42wix",
+                "fecha": "2026-08-22",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_q38n6h8e9",
+                "fecha": "2026-08-22",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 301,
+                  "pago_normal": 256,
+                  "pago_extra": 45
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_bxdedb2yx",
+                "fecha": "2026-08-22",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-23",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_cvllh7ytr",
+                "fecha": "2026-08-23",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 200,
+                  "pago_normal": 200,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_jio0qvwrp",
+                "fecha": "2026-08-23",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "justificado",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_kmy161srq",
+                "fecha": "2026-08-23",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 324,
+                  "pago_normal": 240,
+                  "pago_extra": 84
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_s98zdt8zo",
+                "fecha": "2026-08-23",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_i1yjru3ar",
+                "fecha": "2026-08-23",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_slyku9z4d",
+                "fecha": "2026-08-23",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_q8povis2y",
+                "fecha": "2026-08-23",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-24",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_otoi9o75m",
+                "fecha": "2026-08-24",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 270,
+                  "pago_normal": 200,
+                  "pago_extra": 70
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_smdx95ywg",
+                "fecha": "2026-08-24",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "falto",
+                "horas_extras": 0
+              },
+              {
+                "id": "as_mtnfyvfb_8cgz1sr0u",
+                "fecha": "2026-08-24",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 240,
+                  "pago_normal": 240,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_aks9rcqnh",
+                "fecha": "2026-08-24",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_2lcne8prm",
+                "fecha": "2026-08-24",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_pq4dmoqz7",
+                "fecha": "2026-08-24",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_086iz7ys8",
+                "fecha": "2026-08-24",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          },
+          {
+            "fecha": "2026-08-25",
+            "registros": [
+              {
+                "id": "as_mtnfyvfb_dartjierc",
+                "fecha": "2026-08-25",
+                "trabajador_id": "t_mtnfyvfb_cst5w9t97",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 235,
+                  "pago_normal": 200,
+                  "pago_extra": 35
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_yifv8ef7t",
+                "fecha": "2026-08-25",
+                "trabajador_id": "t_mtnfyvfb_4k5n03iuz",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_gz8kjsv9m",
+                "fecha": "2026-08-25",
+                "trabajador_id": "t_mtnfyvfb_818m8olph",
+                "estado": "asistio",
+                "horas_extras": 2,
+                "calculos": {
+                  "total_diario": 324,
+                  "pago_normal": 240,
+                  "pago_extra": 84
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_rc8chbt3d",
+                "fecha": "2026-08-25",
+                "trabajador_id": "t_mtnfyvfb_93qoqlt4u",
+                "estado": "asistio",
+                "horas_extras": 1,
+                "calculos": {
+                  "total_diario": 262,
+                  "pago_normal": 224,
+                  "pago_extra": 38
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ezkkemd9x",
+                "fecha": "2026-08-25",
+                "trabajador_id": "t_mtnfyvfb_cu7gg59fk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 160,
+                  "pago_normal": 160,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_ix53lx423",
+                "fecha": "2026-08-25",
+                "trabajador_id": "t_mtnfyvfb_9w2gcj5jk",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 256,
+                  "pago_normal": 256,
+                  "pago_extra": 0
+                }
+              },
+              {
+                "id": "as_mtnfyvfb_8fnsqc4c6",
+                "fecha": "2026-08-25",
+                "trabajador_id": "t_mtnfyvfb_8e2gklgcq",
+                "estado": "asistio",
+                "horas_extras": 0,
+                "calculos": {
+                  "total_diario": 224,
+                  "pago_normal": 224,
+                  "pago_extra": 0
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "adquisiciones": {
+        "proveedores": [
+          {
+            "id": "prov_mtnfyvfb_zkd4hyakc",
+            "nombre": "Constructora Los Ángeles S.A.",
+            "telefono": "5555-1234",
+            "email": "ventas@losangeles.com",
+            "direccion": "Zona 12, Guatemala",
+            "contacto": "Carlos Mendoza"
+          },
+          {
+            "id": "prov_mtnfyvfb_reodnpq7y",
+            "nombre": "Distribuidora de Cemento Nacional",
+            "telefono": "5555-5678",
+            "email": "info@cementonacional.com",
+            "direccion": "Carretera a El Salvador",
+            "contacto": "Marta López"
+          },
+          {
+            "id": "prov_mtnfyvfb_tsz9sh1wu",
+            "nombre": "Hierros y Aceros del Norte",
+            "telefono": "5555-9012",
+            "email": "ventas@hierrosnorte.com",
+            "direccion": "Zona 18, Guatemala",
+            "contacto": "Roberto Díaz"
+          },
+          {
+            "id": "prov_mtnfyvfb_rgvbtnutp",
+            "nombre": "Materiales de Construcción Bella Vista",
+            "telefono": "5555-3456",
+            "email": "info@bellavista.com",
+            "direccion": "Zona 7, Guatemala",
+            "contacto": "Ana Torres"
+          }
+        ],
+        "cotizaciones_compras": [
+          {
+            "id": "cot_mtnfyvfb_v4a3vloxz",
+            "proveedor_id": "prov_mtnfyvfb_zkd4hyakc",
+            "material_descripcion": "Cemento Portland Tipo I",
+            "cantidad": 29,
+            "precio_unitario": 166.43,
+            "total": 4826.39,
+            "fecha": "2026-08-06",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_wsdsox1vk"
+          },
+          {
+            "id": "cot_mtnfyvfc_42yf0kccu",
+            "proveedor_id": "prov_mtnfyvfb_reodnpq7y",
+            "material_descripcion": "Varilla de acero #4",
+            "cantidad": 80,
+            "precio_unitario": 419.42,
+            "total": 33553.67,
+            "fecha": "2026-08-07",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_hoewejb68"
+          },
+          {
+            "id": "cot_mtnfyvfc_1iejh475y",
+            "proveedor_id": "prov_mtnfyvfb_tsz9sh1wu",
+            "material_descripcion": "Bloque de concreto 6\"",
+            "cantidad": 66,
+            "precio_unitario": 233.23,
+            "total": 15393.4,
+            "fecha": "2026-08-08",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_glne0mth3"
+          },
+          {
+            "id": "cot_mtnfyvfc_ow2327rfg",
+            "proveedor_id": "prov_mtnfyvfb_rgvbtnutp",
+            "material_descripcion": "Arena de río",
+            "cantidad": 67,
+            "precio_unitario": 172.34,
+            "total": 11547.02,
+            "fecha": "2026-08-09",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_tzyt8rpom"
+          },
+          {
+            "id": "cot_mtnfyvfc_valea3z2w",
+            "proveedor_id": "prov_mtnfyvfb_zkd4hyakc",
+            "material_descripcion": "Grava triturada 3/4\"",
+            "cantidad": 22,
+            "precio_unitario": 264.74,
+            "total": 5824.28,
+            "fecha": "2026-08-10",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_v743zdpcd"
+          },
+          {
+            "id": "cot_mtnfyvfc_ahtiimql1",
+            "proveedor_id": "prov_mtnfyvfb_reodnpq7y",
+            "material_descripcion": "Pintura látex blanca",
+            "cantidad": 37,
+            "precio_unitario": 153.12,
+            "total": 5665.57,
+            "fecha": "2026-08-11",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_ny0lekbhr"
+          },
+          {
+            "id": "cot_mtnfyvfc_e1rar3qcj",
+            "proveedor_id": "prov_mtnfyvfb_tsz9sh1wu",
+            "material_descripcion": "Tubo PVC 4\"",
+            "cantidad": 53,
+            "precio_unitario": 169.37,
+            "total": 8976.4,
+            "fecha": "2026-08-12",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_cun35hfzt"
+          },
+          {
+            "id": "cot_mtnfyvfc_uuvcp7fdd",
+            "proveedor_id": "prov_mtnfyvfb_rgvbtnutp",
+            "material_descripcion": "Cable eléctrico #12",
+            "cantidad": 76,
+            "precio_unitario": 465.21,
+            "total": 35356.18,
+            "fecha": "2026-08-13",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_ni2t1rlgi"
+          },
+          {
+            "id": "cot_mtnfyvfc_yvbyz1p1f",
+            "proveedor_id": "prov_mtnfyvfb_zkd4hyakc",
+            "material_descripcion": "Cerámica para piso",
+            "cantidad": 58,
+            "precio_unitario": 235.06,
+            "total": 13633.4,
+            "fecha": "2026-08-14",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_hapc0425b"
+          },
+          {
+            "id": "cot_mtnfyvfc_qc7blyczc",
+            "proveedor_id": "prov_mtnfyvfb_reodnpq7y",
+            "material_descripcion": "Puerta de madera",
+            "cantidad": 80,
+            "precio_unitario": 283.78,
+            "total": 22702.44,
+            "fecha": "2026-08-15",
+            "estado": "aprobada",
+            "gasto_id": "gasto_mtnfyvfc_hzzmfnoc8"
+          },
+          {
+            "id": "cot_mtnfyvfc_pwhd89w44",
+            "proveedor_id": "prov_mtnfyvfb_tsz9sh1wu",
+            "material_descripcion": "Ventana de aluminio",
+            "cantidad": 28,
+            "precio_unitario": 253.72,
+            "total": 7104.07,
+            "fecha": "2026-08-16",
+            "estado": "pendiente",
+            "gasto_id": null
+          },
+          {
+            "id": "cot_mtnfyvfc_lartjbc3n",
+            "proveedor_id": "prov_mtnfyvfb_rgvbtnutp",
+            "material_descripcion": "Fierro corrugado",
+            "cantidad": 94,
+            "precio_unitario": 452.59,
+            "total": 42543.33,
+            "fecha": "2026-08-17",
+            "estado": "pendiente",
+            "gasto_id": null
+          },
+          {
+            "id": "cot_mtnfyvfc_uxee17aep",
+            "proveedor_id": "prov_mtnfyvfb_zkd4hyakc",
+            "material_descripcion": "Cemento Portland Tipo I",
+            "cantidad": 95,
+            "precio_unitario": 308.88,
+            "total": 29343.88,
+            "fecha": "2026-08-18",
+            "estado": "pendiente",
+            "gasto_id": null
+          },
+          {
+            "id": "cot_mtnfyvfc_p8qqa4p2s",
+            "proveedor_id": "prov_mtnfyvfb_reodnpq7y",
+            "material_descripcion": "Varilla de acero #4",
+            "cantidad": 95,
+            "precio_unitario": 489.92,
+            "total": 46542.13,
+            "fecha": "2026-08-19",
+            "estado": "rechazada",
+            "gasto_id": null
+          },
+          {
+            "id": "cot_mtnfyvfc_gjuxhcf8f",
+            "proveedor_id": "prov_mtnfyvfb_tsz9sh1wu",
+            "material_descripcion": "Bloque de concreto 6\"",
+            "cantidad": 73,
+            "precio_unitario": 382.93,
+            "total": 27954.21,
+            "fecha": "2026-08-20",
+            "estado": "rechazada",
+            "gasto_id": null
+          }
+        ]
+      },
+      "viajes_camiones": {
+        "rutas_botadero": [
+          {
+            "id": "ruta_mtnfyvfc_nexr8cupy",
+            "nombre": "Ruta Principal - Botadero Central",
+            "distancia_km": 15
+          },
+          {
+            "id": "ruta_mtnfyvfc_688ye1wxq",
+            "nombre": "Ruta Norte - Botadero San Juan",
+            "distancia_km": 22
+          },
+          {
+            "id": "ruta_mtnfyvfc_45wy94t8q",
+            "nombre": "Ruta Sur - Botadero Las Flores",
+            "distancia_km": 18
+          }
+        ],
+        "camiones": [
+          {
+            "id": "cam_mtnfyvfc_ayopmd9l4",
+            "nombre": "Volvo FH16",
+            "propiedad": "propio",
+            "capacidad": 25,
+            "consumo": 0.35
+          },
+          {
+            "id": "cam_mtnfyvfc_y6xasm2k3",
+            "nombre": "Scania R450",
+            "propiedad": "propio",
+            "capacidad": 25,
+            "consumo": 0.32
+          },
+          {
+            "id": "cam_mtnfyvfc_p5b224eup",
+            "nombre": "Mercedes-Benz Actros",
+            "propiedad": "propio",
+            "capacidad": 20,
+            "consumo": 0.38
+          }
+        ],
+        "equipo_alquilado": [
+          {
+            "id": "eq_mtnfyvfc_00hgcyuj3",
+            "nombre": "Camión de carga pesado",
+            "propiedad": "alquilado",
+            "tarifa_diaria": 1200,
+            "consumo": 0
+          }
+        ],
+        "viajes": [
+          {
+            "id": "viaje_mtnfyvfc_kc7g0rgd1",
+            "fecha": "2026-08-06",
+            "vehiculo_id": "eq_mtnfyvfc_00hgcyuj3",
+            "ruta_id": "ruta_mtnfyvfc_nexr8cupy",
+            "material": "Arena",
+            "numero": 3,
+            "km_total": 90,
+            "litros": 0,
+            "costo_combustible": 0,
+            "costo_alquiler": 1200,
+            "total": 1200,
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_f44xwx8uw"
+          },
+          {
+            "id": "viaje_mtnfyvfc_0iwp7vctu",
+            "fecha": "2026-08-07",
+            "vehiculo_id": "cam_mtnfyvfc_y6xasm2k3",
+            "ruta_id": "ruta_mtnfyvfc_688ye1wxq",
+            "material": "Cemento",
+            "numero": 5,
+            "km_total": 220,
+            "litros": 70.4,
+            "costo_combustible": 2252.8,
+            "costo_alquiler": 0,
+            "total": 2252.8,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_qwi8axeg8"
+          },
+          {
+            "id": "viaje_mtnfyvfc_w6hpmdt0o",
+            "fecha": "2026-08-08",
+            "vehiculo_id": "cam_mtnfyvfc_p5b224eup",
+            "ruta_id": "ruta_mtnfyvfc_45wy94t8q",
+            "material": "Bloques",
+            "numero": 3,
+            "km_total": 108,
+            "litros": 41.04,
+            "costo_combustible": 1313.28,
+            "costo_alquiler": 0,
+            "total": 1313.28,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_33th3tjf2"
+          },
+          {
+            "id": "viaje_mtnfyvfc_p5zr1mht3",
+            "fecha": "2026-08-09",
+            "vehiculo_id": "cam_mtnfyvfc_ayopmd9l4",
+            "ruta_id": "ruta_mtnfyvfc_nexr8cupy",
+            "material": "Arena",
+            "numero": 2,
+            "km_total": 60,
+            "litros": 21,
+            "costo_combustible": 672,
+            "costo_alquiler": 0,
+            "total": 672,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_9w0cbaf0z"
+          },
+          {
+            "id": "viaje_mtnfyvfc_7gpwjesky",
+            "fecha": "2026-08-10",
+            "vehiculo_id": "eq_mtnfyvfc_00hgcyuj3",
+            "ruta_id": "ruta_mtnfyvfc_688ye1wxq",
+            "material": "Tierra",
+            "numero": 6,
+            "km_total": 264,
+            "litros": 0,
+            "costo_combustible": 0,
+            "costo_alquiler": 1200,
+            "total": 1200,
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_2h8loiyp1"
+          },
+          {
+            "id": "viaje_mtnfyvfc_stazo4fkb",
+            "fecha": "2026-08-11",
+            "vehiculo_id": "cam_mtnfyvfc_p5b224eup",
+            "ruta_id": "ruta_mtnfyvfc_45wy94t8q",
+            "material": "Tierra",
+            "numero": 6,
+            "km_total": 216,
+            "litros": 82.08,
+            "costo_combustible": 2626.56,
+            "costo_alquiler": 0,
+            "total": 2626.56,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_4j9o1r328"
+          },
+          {
+            "id": "viaje_mtnfyvfc_7d778v9np",
+            "fecha": "2026-08-12",
+            "vehiculo_id": "cam_mtnfyvfc_ayopmd9l4",
+            "ruta_id": "ruta_mtnfyvfc_nexr8cupy",
+            "material": "Cemento",
+            "numero": 7,
+            "km_total": 210,
+            "litros": 73.5,
+            "costo_combustible": 2352,
+            "costo_alquiler": 0,
+            "total": 2352,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_x2uprd0e2"
+          },
+          {
+            "id": "viaje_mtnfyvfc_su6frzi7m",
+            "fecha": "2026-08-13",
+            "vehiculo_id": "cam_mtnfyvfc_y6xasm2k3",
+            "ruta_id": "ruta_mtnfyvfc_688ye1wxq",
+            "material": "Arena",
+            "numero": 2,
+            "km_total": 88,
+            "litros": 28.16,
+            "costo_combustible": 901.12,
+            "costo_alquiler": 0,
+            "total": 901.12,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_ldr1lvh41"
+          },
+          {
+            "id": "viaje_mtnfyvfc_thj0vxpnf",
+            "fecha": "2026-08-14",
+            "vehiculo_id": "eq_mtnfyvfc_00hgcyuj3",
+            "ruta_id": "ruta_mtnfyvfc_45wy94t8q",
+            "material": "Tierra",
+            "numero": 3,
+            "km_total": 108,
+            "litros": 0,
+            "costo_combustible": 0,
+            "costo_alquiler": 1200,
+            "total": 1200,
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_l0vsevzo9"
+          },
+          {
+            "id": "viaje_mtnfyvfc_tzrpub1aj",
+            "fecha": "2026-08-15",
+            "vehiculo_id": "cam_mtnfyvfc_ayopmd9l4",
+            "ruta_id": "ruta_mtnfyvfc_nexr8cupy",
+            "material": "Escombros",
+            "numero": 6,
+            "km_total": 180,
+            "litros": 63,
+            "costo_combustible": 2016,
+            "costo_alquiler": 0,
+            "total": 2016,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_r7e5q6qfx"
+          },
+          {
+            "id": "viaje_mtnfyvfc_a24cgergs",
+            "fecha": "2026-08-16",
+            "vehiculo_id": "cam_mtnfyvfc_y6xasm2k3",
+            "ruta_id": "ruta_mtnfyvfc_688ye1wxq",
+            "material": "Tierra",
+            "numero": 3,
+            "km_total": 132,
+            "litros": 42.24,
+            "costo_combustible": 1351.68,
+            "costo_alquiler": 0,
+            "total": 1351.68,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_acxdxwo4s"
+          },
+          {
+            "id": "viaje_mtnfyvfc_9kv3kw57x",
+            "fecha": "2026-08-17",
+            "vehiculo_id": "cam_mtnfyvfc_p5b224eup",
+            "ruta_id": "ruta_mtnfyvfc_45wy94t8q",
+            "material": "Agua",
+            "numero": 4,
+            "km_total": 144,
+            "litros": 54.72,
+            "costo_combustible": 1751.04,
+            "costo_alquiler": 0,
+            "total": 1751.04,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_oi57a01n0"
+          },
+          {
+            "id": "viaje_mtnfyvfc_pdf52do0b",
+            "fecha": "2026-08-18",
+            "vehiculo_id": "eq_mtnfyvfc_00hgcyuj3",
+            "ruta_id": "ruta_mtnfyvfc_nexr8cupy",
+            "material": "Arena",
+            "numero": 4,
+            "km_total": 120,
+            "litros": 0,
+            "costo_combustible": 0,
+            "costo_alquiler": 1200,
+            "total": 1200,
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_4hlwenbcz"
+          },
+          {
+            "id": "viaje_mtnfyvfc_2utkdgv44",
+            "fecha": "2026-08-19",
+            "vehiculo_id": "cam_mtnfyvfc_y6xasm2k3",
+            "ruta_id": "ruta_mtnfyvfc_688ye1wxq",
+            "material": "Agua",
+            "numero": 4,
+            "km_total": 176,
+            "litros": 56.32,
+            "costo_combustible": 1802.24,
+            "costo_alquiler": 0,
+            "total": 1802.24,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_pfqzu9hxv"
+          },
+          {
+            "id": "viaje_mtnfyvfc_xdck6pm9a",
+            "fecha": "2026-08-20",
+            "vehiculo_id": "cam_mtnfyvfc_p5b224eup",
+            "ruta_id": "ruta_mtnfyvfc_45wy94t8q",
+            "material": "Cemento",
+            "numero": 7,
+            "km_total": 252,
+            "litros": 95.76,
+            "costo_combustible": 3064.32,
+            "costo_alquiler": 0,
+            "total": 3064.32,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_gndjqc3mg"
+          },
+          {
+            "id": "viaje_mtnfyvfc_oe1vdrw9n",
+            "fecha": "2026-08-21",
+            "vehiculo_id": "cam_mtnfyvfc_ayopmd9l4",
+            "ruta_id": "ruta_mtnfyvfc_nexr8cupy",
+            "material": "Arena",
+            "numero": 2,
+            "km_total": 60,
+            "litros": 21,
+            "costo_combustible": 672,
+            "costo_alquiler": 0,
+            "total": 672,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_aq6dtpn0b"
+          },
+          {
+            "id": "viaje_mtnfyvfc_hngqr5dgw",
+            "fecha": "2026-08-22",
+            "vehiculo_id": "eq_mtnfyvfc_00hgcyuj3",
+            "ruta_id": "ruta_mtnfyvfc_688ye1wxq",
+            "material": "Tierra",
+            "numero": 3,
+            "km_total": 132,
+            "litros": 0,
+            "costo_combustible": 0,
+            "costo_alquiler": 1200,
+            "total": 1200,
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_jz97c6y4t"
+          },
+          {
+            "id": "viaje_mtnfyvfc_fiu0oxrr1",
+            "fecha": "2026-08-23",
+            "vehiculo_id": "cam_mtnfyvfc_p5b224eup",
+            "ruta_id": "ruta_mtnfyvfc_45wy94t8q",
+            "material": "Cemento",
+            "numero": 6,
+            "km_total": 216,
+            "litros": 82.08,
+            "costo_combustible": 2626.56,
+            "costo_alquiler": 0,
+            "total": 2626.56,
+            "propiedad": "propio",
+            "tarifa_modalidad": "dia",
+            "gasto_id": "gasto_mtnfyvfc_1abrim26e"
+          }
+        ]
+      },
+      "mantenimiento": {
+        "maquinaria": [
+          {
+            "id": "mm_mtnfyvfc_gd3uozkbw",
+            "nombre": "Excavadora CAT 320",
+            "tipo": "excavadora"
+          },
+          {
+            "id": "mm_mtnfyvfc_tj94iwant",
+            "nombre": "Camión Volvo FH16",
+            "tipo": "camion"
+          },
+          {
+            "id": "mm_mtnfyvfc_qgrlwnk76",
+            "nombre": "Compactor Vibratorio",
+            "tipo": "compactor"
+          },
+          {
+            "id": "mm_mtnfyvfc_avepylp5j",
+            "nombre": "Retroexcavadora John Deere",
+            "tipo": "retroexcavadora"
+          }
+        ],
+        "formatos": {
+          "excavadora": [
+            "Inspección de motor",
+            "Cambio de aceite",
+            "Revisión de hidráulicos",
+            "Estado de cadenas"
+          ],
+          "camion": [
+            "Inspección de frenos",
+            "Nivel de aceite",
+            "Estado de llantas",
+            "Sistema eléctrico"
+          ],
+          "compactor": [
+            "Inspección de rodillo",
+            "Sistema de vibración",
+            "Nivel de combustible"
+          ],
+          "retroexcavadora": [
+            "Inspección general",
+            "Cambio de filtros",
+            "Estado de brazo"
+          ]
+        },
+        "ordenes": [
+          {
+            "id": "ord_mtnfyvfc_1j91i8wuz",
+            "fecha": "2026-08-06",
+            "maquinaria_id": "mm_mtnfyvfc_gd3uozkbw",
+            "tipo": "preventivo",
+            "observaciones": "Cambio de aceite y filtros",
+            "costo": 2985.69,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Revisar",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_93ancx08j"
+          },
+          {
+            "id": "ord_mtnfyvfc_oyggkce5u",
+            "fecha": "2026-08-07",
+            "maquinaria_id": "mm_mtnfyvfc_tj94iwant",
+            "tipo": "correctivo",
+            "observaciones": "Revisión general de motor",
+            "costo": 2092.63,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Bien",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_ikhduvx0m"
+          },
+          {
+            "id": "ord_mtnfyvfc_j7ty0du7b",
+            "fecha": "2026-08-08",
+            "maquinaria_id": "mm_mtnfyvfc_qgrlwnk76",
+            "tipo": "preventivo",
+            "observaciones": "Reparación de sistema hidráulico",
+            "costo": 2369.76,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Bien",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_wftl02efn"
+          },
+          {
+            "id": "ord_mtnfyvfc_yqip214s5",
+            "fecha": "2026-08-09",
+            "maquinaria_id": "mm_mtnfyvfc_avepylp5j",
+            "tipo": "correctivo",
+            "observaciones": "Ajuste de frenos",
+            "costo": 2362.35,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Revisar",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_phjx0e6u3"
+          },
+          {
+            "id": "ord_mtnfyvfc_bqc5k7wo1",
+            "fecha": "2026-08-10",
+            "maquinaria_id": "mm_mtnfyvfc_gd3uozkbw",
+            "tipo": "preventivo",
+            "observaciones": "Cambio de llantas",
+            "costo": 2983.56,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Bien",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_9o4n1wa2r"
+          },
+          {
+            "id": "ord_mtnfyvfc_v0h5oskta",
+            "fecha": "2026-08-11",
+            "maquinaria_id": "mm_mtnfyvfc_tj94iwant",
+            "tipo": "correctivo",
+            "observaciones": "Reparación de transmisión",
+            "costo": 776.08,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Bien",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_zh0ni19ae"
+          },
+          {
+            "id": "ord_mtnfyvfc_w9melyoon",
+            "fecha": "2026-08-12",
+            "maquinaria_id": "mm_mtnfyvfc_qgrlwnk76",
+            "tipo": "preventivo",
+            "observaciones": "Mantenimiento preventivo programado",
+            "costo": 990.06,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Revisar",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_5snm73kco"
+          },
+          {
+            "id": "ord_mtnfyvfc_ypgyr3wzd",
+            "fecha": "2026-08-13",
+            "maquinaria_id": "mm_mtnfyvfc_avepylp5j",
+            "tipo": "correctivo",
+            "observaciones": "Reparación de sistema eléctrico",
+            "costo": 620.18,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Bien",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_lrj2zegda"
+          },
+          {
+            "id": "ord_mtnfyvfc_j7mnauv3p",
+            "fecha": "2026-08-14",
+            "maquinaria_id": "mm_mtnfyvfc_gd3uozkbw",
+            "tipo": "preventivo",
+            "observaciones": "Cambio de aceite y filtros",
+            "costo": 2229.88,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Bien",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_1vhaa1ks7"
+          },
+          {
+            "id": "ord_mtnfyvfc_l5zga4r4t",
+            "fecha": "2026-08-15",
+            "maquinaria_id": "mm_mtnfyvfc_tj94iwant",
+            "tipo": "correctivo",
+            "observaciones": "Revisión general de motor",
+            "costo": 2517.54,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Revisar",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_734eehrrk"
+          },
+          {
+            "id": "ord_mtnfyvfc_fnpyxin0e",
+            "fecha": "2026-08-16",
+            "maquinaria_id": "mm_mtnfyvfc_qgrlwnk76",
+            "tipo": "preventivo",
+            "observaciones": "Reparación de sistema hidráulico",
+            "costo": 2406.24,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Bien",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_6arxzhitr"
+          },
+          {
+            "id": "ord_mtnfyvfc_e0md82cpv",
+            "fecha": "2026-08-17",
+            "maquinaria_id": "mm_mtnfyvfc_avepylp5j",
+            "tipo": "correctivo",
+            "observaciones": "Ajuste de frenos",
+            "costo": 1216.9,
+            "items": [
+              {
+                "estado": "Bien",
+                "descripcion": "Componente principal"
+              },
+              {
+                "estado": "Bien",
+                "descripcion": "Sistema secundario"
+              }
+            ],
+            "fotos": [],
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_nqkpux3z0"
+          }
+        ],
+        "compras_insumos": [
+          {
+            "id": "ins_mtnfyvfc_7zmanzlma",
+            "fecha": "2026-08-11",
+            "tipo": "repuesto",
+            "articulo": "Aceite motor 15W-40",
+            "cantidad": 4,
+            "costo": 541.9,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfc_1gg7qwdv3"
+          },
+          {
+            "id": "ins_mtnfyvfd_inxo9mqo0",
+            "fecha": "2026-08-12",
+            "tipo": "aceite",
+            "articulo": "Filtro de aceite",
+            "cantidad": 9,
+            "costo": 506.69,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_hxni60hcv"
+          },
+          {
+            "id": "ins_mtnfyvfd_omdmjlncl",
+            "fecha": "2026-08-13",
+            "tipo": "filtro",
+            "articulo": "Filtro de aire",
+            "cantidad": 5,
+            "costo": 1114.58,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_m339wqmfb"
+          },
+          {
+            "id": "ins_mtnfyvfd_ycwsg33fv",
+            "fecha": "2026-08-14",
+            "tipo": "hidraulico",
+            "articulo": "Aceite hidráulico",
+            "cantidad": 9,
+            "costo": 1188.48,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_hvcjz4bek"
+          },
+          {
+            "id": "ins_mtnfyvfd_husvji6nw",
+            "fecha": "2026-08-15",
+            "tipo": "electrico",
+            "articulo": "Correa de transmisión",
+            "cantidad": 5,
+            "costo": 1069.92,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_0ebg3mhzv"
+          },
+          {
+            "id": "ins_mtnfyvfd_jae15hcnl",
+            "fecha": "2026-08-16",
+            "tipo": "repuesto",
+            "articulo": "Bujía de encendido",
+            "cantidad": 6,
+            "costo": 1372.34,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_hglyib52c"
+          },
+          {
+            "id": "ins_mtnfyvfd_6e97l6qdd",
+            "fecha": "2026-08-17",
+            "tipo": "aceite",
+            "articulo": "Líquido de frenos",
+            "cantidad": 7,
+            "costo": 1250.85,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_451msyd4l"
+          },
+          {
+            "id": "ins_mtnfyvfd_594ecj9x6",
+            "fecha": "2026-08-18",
+            "tipo": "filtro",
+            "articulo": "Grasa multiusos",
+            "cantidad": 7,
+            "costo": 468.36,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_j5164ie5d"
+          },
+          {
+            "id": "ins_mtnfyvfd_nkg2hvapb",
+            "fecha": "2026-08-19",
+            "tipo": "hidraulico",
+            "articulo": "Juego de empaques",
+            "cantidad": 3,
+            "costo": 806.75,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_pigdbk3vt"
+          },
+          {
+            "id": "ins_mtnfyvfd_u4e7szzb1",
+            "fecha": "2026-08-20",
+            "tipo": "electrico",
+            "articulo": "Aceite motor 15W-40",
+            "cantidad": 3,
+            "costo": 478.92,
+            "stock_min": 5,
+            "firma": "",
+            "gasto_id": "gasto_mtnfyvfd_by48pdjm4"
+          }
+        ]
+      }
+    }
+  },
   "caja_chica": [],
   "maquinaria_flota": {
     "vehiculos": [],
