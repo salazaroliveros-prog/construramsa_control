@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "build": "node -e \"console.log('PWA estatica: sin paso de compilacion (build no-op)')\"",
+    "vercel-build": "node -e \"console.log('PWA estatica: sin paso de compilacion (build no-op)')\"",
     "test": "npm run test-adapter && npm run test-inline && npm run test-reports && npm run reports && npm run verify && npm run e2e && npm run e2e:data-entry",
     "test-adapter": "node test_report_data_adapter.js",
     "validate": "node validador_datos_reales.js",
