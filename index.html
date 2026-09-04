@@ -4464,6 +4464,9 @@
             console.info = noop;
             console.debug = noop;
         }
+        function logInfo(message, data) {
+            if (window.DEBUG) console.info(message, data || '');
+        }
         // ============================================================
         // SISTEMA DE GESTIÓN DE DATOS (LocalStorage + cache de sesión)
         // FIX #15: cache de sesión para evitar deserializar en cada call
@@ -7505,6 +7508,17 @@ tbody.innerHTML = '';
             document.getElementById('nomina-dia-total').textContent = formatearMoneda(totalPagar);
             
             resumenDiv.style.display = asistencia + faltas > 0 ? 'block' : 'none';
+        }
+
+        // Actualiza el contador global cuando una acción masiva cambia los radios.
+        // La lista también tiene un handler local para mantener su contexto filtrado.
+        function actualizarContador() {
+            const radios = document.querySelectorAll('#lista-asistencia-dinamica input[type="radio"]:checked');
+            const counter = document.getElementById('counter-marcados');
+            const saveButton = document.getElementById('btn-guardar-asistencia');
+            const dateInput = document.getElementById('fecha-asistencia');
+            if (counter) counter.textContent = radios.length;
+            if (saveButton) saveButton.disabled = !(dateInput && dateInput.value);
         }
 
         function marcarTodos(estado) {
