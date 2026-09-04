@@ -5682,14 +5682,40 @@
                     return;
                 }
             
-            // Filtrar gastos por categoría seleccionada
+            // Filtrar gastos por categoría seleccionada.
+            // Las claves de kpis.gastosPorCategoria son etiquetas legibles/almacenadas en
+            // caja_chica[].categoria (p. ej. "Materiales", "Mano de Obra", "Combustible/Viajes"),
+            // mientras el <select #dashboard-categoria> usa claves crudas ("materiales", "viajes").
+            // Normalizamos ambas partes (minúsculas, sin acentos, sin separadores) antes de comparar,
+            // de modo que el filtro aplique sobre el dato real y no deje el gráfico vacío por error.
             let gastosPorCategoria = { ...kpis.gastosPorCategoria };
+            const _normCat = (s) => String(s == null ? '' : s).toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, ' ');
             
-            // Aplicar filtro de categoría si no es "todas"
+            // Aplicar filtro de categoría si no es "todas".
+            // Los valores del <select> son MÓDULOS de origen (caja, maquinaria, personal,
+            // viajes, mantenimiento), no categorías de gasto. gastosPorCategoria solo
+            // contiene egresos de caja chica, por lo que:
+            //  - 'caja'  => conserva todas las claves (todas provienen de caja chica).
+            //  - otros   => se muestra el total de costos de ese módulo (KPIs reales),
+            //               en lugar de vaciar el gráfico por no coincidir las claves.
             if (categoria !== 'todas') {
-                Object.keys(gastosPorCategoria).forEach(key => {
-                    if (key !== categoria) gastosPorCategoria[key] = 0;
-                });
+                const filtroNorm = _normCat(categoria).trim();
+                if (filtroNorm === 'caja') {
+                    // Todos los gastos graficados provienen de caja chica: no se recorta nada.
+                } else {
+                    const _sumArr = (arr, fn) => (Array.isArray(arr) ? arr.reduce((s, it) => s + (Number(fn(it)) || 0), 0) : 0);
+                    const _modTotal = {
+                        viajes: _sumArr((datos.viajes_camiones || {}).viajes, v => v.total),
+                        mantenimiento: _sumArr(((datos.mantenimiento || {}).ordenes), o => o.costo)
+                            + _sumArr(((datos.mantenimiento || {}).compras_insumos), i => i.costo_total || i.costo),
+                        personal: Number(kpis.totalNomina) || 0,
+                        maquinaria: _sumArr((datos.maquinaria_flota || {}).registros, r => r.costo_total || r.costo)
+                    }[filtroNorm.replace(/\s+/g, '')] || 0;
+                    const etiquetaModulo = categoria.charAt(0).toUpperCase() + categoria.slice(1);
+                    gastosPorCategoria = { [etiquetaModulo]: _modTotal };
+                }
             }
             
             // Actualizar gráfico mejorado
@@ -5736,10 +5762,28 @@
                         'otros': '#d1d5db'
                     };
 
+                    // colores está indexado por claves snake_case (p. ej. "mano_de_obra"),
+                    // pero los datos llegan como etiquetas legibles ("Mano de Obra").
+                    // Buscamos el color comparando versiones normalizadas de ambas claves.
+                    const _colorParaCategoria = (_cat) => {
+                        const claveCat = _normCat(_cat).trim();
+                        let mejor = null, mejorLen = -1;
+                        for (const k in colores) {
+                            if (!Object.prototype.hasOwnProperty.call(colores, k)) continue;
+                            const claveCol = _normCat(k).trim();
+                            if (claveCat === claveCol) return colores[k];
+                            // Coincidencia por tokens inclusivos (todas las palabras de la clave del color
+                            // presentes en la etiqueta del dato: 'mano de obra' <= 'Mano de Obra').
+                            if (claveCat && claveCol && claveCol.split(' ').every(t => claveCat.includes(t))) {
+                                if (claveCol.length > mejorLen) { mejor = colores[k]; mejorLen = claveCol.length; }
+                            }
+                        }
+                        return mejor || '#7dd3fc';
+                    };
                     const barras = gastosConValor.map(([cat, monto]) => {
                         const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                         const porcentaje = ((monto / totalGastos) * 100).toFixed(1);
-                        const color = colores[cat] || '#7dd3fc';
+                        const color = _colorParaCategoria(cat);
                         const altura = Math.max((monto / maxGasto) * 100, 8);
                         const esAlerta = Number(porcentaje) > 25;
 

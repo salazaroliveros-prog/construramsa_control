@@ -72,3 +72,11 @@ exports/
 # Archivos temporales de sesión
 *.txt
 !README.md
+.vercel
+  
+# Artefactos de pruebas generados  
+report_*.csv  
+report_test_results.json  
+functional_test_results.json  
+comprehensive_audit_results.json  
+e2e_validation_report.html  

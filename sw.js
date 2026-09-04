@@ -1,5 +1,5 @@
 // ============================================================
-// SERVICE WORKER — Control de Obra v2.9.1
+// SERVICE WORKER — Control de Obra v2.9.2
 // Estrategia: Network First con fallback a Cache
 // Mejora: Skip waiting in install para actualizaciones inmediatas
 // ============================================================
@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
     './icon-512.png',
     './icon-192.png',
     './icon.svg',
+    './icon.png',
     './vendor/html2pdf.bundle.min.js',
     './vendor/purify.min.js',
     './vendor/xlsx.full.min.js',

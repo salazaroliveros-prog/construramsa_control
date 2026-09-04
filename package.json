@@ -9,6 +9,8 @@
     "verify": "node visual_verifier.js",
     "reports": "node report_validator.js",
     "audit": "node comprehensive_audit.js",
+    "test-inline": "node check_inline.js",
+    "e2e": "node run_e2e_validation.js",
     "test-data": "node populate_test_data.js",
     "test-reports": "node test_all_reports.js",
     "test-functional": "node functional_test.js",

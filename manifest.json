@@ -14,7 +14,7 @@
   "dir": "ltr",
   "categories": ["business", "productivity", "finance"],
   "prefer_related_applications": false,
-
+  "screenshots": [],
   "icons": [
     {
       "src": "./logocr.png",
@@ -53,7 +53,6 @@
       "purpose": "any"
     }
   ],
-
   "shortcuts": [
     {
       "name": "Panel de Resumen",
