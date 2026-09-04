@@ -135,7 +135,7 @@ function validateCSVGeneration(tipo, db) {
     } else {
         const projectIds = Object.keys(datos);
         if (projectIds.length === 0) {
-            issues.push('No projects with data to export');
+            issues.push('No projects with data to export — fresh install state');
         } else {
             logSuccess(`Found ${projectIds.length} project(s) with data`);
         }
@@ -147,14 +147,19 @@ function validateCSVGeneration(tipo, db) {
         headers: expectedHeaders[tipo] || []
     };
     
-    if (issues.length === 0) {
-        logSuccess(`CSV validation for ${tipo}: PASSED`);
+    // Fresh install state: treat missing data as info, not failure
+    const isFreshInstall = issues.some(i => String(i).includes('fresh install'));
+    const realIssues = issues.filter(i => !String(i).includes('fresh install'));
+    const passed = realIssues.length === 0;
+    
+    if (passed) {
+        logSuccess(`CSV validation for ${tipo}: PASSED${isFreshInstall ? ' (fresh install — no data yet)' : ''}`);
     } else {
         logError(`CSV validation for ${tipo}: FAILED`);
-        issues.forEach(issue => logWarning(`  - ${issue}`));
+        realIssues.forEach(issue => logWarning(`  - ${issue}`));
     }
     
-    return issues.length === 0;
+    return passed;
 }
 
 /**
@@ -263,7 +268,8 @@ function validateDataCompleteness(db) {
     }
     
     if (!db.proyectos || db.proyectos.length === 0) {
-        issues.push('No projects defined');
+        issues.push('No projects defined — fresh install state, user should create projects');
+        issues.isFreshInstall = true;
     }
     
     if (!db.proyectos_data) {
@@ -273,11 +279,19 @@ function validateDataCompleteness(db) {
     if (issues.length === 0) {
         logSuccess('All required data structures are present');
     } else {
-        logError('Data completeness issues found:');
-        issues.forEach(issue => logWarning(`  - ${issue}`));
+        const freshInstallIssues = issues.filter(i => String(i).includes('fresh install'));
+        const realIssues = issues.filter(i => !String(i).includes('fresh install'));
+        if (realIssues.length > 0) {
+            logError('Data completeness issues found:');
+            realIssues.forEach(issue => logWarning(`  - ${issue}`));
+        }
+        if (freshInstallIssues.length > 0) {
+            logInfo('Fresh install state:');
+            freshInstallIssues.forEach(issue => logInfo(`  - ${issue}`));
+        }
     }
     
-    return issues.length === 0;
+    return issues.filter(i => !String(i).includes('fresh install')).length === 0;
 }
 
 /**
