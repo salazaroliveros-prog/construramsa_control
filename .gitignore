@@ -47,6 +47,7 @@ test_*.js
 !test_modulos.js
 !test_report_data_adapter.js
 !test_all_reports.js
+!test_validacion_modulos.js
 
 # Archivos de firmas personales (no se suben al repositorio)
 wilson.png
