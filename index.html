@@ -12641,18 +12641,8 @@ function validarDependenciasExportacion() {
                         if (versionRemota !== versionLocal && !_recargandoPorUpdate) {
                             console.log(`[Actualización] ¡Nueva versión detectada! ${versionLocal} -> ${versionRemota}`);
                             _recargandoPorUpdate = true;
-
-                            showConfirmModal(
-                                'Actualización disponible',
-                                `Hay una nueva versión (${versionRemota}) disponible. La versión actual es ${versionLocal}. ¿Actualizar ahora?`,
-                                () => {
-                                    showToast('🔄 Actualizando...', 'info', 2000);
-                                    // Forzar recarga con timestamp para evitar cache
-                                    setTimeout(() => location.reload(true), 500);
-                                },
-                                'Ahora no',
-                                () => { _recargandoPorUpdate = false; }
-                            );
+                            showToast('🔄 Nueva versión disponible, actualizando...', 'info', 2500);
+                            setTimeout(() => location.reload(true), 2000);
                         } else {
                             console.log('[Actualización] Versión actualizada');
                         }
@@ -12673,17 +12663,8 @@ function validarDependenciasExportacion() {
                             w.addEventListener('statechange', function () {
                                 console.log('[SW] SW state:', w.state);
                                 if (w.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('[SW] SW nuevo instalado, solicitando actualización');
-                                    showConfirmModal(
-                                        'Actualización disponible',
-                                        'Hay una nueva versión de la app disponible. ¿Actualizar ahora para obtener las últimas mejoras?',
-                                        () => {
-                                            console.log('[SW] Usuario confirmó actualización');
-                                            w.postMessage({ action: 'skipWaiting' });
-                                        },
-                                        'Ahora no',
-                                        () => { console.log('[SW] Usuario rechazó actualización'); }
-                                    );
+                                    console.log('[SW] SW nuevo instalado, activando automáticamente...');
+                                    w.postMessage({ action: 'skipWaiting' });
                                 }
                             });
                         });
@@ -12721,7 +12702,8 @@ function validarDependenciasExportacion() {
                 navigator.serviceWorker.addEventListener('controllerchange', function () {
                     if (_recargandoPorUpdate) return;
                     _recargandoPorUpdate = true;
-                    window.location.reload();
+                    showToast('🔄 Actualizando la app...', 'info', 1500);
+                    setTimeout(() => window.location.reload(), 1200);
                 });
             });
         }
