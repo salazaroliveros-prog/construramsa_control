@@ -200,6 +200,15 @@
         attendanceSummary
     });
 
-    if (globalScope) globalScope.CR_ReportData = api;
+    if (globalScope) {
+        try {
+            Object.defineProperty(globalScope, 'CR_ReportData', {
+                value: api,
+                writable: false,
+                enumerable: false,
+                configurable: false
+            });
+        } catch (e) { /* entornos restringidos */ }
+    }
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

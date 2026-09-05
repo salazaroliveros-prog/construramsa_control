@@ -80,6 +80,7 @@ exports/
 # Artefactos de pruebas generados  
 report_*.csv  
 report_*.json
+validacion_*_report.json
 report_*.md
 visual_verification_report.html
 functional_test_results.json

@@ -7,7 +7,7 @@
     "start": "node server.js",
     "build": "node -e \"console.log('PWA estatica: sin paso de compilacion (build no-op)')\"",
     "vercel-build": "node -e \"console.log('PWA estatica: sin paso de compilacion (build no-op)')\"",
-    "test": "npm run test-adapter && npm run test-inline && npm run test-reports && npm run reports && npm run verify && npm run e2e && npm run e2e:data-entry",
+    "test": "npm run test-adapter && npm run test-inline && npm run test-reports && npm run reports && npm run verify && npm run e2e && npm run e2e:data-entry && npm run test-validacion",
     "test-adapter": "node test_report_data_adapter.js",
     "validate": "node validador_datos_reales.js",
     "verify": "node visual_verifier.js",
@@ -19,6 +19,7 @@
     "test-data": "node populate_test_data.js",
     "test-reports": "node test_all_reports.js",
     "test-functional": "node functional_test.js",
+    "test-validacion": "node test_validacion_modulos.js",
     "clean": "node -e \"const fs=require('fs'); const path=require('path'); const nm=path.join(__dirname,'node_modules'); const pl=path.join(__dirname,'package-lock.json'); if(fs.existsSync(nm))fs.rmSync(nm,{recursive:true,force:true}); if(fs.existsSync(pl))fs.unlinkSync(pl); console.log('Cleaned node_modules and package-lock.json');\""
   },
   "repository": {
@@ -33,7 +34,7 @@
     "onedrive",
     "sincronizacion"
   ],
-  "author": "",
+  "author": "CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {

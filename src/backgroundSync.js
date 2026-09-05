@@ -7,7 +7,7 @@
  * ╚═══════════════════════════════════════════════════════════════╝
  */
 
-(function() {
+(function (globalScope) {
     'use strict';
 
     /**
@@ -219,7 +219,7 @@
      * - Se ejecuta sin interrupciones
      * - Completamente silenciosa salvo cambios significativos
      */
-    window.startBackgroundSync = function() {
+    function startBackgroundSync() {
         log('🚀 Iniciando background sync');
         
         if (_syncTimerId) {
@@ -238,39 +238,68 @@
             interval: `${SYNC_CONFIG.SYNC_INTERVAL / 1000 / 60} min`,
             idleTimeout: `${SYNC_CONFIG.IDLE_TIMEOUT / 1000}s`
         });
-    };
+    }
 
     /**
      * Detiene sincronización en background
      */
-    window.stopBackgroundSync = function() {
+    function stopBackgroundSync() {
         if (_syncTimerId) {
             clearInterval(_syncTimerId);
             _syncTimerId = null;
             log('⏹️  Background sync detenido');
         }
-    };
+    }
 
     /**
      * Expone configuración para debug
      */
-    window.getBackgroundSyncStatus = function() {
+    function getBackgroundSyncStatus() {
         return {
             enabled: _syncTimerId !== null,
             isSyncing: _isSyncingNow,
             lastSyncHash: _lastSyncHash,
             config: SYNC_CONFIG
         };
-    };
+    }
 
     /**
      * Permite cambiar configuración en runtime
      */
-    window.configureBackgroundSync = function(options = {}) {
-        Object.assign(SYNC_CONFIG, options);
+    function configureBackgroundSync(options) {
+        Object.assign(SYNC_CONFIG, options || {});
         log('⚙️ Configuración actualizada', SYNC_CONFIG);
-    };
+    }
+
+    // API pública del módulo
+    const api = Object.freeze({
+        start: startBackgroundSync,
+        stop: stopBackgroundSync,
+        status: getBackgroundSyncStatus,
+        configure: configureBackgroundSync
+    });
+
+    // Exponer funciones individuales en window para compatibilidad con index.html
+    // y objeto API congelado bajo CR_BackgroundSync
+    if (globalScope) {
+        globalScope.startBackgroundSync = startBackgroundSync;
+        globalScope.stopBackgroundSync = stopBackgroundSync;
+        globalScope.getBackgroundSyncStatus = getBackgroundSyncStatus;
+        globalScope.configureBackgroundSync = configureBackgroundSync;
+        try {
+            Object.defineProperty(globalScope, 'CR_BackgroundSync', {
+                value: api,
+                writable: false,
+                enumerable: false,
+                configurable: false
+            });
+        } catch (e) { /* entornos restringidos */ }
+    }
+
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = api;
+    }
 
     log('✨ backgroundSync.js cargado');
 
-})();
+})(typeof window !== 'undefined' ? window : globalThis);

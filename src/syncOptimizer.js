@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════════════════════
- * SYNC OPTIMIZER — Control de Obra v2.9.1
+ * SYNC OPTIMIZER — Control de Obra v2.9.2
  * ════════════════════════════════════════════════════════════════════════════════
  * 
  * Módulo para optimizar sincronización con Cloud (OneDrive, Google Drive):
@@ -406,11 +406,27 @@ const SyncOptimizer = (() => {
 })();
 
 if (typeof window !== 'undefined') {
-    window.SyncOptimizer = SyncOptimizer;
-}
-
-if (typeof globalThis !== 'undefined') {
-    globalThis.SyncOptimizer = SyncOptimizer;
+    try {
+        Object.defineProperty(window, 'SyncOptimizer', {
+            value: SyncOptimizer,
+            writable: false,
+            enumerable: false,
+            configurable: false
+        });
+    } catch (e) {
+        window.SyncOptimizer = SyncOptimizer;
+    }
+} else if (typeof globalThis !== 'undefined') {
+    try {
+        Object.defineProperty(globalThis, 'SyncOptimizer', {
+            value: SyncOptimizer,
+            writable: false,
+            enumerable: false,
+            configurable: false
+        });
+    } catch (e) {
+        globalThis.SyncOptimizer = SyncOptimizer;
+    }
 }
 
 // Exportar para uso en Node.js / test environment

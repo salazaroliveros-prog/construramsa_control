@@ -8,7 +8,7 @@
  * CommonJS para testing en Node.
  *
  * @module kpiEngine
- * @version 2.9.1
+ * @version 2.9.2
  */
 (function (globalScope) {
     'use strict';

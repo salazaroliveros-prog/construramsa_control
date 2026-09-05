@@ -1,6 +1,6 @@
 /**
  * plantillaPremium.js — Estándares visuales centralizados para PDFs y reportes
- * CONSTRURAMSA v2.9.1
+ * CONSTRURAMSA v2.9.2
  *
  * Expone CR_PlantillaPremium con la constante TEMPLATE_PREMIUM que contiene
  * paleta, márgenes y tipografía canónicos. Todos los módulos de generación de

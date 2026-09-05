@@ -23,7 +23,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 - **Respaldo de Datos**: Exportación e importación con fusión inteligente
 - **Accesibilidad WCAG 2.1 AA**: Contraste de colores corregido, aria-live, aria-label en todos los controles
 - **Paginación**: Tablas de historial paginadas a 20 registros por página
-- **PWA Completa**: Service Worker v2.9.1 con activación inmediata, dependencias de exportación locales y caché robusto
+- **PWA Completa**: Service Worker v2.9.2 con activación inmediata, dependencias de exportación locales y caché robusto
 
 ## Instalación
 
@@ -65,7 +65,7 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 | Archivo | Descripción |
 |---------|-------------|
 | `index.html` | Aplicación principal (HTML + CSS + JavaScript) |
-| `sw.js` | Service Worker v2.9.1 para funcionalidad offline |
+| `sw.js` | Service Worker v2.9.2 para funcionalidad offline |
 | `manifest.json` | Configuración PWA con shortcuts de módulos |
 | `icon.png` | Icono corporativo 1024×1024 (instalación/PWA) |
 | `icon-512.png` | Icono PWA 512×512 |
@@ -303,6 +303,6 @@ La aplicación es una PWA instalable y 100% responsive, optimizada para uso en c
 
 ---
 
-**Versión**: 2.8.4
+**Versión**: 2.9.2
 **Desarrollado para**: CONSTRURAMSA — Soluciones en Ingeniería y Arquitectura  
 **Moneda**: Quetzales (Q) — Guatemala
