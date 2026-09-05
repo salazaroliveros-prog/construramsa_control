@@ -14,10 +14,39 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
+const { spawn } = require('child_process');
 
-const BASE_URL    = 'http://localhost:3000';
+const PORT        = process.env.PORT || '3000';
+const BASE_URL    = 'http://localhost:' + PORT;
 const TIMEOUT     = 30000;
 const REPORT_PATH = path.join(__dirname, 'validacion_modulos_report.json');
+
+// ─── server lifecycle ────────────────────────────────────────────────────────
+function startServer() {
+    const srv = spawn('node', ['server.js'], { cwd: __dirname, stdio: 'ignore' });
+    srv.on('error', (e) => console.error('[validacion] Error spawn:', e.message));
+    return srv;
+}
+
+function waitServer(timeoutMs) {
+    return new Promise((resolve, reject) => {
+        const start = Date.now();
+        const check = () => {
+            const req = http.get(BASE_URL, (res) => {
+                res.resume();
+                if (res.statusCode === 200) return resolve(true);
+                retry();
+            });
+            req.on('error', retry);
+        };
+        const retry = () => {
+            if (Date.now() - start > timeoutMs) return reject(new Error('Servidor no respondio'));
+            setTimeout(check, 400);
+        };
+        check();
+    });
+}
 
 // ─── utilidades ─────────────────────────────────────────────────────────────
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -573,6 +602,18 @@ async function run() {
     console.log('═══════════════════════════════════════════════════════');
     console.log(` Inicio: ${ts()}\n`);
 
+    // ── levantar servidor si no está corriendo ──────────────────────────────
+    let serverProc = null;
+    try {
+        await waitServer(1500);
+        console.log('[validacion] Servidor ya activo en ' + PORT);
+    } catch (_) {
+        serverProc = startServer();
+        console.log('[validacion] Servidor iniciado en puerto ' + PORT + '...');
+        await waitServer(15000);
+        console.log('[validacion] Servidor listo\n');
+    }
+
     const browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
         viewport: { width: 1280, height: 900 },
@@ -606,6 +647,7 @@ async function run() {
 
     } finally {
         await browser.close();
+        if (serverProc) serverProc.kill();
     }
 
     suite.browserErrors = [...new Set(browserErrors)];
