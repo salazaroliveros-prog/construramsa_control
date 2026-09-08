@@ -97,4 +97,11 @@ report_*.md
 visual_verification_report.html
 functional_test_results.json
 comprehensive_audit_results.json
-e2e_validation_report.html  
+e2e_validation_report.html
+offline_validation_report.json
+
+# Configuración de editor (local)
+.kilo/
+
+# Backups de datos temporales
+control_obra_backup_*.json  
