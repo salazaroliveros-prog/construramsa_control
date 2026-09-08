@@ -1,11 +1,14 @@
 // ============================================================
 // SERVICE WORKER — Control de Obra v2.9.2
-// Estrategia: Network First con fallback a Cache
-// Mejora: Skip waiting in install para actualizaciones inmediatas
+// Estrategia: Cache First para recursos estáticos, Network First para navegación
+// Mejora: Offline completo con fallback UI
 // ============================================================
 
 const CACHE_VERSION = '2.9.2';
 const CACHE_NAME = `control-obra-v${CACHE_VERSION}`;
+const OFFLINE_CACHE_NAME = `${CACHE_NAME}-offline`;
+
+// Recursos estáticos críticos para offline completo
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -47,6 +50,18 @@ const STATIC_ASSETS = [
   './splash-1668x2388.png',
 ];
 
+// Recursos adicionales para caché dinámico
+const DYNAMIC_CACHE_PATTERNS = [
+  '*.png',
+  '*.jpg',
+  '*.jpeg',
+  '*.svg',
+  '*.css',
+  '*.woff',
+  '*.woff2',
+  '*.ttf',
+];
+
 // NOTA: Scripts de desarrollo (build.js, optimize-images.js, test_*.js) no están en caché
 // porque no se usan en producción. Solo se cachean archivos necesarios para
 // funcionamiento offline de la aplicación.
@@ -82,7 +97,7 @@ self.addEventListener('activate', function (event) {
         console.log('[SW] Caches existentes:', names);
         return Promise.all(
           names
-            .filter((n) => n !== CACHE_NAME)
+            .filter((n) => n !== CACHE_NAME && n !== OFFLINE_CACHE_NAME)
             .map((n) => {
               console.log('[SW] Eliminando cache obsoleto:', n);
               return caches.delete(n);
@@ -96,7 +111,7 @@ self.addEventListener('activate', function (event) {
   );
 });
 
-// ── Fetch: Network First para locales, incluidos recursos de exportación offline ──
+// ── Fetch: Cache First para todos los recursos (estrategia offline-first) ──
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
   if (event.request.url.startsWith('chrome-extension://')) return;
@@ -105,50 +120,87 @@ self.addEventListener('fetch', function (event) {
   const esNavegacion =
     event.request.mode === 'navigate' || event.request.destination === 'document';
 
-  if (esNavegacion && url.pathname.endsWith('index.html')) {
+  // Para navegación: Cache First para soportar recarga offline
+  if (esNavegacion) {
     event.respondWith(
-      fetch(event.request)
-        .then(function (response) {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((c) => c.put('./index.html', clone));
-          }
-          return response;
-        })
-        .catch(function () {
-          return caches.match('./index.html');
-        })
+      caches.match(event.request).then(function (cached) {
+        if (cached) {
+          // Actualizar en background si hay red
+          fetch(event.request)
+            .then(function (response) {
+              if (response && response.status === 200) {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
+              }
+            })
+            .catch(() => {
+              // No hay red, pero tenemos caché - OK
+            });
+          return cached;
+        }
+
+        // Si no está en caché, buscar en red
+        return fetch(event.request)
+          .then(function (response) {
+            if (response && response.status === 200) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
+            }
+            return response;
+          })
+          .catch(function () {
+            // Fallback a index.html para SPA
+            return caches.match('./index.html');
+          });
+      })
     );
     return;
   }
 
+  // Para recursos estáticos: Cache First con fallback a Network
   event.respondWith(
-    fetch(event.request)
-      .then(function (response) {
-        // Solo cachear respuestas same-origin 'basic' con estado 200.
-        // Las 'opaque' (cross-origin) pueden ser errores opacos no
-        // inspeccionables y llenarían la cuota de almacenamiento.
-        if (!response || response.status !== 200) return response;
-        if (response.type !== 'basic') return response;
+    caches.match(event.request).then(function (cached) {
+      if (cached) {
+        // Actualizar caché en background
+        fetch(event.request).then(function (response) {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((c) => {
+              c.put(event.request, clone);
+              limitarCache(c);
+            });
+          }
+        });
+        return cached;
+      }
 
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((c) => {
-          c.put(event.request, clone);
-          limitarCache(c);
+      // Si no está en caché, buscar en red
+      return fetch(event.request)
+        .then(function (response) {
+          if (!response || response.status !== 200) return response;
+          if (response.type !== 'basic') return response;
+
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((c) => {
+            c.put(event.request, clone);
+            limitarCache(c);
+          });
+          return response;
+        })
+        .catch(function () {
+          // Si no hay red y no está en caché, retornar respuesta offline
+          return new Response('Offline: recurso no disponible', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({ 'Content-Type': 'text/plain' }),
+          });
         });
-        return response;
-      })
-      .catch(function () {
-        return caches.match(event.request).then(function (cached) {
-          if (cached) return cached;
-          if (esNavegacion) return caches.match('./index.html');
-        });
-      })
+    })
   );
 });
 
 // ── Límite de entradas en caché (LRU aproximado, FIFO) ───────
-const MAX_CACHE_ENTRIES = 200;
+const MAX_CACHE_ENTRIES = 300; // Aumentado para mejor offline
 async function limitarCache(cache) {
   try {
     const keys = await cache.keys();
