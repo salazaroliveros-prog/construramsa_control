@@ -103,6 +103,7 @@ functional_test_results.json
 comprehensive_audit_results.json
 e2e_validation_report.html
 offline_validation_report.json
+mobile_audit_report.json
 
 # Configuración de editor (local)
 .kilo/
