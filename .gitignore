@@ -13,6 +13,13 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Code quality tools (versioned configuration)
+!.eslintrc.js
+!.prettierrc
+!.prettierignore
+!.husky/
+.husky/_/
+
 # Temporary files
 *.tmp
 *.temp
@@ -48,6 +55,10 @@ test_*.js
 !test_report_data_adapter.js
 !test_all_reports.js
 !test_validacion_modulos.js
+!test_sincronizacion_offline.js
+!test_accesibilidad.js
+!test_lighthouse.js
+!test_lint_staged.js
 
 # Archivos de firmas personales (no se suben al repositorio)
 wilson.png

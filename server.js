@@ -17,7 +17,7 @@ const MIME = {
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
   '.pdf': 'application/pdf',
-  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 };
 
 const ROOT = path.resolve(__dirname);
@@ -60,9 +60,10 @@ module.exports = async (req, res) => {
     const contentType = MIME[ext] || 'application/octet-stream';
     res.writeHead(200, {
       'Content-Type': contentType,
-      'Cache-Control': ext === '.html'
-        ? 'no-store, no-cache, must-revalidate, max-age=0'
-        : 'public, max-age=31536000, immutable'
+      'Cache-Control':
+        ext === '.html'
+          ? 'no-store, no-cache, must-revalidate, max-age=0'
+          : 'public, max-age=31536000, immutable',
     });
     res.end(data);
   } catch (err) {
@@ -75,7 +76,7 @@ module.exports = async (req, res) => {
 function sendHtml(res, data) {
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
-    'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0'
+    'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
   });
   res.end(data);
 }
@@ -85,7 +86,9 @@ function sendHtml(res, data) {
 if (require.main === module) {
   const http = require('http');
   const PORT = process.env.PORT || 3000;
-  http.createServer((req, res) => module.exports(req, res)).listen(PORT, () => {
-    console.log(`CONSTRURAMSA Control de Obra — http://127.0.0.1:${PORT}/`);
-  });
+  http
+    .createServer((req, res) => module.exports(req, res))
+    .listen(PORT, () => {
+      console.log(`CONSTRURAMSA Control de Obra — http://127.0.0.1:${PORT}/`);
+    });
 }

@@ -6,7 +6,7 @@
     "start": "node server.js",
     "build": "node -e \"console.log('PWA estatica: sin paso de compilacion (build no-op)')\"",
     "vercel-build": "node -e \"console.log('PWA estatica: sin paso de compilacion (build no-op)')\"",
-    "test": "npm run test-adapter && npm run test-inline && npm run test-reports && npm run reports && npm run verify && npm run e2e && npm run e2e:data-entry && npm run test-validacion",
+    "test": "npm run test-adapter && npm run test-inline && npm run test-reports && npm run reports && npm run verify && npm run e2e && npm run e2e:data-entry && npm run test-validacion && npm run test-a11y",
     "test-adapter": "node test_report_data_adapter.js",
     "validate": "node validador_datos_reales.js",
     "verify": "node visual_verifier.js",
@@ -19,7 +19,17 @@
     "test-reports": "node test_all_reports.js",
     "test-functional": "node functional_test.js",
     "test-validacion": "node test_validacion_modulos.js",
-    "clean": "node -e \"const fs=require('fs'); const path=require('path'); const nm=path.join(__dirname,'node_modules'); const pl=path.join(__dirname,'package-lock.json'); if(fs.existsSync(nm))fs.rmSync(nm,{recursive:true,force:true}); if(fs.existsSync(pl))fs.unlinkSync(pl); console.log('Cleaned node_modules and package-lock.json');\""
+    "test-sync-offline": "node test_sincronizacion_offline.js",
+    "clean": "node -e \"const fs=require('fs'); const path=require('path'); const nm=path.join(__dirname,'node_modules'); const pl=path.join(__dirname,'package-lock.json'); if(fs.existsSync(nm))fs.rmSync(nm,{recursive:true,force:true}); if(fs.existsSync(pl))fs.unlinkSync(pl); console.log('Cleaned node_modules and package-lock.json');\"",
+    "lint": "eslint src/**/*.js test_*.js *.js",
+    "lint:fix": "eslint src/**/*.js test_*.js *.js --fix",
+    "format": "prettier --write \"src/**/*.js\" \"test_*.js\" \"*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"test_*.js\" \"*.js\"",
+    "prepare": "husky",
+    "bundle": "node build.js",
+    "optimize-images": "node optimize-images.js",
+    "test-a11y": "node test_accesibilidad.js",
+    "test-lighthouse": "node test_lighthouse.js"
   },
   "repository": {
     "type": "git",
@@ -42,6 +52,28 @@
   "homepage": "https://github.com/salazaroliveros-prog/construramsa_control#readme",
   "devDependencies": {
     "playwright": "^1.62.1",
-    "playwright-core": "^1.62.1"
+    "playwright-core": "^1.62.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "esbuild": "^0.28.2",
+    "sharp": "^0.35.4",
+    "@axe-core/playwright": "^4.8.2",
+    "lighthouse": "^13.4.1"
+  },
+  "lint-staged": {
+    "src/**/*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "test_*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

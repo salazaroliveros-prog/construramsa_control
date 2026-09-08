@@ -8,7 +8,7 @@
          Se eliminaron maximum-scale y user-scalable=no (WCAG 1.4.4 compliance) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Control de Obra - Sistema de Gestión</title>
-    <meta name="description" content="Sistema de control de gastos y gestión de obra 100% offline. Personalizable para cualquier empresa.">
+    <meta name="description" content="Sistema de control de gastos y gestión de obra 100% offline. v2.9.2 Personalizable para cualquier empresa.">
     <meta name="theme-color" content="#090a0f">
 
     <!-- PWA Manifest -->
@@ -78,6 +78,12 @@
 
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
     <script src="./vendor/purify.min.js" integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF" crossorigin="anonymous"></script>
+
+    <!-- SheetJS para exportación XLSX -->
+    <script src="./vendor/xlsx.full.min.js"></script>
+
+    <!-- ExcelJS para exportación XLSX avanzada -->
+    <script src="./vendor/exceljs.min.js"></script>
 <!-- Módulos tipados y config central (IIFE: no filtran globals, no colisionan con el bundle) -->
     <script src="./src/types.js" defer></script>
     <script src="./src/config.js" defer></script>
@@ -91,6 +97,7 @@
     <script src="./src/nominaEngine.js" defer></script>
     <script src="./src/plantillaPremium.js" defer></script>
     <script src="./src/signatureCapture.js" defer></script>
+    <script src="./src/formValidator.js" defer></script>
     <style>
         :root {
             /* Paleta Construramsa — degradado del logotipo (azul → cian → púrpura) sobre oscuro */

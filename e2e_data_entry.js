@@ -56,10 +56,12 @@ async function readState(page) {
       maintenanceMachines: (data.mantenimiento?.maquinaria || []).length,
       orders: (data.mantenimiento?.ordenes || []).length,
       supplies: (data.mantenimiento?.compras_insumos || []).length,
-      quoteExpenseLinked: !!data.adquisiciones?.cotizaciones_compras?.find((quote) => quote.material_descripcion === 'Cemento E2E')?.gasto_id,
+      quoteExpenseLinked: !!data.adquisiciones?.cotizaciones_compras?.find(
+        (quote) => quote.material_descripcion === 'Cemento E2E'
+      )?.gasto_id,
       tripExpenseLinked: !!data.viajes_camiones?.viajes?.[0]?.gasto_id,
       orderExpenseLinked: !!data.mantenimiento?.ordenes?.[0]?.gasto_id,
-      supplyExpenseLinked: !!data.mantenimiento?.compras_insumos?.[0]?.gasto_id
+      supplyExpenseLinked: !!data.mantenimiento?.compras_insumos?.[0]?.gasto_id,
     };
   });
 }
@@ -68,7 +70,7 @@ async function readState(page) {
   const server = spawn(process.execPath, ['server.js'], {
     cwd: __dirname,
     env: { ...process.env, PORT: String(PORT), NODE_OPTIONS: '' },
-    stdio: 'ignore'
+    stdio: 'ignore',
   });
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
   const errors = [];
@@ -99,7 +101,9 @@ async function readState(page) {
       return (db.proyectos || []).some((project) => project.nombre === 'E2E Proyecto Integrado');
     });
     if (!projectCreated) throw new Error('El proyecto E2E no se persistió');
-    if (await page.locator('#modal-crear-proyecto').evaluate((el) => !el.classList.contains('hidden'))) {
+    if (
+      await page.locator('#modal-crear-proyecto').evaluate((el) => !el.classList.contains('hidden'))
+    ) {
       await page.evaluate(() => cerrarModalCrearProyecto());
     }
 
@@ -209,15 +213,23 @@ async function readState(page) {
       stateBeforeReload,
       stateAfterReload,
       errors,
-      pass: reportControls === 3 && stateAfterReload.projects >= 1 &&
-        stateAfterReload.caja >= 2 && stateAfterReload.maquinaria === 1 &&
-        stateAfterReload.workers === 1 && stateAfterReload.attendanceDays === 1 &&
-        stateAfterReload.providers === 1 && stateAfterReload.quotes === 1 &&
-        stateAfterReload.trucks === 1 && stateAfterReload.routes === 1 &&
-        stateAfterReload.trips === 1 && stateAfterReload.maintenanceMachines === 1 &&
-        stateAfterReload.orders === 1 && stateAfterReload.supplies === 1 &&
+      pass:
+        reportControls === 3 &&
+        stateAfterReload.projects >= 1 &&
+        stateAfterReload.caja >= 2 &&
+        stateAfterReload.maquinaria === 1 &&
+        stateAfterReload.workers === 1 &&
+        stateAfterReload.attendanceDays === 1 &&
+        stateAfterReload.providers === 1 &&
+        stateAfterReload.quotes === 1 &&
+        stateAfterReload.trucks === 1 &&
+        stateAfterReload.routes === 1 &&
+        stateAfterReload.trips === 1 &&
+        stateAfterReload.maintenanceMachines === 1 &&
+        stateAfterReload.orders === 1 &&
+        stateAfterReload.supplies === 1 &&
         stateAfterReload.quoteExpenseLinked &&
-        !errors.length
+        !errors.length,
     };
     console.log(JSON.stringify(result, null, 2));
     if (!result.pass) process.exitCode = 1;

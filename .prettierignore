@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Minified files
+*.min.js
+*.min.css
+
+# Generated files
+*.json
+package-lock.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+*.backup
+
+# Documentation (manually formatted)
+*.md
+!README.md
+
+# Test artifacts
+screenshots/
+.playwright-mcp/
+scroll_audit_screenshots/
+
+# Local config
+.env*
+.vercel/
+
+# Large data files
+construramsa_db.json
+control_obra_backup_*.json
+
+# Generated reports
+report_*.csv
+report_*.json
+validacion_*_report.json
+visual_verification_report.html
+functional_test_results.json
+comprehensive_audit_results.json
+e2e_validation_report.html
