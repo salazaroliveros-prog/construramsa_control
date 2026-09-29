@@ -63,6 +63,7 @@ test_*.js
 !test_lint_staged.js
 !test_offline_completo.js
 !test_mobile_audit.js
+!test_nube_script.js
 
 # Archivos de firmas personales (no se suben al repositorio)
 wilson.png
