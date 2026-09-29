@@ -1,10 +1,10 @@
 // ============================================================
-// SERVICE WORKER — Control de Obra v2.9.3
+// SERVICE WORKER — Control de Obra v2.9.4
 // Estrategia: Cache First para recursos estáticos, Network First para navegación
 // Mejora: Offline completo con fallback UI
 // ============================================================
 
-const CACHE_VERSION = '2.9.3';
+const CACHE_VERSION = '2.9.4';
 const CACHE_NAME = `control-obra-v${CACHE_VERSION}`;
 const OFFLINE_CACHE_NAME = `${CACHE_NAME}-offline`;
 

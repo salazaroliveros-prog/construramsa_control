@@ -22,10 +22,54 @@ const TIMEOUT = 30000;
 const REPORT_PATH = path.join(__dirname, 'accesibilidad_report.json');
 
 // ─── server lifecycle ────────────────────────────────────────────────────────
+const net = require('net');
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function startServer() {
   const srv = spawn('node', ['server.js'], { cwd: __dirname, stdio: 'ignore' });
   srv.on('error', (e) => console.error('[a11y] Error spawn:', e.message));
   return srv;
+}
+
+/** true si nadie está escuchando en el puerto del servidor de pruebas. */
+function isPortFree() {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.once('error', () => resolve(false));
+    probe.once('listening', () => probe.close(() => resolve(true)));
+    probe.listen(Number(PORT), '127.0.0.1');
+  });
+}
+
+/**
+ * La suite anterior puede estar terminando su servidor (kill asíncrono);
+ * esperar a liberar el puerto evita EADDRINUSE al hacer spawn.
+ */
+async function waitForPortFree(timeoutMs = 15000) {
+  const start = Date.now();
+  while (!(await isPortFree())) {
+    if (Date.now() - start > timeoutMs) return false;
+    await sleep(300);
+  }
+  return true;
+}
+
+/** Espera puerto libre + spawn + health-check, con reintentos. */
+async function startServerAwaiting(attempts = 3, healthTimeoutMs = 15000) {
+  let lastError = null;
+  for (let i = 0; i < attempts; i++) {
+    await waitForPortFree();
+    const srv = startServer();
+    try {
+      await waitServer(healthTimeoutMs);
+      return srv;
+    } catch (err) {
+      lastError = err;
+      srv.kill();
+      await sleep(500);
+    }
+  }
+  throw lastError || new Error('Servidor no respondio');
 }
 
 function waitServer(timeoutMs) {
@@ -59,8 +103,7 @@ async function runAccessibilityTests() {
 
   try {
     console.log('[a11y] Iniciando servidor...');
-    server = startServer();
-    await waitServer(10000);
+    server = await startServerAwaiting();
     console.log('[a11y] Servidor listo en', BASE_URL);
 
     console.log('[a11y] Iniciando navegador...');

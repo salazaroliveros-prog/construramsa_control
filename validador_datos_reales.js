@@ -137,7 +137,13 @@ function validarProyectos(db) {
       errores++;
     }
 
-    if (typeof proyecto.presupuesto !== 'number') {
+    // El esquema real de proyecto usa presupuesto_inicial (ver crearProyecto en index.html);
+    // se acepta 'presupuesto' como alias por compatibilidad.
+    const presupuesto =
+      proyecto.presupuesto_inicial !== undefined
+        ? proyecto.presupuesto_inicial
+        : proyecto.presupuesto;
+    if (typeof presupuesto !== 'number' || isNaN(presupuesto) || presupuesto < 0) {
       logError(`Proyecto ${proyecto.nombre || pid}: Presupuesto inválido`);
       errores++;
     }

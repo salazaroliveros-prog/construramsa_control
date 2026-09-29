@@ -1,11 +1,11 @@
 {
-  "version": "2.9.3",
+  "version": "2.9.4",
   "configuracion": {
     "nombre_empresa": "CONSTRURAMSA",
     "eslogan": "SOLUCIONES EN INGENIERÍA Y ARQUITECTURA",
     "logo_base64": "",
     "presupuesto_inicial_caja": 0,
-    "proyecto_actual": null,
+    "proyecto_actual": "prueba_mume9l13",
     "telefono": "+502 5997 9501",
     "email": "contacto@construramsa.com",
     "direccion": "17av. Villa Mariscal, Apto. 116, Torre 2, Zona 11, Ciudad de Guatemala",
@@ -27,8 +27,2283 @@
       }
     ]
   },
-  "proyectos": [],
-  "proyectos_data": {},
+  "proyectos": [
+    {
+      "id": "prueba_mume9l13",
+      "nombre": "Proyecto de Prueba QA",
+      "descripcion": "Proyecto generado automáticamente para validar los 9 tipos de reporte",
+      "presupuesto_inicial": 150000,
+      "fecha_creacion": "2026-09-29",
+      "fecha_ultima_modificacion": "2026-09-29T08:08:17.849Z",
+      "activo": true,
+      "color": "#004B93"
+    }
+  ],
+  "proyectos_data": {
+    "prueba_mume9l13": {
+      "caja_chica": [
+        {
+          "id": "cc_2026-08-31_0",
+          "fecha": "2026-08-31",
+          "tipo": "ingreso",
+          "categoria": "servicios",
+          "descripcion": "Aporte de capital",
+          "monto": 6180.972575030792,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-08-31_1",
+          "fecha": "2026-08-31",
+          "tipo": "egreso",
+          "categoria": "alimentos",
+          "descripcion": "Gasto operativo 2",
+          "monto": 511.5762111675114,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-08-31_2",
+          "fecha": "2026-08-31",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 3",
+          "monto": 482.0790091468802,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-01_0",
+          "fecha": "2026-09-01",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 1",
+          "monto": 371.6025676530279,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-01_1",
+          "fecha": "2026-09-01",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 2",
+          "monto": 355.3025023051474,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-02_0",
+          "fecha": "2026-09-02",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 1",
+          "monto": 338.4029476614328,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-02_1",
+          "fecha": "2026-09-02",
+          "tipo": "egreso",
+          "categoria": "alimentos",
+          "descripcion": "Gasto operativo 2",
+          "monto": 397.0542401750187,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-02_2",
+          "fecha": "2026-09-02",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 3",
+          "monto": 286.87234214360046,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-03_0",
+          "fecha": "2026-09-03",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 1",
+          "monto": 519.3753883649722,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-03_1",
+          "fecha": "2026-09-03",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 2",
+          "monto": 337.91174564946556,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-04_0",
+          "fecha": "2026-09-04",
+          "tipo": "egreso",
+          "categoria": "alimentos",
+          "descripcion": "Gasto operativo 1",
+          "monto": 354.35548462684096,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-04_1",
+          "fecha": "2026-09-04",
+          "tipo": "egreso",
+          "categoria": "alimentos",
+          "descripcion": "Gasto operativo 2",
+          "monto": 290.1440117012893,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-04_2",
+          "fecha": "2026-09-04",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 3",
+          "monto": 271.2386993891155,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-05_0",
+          "fecha": "2026-09-05",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 1",
+          "monto": 231.2018544706811,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-05_1",
+          "fecha": "2026-09-05",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 2",
+          "monto": 369.9894035582172,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-06_0",
+          "fecha": "2026-09-06",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 1",
+          "monto": 418.2915626102068,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-06_1",
+          "fecha": "2026-09-06",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 133.69267487097517,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-07_0",
+          "fecha": "2026-09-07",
+          "tipo": "ingreso",
+          "categoria": "otros",
+          "descripcion": "Aporte de capital",
+          "monto": 6909.421191994842,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-07_1",
+          "fecha": "2026-09-07",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 2",
+          "monto": 483.6291131476442,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-07_2",
+          "fecha": "2026-09-07",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 3",
+          "monto": 287.23461908903226,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-08_0",
+          "fecha": "2026-09-08",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 1",
+          "monto": 191.34251094245326,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-08_1",
+          "fecha": "2026-09-08",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 553.4304261605876,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-09_0",
+          "fecha": "2026-09-09",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 1",
+          "monto": 141.38213793120903,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-09_1",
+          "fecha": "2026-09-09",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 2",
+          "monto": 334.41083448308893,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-09_2",
+          "fecha": "2026-09-09",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 3",
+          "monto": 512.9103308351794,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-10_0",
+          "fecha": "2026-09-10",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 1",
+          "monto": 592.5071858352107,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-10_1",
+          "fecha": "2026-09-10",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 365.15582087871076,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-10_2",
+          "fecha": "2026-09-10",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 3",
+          "monto": 427.3405302951131,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-11_0",
+          "fecha": "2026-09-11",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 1",
+          "monto": 512.7806770058148,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-11_1",
+          "fecha": "2026-09-11",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 2",
+          "monto": 368.50131013370594,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-11_2",
+          "fecha": "2026-09-11",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 3",
+          "monto": 275.16755852181836,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-12_0",
+          "fecha": "2026-09-12",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 1",
+          "monto": 564.6237862566018,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-12_1",
+          "fecha": "2026-09-12",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 2",
+          "monto": 346.39353938033196,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-12_2",
+          "fecha": "2026-09-12",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 3",
+          "monto": 438.89149731700854,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-13_0",
+          "fecha": "2026-09-13",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 1",
+          "monto": 562.5990391110226,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-13_1",
+          "fecha": "2026-09-13",
+          "tipo": "egreso",
+          "categoria": "alimentos",
+          "descripcion": "Gasto operativo 2",
+          "monto": 139.27292441639622,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-13_2",
+          "fecha": "2026-09-13",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 3",
+          "monto": 588.9072557156035,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-14_0",
+          "fecha": "2026-09-14",
+          "tipo": "ingreso",
+          "categoria": "materiales",
+          "descripcion": "Aporte de capital",
+          "monto": 6165.32549759356,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-14_1",
+          "fecha": "2026-09-14",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 541.0183796033534,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-14_2",
+          "fecha": "2026-09-14",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 3",
+          "monto": 561.860361032265,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-15_0",
+          "fecha": "2026-09-15",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 1",
+          "monto": 162.0941993068445,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-15_1",
+          "fecha": "2026-09-15",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 2",
+          "monto": 529.669224460218,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-16_0",
+          "fecha": "2026-09-16",
+          "tipo": "egreso",
+          "categoria": "alimentos",
+          "descripcion": "Gasto operativo 1",
+          "monto": 530.9149223437471,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-16_1",
+          "fecha": "2026-09-16",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 140.77930279694735,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-16_2",
+          "fecha": "2026-09-16",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 3",
+          "monto": 426.9085544431517,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-17_0",
+          "fecha": "2026-09-17",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 1",
+          "monto": 113.0775732385966,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-17_1",
+          "fecha": "2026-09-17",
+          "tipo": "egreso",
+          "categoria": "alimentos",
+          "descripcion": "Gasto operativo 2",
+          "monto": 113.47373361619563,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-17_2",
+          "fecha": "2026-09-17",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 3",
+          "monto": 467.2920695754422,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-18_0",
+          "fecha": "2026-09-18",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 1",
+          "monto": 557.5175601285175,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-18_1",
+          "fecha": "2026-09-18",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 228.257886457528,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-19_0",
+          "fecha": "2026-09-19",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 1",
+          "monto": 489.28772891909,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-19_1",
+          "fecha": "2026-09-19",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 2",
+          "monto": 178.23059185672304,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-20_0",
+          "fecha": "2026-09-20",
+          "tipo": "egreso",
+          "categoria": "alimentos",
+          "descripcion": "Gasto operativo 1",
+          "monto": 305.7755813917944,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-20_1",
+          "fecha": "2026-09-20",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 2",
+          "monto": 423.80949111088876,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-20_2",
+          "fecha": "2026-09-20",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 3",
+          "monto": 367.3329539474146,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-21_0",
+          "fecha": "2026-09-21",
+          "tipo": "ingreso",
+          "categoria": "combustible",
+          "descripcion": "Aporte de capital",
+          "monto": 6836.272479974319,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-21_1",
+          "fecha": "2026-09-21",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 286.3192507757367,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-21_2",
+          "fecha": "2026-09-21",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 3",
+          "monto": 214.30729096930907,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-22_0",
+          "fecha": "2026-09-22",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 1",
+          "monto": 309.19359335004356,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-22_1",
+          "fecha": "2026-09-22",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 2",
+          "monto": 366.3995285269541,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-23_0",
+          "fecha": "2026-09-23",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 1",
+          "monto": 539.6323056648714,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-23_1",
+          "fecha": "2026-09-23",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 2",
+          "monto": 135.68249840605836,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-24_0",
+          "fecha": "2026-09-24",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 1",
+          "monto": 402.7652919592518,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-24_1",
+          "fecha": "2026-09-24",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 279.6619990885415,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-25_0",
+          "fecha": "2026-09-25",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 1",
+          "monto": 316.7818615107751,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-25_1",
+          "fecha": "2026-09-25",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 2",
+          "monto": 285.781562027166,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-26_0",
+          "fecha": "2026-09-26",
+          "tipo": "egreso",
+          "categoria": "servicios",
+          "descripcion": "Gasto operativo 1",
+          "monto": 143.0093552642599,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-26_1",
+          "fecha": "2026-09-26",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 2",
+          "monto": 575.8989675111552,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-26_2",
+          "fecha": "2026-09-26",
+          "tipo": "egreso",
+          "categoria": "materiales",
+          "descripcion": "Gasto operativo 3",
+          "monto": 588.429441120215,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-27_0",
+          "fecha": "2026-09-27",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 1",
+          "monto": 455.1487866957272,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-27_1",
+          "fecha": "2026-09-27",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 143.5839582466341,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-28_0",
+          "fecha": "2026-09-28",
+          "tipo": "ingreso",
+          "categoria": "herramientas",
+          "descripcion": "Aporte de capital",
+          "monto": 6347.662821513637,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-28_1",
+          "fecha": "2026-09-28",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 2",
+          "monto": 123.27348458207607,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-29_0",
+          "fecha": "2026-09-29",
+          "tipo": "egreso",
+          "categoria": "otros",
+          "descripcion": "Gasto operativo 1",
+          "monto": 457.82996921411353,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-29_1",
+          "fecha": "2026-09-29",
+          "tipo": "egreso",
+          "categoria": "herramientas",
+          "descripcion": "Gasto operativo 2",
+          "monto": 570.7033084561448,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "cc_2026-09-29_2",
+          "fecha": "2026-09-29",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Gasto operativo 3",
+          "monto": 260.22119913702005,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-08-31",
+          "fecha": "2026-08-31",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 0",
+          "monto": 937.0112280083059,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-01",
+          "fecha": "2026-09-01",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 1",
+          "monto": 181.8166334219349,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-02",
+          "fecha": "2026-09-02",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 2",
+          "monto": 126.60920171161423,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-03",
+          "fecha": "2026-09-03",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 3",
+          "monto": 1008.193765042394,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-04",
+          "fecha": "2026-09-04",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 4",
+          "monto": 196.38492570943154,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-05",
+          "fecha": "2026-09-05",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 5",
+          "monto": 96.50295256027302,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-06",
+          "fecha": "2026-09-06",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 6",
+          "monto": 911.9233144927643,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-07",
+          "fecha": "2026-09-07",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 7",
+          "monto": 116.9051315911166,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-08",
+          "fecha": "2026-09-08",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 8",
+          "monto": 114.42979448413982,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_viaje_2026-09-09",
+          "fecha": "2026-09-09",
+          "tipo": "egreso",
+          "categoria": "transporte",
+          "descripcion": "Viaje de camión 9",
+          "monto": 921.3267563357932,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_mant_2026-08-31",
+          "fecha": "2026-08-31",
+          "tipo": "egreso",
+          "categoria": "mantenimiento",
+          "descripcion": "Orden de mantenimiento 0",
+          "monto": 1093.8336275323854,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_mant_2026-09-01",
+          "fecha": "2026-09-01",
+          "tipo": "egreso",
+          "categoria": "mantenimiento",
+          "descripcion": "Orden de mantenimiento 1",
+          "monto": 1253.0345235521536,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_mant_2026-09-02",
+          "fecha": "2026-09-02",
+          "tipo": "egreso",
+          "categoria": "mantenimiento",
+          "descripcion": "Orden de mantenimiento 2",
+          "monto": 638.9884330987418,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_mant_2026-09-03",
+          "fecha": "2026-09-03",
+          "tipo": "egreso",
+          "categoria": "mantenimiento",
+          "descripcion": "Orden de mantenimiento 3",
+          "monto": 884.4336873011013,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_mant_2026-09-04",
+          "fecha": "2026-09-04",
+          "tipo": "egreso",
+          "categoria": "mantenimiento",
+          "descripcion": "Orden de mantenimiento 4",
+          "monto": 1152.885186889498,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_mant_2026-09-05",
+          "fecha": "2026-09-05",
+          "tipo": "egreso",
+          "categoria": "mantenimiento",
+          "descripcion": "Orden de mantenimiento 5",
+          "monto": 635.306227912761,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_mant_2026-09-06",
+          "fecha": "2026-09-06",
+          "tipo": "egreso",
+          "categoria": "mantenimiento",
+          "descripcion": "Orden de mantenimiento 6",
+          "monto": 1282.4379568001968,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_mant_2026-09-07",
+          "fecha": "2026-09-07",
+          "tipo": "egreso",
+          "categoria": "mantenimiento",
+          "descripcion": "Orden de mantenimiento 7",
+          "monto": 1009.4943533203686,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_ins_2026-08-31",
+          "fecha": "2026-08-31",
+          "tipo": "egreso",
+          "categoria": "insumos",
+          "descripcion": "Compra de insumos 0",
+          "monto": 111.33749446700902,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_ins_2026-09-01",
+          "fecha": "2026-09-01",
+          "tipo": "egreso",
+          "categoria": "insumos",
+          "descripcion": "Compra de insumos 1",
+          "monto": 232.385954545407,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_ins_2026-09-02",
+          "fecha": "2026-09-02",
+          "tipo": "egreso",
+          "categoria": "insumos",
+          "descripcion": "Compra de insumos 2",
+          "monto": 186.84010483645872,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_ins_2026-09-03",
+          "fecha": "2026-09-03",
+          "tipo": "egreso",
+          "categoria": "insumos",
+          "descripcion": "Compra de insumos 3",
+          "monto": 204.51817039659227,
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gasto_ins_2026-09-04",
+          "fecha": "2026-09-04",
+          "tipo": "egreso",
+          "categoria": "insumos",
+          "descripcion": "Compra de insumos 4",
+          "monto": 225.8452523075502,
+          "proyecto_id": "prueba_mume9l13"
+        }
+      ],
+      "maquinaria_flota": {
+        "vehiculos": [
+          {
+            "id": "v1",
+            "nombre": "Camión Volteo 1",
+            "tipo": "camion",
+            "capacidad": 10
+          },
+          {
+            "id": "v2",
+            "nombre": "Excavadora CAT 320",
+            "tipo": "excavadora",
+            "capacidad": 5
+          },
+          {
+            "id": "v3",
+            "nombre": "Compactor Vibratorio",
+            "tipo": "compactor",
+            "capacidad": 3
+          }
+        ],
+        "registros": [
+          {
+            "id": "maq_2026-08-31",
+            "fecha": "2026-08-31",
+            "vehiculo_id": "v1",
+            "horas": 8,
+            "combustible": 29.66793021224866,
+            "operador": "Operador 1"
+          },
+          {
+            "id": "maq_2026-09-01",
+            "fecha": "2026-09-01",
+            "vehiculo_id": "v2",
+            "horas": 8,
+            "combustible": 21.950351691825574,
+            "operador": "Operador 2"
+          },
+          {
+            "id": "maq_2026-09-02",
+            "fecha": "2026-09-02",
+            "vehiculo_id": "v3",
+            "horas": 8,
+            "combustible": 22.837745613496462,
+            "operador": "Operador 3"
+          },
+          {
+            "id": "maq_2026-09-03",
+            "fecha": "2026-09-03",
+            "vehiculo_id": "v1",
+            "horas": 8,
+            "combustible": 26.692783618878988,
+            "operador": "Operador 4"
+          },
+          {
+            "id": "maq_2026-09-04",
+            "fecha": "2026-09-04",
+            "vehiculo_id": "v2",
+            "horas": 8,
+            "combustible": 27.127572696328155,
+            "operador": "Operador 5"
+          },
+          {
+            "id": "maq_2026-09-05",
+            "fecha": "2026-09-05",
+            "vehiculo_id": "v3",
+            "horas": 8,
+            "combustible": 28.824429496987158,
+            "operador": "Operador 6"
+          },
+          {
+            "id": "maq_2026-09-06",
+            "fecha": "2026-09-06",
+            "vehiculo_id": "v1",
+            "horas": 8,
+            "combustible": 29.14042799933866,
+            "operador": "Operador 7"
+          },
+          {
+            "id": "maq_2026-09-07",
+            "fecha": "2026-09-07",
+            "vehiculo_id": "v2",
+            "horas": 8,
+            "combustible": 27.436341896095218,
+            "operador": "Operador 8"
+          },
+          {
+            "id": "maq_2026-09-08",
+            "fecha": "2026-09-08",
+            "vehiculo_id": "v3",
+            "horas": 8,
+            "combustible": 26.705867033665534,
+            "operador": "Operador 9"
+          },
+          {
+            "id": "maq_2026-09-09",
+            "fecha": "2026-09-09",
+            "vehiculo_id": "v1",
+            "horas": 8,
+            "combustible": 23.41519267575867,
+            "operador": "Operador 10"
+          },
+          {
+            "id": "maq_2026-09-10",
+            "fecha": "2026-09-10",
+            "vehiculo_id": "v2",
+            "horas": 8,
+            "combustible": 27.667350274268177,
+            "operador": "Operador 11"
+          },
+          {
+            "id": "maq_2026-09-11",
+            "fecha": "2026-09-11",
+            "vehiculo_id": "v3",
+            "horas": 8,
+            "combustible": 20.05999804031607,
+            "operador": "Operador 12"
+          },
+          {
+            "id": "maq_2026-09-12",
+            "fecha": "2026-09-12",
+            "vehiculo_id": "v1",
+            "horas": 8,
+            "combustible": 29.655510424339845,
+            "operador": "Operador 13"
+          },
+          {
+            "id": "maq_2026-09-13",
+            "fecha": "2026-09-13",
+            "vehiculo_id": "v2",
+            "horas": 8,
+            "combustible": 24.64832246463928,
+            "operador": "Operador 14"
+          },
+          {
+            "id": "maq_2026-09-14",
+            "fecha": "2026-09-14",
+            "vehiculo_id": "v3",
+            "horas": 8,
+            "combustible": 23.8747023179913,
+            "operador": "Operador 15"
+          }
+        ]
+      },
+      "personal": {
+        "trabajadores": [
+          {
+            "id": "t1",
+            "nombre": "Juan Pérez",
+            "puesto": "Albañil",
+            "pago_hora_normal": 25,
+            "pago_hora_extra": 35
+          },
+          {
+            "id": "t2",
+            "nombre": "María García",
+            "puesto": "Ayudante",
+            "pago_hora_normal": 20,
+            "pago_hora_extra": 28
+          },
+          {
+            "id": "t3",
+            "nombre": "Carlos López",
+            "puesto": "Maestro",
+            "pago_hora_normal": 30,
+            "pago_hora_extra": 42
+          },
+          {
+            "id": "t4",
+            "nombre": "Ana Martínez",
+            "puesto": "Soldador",
+            "pago_hora_normal": 28,
+            "pago_hora_extra": 38
+          },
+          {
+            "id": "t5",
+            "nombre": "Pedro Sánchez",
+            "puesto": "Ayudante",
+            "pago_hora_normal": 20,
+            "pago_hora_extra": 28
+          }
+        ],
+        "asistencia": [
+          {
+            "fecha": "2026-08-31",
+            "registros": [
+              {
+                "id": "as_2026-08-31_t1",
+                "fecha": "2026-08-31",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-08-31_t2",
+                "fecha": "2026-08-31",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-08-31_t3",
+                "fecha": "2026-08-31",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-08-31_t4",
+                "fecha": "2026-08-31",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-08-31_t5",
+                "fecha": "2026-08-31",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-01",
+            "registros": [
+              {
+                "id": "as_2026-09-01_t1",
+                "fecha": "2026-09-01",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-01_t2",
+                "fecha": "2026-09-01",
+                "trabajador_id": "t2",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-01_t3",
+                "fecha": "2026-09-01",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-01_t4",
+                "fecha": "2026-09-01",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-01_t5",
+                "fecha": "2026-09-01",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-02",
+            "registros": [
+              {
+                "id": "as_2026-09-02_t1",
+                "fecha": "2026-09-02",
+                "trabajador_id": "t1",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-02_t2",
+                "fecha": "2026-09-02",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-02_t3",
+                "fecha": "2026-09-02",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-02_t4",
+                "fecha": "2026-09-02",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-02_t5",
+                "fecha": "2026-09-02",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-03",
+            "registros": [
+              {
+                "id": "as_2026-09-03_t1",
+                "fecha": "2026-09-03",
+                "trabajador_id": "t1",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-03_t2",
+                "fecha": "2026-09-03",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-03_t3",
+                "fecha": "2026-09-03",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-03_t4",
+                "fecha": "2026-09-03",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-03_t5",
+                "fecha": "2026-09-03",
+                "trabajador_id": "t5",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-04",
+            "registros": [
+              {
+                "id": "as_2026-09-04_t1",
+                "fecha": "2026-09-04",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-04_t2",
+                "fecha": "2026-09-04",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-04_t3",
+                "fecha": "2026-09-04",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-04_t4",
+                "fecha": "2026-09-04",
+                "trabajador_id": "t4",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-04_t5",
+                "fecha": "2026-09-04",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-05",
+            "registros": [
+              {
+                "id": "as_2026-09-05_t1",
+                "fecha": "2026-09-05",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-05_t2",
+                "fecha": "2026-09-05",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-05_t3",
+                "fecha": "2026-09-05",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-05_t4",
+                "fecha": "2026-09-05",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-05_t5",
+                "fecha": "2026-09-05",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-06",
+            "registros": [
+              {
+                "id": "as_2026-09-06_t1",
+                "fecha": "2026-09-06",
+                "trabajador_id": "t1",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-06_t2",
+                "fecha": "2026-09-06",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-06_t3",
+                "fecha": "2026-09-06",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-06_t4",
+                "fecha": "2026-09-06",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-06_t5",
+                "fecha": "2026-09-06",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-07",
+            "registros": [
+              {
+                "id": "as_2026-09-07_t1",
+                "fecha": "2026-09-07",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-07_t2",
+                "fecha": "2026-09-07",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-07_t3",
+                "fecha": "2026-09-07",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-07_t4",
+                "fecha": "2026-09-07",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-07_t5",
+                "fecha": "2026-09-07",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-08",
+            "registros": [
+              {
+                "id": "as_2026-09-08_t1",
+                "fecha": "2026-09-08",
+                "trabajador_id": "t1",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-08_t2",
+                "fecha": "2026-09-08",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-08_t3",
+                "fecha": "2026-09-08",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-08_t4",
+                "fecha": "2026-09-08",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-08_t5",
+                "fecha": "2026-09-08",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-09",
+            "registros": [
+              {
+                "id": "as_2026-09-09_t1",
+                "fecha": "2026-09-09",
+                "trabajador_id": "t1",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-09_t2",
+                "fecha": "2026-09-09",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-09_t3",
+                "fecha": "2026-09-09",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-09_t4",
+                "fecha": "2026-09-09",
+                "trabajador_id": "t4",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-09_t5",
+                "fecha": "2026-09-09",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-10",
+            "registros": [
+              {
+                "id": "as_2026-09-10_t1",
+                "fecha": "2026-09-10",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-10_t2",
+                "fecha": "2026-09-10",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-10_t3",
+                "fecha": "2026-09-10",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-10_t4",
+                "fecha": "2026-09-10",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-10_t5",
+                "fecha": "2026-09-10",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-11",
+            "registros": [
+              {
+                "id": "as_2026-09-11_t1",
+                "fecha": "2026-09-11",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-11_t2",
+                "fecha": "2026-09-11",
+                "trabajador_id": "t2",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-11_t3",
+                "fecha": "2026-09-11",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-11_t4",
+                "fecha": "2026-09-11",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-11_t5",
+                "fecha": "2026-09-11",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-12",
+            "registros": [
+              {
+                "id": "as_2026-09-12_t1",
+                "fecha": "2026-09-12",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-12_t2",
+                "fecha": "2026-09-12",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-12_t3",
+                "fecha": "2026-09-12",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-12_t4",
+                "fecha": "2026-09-12",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-12_t5",
+                "fecha": "2026-09-12",
+                "trabajador_id": "t5",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-13",
+            "registros": [
+              {
+                "id": "as_2026-09-13_t1",
+                "fecha": "2026-09-13",
+                "trabajador_id": "t1",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-13_t2",
+                "fecha": "2026-09-13",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-13_t3",
+                "fecha": "2026-09-13",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-13_t4",
+                "fecha": "2026-09-13",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-13_t5",
+                "fecha": "2026-09-13",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          },
+          {
+            "fecha": "2026-09-14",
+            "registros": [
+              {
+                "id": "as_2026-09-14_t1",
+                "fecha": "2026-09-14",
+                "trabajador_id": "t1",
+                "estado": "falto",
+                "horas_trabajadas": 0,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-14_t2",
+                "fecha": "2026-09-14",
+                "trabajador_id": "t2",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-14_t3",
+                "fecha": "2026-09-14",
+                "trabajador_id": "t3",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              },
+              {
+                "id": "as_2026-09-14_t4",
+                "fecha": "2026-09-14",
+                "trabajador_id": "t4",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 2
+              },
+              {
+                "id": "as_2026-09-14_t5",
+                "fecha": "2026-09-14",
+                "trabajador_id": "t5",
+                "estado": "presente",
+                "horas_trabajadas": 8,
+                "horas_extra": 0
+              }
+            ],
+            "aprobacion": {
+              "estado": "pendiente",
+              "aprobado_por": "",
+              "fecha_aprobacion": "",
+              "comentario": ""
+            }
+          }
+        ]
+      },
+      "adquisiciones": {
+        "proveedores": [
+          {
+            "id": "p1",
+            "nombre": "Constructora Los Ángeles",
+            "telefono": "5555-1234",
+            "especialidad": "Materiales"
+          },
+          {
+            "id": "p2",
+            "nombre": "Distribuidora de Cemento",
+            "telefono": "5555-5678",
+            "especialidad": "Cemento"
+          },
+          {
+            "id": "p3",
+            "nombre": "Hierros y Aceros",
+            "telefono": "5555-9012",
+            "especialidad": "Acero"
+          }
+        ],
+        "cotizaciones_compras": [
+          {
+            "id": "cot_2026-08-31",
+            "fecha": "2026-08-31",
+            "proveedor_id": "p1",
+            "articulo": "Cemento",
+            "cantidad": 44.32018861019767,
+            "precio_unitario": 51.168298033830716,
+            "estado": "aprobado"
+          },
+          {
+            "id": "cot_2026-09-01",
+            "fecha": "2026-09-01",
+            "proveedor_id": "p2",
+            "articulo": "Varilla",
+            "cantidad": 10.468701051559522,
+            "precio_unitario": 61.206124847521124,
+            "estado": "pendiente"
+          },
+          {
+            "id": "cot_2026-09-02",
+            "fecha": "2026-09-02",
+            "proveedor_id": "p3",
+            "articulo": "Bloque",
+            "cantidad": 26.22477463089033,
+            "precio_unitario": 147.6916146741301,
+            "estado": "aprobado"
+          },
+          {
+            "id": "cot_2026-09-03",
+            "fecha": "2026-09-03",
+            "proveedor_id": "p1",
+            "articulo": "Cemento",
+            "cantidad": 16.954137492030384,
+            "precio_unitario": 84.41770118895025,
+            "estado": "aprobado"
+          },
+          {
+            "id": "cot_2026-09-04",
+            "fecha": "2026-09-04",
+            "proveedor_id": "p2",
+            "articulo": "Varilla",
+            "cantidad": 10.388908430519413,
+            "precio_unitario": 55.05695739102951,
+            "estado": "aprobado"
+          },
+          {
+            "id": "cot_2026-09-05",
+            "fecha": "2026-09-05",
+            "proveedor_id": "p3",
+            "articulo": "Bloque",
+            "cantidad": 52.54764488996347,
+            "precio_unitario": 62.71961206809611,
+            "estado": "aprobado"
+          },
+          {
+            "id": "cot_2026-09-06",
+            "fecha": "2026-09-06",
+            "proveedor_id": "p1",
+            "articulo": "Cemento",
+            "cantidad": 40.63692982769,
+            "precio_unitario": 75.40275478118565,
+            "estado": "aprobado"
+          },
+          {
+            "id": "cot_2026-09-07",
+            "fecha": "2026-09-07",
+            "proveedor_id": "p2",
+            "articulo": "Varilla",
+            "cantidad": 58.819490986930326,
+            "precio_unitario": 143.86850310190485,
+            "estado": "aprobado"
+          },
+          {
+            "id": "cot_2026-09-08",
+            "fecha": "2026-09-08",
+            "proveedor_id": "p3",
+            "articulo": "Bloque",
+            "cantidad": 27.598770730248415,
+            "precio_unitario": 51.866867571923144,
+            "estado": "pendiente"
+          },
+          {
+            "id": "cot_2026-09-09",
+            "fecha": "2026-09-09",
+            "proveedor_id": "p1",
+            "articulo": "Cemento",
+            "cantidad": 45.21707374712178,
+            "precio_unitario": 124.01461832652527,
+            "estado": "aprobado"
+          }
+        ]
+      },
+      "viajes_camiones": {
+        "rutas_botadero": [
+          {
+            "id": "r1",
+            "nombre": "Ruta Principal - Botadero A",
+            "distancia_km": 15
+          },
+          {
+            "id": "r2",
+            "nombre": "Ruta Secundaria - Botadero B",
+            "distancia_km": 12
+          }
+        ],
+        "camiones": [
+          {
+            "id": "c1",
+            "nombre": "Volvo FH16",
+            "capacidad": 25
+          },
+          {
+            "id": "c2",
+            "nombre": "Scania R450",
+            "capacidad": 25
+          }
+        ],
+        "equipo_alquilado": [
+          {
+            "id": "ea1",
+            "nombre": "Camión Alquilado 1",
+            "tarifa_diaria": 800
+          }
+        ],
+        "viajes": [
+          {
+            "id": "viaje_2026-08-31",
+            "fecha": "2026-08-31",
+            "vehiculo_id": "ea1",
+            "material": "Tierra",
+            "numero": 1,
+            "km_total": 18.26816373444079,
+            "litros": 5.480449120332237,
+            "costo_combustible": 137.01122800830592,
+            "costo_alquiler": 800,
+            "total": 937.0112280083059,
+            "gasto_id": "gasto_viaje_2026-08-31"
+          },
+          {
+            "id": "viaje_2026-09-01",
+            "fecha": "2026-09-01",
+            "vehiculo_id": "c2",
+            "material": "Grava",
+            "numero": 2,
+            "km_total": 24.242217789591322,
+            "litros": 7.272665336877396,
+            "costo_combustible": 181.8166334219349,
+            "costo_alquiler": 0,
+            "total": 181.8166334219349,
+            "gasto_id": "gasto_viaje_2026-09-01"
+          },
+          {
+            "id": "viaje_2026-09-02",
+            "fecha": "2026-09-02",
+            "vehiculo_id": "c1",
+            "material": "Arena",
+            "numero": 3,
+            "km_total": 16.881226894881898,
+            "litros": 5.064368068464569,
+            "costo_combustible": 126.60920171161423,
+            "costo_alquiler": 0,
+            "total": 126.60920171161423,
+            "gasto_id": "gasto_viaje_2026-09-02"
+          },
+          {
+            "id": "viaje_2026-09-03",
+            "fecha": "2026-09-03",
+            "vehiculo_id": "ea1",
+            "material": "Tierra",
+            "numero": 4,
+            "km_total": 27.759168672319213,
+            "litros": 8.327750601695763,
+            "costo_combustible": 208.1937650423941,
+            "costo_alquiler": 800,
+            "total": 1008.193765042394,
+            "gasto_id": "gasto_viaje_2026-09-03"
+          },
+          {
+            "id": "viaje_2026-09-04",
+            "fecha": "2026-09-04",
+            "vehiculo_id": "c1",
+            "material": "Grava",
+            "numero": 5,
+            "km_total": 26.18465676125754,
+            "litros": 7.855397028377261,
+            "costo_combustible": 196.38492570943154,
+            "costo_alquiler": 0,
+            "total": 196.38492570943154,
+            "gasto_id": "gasto_viaje_2026-09-04"
+          },
+          {
+            "id": "viaje_2026-09-05",
+            "fecha": "2026-09-05",
+            "vehiculo_id": "c2",
+            "material": "Arena",
+            "numero": 6,
+            "km_total": 12.867060341369736,
+            "litros": 3.8601181024109206,
+            "costo_combustible": 96.50295256027302,
+            "costo_alquiler": 0,
+            "total": 96.50295256027302,
+            "gasto_id": "gasto_viaje_2026-09-05"
+          },
+          {
+            "id": "viaje_2026-09-06",
+            "fecha": "2026-09-06",
+            "vehiculo_id": "ea1",
+            "material": "Tierra",
+            "numero": 7,
+            "km_total": 14.923108599035245,
+            "litros": 4.4769325797105735,
+            "costo_combustible": 111.92331449276433,
+            "costo_alquiler": 800,
+            "total": 911.9233144927643,
+            "gasto_id": "gasto_viaje_2026-09-06"
+          },
+          {
+            "id": "viaje_2026-09-07",
+            "fecha": "2026-09-07",
+            "vehiculo_id": "c2",
+            "material": "Grava",
+            "numero": 8,
+            "km_total": 15.587350878815545,
+            "litros": 4.676205263644664,
+            "costo_combustible": 116.9051315911166,
+            "costo_alquiler": 0,
+            "total": 116.9051315911166,
+            "gasto_id": "gasto_viaje_2026-09-07"
+          },
+          {
+            "id": "viaje_2026-09-08",
+            "fecha": "2026-09-08",
+            "vehiculo_id": "c1",
+            "material": "Arena",
+            "numero": 9,
+            "km_total": 15.257305931218642,
+            "litros": 4.5771917793655925,
+            "costo_combustible": 114.42979448413982,
+            "costo_alquiler": 0,
+            "total": 114.42979448413982,
+            "gasto_id": "gasto_viaje_2026-09-08"
+          },
+          {
+            "id": "viaje_2026-09-09",
+            "fecha": "2026-09-09",
+            "vehiculo_id": "ea1",
+            "material": "Tierra",
+            "numero": 10,
+            "km_total": 16.176900844772433,
+            "litros": 4.85307025343173,
+            "costo_combustible": 121.32675633579323,
+            "costo_alquiler": 800,
+            "total": 921.3267563357932,
+            "gasto_id": "gasto_viaje_2026-09-09"
+          }
+        ]
+      },
+      "mantenimiento": {
+        "maquinaria": [
+          {
+            "id": "mm1",
+            "nombre": "Excavadora CAT 320",
+            "tipo": "excavadora"
+          },
+          {
+            "id": "mm2",
+            "nombre": "Camión Volvo FH16",
+            "tipo": "camion"
+          }
+        ],
+        "formatos": [
+          "preventivo",
+          "correctivo"
+        ],
+        "ordenes": [
+          {
+            "id": "ord_2026-08-31",
+            "fecha": "2026-08-31",
+            "maquinaria_id": "mm1",
+            "tipo": "preventivo",
+            "observaciones": "Mantenimiento rutino de equipo",
+            "costo": 1093.8336275323854,
+            "gasto_id": "gasto_mant_2026-08-31"
+          },
+          {
+            "id": "ord_2026-09-01",
+            "fecha": "2026-09-01",
+            "maquinaria_id": "mm2",
+            "tipo": "correctivo",
+            "observaciones": "Mantenimiento rutino de equipo",
+            "costo": 1253.0345235521536,
+            "gasto_id": "gasto_mant_2026-09-01"
+          },
+          {
+            "id": "ord_2026-09-02",
+            "fecha": "2026-09-02",
+            "maquinaria_id": "mm1",
+            "tipo": "preventivo",
+            "observaciones": "Mantenimiento rutino de equipo",
+            "costo": 638.9884330987418,
+            "gasto_id": "gasto_mant_2026-09-02"
+          },
+          {
+            "id": "ord_2026-09-03",
+            "fecha": "2026-09-03",
+            "maquinaria_id": "mm2",
+            "tipo": "correctivo",
+            "observaciones": "Mantenimiento rutino de equipo",
+            "costo": 884.4336873011013,
+            "gasto_id": "gasto_mant_2026-09-03"
+          },
+          {
+            "id": "ord_2026-09-04",
+            "fecha": "2026-09-04",
+            "maquinaria_id": "mm1",
+            "tipo": "preventivo",
+            "observaciones": "Mantenimiento rutino de equipo",
+            "costo": 1152.885186889498,
+            "gasto_id": "gasto_mant_2026-09-04"
+          },
+          {
+            "id": "ord_2026-09-05",
+            "fecha": "2026-09-05",
+            "maquinaria_id": "mm2",
+            "tipo": "correctivo",
+            "observaciones": "Mantenimiento rutino de equipo",
+            "costo": 635.306227912761,
+            "gasto_id": "gasto_mant_2026-09-05"
+          },
+          {
+            "id": "ord_2026-09-06",
+            "fecha": "2026-09-06",
+            "maquinaria_id": "mm1",
+            "tipo": "preventivo",
+            "observaciones": "Mantenimiento rutino de equipo",
+            "costo": 1282.4379568001968,
+            "gasto_id": "gasto_mant_2026-09-06"
+          },
+          {
+            "id": "ord_2026-09-07",
+            "fecha": "2026-09-07",
+            "maquinaria_id": "mm2",
+            "tipo": "correctivo",
+            "observaciones": "Mantenimiento rutino de equipo",
+            "costo": 1009.4943533203686,
+            "gasto_id": "gasto_mant_2026-09-07"
+          }
+        ],
+        "compras_insumos": [
+          {
+            "id": "ins_2026-08-31",
+            "fecha": "2026-08-31",
+            "tipo": "aceite",
+            "articulo": "Aceite Motor",
+            "cantidad": 2.9168394861595197,
+            "costo": 111.33749446700902,
+            "gasto_id": "gasto_ins_2026-08-31"
+          },
+          {
+            "id": "ins_2026-09-01",
+            "fecha": "2026-09-01",
+            "tipo": "aceite",
+            "articulo": "Filtros",
+            "cantidad": 4.308275862442971,
+            "costo": 232.385954545407,
+            "gasto_id": "gasto_ins_2026-09-01"
+          },
+          {
+            "id": "ins_2026-09-02",
+            "fecha": "2026-09-02",
+            "tipo": "aceite",
+            "articulo": "Grasa",
+            "cantidad": 2.7024781720075888,
+            "costo": 186.84010483645872,
+            "gasto_id": "gasto_ins_2026-09-02"
+          },
+          {
+            "id": "ins_2026-09-03",
+            "fecha": "2026-09-03",
+            "tipo": "aceite",
+            "articulo": "Aceite Motor",
+            "cantidad": 2.4667910752051174,
+            "costo": 204.51817039659227,
+            "gasto_id": "gasto_ins_2026-09-03"
+          },
+          {
+            "id": "ins_2026-09-04",
+            "fecha": "2026-09-04",
+            "tipo": "aceite",
+            "articulo": "Filtros",
+            "cantidad": 3.0235341637740527,
+            "costo": 225.8452523075502,
+            "gasto_id": "gasto_ins_2026-09-04"
+          }
+        ]
+      }
+    }
+  },
   "caja_chica": [],
   "maquinaria_flota": {
     "vehiculos": [],

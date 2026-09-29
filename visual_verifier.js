@@ -64,6 +64,82 @@ function ensureDirectories() {
 let browser = null;
 let page = null;
 
+// Seed data for localStorage: the app only reveals module content when an
+// active project exists (same strategy as run_e2e_validation.js, which uses
+// page.addInitScript to seed 'construramsa_db' before app boot).
+function seedDataScript() {
+  const ftoday = (offset = 0) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offset);
+    return d.toISOString().split('T')[0];
+  };
+  const db = {
+    version: '2.9.4',
+    configuracion: {
+      nombre_empresa: 'CONSTRURAMSA',
+      presupuesto_inicial_caja: 200000,
+      proyecto_actual: 'proyecto_demo',
+    },
+    proyectos: [{ id: 'proyecto_demo', nombre: 'Proyecto Residencial' }],
+    proyectos_data: {
+      proyecto_demo: {
+        caja_chica: [
+          { id: 'm1', fecha: ftoday(0), tipo: 'ingreso', categoria: 'Aportacion', monto: 50000 },
+          { id: 'm2', fecha: ftoday(-1), tipo: 'egreso', categoria: 'Materiales', monto: 15000 },
+        ],
+        viajes_camiones: {
+          viajes: [
+            {
+              id: 'v1',
+              fecha: ftoday(-1),
+              vehiculo_id: 'c1',
+              material: 'Arena',
+              numero: 2,
+              propiedad: 'propio',
+              km_total: 80,
+              litros: 20,
+            },
+          ],
+          camiones: [{ id: 'c1', nombre: 'Volquete 01', propiedad: 'propio' }],
+        },
+        mantenimiento: {
+          ordenes: [{ id: 'o1', fecha: ftoday(-2), tipo: 'Preventivo', costo: 1500 }],
+          compras_insumos: [
+            {
+              id: 'i1',
+              fecha: ftoday(-3),
+              articulo: 'Aceite',
+              cantidad: 2,
+              costo: 280,
+              stock_min: 1,
+            },
+          ],
+        },
+        personal: {
+          trabajadores: [{ id: 't1', nombre: 'Juan Perez', puesto: 'Albanil' }],
+          asistencia: [
+            { fecha: ftoday(-1), registros: [{ trabajador_id: 't1', estado: 'asistio' }] },
+          ],
+        },
+        maquinaria_flota: { registros: [{ id: 'ma1', fecha: ftoday(-1), horas: 4 }] },
+        adquisiciones: {
+          cotizaciones_compras: [
+            {
+              id: 'c1',
+              fecha: ftoday(-1),
+              material_descripcion: 'Cemento',
+              total: 2500,
+              estado: 'pendiente',
+            },
+          ],
+          proveedores: [{ id: 'p1', nombre: 'Ferreteria Central' }],
+        },
+      },
+    },
+  };
+  return 'localStorage.setItem("construramsa_db", ' + JSON.stringify(JSON.stringify(db)) + ');';
+}
+
 async function setupBrowser() {
   logInfo('Initializing Playwright browser...');
   const isCI = Boolean(process.env.CI);
@@ -72,6 +148,9 @@ async function setupBrowser() {
     slowMo: isCI ? 0 : 500,
   });
   page = await browser.newPage();
+
+  // Seed localStorage before any app script runs so modules are visible
+  await page.addInitScript(seedDataScript());
 
   // Set viewport to common mobile size
   await page.setViewportSize({ width: 375, height: 812 });

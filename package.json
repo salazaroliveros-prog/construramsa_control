@@ -1,6 +1,6 @@
 {
   "name": "control_obra_gastos",
-  "version": "2.9.3",
+  "version": "2.9.4",
   "description": "Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra. Personalizable para cualquier empresa con sincronización en la nube.",
   "scripts": {
     "start": "node server.js",

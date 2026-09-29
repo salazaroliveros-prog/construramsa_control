@@ -112,5 +112,7 @@ mobile_audit_report.json
 # Backups de datos temporales
 control_obra_backup_*.json
 construramsa_db.json.backup*
+construramsa_db.json.pre_validacion
+*.pre_validacion
 sincronizacion_offline_report.json
 functional_test_results.json

@@ -76,7 +76,7 @@ function mkCompra(id, dd, desc, total, estado) {
 
 function dbSintetico() {
   return {
-    version: '2.9.3',
+    version: '2.9.4',
     configuracion: {
       nombre_empresa: 'CONSTRURAMSA',
       presupuesto_inicial_caja: 200000,

@@ -63,8 +63,47 @@ function saveDatabase(db) {
 function generateTestData(db) {
   logInfo('Generating test data...');
 
+  // Si la BD está vacía (seed limpio), crear un proyecto de prueba con la
+  // misma estructura que crearProyecto() en index.html.
+  if (!db.proyectos || db.proyectos.length === 0) {
+    const newId = 'prueba_' + Date.now().toString(36);
+    db.proyectos = [
+      {
+        id: newId,
+        nombre: 'Proyecto de Prueba QA',
+        descripcion: 'Proyecto generado automáticamente para validar los 9 tipos de reporte',
+        presupuesto_inicial: 150000,
+        fecha_creacion: new Date().toISOString().split('T')[0],
+        fecha_ultima_modificacion: new Date().toISOString(),
+        activo: true,
+        color: '#004B93',
+      },
+    ];
+    db.proyectos_data = db.proyectos_data || {};
+    db.proyectos_data[newId] = {
+      caja_chica: [],
+      maquinaria_flota: { vehiculos: [], registros: [] },
+      personal: { trabajadores: [], asistencia: [] },
+      adquisiciones: { proveedores: [], cotizaciones_compras: [] },
+      viajes_camiones: { rutas_botadero: [], camiones: [], equipo_alquilado: [], viajes: [] },
+      mantenimiento: { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] },
+    };
+    if (db.configuracion) db.configuracion.proyecto_actual = newId;
+    logSuccess(`Proyecto de prueba creado: ${newId}`);
+  }
+
   const projectId = db.proyectos[0].id;
-  const datos = db.proyectos_data[projectId];
+  let datos = db.proyectos_data[projectId];
+  if (!datos) {
+    datos = db.proyectos_data[projectId] = {
+      caja_chica: [],
+      maquinaria_flota: { vehiculos: [], registros: [] },
+      personal: { trabajadores: [], asistencia: [] },
+      adquisiciones: { proveedores: [], cotizaciones_compras: [] },
+      viajes_camiones: { rutas_botadero: [], camiones: [], equipo_alquilado: [], viajes: [] },
+      mantenimiento: { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] },
+    };
+  }
 
   const today = new Date();
   const formatDate = (d) => d.toISOString().split('T')[0];
@@ -164,24 +203,37 @@ function generateTestData(db) {
         pago_hora_extra: 28,
       },
     ],
-    asistencia: dates
-      .slice(0, 15)
-      .map((fecha, idx) => {
-        const records = [];
-        for (let t = 1; t <= 5; t++) {
-          const estado = Math.random() > 0.1 ? 'presente' : 'falto';
-          records.push({
-            id: 'as_' + fecha + '_t' + t,
-            fecha: fecha,
-            trabajador_id: 't' + t,
-            estado: estado,
-            horas_trabajadas: estado === 'presente' ? 8 : 0,
-            horas_extra: estado === 'presente' && Math.random() > 0.7 ? 2 : 0,
-          });
-        }
-        return records;
-      })
-      .flat(),
+    asistencia: dates.slice(0, 15).map((fecha) => {
+      // Esquema canónico agrupado por día: { fecha, registros: [...] }
+      // (ver nominaEngine.consolidarAsistencia / reportDataAdapter)
+      const registros = [];
+      for (let t = 1; t <= 5; t++) {
+        const estado = Math.random() > 0.1 ? 'presente' : 'falto';
+        const horasExtra = estado === 'presente' && Math.random() > 0.7 ? 2 : 0;
+        registros.push({
+          trabajador_id: 't' + t,
+          estado: estado,
+          horas_trabajadas: estado === 'presente' ? 8 : 0,
+          horas_extras: horasExtra,
+          horas_extra: horasExtra,
+          calculos: {
+            pago_normal: 0,
+            pago_extra: 0,
+            total_diario: estado === 'presente' ? 8 * 25 + horasExtra * 35 : 0,
+          },
+        });
+      }
+      return {
+        fecha,
+        registros,
+        aprobacion: {
+          estado: 'aprobada',
+          aprobado_por: 'Administrador QA',
+          fecha_aprobacion: fecha,
+          comentario: '',
+        },
+      };
+    }),
   };
 
   // 4. Adquisiciones - Suppliers and quotations

@@ -231,27 +231,33 @@ function testReportGeneration(tipo, db) {
 
       const asistencia = datos.personal.asistencia || [];
       const trabajadores = datos.personal.trabajadores || [];
+      // Aplanar historial canónico agrupado {fecha, registros[]} (soporta también entradas legadas planas)
+      const registrosAsistencia = asistencia.flatMap((dia) =>
+        dia && Array.isArray(dia.registros)
+          ? dia.registros.map((r) => ({ ...r, fecha: dia.fecha }))
+          : [dia]
+      );
 
-      if (asistencia.length === 0) {
+      if (registrosAsistencia.length === 0) {
         csv += `"SIN REGISTROS DE ASISTENCIA",,,,,\n`;
         logWarning('No attendance records');
       } else {
         let totalHoras = 0,
           totalExtra = 0,
           totalPago = 0;
-        asistencia.forEach((a) => {
+        registrosAsistencia.forEach((a) => {
           const t = trabajadores.find((w) => w.id === a.trabajador_id) || { nombre: 'N/A' };
-          const pago = a.horas_trabajadas * 25 + a.horas_extra * 35; // Mock calculation
+          const pago = a.horas_trabajadas * 25 + a.horas_extras * 35; // Mock calculation
           totalHoras += a.horas_trabajadas || 0;
-          totalExtra += a.horas_extra || 0;
+          totalExtra += a.horas_extras || 0;
           totalPago += pago;
-          csv += `${csvRow([t.nombre, a.fecha, a.estado, a.horas_trabajadas, a.horas_extra, pago])}\n`;
+          csv += `${csvRow([t.nombre, a.fecha, a.estado, a.horas_trabajadas, a.horas_extras, pago])}\n`;
         });
         csv += `\n`;
         csv += `${csvRow(['', '', 'TOTAL HORAS:', totalHoras, '', ''])}\n`;
         csv += `${csvRow(['', '', 'TOTAL HORAS EXTRA:', totalExtra, '', ''])}\n`;
         csv += `${csvRow(['', '', '', '', 'TOTAL PAGO:', totalPago])}\n`;
-        logSuccess(`Processed ${asistencia.length} attendance records`);
+        logSuccess(`Processed ${registrosAsistencia.length} attendance records`);
       }
       break;
 
@@ -342,16 +348,22 @@ function testReportGeneration(tipo, db) {
 
       const trabajadoresN = datos.personal.trabajadores || [];
       const asistenciaN = datos.personal.asistencia || [];
+      // Aplanar historial agrupado {fecha, registros[]} → registros individuales
+      const registrosN = asistenciaN.flatMap((dia) =>
+        dia && Array.isArray(dia.registros)
+          ? dia.registros.map((r) => ({ ...r, fecha: dia.fecha }))
+          : [dia]
+      );
 
       if (trabajadoresN.length === 0) {
         csv += `"SIN TRABAJADORES REGISTRADOS",,,,\n`;
         logWarning('No workers registered');
       } else {
         trabajadoresN.forEach((t) => {
-          const registros = asistenciaN.filter((a) => a.trabajador_id === t.id);
+          const registros = registrosN.filter((a) => a.trabajador_id === t.id);
           const diasAsistidos = registros.filter((a) => a.estado === 'presente').length;
           const faltas = registros.filter((a) => a.estado === 'falto').length;
-          const horasExtra = registros.reduce((s, a) => s + (a.horas_extra || 0), 0);
+          const horasExtra = registros.reduce((s, a) => s + (a.horas_extras || 0), 0);
           const pago =
             diasAsistidos * 8 * (t.pago_hora_normal || 20) + horasExtra * (t.pago_hora_extra || 28);
           csv += `${csvRow([t.nombre, diasAsistidos, faltas, horasExtra, pago])}\n`;

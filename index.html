@@ -8,7 +8,7 @@
          Se eliminaron maximum-scale y user-scalable=no (WCAG 1.4.4 compliance) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Control de Obra - Sistema de Gestión</title>
-    <meta name="description" content="Sistema de control de gastos y gestión de obra 100% offline. v2.9.3 Personalizable para cualquier empresa.">
+    <meta name="description" content="Sistema de control de gastos y gestión de obra 100% offline. v2.9.4 Personalizable para cualquier empresa.">
     <meta name="theme-color" content="#090a0f">
 
     <!-- PWA Manifest -->
@@ -4396,7 +4396,7 @@
             <div>
                 <h3 class="historial-titulo">ℹ️ Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.9.3 (Seguridad: tokens OAuth sanitizados en toda sincronización cloud; descarga silenciosa OneDrive vía Graph API corregida; accesibilidad WCAG 2.1 AA: landmarks de navegación y región de plantilla de impresión)<br>
+                    Versión: 2.9.4 (Integridad de datos: esquema de asistencia normalizado {fecha, registros[]} con migración automática de registros legados — corrige fallo que dejaba los módulos sin navegación en sesiones nuevas; generador de datos de prueba y reportes actualizados; suite de pruebas sin errores ni warnings)<br>
                     Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV<br>
                     Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
@@ -4718,7 +4718,7 @@
         }
 
         function migrarDB(db) {
-            if (!db.version) db.version = '2.9.3';
+            if (!db.version) db.version = '2.9.4';
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
             if (!db.configuracion.nombre_empresa) db.configuracion.nombre_empresa = 'CONSTRURAMSA';
             if (!db.configuracion.eslogan) db.configuracion.eslogan = 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
@@ -4760,7 +4760,7 @@
 
         function inicializarDB() {
             const db = {
-                version: '2.9.3',
+                version: '2.9.4',
                 configuracion: { 
                     nombre_empresa:'CONSTRURAMSA', 
                     eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', 
@@ -4803,6 +4803,32 @@
                 if (!d.personal) d.personal = { trabajadores:[], asistencia:[] };
                 if (!d.personal.trabajadores) d.personal.trabajadores = [];
                 if (!d.personal.asistencia) d.personal.asistencia = [];
+                // Normalización de esquema de asistencia: entradas legadas planas
+                // ({fecha, trabajador_id, ...}) se agrupan al formato canónico
+                // {fecha, registros:[...] } que consumen tablas, KPIs y exportaciones.
+                if (d.personal.asistencia.some(a => a && !Array.isArray(a.registros))) {
+                    const dias = new Map();
+                    const resultado = [];
+                    const diaDe = (fecha) => {
+                        if (!dias.has(fecha)) {
+                            const dia = { fecha, registros: [], aprobacion: { estado:'pendiente', aprobado_por:'', fecha_aprobacion:'', comentario:'' } };
+                            dias.set(fecha, dia);
+                            resultado.push(dia);
+                        }
+                        return dias.get(fecha);
+                    };
+                    d.personal.asistencia.forEach(entrada => {
+                        if (!entrada || !entrada.fecha) return;
+                        if (Array.isArray(entrada.registros)) {
+                            const dia = diaDe(entrada.fecha);
+                            entrada.registros.forEach(r => dia.registros.push(r));
+                            if (entrada.aprobacion) dia.aprobacion = entrada.aprobacion;
+                        } else {
+                            diaDe(entrada.fecha).registros.push(entrada);
+                        }
+                    });
+                    d.personal.asistencia = resultado;
+                }
                 if (!d.adquisiciones) d.adquisiciones = { proveedores:[], cotizaciones_compras:[] };
                 if (!d.adquisiciones.proveedores) d.adquisiciones.proveedores = [];
                 if (!d.adquisiciones.cotizaciones_compras) d.adquisiciones.cotizaciones_compras = [];
@@ -8598,8 +8624,8 @@ pag_.forEach(c => {
             ex.maquinaria_flota.registros = fusionarArrays(ex.maquinaria_flota.registros||[], imp.maquinaria_flota?.registros||[], 'id');
             ex.personal.trabajadores      = fusionarArrays(ex.personal.trabajadores||[], imp.personal?.trabajadores||[], 'id');
             const mapaAsis = new Map();
-            (ex.personal.asistencia||[]).forEach(d => d.registros.forEach(r => mapaAsis.set(`${d.fecha}_${r.trabajador_id}`,{fecha:d.fecha,reg:r})));
-            (imp.personal?.asistencia||[]).forEach(d => d.registros.forEach(r => mapaAsis.set(`${d.fecha}_${r.trabajador_id}`,{fecha:d.fecha,reg:r})));
+            (ex.personal.asistencia||[]).forEach(d => (d.registros||[]).forEach(r => mapaAsis.set(`${d.fecha}_${r.trabajador_id}`,{fecha:d.fecha,reg:r})));
+            (imp.personal?.asistencia||[]).forEach(d => (d.registros||[]).forEach(r => mapaAsis.set(`${d.fecha}_${r.trabajador_id}`,{fecha:d.fecha,reg:r})));
             const mapaDias = new Map();
             mapaAsis.forEach(({fecha,reg}) => { if(!mapaDias.has(fecha)) mapaDias.set(fecha,{fecha,registros:[]}); mapaDias.get(fecha).registros.push(reg); });
             ex.personal.asistencia = Array.from(mapaDias.values());
@@ -8635,8 +8661,8 @@ pag_.forEach(c => {
                         if (!dst.personal) dst.personal = { trabajadores: [], asistencia: [] };
                         dst.personal.trabajadores = fusionarArrays(dst.personal.trabajadores || [], (src.personal || {}).trabajadores || [], 'id');
                         const mapaA2 = new Map();
-                        (dst.personal.asistencia || []).forEach(d => d.registros.forEach(r => mapaA2.set(d.fecha + '_' + r.trabajador_id, { fecha: d.fecha, reg: r })));
-                        ((src.personal || {}).asistencia || []).forEach(d => d.registros.forEach(r => mapaA2.set(d.fecha + '_' + r.trabajador_id, { fecha: d.fecha, reg: r })));
+                        (dst.personal.asistencia || []).forEach(d => (d.registros || []).forEach(r => mapaA2.set(d.fecha + '_' + r.trabajador_id, { fecha: d.fecha, reg: r })));
+                        ((src.personal || {}).asistencia || []).forEach(d => (d.registros || []).forEach(r => mapaA2.set(d.fecha + '_' + r.trabajador_id, { fecha: d.fecha, reg: r })));
                         const mapaDias2 = new Map();
                         mapaA2.forEach(({ fecha, reg }) => { if (!mapaDias2.has(fecha)) mapaDias2.set(fecha, { fecha, registros: [] }); mapaDias2.get(fecha).registros.push(reg); });
                         dst.personal.asistencia = Array.from(mapaDias2.values());
@@ -12349,8 +12375,8 @@ function validarDependenciasExportacion() {
             }
         });
 
-        const APP_VERSION = '2.9.3';
-        // APP_VERSION_MARKER:2.9.3 (usado para detección de actualizaciones)
+        const APP_VERSION = '2.9.4';
+        // APP_VERSION_MARKER:2.9.4 (usado para detección de actualizaciones)
         const _scrollPositions = new Map();
         function guardarScrollModulo(mid) {
             const el = document.getElementById(mid);
