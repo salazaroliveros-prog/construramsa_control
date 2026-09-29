@@ -8,7 +8,7 @@
          Se eliminaron maximum-scale y user-scalable=no (WCAG 1.4.4 compliance) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Control de Obra - Sistema de Gestión</title>
-    <meta name="description" content="Sistema de control de gastos y gestión de obra 100% offline. v2.9.2 Personalizable para cualquier empresa.">
+    <meta name="description" content="Sistema de control de gastos y gestión de obra 100% offline. v2.9.3 Personalizable para cualquier empresa.">
     <meta name="theme-color" content="#090a0f">
 
     <!-- PWA Manifest -->
@@ -90,7 +90,6 @@
     <script src="./src/reportDataAdapter.js" defer></script>
     <script src="./src/syncOptimizer.js" defer></script>
     <script src="./src/silentDownload.js" defer></script>
-    <script src="./src/backgroundSync.js" defer></script>
     <script src="./src/exportador.js" defer></script>
     <script src="./src/kpiEngine.js" defer></script>
     <script src="./src/reporteEjecutivo.js" defer></script>
@@ -3018,7 +3017,8 @@
         </header>
 
         <!-- Navegación -->
-        <nav class="nav-tabs" role="tablist" aria-label="Navegación principal de módulos">
+        <nav aria-label="Navegación principal de módulos">
+        <div class="nav-tabs" role="tablist">
             <button id="tab-resumen" class="nav-tab active" data-module="resumen" role="tab" aria-selected="true" aria-controls="resumen" aria-label="Módulo Panel de Resumen" tabindex="0">📈 Resumen</button>
             <button id="tab-caja-chica" class="nav-tab" data-module="caja-chica" role="tab" aria-selected="false" aria-controls="caja-chica" aria-label="Módulo Caja Chica" tabindex="-1">💰 Caja Chica</button>
             <button id="tab-maquinaria" class="nav-tab" data-module="maquinaria" role="tab" aria-selected="false" aria-controls="maquinaria" aria-label="Módulo Maquinaria" tabindex="-1">🚜 Maquinaria</button>
@@ -3028,6 +3028,7 @@
             <button id="tab-mantenimiento" class="nav-tab" data-module="mantenimiento" role="tab" aria-selected="false" aria-controls="mantenimiento" aria-label="Módulo Mantenimiento y Repuestos" tabindex="-1">🔧 Mantenimiento</button>
             <button id="tab-reportes" class="nav-tab" data-module="reportes" role="tab" aria-selected="false" aria-controls="reportes" aria-label="Módulo Reportes" tabindex="-1">📊 Reportes</button>
             <button id="tab-configuracion" class="nav-tab" data-module="configuracion" role="tab" aria-selected="false" aria-controls="configuracion" aria-label="Módulo Configuración" tabindex="-1">⚙️ Configuración</button>
+        </div>
         </nav>
 
         <main id="contenido-principal" tabindex="-1">
@@ -4395,7 +4396,7 @@
             <div>
                 <h3 class="historial-titulo">ℹ️ Información de la Aplicación</h3>
                 <p style="color:var(--texto-secundario);font-size:13px;margin-top:10px;">
-                    Versión: 2.9.2 (Refactorización Clean Code: KPIs por etiqueta, filtro de rango en asistencia, UI/UX optimizado — densidad de tablas y whitespace mejorados)<br>
+                    Versión: 2.9.3 (Seguridad: tokens OAuth sanitizados en toda sincronización cloud; descarga silenciosa OneDrive vía Graph API corregida; accesibilidad WCAG 2.1 AA: landmarks de navegación y región de plantilla de impresión)<br>
                     Características: Identidad personalizable, sincronización bidireccional OneDrive, scroll nativo en todos los dispositivos, exportaciones dinámicas PDF/CSV<br>
                     Modo: Offline (LocalStorage) · Sincronización en la nube configurable
                 </p>
@@ -4405,7 +4406,7 @@
     </div><!-- /container -->
 
     <!-- Plantilla de Impresión Oculta (solo para PDF) -->
-    <div id="plantilla-reporte-impresion">
+    <div id="plantilla-reporte-impresion" role="region" aria-label="Plantilla de reporte para impresión">
 
         <!-- ══════════════════════════════════════════════════════════
              MEMBRETE CONSTRURAMSA — fiel al membrete oficial
@@ -4675,6 +4676,7 @@
                     delete n.od_refresh_token;
                     delete n.od_token;
                     delete n.gd_token;
+                    delete n.gd_refresh_token;
                 }
                 return clone;
             } catch (e) {
@@ -4716,7 +4718,7 @@
         }
 
         function migrarDB(db) {
-            if (!db.version) db.version = '2.9.2';
+            if (!db.version) db.version = '2.9.3';
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
             if (!db.configuracion.nombre_empresa) db.configuracion.nombre_empresa = 'CONSTRURAMSA';
             if (!db.configuracion.eslogan) db.configuracion.eslogan = 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
@@ -4758,7 +4760,7 @@
 
         function inicializarDB() {
             const db = {
-                version: '2.9.2',
+                version: '2.9.3',
                 configuracion: { 
                     nombre_empresa:'CONSTRURAMSA', 
                     eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', 
@@ -9278,7 +9280,7 @@ pag_.forEach(c => {
                 if (!auto) _nubeSetEstado('⬆️ Subiendo a Google Drive...', true);
                 const folderId = await gdriveAsegurarCarpeta();
                 const db = getDB();
-                const content = JSON.stringify(db, null, 2);
+                const content = JSON.stringify(_nubeSanitizarPayload(db), null, 2);
                 const boundary = '-------cob' + Date.now();
                 const nombre = `control_obra_${new Date().toISOString().split('T')[0]}.json`;
                 const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and (name='${nombre}' or name='latest.json')`);
@@ -9549,7 +9551,7 @@ pag_.forEach(c => {
                 
                 const db = getDB();
                 const fileName = `control_obra_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
-                const fileContent = JSON.stringify(db, null, 2);
+                const fileContent = JSON.stringify(_nubeSanitizarPayload(db), null, 2);
                 
                 // Subir archivo
                 const uploadResponse = await fetch(`${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}:/${encodeURIComponent(fileName)}:/content`, {
@@ -9570,19 +9572,22 @@ pag_.forEach(c => {
                         'Authorization': `Bearer ${c.od_token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(db, null, 2)
+                    body: JSON.stringify(_nubeSanitizarPayload(db), null, 2)
                 });
                 if (!latestResponse.ok) throw new Error('HTTP ' + latestResponse.status);
                 
-                // Actualizar timestamp
-                c.ultimo = new Date().toISOString();
-                c.od_last_sync = c.ultimo;
+                // Actualizar timestamp (actualizar SOLO los timestamps sobre config local fresca,
+                // preservando el resto de configuración de nube que pudiera haber cambiado).
+                const timestamp = new Date().toISOString();
                 const dbCurrent = getDB();
-                dbCurrent.configuracion.nube = c;
+                const cfgActual = dbCurrent.configuracion.nube || {};
+                cfgActual.ultimo = timestamp;
+                cfgActual.od_last_sync = timestamp;
+                dbCurrent.configuracion.nube = cfgActual;
                 saveDB(dbCurrent);
                 
                 _nubeSetEstado('✅ Datos subidos a OneDrive', true);
-                _nubeSetUltimo(c.ultimo);
+                _nubeSetUltimo(timestamp);
                 showToast(auto ? '☁️ Base de datos actualizada en OneDrive' : '✅ Datos subidos a OneDrive', 'success');
                 
             } catch (error) {
@@ -9609,7 +9614,7 @@ pag_.forEach(c => {
                         'Authorization': `Bearer ${c.od_token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(db, null, 2)
+                    body: JSON.stringify(_nubeSanitizarPayload(db), null, 2)
                 });
             } catch (error) {
                 console.error('Error al actualizar latest en OneDrive:', error);
@@ -12344,8 +12349,8 @@ function validarDependenciasExportacion() {
             }
         });
 
-        const APP_VERSION = '2.9.2';
-        // APP_VERSION_MARKER:2.9.2 (usado para detección de actualizaciones)
+        const APP_VERSION = '2.9.3';
+        // APP_VERSION_MARKER:2.9.3 (usado para detección de actualizaciones)
         const _scrollPositions = new Map();
         function guardarScrollModulo(mid) {
             const el = document.getElementById(mid);

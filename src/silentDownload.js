@@ -44,32 +44,71 @@
     try {
       log('📥 Iniciando descarga silenciosa...');
 
-      const fileId = cfg.od_itemid;
-      const endpoint = `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`;
-
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${cfg.od_token}`,
-          Accept: 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          log('🔑 Token expirado (401)');
-        } else {
-          log(`❌ Error ${response.status}: ${response.statusText}`);
-        }
+      if (!cfg.od_file_id) {
+        log('❌ od_file_id no configurado — OneDrive no inicializado');
         return null;
       }
 
-      const text = await response.text();
-      log(`📊 Descargados ${text.length} bytes`);
+      const ONEDRIVE_BASE_URL = 'https://graph.microsoft.com/v1.0';
+      const headers = { Authorization: `Bearer ${cfg.od_token}`, Accept: 'application/json' };
+
+      // Fase 1: listar archivos del folder de la app y escoger el más reciente.
+      // (od_file_id no es el archivo, es la carpeta creada por onedriveInicializarCarpeta)
+      const listEndpoint = `${ONEDRIVE_BASE_URL}/me/drive/items/${cfg.od_file_id}/children`;
+      let filesResponse = await fetch(listEndpoint, { headers });
+
+      // Renovar token silenciosamente si expiró (401/403)
+      if (!filesResponse.ok && (filesResponse.status === 401 || filesResponse.status === 403)) {
+        log('🔑 Token expirado (401/403) — renovando silenciosamente...');
+        if (typeof onedriveRenovarToken === 'function') {
+          try {
+            await onedriveRenovarToken();
+          } catch (re) {
+            log('⚠️ No se pudo renovar token:', re.message);
+          }
+        }
+        const retryCfg = typeof _nubeCfg === 'function' ? _nubeCfg() : cfg;
+        if (!retryCfg.od_token) {
+          log('❌ No se renovó el token');
+          return null;
+        }
+        headers.Authorization = `Bearer ${retryCfg.od_token}`;
+        cfg.od_token = retryCfg.od_token; // mantener referencia coherente
+        filesResponse = await fetch(listEndpoint, { headers });
+      }
+
+      if (!filesResponse.ok) {
+        log(`❌ Error listando folder (${filesResponse.status}): ${filesResponse.statusText}`);
+        return null;
+      }
+
+      const files = await filesResponse.json();
+      const jsonFiles = (files.value || [])
+        .filter((f) => f.name.endsWith('.json'))
+        .sort((a, b) => new Date(b.lastModifiedDateTime) - new Date(a.lastModifiedDateTime));
+
+      const latest = jsonFiles.find((f) => f.name === 'control_obra_latest.json') || jsonFiles[0];
+      if (!latest) {
+        log('ℹ️ Sin respaldo JSON en la carpeta de OneDrive');
+        return null;
+      }
+
+      // Fase 2: descargar el contenido del archivo elegido
+      const downloadEndpoint = `${ONEDRIVE_BASE_URL}/me/drive/items/${latest.id}/content`;
+      const downloadResponse = await fetch(downloadEndpoint, { headers });
+      if (!downloadResponse.ok) {
+        log(
+          `❌ Error descargando ${latest.name} (${downloadResponse.status}): ${downloadResponse.statusText}`
+        );
+        return null;
+      }
+
+      const text = await downloadResponse.text();
+      log(`📊 Descargados ${text.length} bytes (${latest.name})`);
 
       try {
         const data = JSON.parse(text);
-        log('✅ Descarga completada', { items: Object.keys(data).length });
+        log('✅ Descarga completada', { keys: Object.keys(data).length });
         return data;
       } catch (parseErr) {
         log('⚠️ JSON inválido:', parseErr.message);

@@ -104,7 +104,7 @@ function verifyProjects(db) {
   logSection('PROJECTS VERIFICATION');
 
   test('Database has version', () => {
-    assert(db.version === '2.9.2', `Expected version 2.9.2, got ${db.version}`);
+    assert(db.version === '2.9.3', `Expected version 2.9.3, got ${db.version}`);
   });
 
   test('Database has configuracion', () => {

@@ -55,7 +55,7 @@ async function runAccessibilityTests() {
     summary: { total: 0, passed: 0, failed: 0, violations: 0 },
   };
 
-  let browser, page, server;
+  let browser, context, page, server;
 
   try {
     console.log('[a11y] Iniciando servidor...');
@@ -65,7 +65,9 @@ async function runAccessibilityTests() {
 
     console.log('[a11y] Iniciando navegador...');
     browser = await chromium.launch({ headless: true });
-    page = await browser.newPage();
+    // @axe-core/playwright exige un BrowserContext (no browser.newPage() directo).
+    context = await browser.newContext();
+    page = await context.newPage();
     page.setDefaultTimeout(TIMEOUT);
 
     // Test 1: Accesibilidad de página principal
@@ -91,8 +93,16 @@ async function runAccessibilityTests() {
     });
   } finally {
     if (page) await page.close();
+    if (context) await context.close();
     if (browser) await browser.close();
     if (server) server.kill();
+
+    // Consolider resumen a partir de los tests ejecutados.
+    results.summary.total = results.tests.length;
+    results.summary.passed = results.tests.filter((t) => t.status === 'PASSED').length;
+    results.summary.failed = results.tests.filter(
+      (t) => t.status === 'FAILED' || t.status === 'PENDING'
+    ).length;
 
     // Guardar reporte
     fs.writeFileSync(REPORT_PATH, JSON.stringify(results, null, 2));
@@ -164,7 +174,7 @@ async function test2_ModulesAccessibility(page, results) {
 
     const failedModules = test.moduleResults.filter((r) => r.status !== 'PASSED');
     test.status = failedModules.length === 0 ? 'PASSED' : 'FAILED';
-    test.details = `${failedModules.length}/${modules.length} módulos pasaron`;
+    test.details = `${modules.length - failedModules.length}/${modules.length} módulos pasaron`;
   } catch (error) {
     test.status = 'FAILED';
     test.error = error.message;

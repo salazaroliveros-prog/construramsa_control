@@ -1,0 +1,47 @@
+# Development server (not part of the static SPA build; Vercel framework=null ignores it anyway)
+server.js
+server_log.txt
+
+# Local data / user databases (never deployed to production)
+construramsa_db.json*
+control_obra_backup_*.json
+
+# Test scripts & artefacts (local-only validation)
+test_*.js
+*_test.js
+tests/
+audit_ui.js
+functional_test.js
+visual_verifier.js
+check_inline.js
+
+# Generated test artefacts
+*.e2e.*
+screenshots/
+scroll_validation_screenshots/
+.reportes/
+report_*.csv
+report_*.json
+report_*.md
+*_report.json
+comprehensive_audit_results.json
+functional_test_results.json
+visual_verification_report.html
+e2e_validation_report.html
+offline_validation_report.json
+mobile_audit_report.json
+validacion_*_report.json
+
+# Local tooling / editor config
+.kilo/
+.vercel/
+.playwright-mcp/
+.vscode/
+.idea/
+*.tmp
+*.temp
+
+# Secrets are injected via the platform; never commit local env
+.env
+.env.*
+!.env.example
