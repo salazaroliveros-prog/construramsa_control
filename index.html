@@ -462,6 +462,8 @@
             color: #fff;
             font-weight: 700;
             padding: 12px 24px;
+            min-height: 44px;
+            min-width: 44px;
             cursor: pointer;
             box-shadow: 0 6px 18px -4px rgba(0, 164, 228, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.22);
             transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
@@ -471,23 +473,31 @@
 
         .btn-eliminar {
             background: var(--alerta);
-            padding: 4px 8px;
-            font-size: 11px;
+            padding: 12px 16px;
+            min-height: 44px;
+            min-width: 44px;
+            font-size: 12px;
         }
         
         .btn-exito {
             background: var(--exito);
-            padding: 4px 8px;
-            font-size: 11px;
+            padding: 12px 16px;
+            min-height: 44px;
+            min-width: 44px;
+            font-size: 12px;
         }
         
         .btn-xs {
-            padding: 4px 8px;
-            font-size: 11px;
+            padding: 10px 14px;
+            min-height: 44px;
+            min-width: 44px;
+            font-size: 12px;
         }
         
         .btn-sm {
-            padding: 6px 12px;
+            padding: 12px 20px;
+            min-height: 44px;
+            min-width: 44px;
             font-size: 12px;
         }
         
@@ -504,6 +514,8 @@
             color: #fff;
             font-weight: 600;
             padding: 12px 24px;
+            min-height: 44px;
+            min-width: 44px;
             cursor: pointer;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
             transition: transform 0.2s, background 0.2s, border-color 0.2s;
@@ -535,6 +547,45 @@
         button:focus-visible {
             outline: 2px solid var(--acento-cian);
             outline-offset: 3px;
+        }
+
+        /* ── Touch targets mínimos para todos los elementos interactivos (WCAG 2.5.5) ── */
+        button, 
+        input[type="button"], 
+        input[type="submit"],
+        a[role="button"],
+        .file-label,
+        .nav-tab {
+            min-height: 44px !important;
+            min-width: 44px !important;
+        }
+
+        /* Botones específicos con clases */
+        .btn-primario,
+        .btn-secundario,
+        .btn-xs,
+        .btn-sm,
+        .btn-eliminar,
+        .btn-exito {
+            min-height: 44px !important;
+            min-width: 44px !important;
+        }
+
+        /* Excepciones para elementos muy pequeños en tablas - mínimo 36px */
+        td button:not(.btn-primario):not(.btn-secundario),
+        th button:not(.btn-primario):not(.btn-secundario),
+        .table-container button:not(.btn-primario):not(.btn-secundario),
+        .action-buttons button:not(.btn-primario):not(.btn-secundario),
+        td .btn-xs:not(.btn-primario):not(.btn-secundario),
+        th .btn-xs:not(.btn-primario):not(.btn-secundario),
+        .btn-eliminar:not(.btn-primario):not(.btn-secundario),
+        .btn-exito:not(.btn-primario):not(.btn-secundario),
+        td .btn-eliminar:not(.btn-primario):not(.btn-secundario),
+        th .btn-eliminar:not(.btn-primario):not(.btn-secundario),
+        td .btn-exito:not(.btn-primario):not(.btn-secundario),
+        th .btn-exito:not(.btn-primario):not(.btn-secundario) {
+            min-height: 44px !important;
+            min-width: 44px !important;
         }
 
         /* ── .btn-row — fila reutilizable de botones en formularios ─────────
@@ -722,6 +773,8 @@
             border-radius: 10px;
             color: var(--texto-secundario);
             padding: 10px 18px;
+            min-height: 44px;
+            min-width: 44px;
             cursor: pointer;
             font-weight: 600;
             transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
@@ -798,7 +851,7 @@
             padding: 9px 10px;
             text-align: left;
             border-bottom: 1px solid var(--glass-border);
-            white-space: nowrap;
+            white-space: normal;
             position: sticky;
             top: 0;
             z-index: 1;
@@ -809,6 +862,10 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 13px;
             vertical-align: middle;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         /* Columna de acciones: fija a la derecha en pantallas grandes */
@@ -816,6 +873,20 @@
             white-space: nowrap;
             text-align: right;
             width: 1%;
+        }
+
+        /* Columna de nombres: permitir wrapping para evitar truncación */
+        td.col-nombre, th.col-nombre {
+            max-width: 200px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        /* Contenedor de tablas: permitir scroll horizontal si es necesario */
+        .table-container {
+            overflow-x: auto;
+            max-width: 100%;
         }
 
         /* Montos alineados a la derecha */
@@ -827,11 +898,13 @@
         /* Badge de estado */
         .estado-badge {
             display: inline-block;
-            padding: 2px 8px;
+            padding: 4px 10px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
+            white-space: normal;
+            word-wrap: break-word;
         }
         .estado-badge.asistio { background: rgba(16,185,129,0.15); color: var(--exito); border: 1px solid rgba(16,185,129,0.3); }
         .estado-badge.falto   { background: rgba(239,68,68,0.15);   color: var(--alerta-texto); border: 1px solid rgba(239,68,68,0.3);   }
