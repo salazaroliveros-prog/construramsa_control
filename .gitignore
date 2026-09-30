@@ -39,6 +39,7 @@ build/
 !FILES_COMPATIBILITY.md
 !UX_FILES_REPORT.md
 !DIAGNOSTICO_COMPLETO_FINAL.md
+!UX_AUDIT_REPORT_FINAL.md
 
 # Servidor local usado por las pruebas; Vercel no lo incluye en builds estáticos.
 server_log.txt
@@ -77,6 +78,16 @@ juan.png
 # Auditoría visual E2E local y screenshots (no versionables)
 audit_ui.js
 scroll_audit_screenshots/
+ux_full_audit.js
+ux_manual_audit.js
+validate_ui.js
+test_export_reports.js
+validation_screenshots/
+test_exports/
+ux_audit_screenshots/
+ux_audit_report.json
+ux_manual_report.json
+export_test_report.json
 
 # Directorio de screenshots de pruebas (solo desarrollo local)
 scroll_validation_screenshots/
@@ -111,6 +122,9 @@ comprehensive_audit_results.json
 e2e_validation_report.html
 offline_validation_report.json
 mobile_audit_report.json
+UX_AUDIT_REPORT.md
+VALIDATION_REPORT.md
+EXPORT_TEST_REPORT.md
 
 # Configuración de editor (local)
 .kilo/
