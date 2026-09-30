@@ -40,6 +40,7 @@ build/
 !UX_FILES_REPORT.md
 !DIAGNOSTICO_COMPLETO_FINAL.md
 !UX_AUDIT_REPORT_FINAL.md
+!REALTIME_SYNC_FINAL_REPORT.md
 
 # Servidor local usado por las pruebas; Vercel no lo incluye en builds estáticos.
 server_log.txt
