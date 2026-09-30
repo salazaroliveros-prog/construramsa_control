@@ -9475,6 +9475,62 @@ pag_.forEach(c => {
                 return await nubeDescargarGasJsonp(url);
             }
         }
+        
+        /**
+         * Descarga datos desde Google Drive usando OAuth
+         */
+        async function nubeDescargarDrive() {
+            const c = _nubeCfg();
+            if (!c.gd_token || !c.gd_file_id) {
+                console.warn('[Drive] No hay token o file_id configurado');
+                return null;
+            }
+            
+            try {
+                const GDRIVE_BASE_URL = 'https://www.googleapis.com/drive/v3';
+                const downloadUrl = `${GDRIVE_BASE_URL}/files/${c.gd_file_id}?alt=media`;
+                
+                const response = await fetch(downloadUrl, {
+                    headers: { 'Authorization': `Bearer ${c.gd_token}` }
+                });
+                
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                
+                const data = await response.json();
+                return { ok: true, data: data };
+            } catch (e) {
+                console.error('[Drive] Error al descargar:', e);
+                return null;
+            }
+        }
+        
+        /**
+         * Descarga datos desde OneDrive usando OAuth
+         */
+        async function nubeDescargarOneDrive() {
+            const c = _nubeCfg();
+            if (!c.od_token || !c.od_file_id) {
+                console.warn('[OneDrive] No hay token o file_id configurado');
+                return null;
+            }
+            
+            try {
+                const ONEDRIVE_BASE_URL = 'https://graph.microsoft.com/v1.0';
+                const downloadUrl = `${ONEDRIVE_BASE_URL}/me/drive/items/${c.od_file_id}/content`;
+                
+                const response = await fetch(downloadUrl, {
+                    headers: { 'Authorization': `Bearer ${c.od_token}` }
+                });
+                
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                
+                const data = await response.json();
+                return { ok: true, data: data };
+            } catch (e) {
+                console.error('[OneDrive] Error al descargar:', e);
+                return null;
+            }
+        }
         async function nubeRestaurar() {
             const c = _nubeCfg();
             if (c.proveedor !== 'gas' || !c.url) { showToast('⚠️ Configura un respaldo en la nube primero', 'info'); return; }
