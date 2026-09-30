@@ -82,8 +82,10 @@ ux_full_audit.js
 ux_manual_audit.js
 validate_ui.js
 test_export_reports.js
+export_all_reports.js
 validation_screenshots/
 test_exports/
+all_reports_exported/
 ux_audit_screenshots/
 ux_audit_report.json
 ux_manual_report.json
