@@ -12,7 +12,7 @@
  * CommonJS para testing en Node / Playwright.
  *
  * @module nominaEngine
- * @version 2.9.2
+ * @version 2.9.4
  */
 (function (globalScope) {
   'use strict';

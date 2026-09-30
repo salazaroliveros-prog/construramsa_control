@@ -34,6 +34,7 @@ const STATIC_ASSETS = [
   './src/plantillaPremium.js',
   './src/syncOptimizer.js',
   './src/silentDownload.js',
+  './src/backgroundSync.js',
   './src/formValidator.js',
   './splash-640x1136.png',
   './splash-750x1334.png',
@@ -116,6 +117,9 @@ self.addEventListener('fetch', function (event) {
   if (event.request.url.startsWith('chrome-extension://')) return;
 
   const url = new URL(event.request.url);
+  // No interceptar otros orígenes (Apps Script, Google Drive, Microsoft Graph, etc.):
+  // el respaldo en la nube debe recibir la respuesta real de la red, no un 503 simulado.
+  if (url.origin !== self.location.origin) return;
   const esNavegacion =
     event.request.mode === 'navigate' || event.request.destination === 'document';
 
@@ -161,15 +165,19 @@ self.addEventListener('fetch', function (event) {
     caches.match(event.request).then(function (cached) {
       if (cached) {
         // Actualizar caché en background
-        fetch(event.request).then(function (response) {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((c) => {
-              c.put(event.request, clone);
-              limitarCache(c);
-            });
-          }
-        });
+        fetch(event.request)
+          .then(function (response) {
+            if (response && response.status === 200) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((c) => {
+                c.put(event.request, clone);
+                limitarCache(c);
+              });
+            }
+          })
+          .catch(() => {
+            // Sin red: se conserva la copia en caché
+          });
         return cached;
       }
 

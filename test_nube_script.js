@@ -66,6 +66,17 @@ global.ContentService = {
   },
 };
 
+// Mock de PropertiesService para verificarToken (gestiona global.__GAS_TOKENS)
+global.PropertiesService = {
+  getScriptProperties: () => ({
+    getProperty: (k) => global.__GAS_TOKENS[k],
+    setProperty: (k, v) => {
+      global.__GAS_TOKENS[k] = v;
+    },
+  }),
+};
+global.__GAS_TOKENS = {}; // {} => TOKEN no definido => modo ABIERTO
+
 // Cargar el script y capturar sus puntos de entrada
 const api = new Function(
   code + '\nreturn { doGet: doGet, doPost: doPost, crearCarpetaPrueba: crearCarpetaPrueba };'
@@ -151,6 +162,108 @@ check('doGet sin respaldo -> ok:false', parse(r).ok === false, r._t);
 check(
   'crearCarpetaPrueba ejecutable',
   typeof crearCarpetaPrueba === 'function' && /Carpeta/.test(crearCarpetaPrueba())
+);
+
+// ── 12. Token obligatorio: modo ABIERTO (TOKEN no definido) ──
+global.__GAS_TOKENS = {};
+r = doPost({ postData: { contents: JSON.stringify({ data: { modopen: 1 } }) } });
+check('modo abierto: doPost sin token funciona (retrocompatible)', parse(r).ok === true, r._t);
+check(
+  'modo abierto: doGet sin token funciona (retrocompatible)',
+  parse(doGet({ parameter: {} })).ok === true && parse(doGet({ parameter: {} })).data.modopen === 1
+);
+
+// ── 13. Token obligatorio: TOKEN definido en propiedades del script ──
+global.__GAS_TOKENS = { TOKEN: 'secreto-app' };
+
+// 13a. doPost sin token -> rechazado
+r = doPost({ postData: { contents: JSON.stringify({ data: { t: 1 } }) } });
+check(
+  'modo token: doPost sin token -> ok:false',
+  parse(r).ok === false && /Token|invalido/i.test(parse(r).error),
+  parse(r).error
+);
+
+// 13b. doPost con token correcto -> ok
+r = doPost({
+  postData: { contents: JSON.stringify({ data: { tokenizado: 1 } }) },
+  parameter: { token: 'secreto-app' },
+});
+check('modo token: doPost con token correcto -> ok:true', parse(r).ok === true, r._t);
+check(
+  'modo token: doPost guarda data tokenizada',
+  store.get('control_obra_latest.json') === JSON.stringify({ tokenizado: 1 })
+);
+
+// 13c. doGet sin token -> rechazado
+r = doGet({ parameter: {} });
+check(
+  'modo token: doGet sin token -> ok:false',
+  parse(r).ok === false && /Token|invalido/i.test(parse(r).error),
+  parse(r).error
+);
+
+// 13d. doGet con token correcto -> ok
+r = doGet({ parameter: { token: 'secreto-app' } });
+check(
+  'modo token: doGet con token correcto -> ok:true',
+  parse(r).ok === true && parse(r).data.tokenizado === 1,
+  r._t
+);
+
+// 13e. doGet con token incorrecto -> rechazado
+r = doGet({ parameter: { token: 'otro' } });
+check(
+  'modo token: doGet token incorrecto -> ok:false',
+  parse(r).ok === false && /Token|invalido/i.test(parse(r).error),
+  parse(r).error
+);
+
+// 13f. doPost clear con token correcto
+store.clear();
+store.set('control_obra_latest.json', JSON.stringify({ v: 1 }));
+r = doPost({
+  postData: { contents: JSON.stringify({ data: { v: 2 } }) },
+  parameter: { token: 'secreto-app' },
+});
+r = doPost({
+  postData: { contents: JSON.stringify({ clear: true }) },
+  parameter: { token: 'secreto-app' },
+});
+check(
+  'modo token: clear con token correcto -> ok:true',
+  parse(r).ok === true && parse(r).cleared === true,
+  r._t
+);
+check(
+  'modo token: clear borra backups',
+  [...store.keys()].filter((k) => k.startsWith('control_obra_')).length === 0,
+  [...store.keys()].join(',')
+);
+
+// 13g. JSONP con token
+r = doGet({ parameter: { token: 'secreto-app', prefix: '__nubeGasCallback_1_xyz' } });
+check(
+  'modo token: doGet JSONP con token -> callback',
+  /^__nubeGasCallback_1_xyz\(\{.*\}\);$/.test(r._t),
+  r._t.slice(0, 80)
+);
+
+// 13h. clear con token incorrecto NO borra
+store.clear();
+store.set('control_obra_latest.json', JSON.stringify({ v: 9 }));
+r = doPost({
+  postData: { contents: JSON.stringify({ data: { v: 1 } }) },
+  parameter: { token: 'secreto-app' },
+});
+r = doPost({
+  postData: { contents: JSON.stringify({ clear: true }) },
+  parameter: { token: 'WRONG' },
+});
+check(
+  'modo token: clear con token incorrecto no borra latest',
+  parse(r).ok === false && store.get('control_obra_latest.json') === JSON.stringify({ v: 1 }),
+  r._t
 );
 
 console.log(`\nRESULTADO: ${pass} pass / ${fail} fail`);

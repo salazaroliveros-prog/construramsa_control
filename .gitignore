@@ -38,6 +38,7 @@ build/
 !REPORTES_VALIDATION.md
 !FILES_COMPATIBILITY.md
 !UX_FILES_REPORT.md
+!DIAGNOSTICO_COMPLETO_FINAL.md
 
 # Servidor local usado por las pruebas; Vercel no lo incluye en builds estáticos.
 server_log.txt
@@ -64,6 +65,10 @@ test_*.js
 !test_offline_completo.js
 !test_mobile_audit.js
 !test_nube_script.js
+!test_database_operations.js
+!test_database_connection.js
+!test_cloud_sync.js
+!test_reports_completos.js
 
 # Archivos de firmas personales (no se suben al repositorio)
 wilson.png

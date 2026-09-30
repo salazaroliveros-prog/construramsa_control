@@ -14,6 +14,10 @@ audit_ui.js
 functional_test.js
 visual_verifier.js
 check_inline.js
+test_database_operations.js
+test_database_connection.js
+test_cloud_sync.js
+test_reports_completos.js
 
 # Generated test artefacts
 *.e2e.*

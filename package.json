@@ -6,7 +6,7 @@
     "start": "node server.js",
     "build": "node -e \"console.log('PWA estatica: sin paso de compilacion (build no-op)')\"",
     "vercel-build": "node -e \"console.log('PWA estatica: sin paso de compilacion (build no-op)')\"",
-    "test": "npm run test-adapter && npm run test-inline && npm run test-nube && npm run test-reports && npm run reports && npm run verify && npm run e2e && npm run e2e:data-entry && npm run test-validacion && npm run test-a11y",
+    "test": "npm run test-adapter && npm run test-inline && npm run test-nube && npm run test-reports && npm run reports && npm run verify && npm run test-db-ops && npm run test-db-conn && npm run test-cloud-sync && npm run e2e && npm run e2e:data-entry && npm run test-validacion && npm run test-a11y",
     "test-adapter": "node test_report_data_adapter.js",
     "validate": "node validador_datos_reales.js",
     "verify": "node visual_verifier.js",
@@ -30,7 +30,11 @@
     "bundle": "node build.js",
     "optimize-images": "node optimize-images.js",
     "test-a11y": "node test_accesibilidad.js",
-    "test-lighthouse": "node test_lighthouse.js"
+    "test-lighthouse": "node test_lighthouse.js",
+    "test-db-ops": "node test_database_operations.js",
+    "test-db-conn": "node test_database_connection.js",
+    "test-cloud-sync": "node test_cloud_sync.js",
+    "test-reports-full": "node test_reports_completos.js"
   },
   "repository": {
     "type": "git",

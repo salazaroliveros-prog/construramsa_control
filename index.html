@@ -4323,6 +4323,8 @@
                 <div id="nube-cfg-gas">
                     <label for="nube-gas-url" style="font-size:12px;color:var(--texto-principal);">URL del Web App (Google Apps Script)</label>
                     <input type="text" id="nube-gas-url" placeholder="https://script.google.com/macros/s/.../exec" aria-label="URL del Web App de Google Apps Script">
+                    <label for="nube-gas-token" style="font-size:11px;color:var(--texto-principal);margin-top:8px;display:block;">Token opcional de respaldo (igual al configurado en Apps Script: Archivo → Project Properties → Script properties → TOKEN)</label>
+                    <input type="password" id="nube-gas-token" placeholder="Opcional — deja en blanco para backup abierto" autocomplete="off" aria-label="Token de respaldo Apps Script">
                     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
                         <button type="button" onclick="nubeCopiarScript()" class="btn-secundario" style="font-size:12px;">📋 Copiar Script</button>
                         <button type="button" onclick="nubeAbrirGuia()" class="btn-secundario" style="font-size:12px;">📖 Guía paso a paso</button>
@@ -4677,6 +4679,7 @@
                     delete n.od_token;
                     delete n.gd_token;
                     delete n.gd_refresh_token;
+                    delete n.gas_token; // token Apps Script (no viaja al backup)
                 }
                 return clone;
             } catch (e) {
@@ -4727,7 +4730,7 @@
             if (!db.configuracion.email) db.configuracion.email = 'contacto@construramsa.com';
             if (!db.configuracion.direccion) db.configuracion.direccion = '17av. Villa Mariscal, Apto. 116, Torre 2, Zona 11, Ciudad de Guatemala';
             if (!db.configuracion.website) db.configuracion.website = 'construramsa.com';
-            if (!db.configuracion.nube) db.configuracion.nube = { proveedor:'gas', url:'', auto:true, ultimo:null };
+            if (!db.configuracion.nube) db.configuracion.nube = { proveedor:'gas', url:'', gas_token:'', auto:true, ultimo:null };
             if (db.configuracion.proyecto_actual === undefined) db.configuracion.proyecto_actual = null;
             if (!db.proyectos) db.proyectos = [];
             if (!db.proyectos_data) db.proyectos_data = {};
@@ -8818,7 +8821,8 @@ pag_.forEach(c => {
                 od_connected:false,
                 od_last_sync:null,
                 od_file_id:null,
-                od_sync_interval:300000 // 5 minutos por defecto
+                od_sync_interval:300000, // 5 minutos por defecto
+                gas_token:'' // token opcional Apps Script
             };
             return db.configuracion.nube;
         }
@@ -8838,6 +8842,7 @@ pag_.forEach(c => {
             const c = _nubeCfg();
             const prov = document.getElementById('nube-proveedor'); if (prov) prov.value = c.proveedor || 'gas';
             const u = document.getElementById('nube-gas-url'); if (u) u.value = c.url || '';
+            const gt = document.getElementById('nube-gas-token'); if (gt) gt.value = c.gas_token || '';
             const gd1 = document.getElementById('nube-gd-client'); if (gd1) gd1.value = c.gd_client || '';
             const gd2 = document.getElementById('nube-gd-token'); if (gd2) gd2.value = c.gd_token || '';
             const od1 = document.getElementById('nube-od-client'); if (od1) od1.value = c.od_client || '';
@@ -8891,6 +8896,7 @@ pag_.forEach(c => {
             const c = db.configuracion.nube;
             c.proveedor = document.getElementById('nube-proveedor').value;
             c.url = document.getElementById('nube-gas-url').value.trim();
+            c.gas_token = (document.getElementById('nube-gas-token') || {}).value ? document.getElementById('nube-gas-token').value.trim() : (c.gas_token || '');
             c.gd_client = (document.getElementById('nube-gd-client') || {}).value ? document.getElementById('nube-gd-client').value.trim() : (c.gd_client || '');
             c.od_client = (document.getElementById('nube-od-client') || {}).value ? document.getElementById('nube-od-client').value.trim() : (c.od_client || '');
             c.auto = true;
@@ -8961,7 +8967,8 @@ pag_.forEach(c => {
                 '   · Quién tiene acceso: Cualquier usuario\n' +
                 '6. Copia la URL que termina en /exec.\n' +
                 '7. Vuelve a la app, pega esa URL en «URL del Web App» y pulsa 💾 Guardar.\n\n' +
-                '✅ LISTO: cada vez que guardes datos, la app subirá el respaldo sola a la carpeta ControlObra_Backups de tu Google Drive y te lo notificará con un aviso.',
+                '✅ LISTO: cada vez que guardes datos, la app subirá el respaldo sola a la carpeta ControlObra_Backups de tu Google Drive y te lo notificará con un aviso.\n\n' +
+                '🔐 OPCIONAL (recomendado): en el editor de Apps Script pulsa Archivo → Project Settings → Script properties → + (añadir) → TOKEN (ej: «abc123secreto»). Luego, en esta app, escribe ese mismo valor en «Token opcional de respaldo» y guarda. Con eso bloquearás lecturas/subidas de terceros a tu backup.',
                 () => {}, 'Cerrar');
         }
         function gdriveAbrirGuia() {
@@ -9035,7 +9042,7 @@ pag_.forEach(c => {
             "function salidaJson(obj){",
             "  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);",
             "}",
-            "function doPost(e){",
+            "function doPost(e){ try{ verificarToken(e); }catch(err){ return salidaJson({ok:false, error:String(err)}); }",
             "  try {",
             "    if (!e || !e.postData || typeof e.postData.contents !== 'string') {",
             "      return salidaJson({ok:false, error:'Solicitud sin cuerpo'});",
@@ -9061,7 +9068,7 @@ pag_.forEach(c => {
             "  if (prefix && /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(prefix)) return ContentService.createTextOutput(prefix + '(' + json + ');').setMimeType(ContentService.MimeType.JAVASCRIPT);",
             "  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);",
             "}",
-            "function doGet(e){",
+            "function doGet(e){ try{ verificarToken(e); }catch(err){ return respuesta({ok:false, error:String(err)},e); }",
             "  try {",
             "    var folder = buscarCarpeta();",
             "    var f = folder.getFilesByName('control_obra_latest.json');",
@@ -9071,6 +9078,7 @@ pag_.forEach(c => {
             "  } catch(err){ return respuesta({ok:false,error:String(err)},e); }",
             "}",
             "/** Solo para autorizar permisos la primera vez */",
+            "function verificarToken(e){ var TOKEN=PropertiesService.getScriptProperties().getProperty('TOKEN'); if(!TOKEN){return;} var q=(e&&e.parameter&&e.parameter.token)||''; if(q!==TOKEN){throw new Error('Token invalido o ausente');} }",
             "function crearCarpetaPrueba(){ buscarCarpeta(); return 'Carpeta ControlObra lista'; }"
         ].join('\n');
 
@@ -9086,7 +9094,8 @@ pag_.forEach(c => {
             try {
                 if (!auto) { _nubeSetEstado('⬆️ Subiendo a Google Drive...'); showLoading('Subiendo respaldo a la nube...'); }
                 const body = JSON.stringify({ data: _nubeSanitizarPayload(db) });
-                const res = await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body });
+                const uploadUrl = c.gas_token ? (c.url + (c.url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(c.gas_token)) : c.url;
+                const res = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 // Apps Script siempre responde HTTP 200: validar el cuerpo {ok:true}
                 const out = await res.json().catch(() => null);

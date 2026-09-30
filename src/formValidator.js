@@ -1,5 +1,5 @@
 /**
- * Validación de Formularios Robusta - CONSTRURAMSA Control de Obra v2.9.2
+ * Validación de Formularios Robusta - CONSTRURAMSA Control de Obra v2.9.4
  * ================================================================
  * Sistema de validación avanzado para formularios de la aplicación.
  * Proporciona validación de formato, reglas de negocio y feedback UX.
