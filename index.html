@@ -3078,6 +3078,8 @@
             </div>
             <!-- FIX #14: clase header-actions en vez de config-section inline -->
             <div class="header-actions">
+                <!-- Indicador de sincronización en tiempo real -->
+                <button id="sync-indicator" onclick="forzarSyncAhora()" class="btn-secundario" style="padding:8px 12px;min-width:44px;" aria-label="Sincronización en tiempo real" data-tooltip="Sincronización en tiempo real">⚪</button>
                 <label for="selector-proyectos" class="visually-hidden">Seleccionar proyecto activo</label>
                 <select id="selector-proyectos" name="selector-proyectos" aria-label="Seleccionar proyecto activo">
                     <option value="">-- Seleccionar Proyecto --</option>
@@ -4395,6 +4397,18 @@
                     <option value="gdrive">Google Drive — conectar con tu cuenta</option>
                 </select>
 
+                <!-- Checkbox de sincronización en tiempo real -->
+                <div style="margin-bottom:12px;padding:12px;background:rgba(0,164,228,0.1);border:1px solid rgba(0,164,228,0.3);border-radius:8px;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--texto-principal);">
+                        <input type="checkbox" id="sync-tiempo-real" onchange="toggleSyncTiempoReal()" style="width:auto;">
+                        <span>🔄 Sincronización en tiempo real (polling inteligente)</span>
+                    </label>
+                    <p style="font-size:10px;color:var(--texto-secundario);margin:4px 0 0 0;">
+                        Cuando esté activo, la aplicación verificará automáticamente cambios en la nube y actualizará la UI en todos los dispositivos conectados.
+                        Intervalo adaptativo: 5s (con actividad) a 2min (sin actividad).
+                    </p>
+                </div>
+
                 <!-- Campos: Google Apps Script -->
                 <div id="nube-cfg-gas">
                     <label for="nube-gas-url" style="font-size:12px;color:var(--texto-principal);">URL del Web App (Google Apps Script)</label>
@@ -4716,9 +4730,19 @@
         // ============================================================
         // SISTEMA DE GESTIÓN DE DATOS (LocalStorage + cache de sesión)
         // FIX #15: cache de sesión para evitar deserializar en cada call
+        // REALTIME SYNC: Sistema de polling inteligente para sincronización
         // ============================================================
         const DB_KEY = 'construramsa_db';
         let _dbCache = null;
+        
+        // Variables para sincronización en tiempo real
+        let _syncInterval = null;
+        let _lastSyncHash = null;
+        let _syncEnabled = false;
+        let _syncBaseInterval = 30000; // 30 segundos por defecto
+        let _syncMinInterval = 5000; // 5 segundos mínimo cuando hay actividad
+        let _syncMaxInterval = 120000; // 2 minutos máximo cuando no hay actividad
+        let _lastActivityTime = Date.now();
 
         function getDB() {
             if (_dbCache) return _dbCache;
@@ -4770,10 +4794,19 @@
                 const serialized = JSON.stringify(db);
                 localStorage.setItem(DB_KEY, serialized);
                 console.log('DB guardada exitosamente en localStorage');
+                
+                // Actualizar tiempo de actividad
+                _lastActivityTime = Date.now();
+                
                 // Auto-respaldo a la nube (si está configurado), con debounce
                 scheduleNubeAuto();
                 // Auto-refresh del resumen si está activo
                 if (typeof _refreshResumenDebounced === 'function') _refreshResumenDebounced();
+                
+                // Si la sincronización en tiempo real está activa, actualizar hash
+                if (_syncEnabled) {
+                    _lastSyncHash = calcularHashDB(db);
+                }
             } catch (e) {
                 console.error('Error al guardar DB:', e.message, e.stack);
                 if (e.name === 'QuotaExceededError') {
@@ -4788,6 +4821,217 @@
         function invalidarCacheDB() { 
             _dbCache = null; 
             console.log('Cache de DB invalidado - próxima lectura será desde localStorage');
+        }
+
+        // ============================================================
+        // SISTEMA DE SINCRONIZACIÓN EN TIEMPO REAL (Polling Inteligente)
+        // ============================================================
+        
+        /**
+         * Calcula un hash simple de la base de datos para detectar cambios
+         * Usa una versión simplificada de hash para rendimiento
+         */
+        function calcularHashDB(db) {
+            try {
+                // Extraer campos relevantes para el hash
+                const dataToHash = {
+                    version: db.version,
+                    proyectos_count: db.proyectos ? db.proyectos.length : 0,
+                    caja_count: db.proyectos_data ? Object.keys(db.proyectos_data).length : 0,
+                    last_mod: db.configuracion ? db.configuracion.ultimo_cambio : null
+                };
+                const str = JSON.stringify(dataToHash);
+                
+                // Hash simple usando suma de códigos de caracteres
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // Convertir a 32-bit integer
+                }
+                return hash.toString(36);
+            } catch (e) {
+                console.error('Error al calcular hash:', e);
+                return Date.now().toString(36);
+            }
+        }
+        
+        /**
+         * Verifica si hay cambios en la nube y sincroniza si es necesario
+         */
+        async function verificarCambiosNube() {
+            if (!_syncEnabled) return;
+            
+            try {
+                const cfg = _nubeCfg();
+                if (!cfg.auto || (!cfg.url && !cfg.gd_token && !cfg.od_token)) {
+                    return;
+                }
+                
+                console.log('[Sync] Verificando cambios en la nube...');
+                
+                // Intentar descargar desde la nube
+                let remoto = null;
+                if (cfg.proveedor === 'gas' && cfg.url) {
+                    remoto = await nubeDescargarGas();
+                } else if (cfg.proveedor === 'gd' && cfg.gd_token) {
+                    remoto = await nubeDescargarDrive();
+                } else if (cfg.proveedor === 'od' && cfg.od_token) {
+                    remoto = await nubeDescargarOneDrive();
+                }
+                
+                if (remoto) {
+                    const hashRemoto = calcularHashDB(remoto);
+                    const hashLocal = calcularHashDB(getDB());
+                    
+                    if (hashRemoto !== hashLocal) {
+                        console.log('[Sync] Cambios detectados en la nube, sincronizando...');
+                        
+                        // Fusionar datos
+                        const fusionado = importarBaseDatosConFusion({
+                            ...remoto,
+                            metadata: {
+                                origen: 'nube_sync',
+                                fecha: new Date().toISOString()
+                            }
+                        });
+                        
+                        invalidarCacheDB();
+                        saveDB(fusionado);
+                        
+                        // Actualizar UI
+                        refreshResumen();
+                        renderizarTodo();
+                        
+                        showToast('🔄 Datos sincronizados desde la nube', 'info', 3000);
+                        
+                        // Actualizar indicador de sincronización
+                        actualizarIndicadorSync(true);
+                    } else {
+                        console.log('[Sync] Sin cambios en la nube');
+                    }
+                }
+            } catch (e) {
+                console.error('[Sync] Error al verificar cambios:', e);
+            }
+        }
+        
+        /**
+         * Ajusta el intervalo de sincronización basado en la actividad
+         */
+        function ajustarIntervaloSync() {
+            if (!_syncEnabled) return;
+            
+            const tiempoSinActividad = Date.now() - _lastActivityTime;
+            let nuevoIntervalo;
+            
+            if (tiempoSinActividad < 60000) {
+                // Hubo actividad en el último minuto: sincronizar más rápido
+                nuevoIntervalo = _syncMinInterval;
+            } else if (tiempoSinActividad < 300000) {
+                // Actividad en los últimos 5 minutos: intervalo normal
+                nuevoIntervalo = _syncBaseInterval;
+            } else {
+                // Sin actividad por más de 5 minutos: sincronizar más lento
+                nuevoIntervalo = _syncMaxInterval;
+            }
+            
+            if (_syncInterval && nuevoIntervalo !== _syncInterval.currentInterval) {
+                console.log(`[Sync] Ajustando intervalo: ${nuevoIntervalo}ms`);
+                clearInterval(_syncInterval);
+                _syncInterval = setInterval(verificarCambiosNube, nuevoIntervalo);
+                _syncInterval.currentInterval = nuevoIntervalo;
+            }
+        }
+        
+        /**
+         * Inicia la sincronización en tiempo real
+         */
+        function iniciarSyncTiempoReal() {
+            if (_syncEnabled) {
+                console.log('[Sync] Sincronización ya está activa');
+                return;
+            }
+            
+            console.log('[Sync] Iniciando sincronización en tiempo real...');
+            _syncEnabled = true;
+            _lastSyncHash = calcularHashDB(getDB());
+            
+            // Iniciar con intervalo base
+            _syncInterval = setInterval(verificarCambiosNube, _syncBaseInterval);
+            _syncInterval.currentInterval = _syncBaseInterval;
+            
+            // Ajustar intervalo periódicamente
+            setInterval(ajustarIntervaloSync, 60000); // Cada minuto
+            
+            actualizarIndicadorSync(true);
+            showToast('🔄 Sincronización en tiempo real activada', 'success', 3000);
+        }
+        
+        /**
+         * Detiene la sincronización en tiempo real
+         */
+        function detenerSyncTiempoReal() {
+            if (!_syncEnabled) {
+                console.log('[Sync] Sincronización ya está desactivada');
+                return;
+            }
+            
+            console.log('[Sync] Deteniendo sincronización en tiempo real...');
+            _syncEnabled = false;
+            
+            if (_syncInterval) {
+                clearInterval(_syncInterval);
+                _syncInterval = null;
+            }
+            
+            actualizarIndicadorSync(false);
+            showToast('⏸️ Sincronización en tiempo real desactivada', 'info', 3000);
+        }
+        
+        /**
+         * Actualiza el indicador visual de sincronización
+         */
+        function actualizarIndicadorSync(activo) {
+            const indicador = document.getElementById('sync-indicator');
+            if (!indicador) return;
+            
+            if (activo) {
+                indicador.innerHTML = '🟢';
+                indicador.title = 'Sincronización en tiempo real activa';
+                indicador.style.color = 'var(--exito)';
+            } else {
+                indicador.innerHTML = '⚪';
+                indicador.title = 'Sincronización en tiempo real desactivada';
+                indicador.style.color = 'var(--texto-secundario)';
+            }
+        }
+        
+        /**
+         * Fuerza una sincronización inmediata
+         */
+        function forzarSyncAhora() {
+            console.log('[Sync] Forzando sincronización manual...');
+            verificarCambiosNube();
+            showToast('🔄 Sincronización forzada', 'info', 2000);
+        }
+        
+        /**
+         * Alterna el estado de sincronización en tiempo real
+         */
+        function toggleSyncTiempoReal() {
+            const checkbox = document.getElementById('sync-tiempo-real');
+            if (checkbox.checked) {
+                iniciarSyncTiempoReal();
+            } else {
+                detenerSyncTiempoReal();
+            }
+            
+            // Guardar preferencia en la configuración
+            const db = getDB();
+            if (!db.configuracion) db.configuracion = {};
+            db.configuracion.sync_tiempo_real = checkbox.checked;
+            saveDB(db);
         }
         
         // Wrapper para modificaciones directas que invalidan cache automáticamente
@@ -4808,6 +5052,8 @@
             if (!db.configuracion.website) db.configuracion.website = 'construramsa.com';
             if (!db.configuracion.nube) db.configuracion.nube = { proveedor:'gas', url:'', gas_token:'', auto:true, ultimo:null };
             if (db.configuracion.proyecto_actual === undefined) db.configuracion.proyecto_actual = null;
+            // Campo para sincronización en tiempo real
+            if (db.configuracion.sync_tiempo_real === undefined) db.configuracion.sync_tiempo_real = false;
             if (!db.proyectos) db.proyectos = [];
             if (!db.proyectos_data) db.proyectos_data = {};
             if (!db.caja_chica) db.caja_chica = [];
@@ -8923,6 +9169,13 @@ pag_.forEach(c => {
             const gd2 = document.getElementById('nube-gd-token'); if (gd2) gd2.value = c.gd_token || '';
             const od1 = document.getElementById('nube-od-client'); if (od1) od1.value = c.od_client || '';
 
+            // Actualizar estado de sincronización en tiempo real
+            const syncCheckbox = document.getElementById('sync-tiempo-real');
+            if (syncCheckbox) {
+                const db = getDB();
+                syncCheckbox.checked = db.configuracion && db.configuracion.sync_tiempo_real;
+            }
+
             // Actualizar estado de OneDrive
             const odEstado = document.getElementById('onedrive-estado');
             if (odEstado) {
@@ -8954,6 +9207,17 @@ pag_.forEach(c => {
             // Iniciar sincronización automática si está conectado a OneDrive
             if (c.od_connected && c.auto) {
                 iniciarSincronizacionOneDrive();
+            }
+            
+            // Iniciar sincronización en tiempo real si está configurada
+            const db = getDB();
+            if (db.configuracion && db.configuracion.sync_tiempo_real && c.auto && (c.url || c.gd_token || c.od_token)) {
+                if (!_syncEnabled) {
+                    iniciarSyncTiempoReal();
+                }
+            } else if (_syncEnabled && (!c.auto || !(c.url || c.gd_token || c.od_token))) {
+                // Detener si no hay configuración de nube
+                detenerSyncTiempoReal();
             }
         }
         function nubeCambiarProveedor2() {
