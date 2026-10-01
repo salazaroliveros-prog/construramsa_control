@@ -92,6 +92,8 @@ ux_audit_screenshots/
 ux_audit_report.json
 ux_manual_report.json
 export_test_report.json
+diagnostic_reports/
+diagnostic_sync_completo.js
 
 # Directorio de screenshots de pruebas (solo desarrollo local)
 scroll_validation_screenshots/
