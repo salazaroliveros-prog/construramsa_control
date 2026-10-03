@@ -6065,15 +6065,17 @@
             const avisosEl = document.getElementById('kpi-avisos');
             const pendEl = document.getElementById('lista-pendientes');
             if (!grid) return;
-            const datos = getProyectoData();
             const db = getDB();
+            const adaptador = typeof CR_ReportData !== 'undefined' ? CR_ReportData.resolve(db) : null;
+            const datos = adaptador ? adaptador.data : getProyectoData();
             const proy = db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
             const proyNombre = proy ? proy.nombre : 'General';
             const presupuesto = getPresupuestoActual();
+            const periodo = (document.getElementById('dashboard-periodo')?.value || 'mes');
 
             // Usar el motor de KPIs unificado
             const kpis = typeof CR_KPIEngine !== 'undefined' && CR_KPIEngine.calcularKPIs
-                ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: presupuesto }, 'mes')
+                ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: presupuesto }, periodo)
                 : null;
 
             let saldo = 0, totalIng = 0, totalEgr = 0;
@@ -6110,7 +6112,7 @@
                 viajes = datos.viajes_camiones.viajes || [];
                 camiones = datos.viajes_camiones.camiones || [];
                 viajes.forEach(v => {
-                    totalViajes += (v.total || 0); kmTot += (v.km_total || 0); litrosTot += (v.litros || 0);
+                    totalViajes += 1; kmTot += (v.km_total || 0); litrosTot += (v.litros || 0);
                     if (v.propiedad === 'alquilado') viajesAlq += 1; else viajesPropios += 1;
                 });
 
@@ -6191,7 +6193,8 @@
                 const proyecto = elemProyecto.value;
                 
                 const db = getDB();
-                let datos = getProyectoData();
+                const adaptadorDash = typeof CR_ReportData !== 'undefined' ? CR_ReportData.resolve(db) : null;
+                let datos = adaptadorDash ? adaptadorDash.data : getProyectoData();
                 let presupuesto = getPresupuestoActual();
                 
                 if (proyecto === 'todos') {
@@ -6227,10 +6230,19 @@
                         pushArray((target.mantenimiento || (target.mantenimiento = { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] })).ordenes || [], (source.mantenimiento || {}).ordenes || []);
                         pushArray((target.mantenimiento || (target.mantenimiento = { maquinaria: [], formatos: {}, ordenes: [], compras_insumos: [] })).compras_insumos || [], (source.mantenimiento || {}).compras_insumos || []);
                     };
+                    const _normalizarProyectoData = (raw) => {
+                        if (typeof CR_ReportData !== 'undefined' && CR_ReportData.normalizeProjectData) {
+                            return CR_ReportData.normalizeProjectData(raw);
+                        }
+                        return raw;
+                    };
                     
-                    mergeModule(merged, datos);
+                    mergeModule(merged, _normalizarProyectoData(datos));
+                    const _proyectoActualId = db.configuracion.proyecto_actual;
                     for (const pid in db.proyectos_data) {
-                        mergeModule(merged, db.proyectos_data[pid]);
+                        if (pid !== _proyectoActualId) {
+                            mergeModule(merged, _normalizarProyectoData(db.proyectos_data[pid]));
+                        }
                     }
                     datos = merged;
                     presupuesto = (db.configuracion.presupuesto_inicial_caja || 0) + (db.proyectos || []).reduce((s, p) => s + (Number(p.presupuesto_inicial) || 0), 0);
@@ -11631,7 +11643,7 @@ tbody.innerHTML = '';
                 const portadaEj = (typeof _leerCamposPortada === 'function') ? _leerCamposPortada() : {};
                 const CR_Ej = (typeof window !== 'undefined') ? window.CR_ReporteEjecutivo : undefined;
                 if (CR_Ej) {
-                    return CR_Ej.generarHTML(Object.assign({}, db, getProyectoData()), {
+                    return CR_Ej.generarHTML(Object.assign({}, db, datos), {
                         empresa: cfgEj.nombre_empresa || 'CONSTRURAMSA',
                         logo: (cfgEj.logo_base64 && cfgEj.logo_base64.startsWith('data:image')) ? cfgEj.logo_base64 : undefined,
                         responsable: cfgEj.responsable || 'Gerente de Proyecto'
