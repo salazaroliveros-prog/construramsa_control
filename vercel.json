@@ -1,6 +1,11 @@
 {
   "framework": null,
   "outputDirectory": ".",
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  },
   "rewrites": [
     {
       "source": "/((?!.*\\..*).*)",
