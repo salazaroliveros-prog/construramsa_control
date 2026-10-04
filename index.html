@@ -90,6 +90,7 @@
     <script src="./src/reportDataAdapter.js" defer></script>
     <script src="./src/syncOptimizer.js" defer></script>
     <script src="./src/silentDownload.js" defer></script>
+    <script src="./src/persistence.js" defer></script>
     <script src="./src/exportador.js" defer></script>
     <script src="./src/kpiEngine.js" defer></script>
     <script src="./src/reporteEjecutivo.js" defer></script>
@@ -4728,9 +4729,8 @@
             if (window.DEBUG) console.info(message, data || '');
         }
         // ============================================================
-        // SISTEMA DE GESTIÓN DE DATOS (LocalStorage + cache de sesión)
-        // FIX #15: cache de sesión para evitar deserializar en cada call
-        // REALTIME SYNC: Sistema de polling inteligente para sincronización
+        // SISTEMA DE GESTIÓN DE DATOS (IndexedDB + localStorage + respaldo local)
+        // FIX PERSISTENCIA: usar CR_Persistence para sobrevivir a cierres de PWA
         // ============================================================
         const DB_KEY = 'construramsa_db';
         let _dbCache = null;
@@ -4744,17 +4744,18 @@
         let _syncMaxInterval = 120000; // 2 minutos máximo cuando no hay actividad
         let _lastActivityTime = Date.now();
 
-        function getDB() {
+        async function getDB() {
             if (_dbCache) return _dbCache;
             try {
-                const raw = localStorage.getItem(DB_KEY);
-                if (!raw) { 
-                    console.log('DB no encontrada en localStorage, inicializando nueva DB');
-                    _dbCache = inicializarDB(); 
-                    return _dbCache; 
+                const persistence = typeof CR_Persistence !== 'undefined' ? CR_Persistence : null;
+                const raw = persistence ? await persistence.readIdb() : null;
+                if (!raw) {
+                    console.log('DB no encontrada en persistencia, inicializando nueva DB');
+                    _dbCache = inicializarDB();
+                    return _dbCache;
                 }
-                _dbCache = migrarDB(JSON.parse(raw));
-                console.log('DB cargada exitosamente desde localStorage');
+                _dbCache = migrarDB(raw);
+                console.log('DB cargada exitosamente desde persistencia');
                 return _dbCache;
             } catch (e) {
                 console.error('Error al obtener DB:', e.message, e.stack);
@@ -4788,12 +4789,17 @@
             }
         }
 
-        function saveDB(db) {
+        async function saveDB(db) {
             try {
                 _dbCache = db;
-                const serialized = JSON.stringify(db);
-                localStorage.setItem(DB_KEY, serialized);
-                console.log('DB guardada exitosamente en localStorage');
+                const persistence = typeof CR_Persistence !== 'undefined' ? CR_Persistence : null;
+                if (persistence && persistence.writeIdb) {
+                    await persistence.writeIdb(db);
+                } else {
+                    const serialized = JSON.stringify(db);
+                    localStorage.setItem(DB_KEY, serialized);
+                }
+                console.log('DB guardada exitosamente en persistencia');
                 
                 // Actualizar tiempo de actividad
                 _lastActivityTime = Date.now();
@@ -4820,7 +4826,7 @@
 
         function invalidarCacheDB() { 
             _dbCache = null; 
-            console.log('Cache de DB invalidado - próxima lectura será desde localStorage');
+            console.log('Cache de DB invalidado - próxima lectura será desde persistencia');
         }
 
         // ============================================================
@@ -11121,18 +11127,26 @@ tbody.innerHTML = '';
         }
 
         function resetSoloLocalStorage() {
-            showConfirmModal('Limpiar caché local', 'Esto borra localStorage y recarga la app para volver al estado inicial desde construramsa_db.json. ¿Continuar?', () => {
-                localStorage.removeItem(DB_KEY);
+            showConfirmModal('Limpiar caché local', 'Esto borra la persistencia local y recarga la app para volver al estado inicial desde construramsa_db.json. ¿Continuar?', async () => {
+                if (typeof CR_Persistence !== 'undefined' && typeof CR_Persistence.deleteIdb === 'function') {
+                    await CR_Persistence.deleteIdb();
+                } else if (typeof localStorage !== 'undefined') {
+                    localStorage.removeItem(DB_KEY);
+                }
                 invalidarCacheDB();
-                showToast('✅ localStorage limpiado. Recargando...', 'success');
+                showToast('✅ Persistencia local limpiada. Recargando...', 'success');
                 setTimeout(() => location.reload(), 600);
             });
         }
 
         function resetTotalDatos() {
-            showConfirmModal('Borrar todos los datos locales', 'Se perderán todos los datos operativos locales. Asegúrate de tener un respaldo antes de continuar. ¿Deseas continuar?', () => {
+            showConfirmModal('Borrar todos los datos locales', 'Se perderán todos los datos operativos locales. Asegúrate de tener un respaldo antes de continuar. ¿Deseas continuar?', async () => {
                 try {
-                    localStorage.removeItem(DB_KEY);
+                    if (typeof CR_Persistence !== 'undefined' && typeof CR_Persistence.deleteIdb === 'function') {
+                        await CR_Persistence.deleteIdb();
+                    } else if (typeof localStorage !== 'undefined') {
+                        localStorage.removeItem(DB_KEY);
+                    }
                     invalidarCacheDB();
                     cacheReportes = [];
                     if (typeof window.SyncOptimizer !== 'undefined' && typeof window.SyncOptimizer.clear === 'function') {
@@ -12865,8 +12879,11 @@ function validarDependenciasExportacion() {
         document.addEventListener('DOMContentLoaded', function () {
             normalizarCamposFormulario();
 
-            // Paso 1: cargar datos desde JSON inicial (solo si localStorage vacío)
-            if (!localStorage.getItem(DB_KEY)) {
+            // Paso 1: cargar datos desde JSON inicial (solo si persistencia vacía)
+            const persistence = typeof CR_Persistence !== 'undefined' ? CR_Persistence : null;
+            const tienePersistencia = persistence ? await persistence.readIdb().then(r => !!r).catch(() => false) : false;
+            const tieneLocalStorage = typeof localStorage !== 'undefined' && !!localStorage.getItem(DB_KEY);
+            if (!tienePersistencia && !tieneLocalStorage) {
                 fetch('./construramsa_db.json')
                     .then(r => { if (!r.ok) throw new Error('no-file'); return r.json(); })
                     .then(data => {
