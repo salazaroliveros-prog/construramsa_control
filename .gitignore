@@ -131,6 +131,7 @@ comprehensive_audit_results.json
 e2e_validation_report.html
 offline_validation_report.json
 mobile_audit_report.json
+lighthouse_report.json
 UX_AUDIT_REPORT.md
 VALIDATION_REPORT.md
 EXPORT_TEST_REPORT.md
@@ -142,6 +143,7 @@ EXPORT_TEST_REPORT.md
 control_obra_backup_*.json
 construramsa_db.json.backup*
 construramsa_db.json.pre_validacion
+construramsa_db.json.pre_alineacion
 *.pre_validacion
 sincronizacion_offline_report.json
 functional_test_results.json

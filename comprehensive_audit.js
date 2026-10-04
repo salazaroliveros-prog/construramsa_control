@@ -83,29 +83,87 @@ function auditModuleLogic(indexHtml) {
 
   const issues = [];
 
-  // Check for duplicate function definitions
-  const functionDefs = indexHtml.match(/function\s+(\w+)\s*\(/g);
-  if (functionDefs) {
-    const functionNames = functionDefs.map((m) => m.match(/function\s+(\w+)/)[1]);
-    const duplicates = functionNames.filter((item, index) => functionNames.indexOf(item) !== index);
-    if (duplicates.length > 0) {
-      issues.push(`Duplicate function definitions: ${duplicates.join(', ')}`);
-      auditResults.moduleLogic.errors.push(...duplicates.map((d) => `Duplicate function: ${d}`));
-    } else {
-      logSuccess('No duplicate function definitions found');
-    }
+  // Definiciones de función CON su indentación: permite distinguir un duplicado
+  // real (dos declaraciones al mismo nivel) de un shadowing intencional, donde
+  // una función local repite el nombre de una global. Se acepta `async function`
+  // porque si no, todas las funciones asíncronas se reportan como no definidas.
+  const defs = [];
+  const defRe = /^([ \t]*)(?:async\s+)?function\s+(\w+)\s*\(/gm;
+  let mDef;
+  while ((mDef = defRe.exec(indexHtml)) !== null) {
+    defs.push({ name: mDef[2], indent: mDef[1].length });
+  }
+  const definedFunctions = [...new Set(defs.map((d) => d.name))];
+
+  const porNombre = new Map();
+  defs.forEach((d) => {
+    if (!porNombre.has(d.name)) porNombre.set(d.name, []);
+    porNombre.get(d.name).push(d.indent);
+  });
+  const shadowing = [];
+  const duplicados = [];
+  porNombre.forEach((indents, name) => {
+    if (indents.length < 2) return;
+    (new Set(indents).size > 1 ? shadowing : duplicados).push(name);
+  });
+
+  if (duplicados.length > 0) {
+    issues.push(`Duplicate function definitions: ${duplicados.join(', ')}`);
+    auditResults.moduleLogic.errors.push(...duplicados.map((d) => `Duplicate function: ${d}`));
+  } else {
+    logSuccess('No duplicate function definitions found');
+  }
+  if (shadowing.length > 0) {
+    auditResults.moduleLogic.warnings.push(`Local shadowing of functions: ${shadowing.join(', ')}`);
   }
 
-  // Check for undefined function calls
-  const functionCalls = indexHtml.match(/\b(\w+)\(/g);
+  // Solo se analiza el JavaScript real (el cuerpo de los <script>). Antes se
+  // escaneaba todo el HTML, así que el texto visible y los comentarios en
+  // inglés ("Preview (", "central (") y el CSS de <style> contaban como
+  // llamadas a funciones inexistentes.
+  const jsOnly = [...indexHtml.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)]
+    .map((m) => m[1])
+    .join('\n');
+  // Se ignoran las llamadas a método (precedidas de punto): sin esto, nombres
+  // como has(), includes(), now() o info() se reportan como funciones globales
+  // inexistentes.
+  const functionCalls = jsOnly.match(/(?<![.\w$])(\w+)\s*\(/g);
   if (functionCalls) {
-    const calledFunctions = [...new Set(functionCalls.map((m) => m.replace(/\(/, '')))];
-    const definedFunctions = functionDefs
-      ? [...new Set(functionDefs.map((m) => m.match(/function\s+(\w+)/)[1]))]
-      : [];
+    // Ojo: el match incluye el espacio previo al paréntesis ("if ("), hay que
+    // quitarlo también o las comparaciones contra la lista nunca coinciden.
+    const calledFunctions = [...new Set(functionCalls.map((m) => m.replace(/\s*\($/, '')))];
+    // Palabras clave y literales del lenguaje: `if (`, `function (`... no son
+    // llamadas a funciones.
+    const PALABRAS_CLAVE = new Set([
+      'if',
+      'for',
+      'while',
+      'switch',
+      'catch',
+      'return',
+      'typeof',
+      'new',
+      'do',
+      'else',
+      'await',
+      'yield',
+      'delete',
+      'void',
+      'in',
+      'of',
+      'function',
+      'true',
+      'false',
+      'null',
+      'undefined',
+      'NaN',
+      'Infinity',
+    ]);
+
     const undefinedCalls = calledFunctions.filter(
       (f) =>
         !definedFunctions.includes(f) &&
+        !PALABRAS_CLAVE.has(f) &&
         ![
           'console',
           'alert',
@@ -115,6 +173,8 @@ function auditModuleLogic(indexHtml) {
           'setInterval',
           'fetch',
           'XMLHttpRequest',
+          'URLSearchParams',
+          'IndexedDB',
           'addEventListener',
           'querySelector',
           'querySelectorAll',

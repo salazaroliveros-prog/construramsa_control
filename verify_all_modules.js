@@ -71,6 +71,27 @@ function loadDatabase() {
 }
 
 // ============================================================
+// VERSION SOURCE OF TRUTH
+// ============================================================
+
+/**
+ * package.json es la fuente de verdad de la versión. El resto de archivos
+ * (index.html, src/config.js, construramsa_db.json) debe coincidir; antes esta
+ * prueba hardcodeaba '2.9.3' y fallaba en cada bump.
+ */
+function readAppVersion() {
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+  return pkg.version;
+}
+
+/** Extrae la versión declarada en un archivo fuente mediante una regex. */
+function readSourceVersion(relativePath, pattern) {
+  const content = fs.readFileSync(path.join(__dirname, relativePath), 'utf8');
+  const match = content.match(pattern);
+  return match ? match[1] : null;
+}
+
+// ============================================================
 // VERIFICATION FUNCTIONS
 // ============================================================
 
@@ -103,8 +124,17 @@ function assert(condition, message) {
 function verifyProjects(db) {
   logSection('PROJECTS VERIFICATION');
 
-  test('Database has version', () => {
-    assert(db.version === '2.9.3', `Expected version 2.9.3, got ${db.version}`);
+  test('Database version matches package.json', () => {
+    const expected = readAppVersion();
+    assert(db.version === expected, `Expected version ${expected}, got ${db.version}`);
+  });
+
+  test('APP_VERSION is consistent in config.js and index.html', () => {
+    const expected = readAppVersion();
+    const cfgVer = readSourceVersion('src/config.js', /APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
+    const idxVer = readSourceVersion('index.html', /APP_VERSION_MARKER:([0-9][^\s]*)/);
+    assert(cfgVer === expected, `src/config.js has ${cfgVer}, expected ${expected}`);
+    assert(idxVer === expected, `index.html has ${idxVer}, expected ${expected}`);
   });
 
   test('Database has configuracion', () => {
@@ -350,7 +380,9 @@ function verifyPersonal(db) {
   });
 
   test('All attendance estados are valid', () => {
-    const validEstados = ['asistio', 'falto', 'justificado'];
+    // 'presente' es un alias legacy que src/reportDataAdapter.js sigue aceptando
+    // (línea 196) y que existe en los datos históricos; antes se rechazaba.
+    const validEstados = ['asistio', 'presente', 'falto', 'justificado'];
     asistencia.forEach((dia) => {
       dia.registros.forEach((reg) => {
         assert(validEstados.includes(reg.estado), `Invalid estado: ${reg.estado}`);
@@ -478,7 +510,7 @@ function verifyViajes(db) {
     rutas_botadero.forEach((ruta, idx) => {
       assert(ruta.id, `Route ${idx} missing id`);
       assert(ruta.nombre && ruta.nombre.length >= 2, `Route ${idx} nombre too short`);
-      assert(ruta.distancia_km > 0, `Route ${idx} distancia_km should be > 0`);
+      assert(ruta.distancia > 0, `Route ${idx} distancia should be > 0`);
     });
   });
 
@@ -524,7 +556,7 @@ function verifyViajes(db) {
   test('Trip calculations are correct', () => {
     viajes.forEach((viaje, idx) => {
       const ruta = rutas_botadero.find((r) => r.id === viaje.ruta_id);
-      const expectedKm = ruta.distancia_km * 2 * viaje.numero;
+      const expectedKm = ruta.distancia * 2 * viaje.numero;
       assert(
         Math.abs(viaje.km_total - expectedKm) < 0.01,
         `Trip ${idx} km_total mismatch: expected ${expectedKm}, got ${viaje.km_total}`
@@ -914,7 +946,8 @@ function verifyBusinessLogic(db) {
   test('Attendance: all workers present on any given day', () => {
     datos.personal.asistencia.forEach((dia) => {
       const estados = dia.registros.map((r) => r.estado);
-      const hasPresent = estados.includes('asistio');
+      // 'presente' es alias legacy aceptado por src/reportDataAdapter.js:196.
+      const hasPresent = estados.includes('asistio') || estados.includes('presente');
       assert(hasPresent, `Day ${dia.fecha} has no present workers`);
     });
   });
@@ -1036,7 +1069,7 @@ function main() {
 
   if (failedTests === 0) {
     console.log(
-      '${colors.green}${colors.bold}✅ ALL MODULES VERIFIED SUCCESSFULLY${colors.reset}\n'
+      `${colors.green}${colors.bold}✅ ALL MODULES VERIFIED SUCCESSFULLY${colors.reset}\n`
     );
     process.exit(0);
   } else {

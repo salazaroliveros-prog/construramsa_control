@@ -33,7 +33,11 @@
     "test-db-ops": "node test_database_operations.js",
     "test-db-conn": "node test_database_connection.js",
     "test-cloud-sync": "node test_cloud_sync.js",
-    "test-reports-full": "node test_reports_completos.js"
+    "test-reports-full": "node test_reports_completos.js",
+    "test-offline": "node test_offline_completo.js",
+    "test-mobile": "node test_mobile_audit.js",
+    "audit-reportes": "node audit_report_module.js",
+    "verify-modulos": "node verify_all_modules.js"
   },
   "repository": {
     "type": "git",

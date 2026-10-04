@@ -49,7 +49,8 @@
           "categoria": "servicios",
           "descripcion": "Aporte de capital",
           "monto": 6180.972575030792,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-08-31_1",
@@ -58,7 +59,8 @@
           "categoria": "alimentos",
           "descripcion": "Gasto operativo 2",
           "monto": 511.5762111675114,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-08-31_2",
@@ -67,7 +69,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 3",
           "monto": 482.0790091468802,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-01_0",
@@ -76,7 +79,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 1",
           "monto": 371.6025676530279,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-01_1",
@@ -85,7 +89,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 2",
           "monto": 355.3025023051474,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-02_0",
@@ -94,7 +99,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 1",
           "monto": 338.4029476614328,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-02_1",
@@ -103,7 +109,8 @@
           "categoria": "alimentos",
           "descripcion": "Gasto operativo 2",
           "monto": 397.0542401750187,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-02_2",
@@ -112,7 +119,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 3",
           "monto": 286.87234214360046,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-03_0",
@@ -121,7 +129,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 1",
           "monto": 519.3753883649722,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-03_1",
@@ -130,7 +139,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 2",
           "monto": 337.91174564946556,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-04_0",
@@ -139,7 +149,8 @@
           "categoria": "alimentos",
           "descripcion": "Gasto operativo 1",
           "monto": 354.35548462684096,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-04_1",
@@ -148,7 +159,8 @@
           "categoria": "alimentos",
           "descripcion": "Gasto operativo 2",
           "monto": 290.1440117012893,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-04_2",
@@ -157,7 +169,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 3",
           "monto": 271.2386993891155,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-05_0",
@@ -166,7 +179,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 1",
           "monto": 231.2018544706811,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-05_1",
@@ -175,7 +189,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 2",
           "monto": 369.9894035582172,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-06_0",
@@ -184,7 +199,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 1",
           "monto": 418.2915626102068,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-06_1",
@@ -193,7 +209,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 133.69267487097517,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-07_0",
@@ -202,7 +219,8 @@
           "categoria": "otros",
           "descripcion": "Aporte de capital",
           "monto": 6909.421191994842,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-07_1",
@@ -211,7 +229,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 2",
           "monto": 483.6291131476442,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-07_2",
@@ -220,7 +239,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 3",
           "monto": 287.23461908903226,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-08_0",
@@ -229,7 +249,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 1",
           "monto": 191.34251094245326,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-08_1",
@@ -238,7 +259,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 553.4304261605876,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-09_0",
@@ -247,7 +269,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 1",
           "monto": 141.38213793120903,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-09_1",
@@ -256,7 +279,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 2",
           "monto": 334.41083448308893,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-09_2",
@@ -265,7 +289,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 3",
           "monto": 512.9103308351794,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-10_0",
@@ -274,7 +299,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 1",
           "monto": 592.5071858352107,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-10_1",
@@ -283,7 +309,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 365.15582087871076,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-10_2",
@@ -292,7 +319,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 3",
           "monto": 427.3405302951131,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-11_0",
@@ -301,7 +329,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 1",
           "monto": 512.7806770058148,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-11_1",
@@ -310,7 +339,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 2",
           "monto": 368.50131013370594,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-11_2",
@@ -319,7 +349,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 3",
           "monto": 275.16755852181836,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-12_0",
@@ -328,7 +359,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 1",
           "monto": 564.6237862566018,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-12_1",
@@ -337,7 +369,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 2",
           "monto": 346.39353938033196,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-12_2",
@@ -346,7 +379,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 3",
           "monto": 438.89149731700854,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-13_0",
@@ -355,7 +389,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 1",
           "monto": 562.5990391110226,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-13_1",
@@ -364,7 +399,8 @@
           "categoria": "alimentos",
           "descripcion": "Gasto operativo 2",
           "monto": 139.27292441639622,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-13_2",
@@ -373,7 +409,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 3",
           "monto": 588.9072557156035,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-14_0",
@@ -382,7 +419,8 @@
           "categoria": "materiales",
           "descripcion": "Aporte de capital",
           "monto": 6165.32549759356,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-14_1",
@@ -391,7 +429,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 541.0183796033534,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-14_2",
@@ -400,7 +439,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 3",
           "monto": 561.860361032265,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-15_0",
@@ -409,7 +449,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 1",
           "monto": 162.0941993068445,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-15_1",
@@ -418,7 +459,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 2",
           "monto": 529.669224460218,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-16_0",
@@ -427,7 +469,8 @@
           "categoria": "alimentos",
           "descripcion": "Gasto operativo 1",
           "monto": 530.9149223437471,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-16_1",
@@ -436,7 +479,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 140.77930279694735,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-16_2",
@@ -445,7 +489,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 3",
           "monto": 426.9085544431517,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-17_0",
@@ -454,7 +499,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 1",
           "monto": 113.0775732385966,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-17_1",
@@ -463,7 +509,8 @@
           "categoria": "alimentos",
           "descripcion": "Gasto operativo 2",
           "monto": 113.47373361619563,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-17_2",
@@ -472,7 +519,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 3",
           "monto": 467.2920695754422,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-18_0",
@@ -481,7 +529,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 1",
           "monto": 557.5175601285175,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-18_1",
@@ -490,7 +539,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 228.257886457528,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-19_0",
@@ -499,7 +549,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 1",
           "monto": 489.28772891909,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-19_1",
@@ -508,7 +559,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 2",
           "monto": 178.23059185672304,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-20_0",
@@ -517,7 +569,8 @@
           "categoria": "alimentos",
           "descripcion": "Gasto operativo 1",
           "monto": 305.7755813917944,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-20_1",
@@ -526,7 +579,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 2",
           "monto": 423.80949111088876,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-20_2",
@@ -535,7 +589,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 3",
           "monto": 367.3329539474146,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-21_0",
@@ -544,7 +599,8 @@
           "categoria": "combustible",
           "descripcion": "Aporte de capital",
           "monto": 6836.272479974319,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-21_1",
@@ -553,7 +609,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 286.3192507757367,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-21_2",
@@ -562,7 +619,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 3",
           "monto": 214.30729096930907,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-22_0",
@@ -571,7 +629,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 1",
           "monto": 309.19359335004356,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-22_1",
@@ -580,7 +639,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 2",
           "monto": 366.3995285269541,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-23_0",
@@ -589,7 +649,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 1",
           "monto": 539.6323056648714,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-23_1",
@@ -598,7 +659,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 2",
           "monto": 135.68249840605836,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-24_0",
@@ -607,7 +669,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 1",
           "monto": 402.7652919592518,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-24_1",
@@ -616,7 +679,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 279.6619990885415,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-25_0",
@@ -625,7 +689,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 1",
           "monto": 316.7818615107751,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-25_1",
@@ -634,7 +699,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 2",
           "monto": 285.781562027166,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-26_0",
@@ -643,7 +709,8 @@
           "categoria": "servicios",
           "descripcion": "Gasto operativo 1",
           "monto": 143.0093552642599,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-26_1",
@@ -652,7 +719,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 2",
           "monto": 575.8989675111552,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "cc_2026-09-26_2",
@@ -661,7 +729,8 @@
           "categoria": "materiales",
           "descripcion": "Gasto operativo 3",
           "monto": 588.429441120215,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Gerente de Compras"
         },
         {
           "id": "cc_2026-09-27_0",
@@ -670,7 +739,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 1",
           "monto": 455.1487866957272,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-27_1",
@@ -679,7 +749,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 143.5839582466341,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-28_0",
@@ -688,7 +759,8 @@
           "categoria": "herramientas",
           "descripcion": "Aporte de capital",
           "monto": 6347.662821513637,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-28_1",
@@ -697,7 +769,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 2",
           "monto": 123.27348458207607,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-29_0",
@@ -706,7 +779,8 @@
           "categoria": "otros",
           "descripcion": "Gasto operativo 1",
           "monto": 457.82996921411353,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-29_1",
@@ -715,7 +789,8 @@
           "categoria": "herramientas",
           "descripcion": "Gasto operativo 2",
           "monto": 570.7033084561448,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Administrador"
         },
         {
           "id": "cc_2026-09-29_2",
@@ -724,7 +799,8 @@
           "categoria": "combustible",
           "descripcion": "Gasto operativo 3",
           "monto": 260.22119913702005,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Operador"
         },
         {
           "id": "gasto_viaje_2026-08-31",
@@ -732,8 +808,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 0",
-          "monto": 937.0112280083059,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 800,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-01",
@@ -741,8 +818,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 1",
-          "monto": 181.8166334219349,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 420,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-02",
@@ -750,8 +828,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 2",
-          "monto": 126.60920171161423,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 855,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-03",
@@ -759,8 +838,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 3",
-          "monto": 1008.193765042394,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 800,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-04",
@@ -768,8 +848,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 4",
-          "monto": 196.38492570943154,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 1425,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-05",
@@ -777,8 +858,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 5",
-          "monto": 96.50295256027302,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 1260,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-06",
@@ -786,8 +868,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 6",
-          "monto": 911.9233144927643,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 800,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-07",
@@ -795,8 +878,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 7",
-          "monto": 116.9051315911166,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 1680,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-08",
@@ -804,8 +888,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 8",
-          "monto": 114.42979448413982,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 2565,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_viaje_2026-09-09",
@@ -813,8 +898,9 @@
           "tipo": "egreso",
           "categoria": "transporte",
           "descripcion": "Viaje de camión 9",
-          "monto": 921.3267563357932,
-          "proyecto_id": "prueba_mume9l13"
+          "monto": 800,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Transportista"
         },
         {
           "id": "gasto_mant_2026-08-31",
@@ -823,7 +909,8 @@
           "categoria": "mantenimiento",
           "descripcion": "Orden de mantenimiento 0",
           "monto": 1093.8336275323854,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Jefe de Mantenimiento"
         },
         {
           "id": "gasto_mant_2026-09-01",
@@ -832,7 +919,8 @@
           "categoria": "mantenimiento",
           "descripcion": "Orden de mantenimiento 1",
           "monto": 1253.0345235521536,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Jefe de Mantenimiento"
         },
         {
           "id": "gasto_mant_2026-09-02",
@@ -841,7 +929,8 @@
           "categoria": "mantenimiento",
           "descripcion": "Orden de mantenimiento 2",
           "monto": 638.9884330987418,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Jefe de Mantenimiento"
         },
         {
           "id": "gasto_mant_2026-09-03",
@@ -850,7 +939,8 @@
           "categoria": "mantenimiento",
           "descripcion": "Orden de mantenimiento 3",
           "monto": 884.4336873011013,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Jefe de Mantenimiento"
         },
         {
           "id": "gasto_mant_2026-09-04",
@@ -859,7 +949,8 @@
           "categoria": "mantenimiento",
           "descripcion": "Orden de mantenimiento 4",
           "monto": 1152.885186889498,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Jefe de Mantenimiento"
         },
         {
           "id": "gasto_mant_2026-09-05",
@@ -868,7 +959,8 @@
           "categoria": "mantenimiento",
           "descripcion": "Orden de mantenimiento 5",
           "monto": 635.306227912761,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Jefe de Mantenimiento"
         },
         {
           "id": "gasto_mant_2026-09-06",
@@ -877,7 +969,8 @@
           "categoria": "mantenimiento",
           "descripcion": "Orden de mantenimiento 6",
           "monto": 1282.4379568001968,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Jefe de Mantenimiento"
         },
         {
           "id": "gasto_mant_2026-09-07",
@@ -886,7 +979,8 @@
           "categoria": "mantenimiento",
           "descripcion": "Orden de mantenimiento 7",
           "monto": 1009.4943533203686,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Jefe de Mantenimiento"
         },
         {
           "id": "gasto_ins_2026-08-31",
@@ -895,7 +989,8 @@
           "categoria": "insumos",
           "descripcion": "Compra de insumos 0",
           "monto": 111.33749446700902,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Almacén"
         },
         {
           "id": "gasto_ins_2026-09-01",
@@ -904,7 +999,8 @@
           "categoria": "insumos",
           "descripcion": "Compra de insumos 1",
           "monto": 232.385954545407,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Almacén"
         },
         {
           "id": "gasto_ins_2026-09-02",
@@ -913,7 +1009,8 @@
           "categoria": "insumos",
           "descripcion": "Compra de insumos 2",
           "monto": 186.84010483645872,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Almacén"
         },
         {
           "id": "gasto_ins_2026-09-03",
@@ -922,7 +1019,8 @@
           "categoria": "insumos",
           "descripcion": "Compra de insumos 3",
           "monto": 204.51817039659227,
-          "proyecto_id": "prueba_mume9l13"
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Almacén"
         },
         {
           "id": "gasto_ins_2026-09-04",
@@ -931,6 +1029,245 @@
           "categoria": "insumos",
           "descripcion": "Compra de insumos 4",
           "monto": 225.8452523075502,
+          "proyecto_id": "prueba_mume9l13",
+          "responsable": "Almacén"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_1",
+          "fecha": "2026-08-31",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Camión Volteo 1",
+          "monto": 949.44,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_2",
+          "fecha": "2026-09-01",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Excavadora CAT 320",
+          "monto": 702.4,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_3",
+          "fecha": "2026-09-02",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Compactor Vibratorio",
+          "monto": 730.88,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_4",
+          "fecha": "2026-09-03",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Camión Volteo 1",
+          "monto": 854.08,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_5",
+          "fecha": "2026-09-04",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Excavadora CAT 320",
+          "monto": 868.16,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_6",
+          "fecha": "2026-09-05",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Compactor Vibratorio",
+          "monto": 922.24,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_7",
+          "fecha": "2026-09-06",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Camión Volteo 1",
+          "monto": 932.48,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_8",
+          "fecha": "2026-09-07",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Excavadora CAT 320",
+          "monto": 878.08,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_9",
+          "fecha": "2026-09-08",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Compactor Vibratorio",
+          "monto": 854.72,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_10",
+          "fecha": "2026-09-09",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Camión Volteo 1",
+          "monto": 749.44,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_11",
+          "fecha": "2026-09-10",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Excavadora CAT 320",
+          "monto": 885.44,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_12",
+          "fecha": "2026-09-11",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Compactor Vibratorio",
+          "monto": 641.92,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_13",
+          "fecha": "2026-09-12",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Camión Volteo 1",
+          "monto": 949.12,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_14",
+          "fecha": "2026-09-13",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Excavadora CAT 320",
+          "monto": 788.8,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gmaq_prueba_mume9l13_15",
+          "fecha": "2026-09-14",
+          "tipo": "egreso",
+          "categoria": "combustible",
+          "descripcion": "Combustible/Mantenimiento Compactor Vibratorio",
+          "monto": 763.84,
+          "responsable": "Operador",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gcot_prueba_mume9l13_1",
+          "tipo": "egreso",
+          "monto": 2267.79,
+          "descripcion": "Compra aprobada: Cemento",
+          "fecha": "2026-08-31",
+          "categoria": "materiales",
+          "proveedor": "Constructora Los Ángeles",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gcot_prueba_mume9l13_2",
+          "tipo": "egreso",
+          "monto": 3873.18,
+          "descripcion": "Compra aprobada: Bloque",
+          "fecha": "2026-09-02",
+          "categoria": "materiales",
+          "proveedor": "Hierros y Aceros",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gcot_prueba_mume9l13_3",
+          "tipo": "egreso",
+          "monto": 1431.23,
+          "descripcion": "Compra aprobada: Cemento",
+          "fecha": "2026-09-03",
+          "categoria": "materiales",
+          "proveedor": "Constructora Los Ángeles",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gcot_prueba_mume9l13_4",
+          "tipo": "egreso",
+          "monto": 571.98,
+          "descripcion": "Compra aprobada: Varilla",
+          "fecha": "2026-09-04",
+          "categoria": "materiales",
+          "proveedor": "Distribuidora de Cemento",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gcot_prueba_mume9l13_5",
+          "tipo": "egreso",
+          "monto": 3295.77,
+          "descripcion": "Compra aprobada: Bloque",
+          "fecha": "2026-09-05",
+          "categoria": "materiales",
+          "proveedor": "Hierros y Aceros",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gcot_prueba_mume9l13_6",
+          "tipo": "egreso",
+          "monto": 3064.14,
+          "descripcion": "Compra aprobada: Cemento",
+          "fecha": "2026-09-06",
+          "categoria": "materiales",
+          "proveedor": "Constructora Los Ángeles",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gcot_prueba_mume9l13_7",
+          "tipo": "egreso",
+          "monto": 8462.27,
+          "descripcion": "Compra aprobada: Varilla",
+          "fecha": "2026-09-07",
+          "categoria": "materiales",
+          "proveedor": "Distribuidora de Cemento",
+          "responsable": "Gerente de Compras",
+          "proyecto_id": "prueba_mume9l13"
+        },
+        {
+          "id": "gcot_prueba_mume9l13_8",
+          "tipo": "egreso",
+          "monto": 5607.58,
+          "descripcion": "Compra aprobada: Cemento",
+          "fecha": "2026-09-09",
+          "categoria": "materiales",
+          "proveedor": "Constructora Los Ángeles",
+          "responsable": "Gerente de Compras",
           "proyecto_id": "prueba_mume9l13"
         }
       ],
@@ -940,19 +1277,22 @@
             "id": "v1",
             "nombre": "Camión Volteo 1",
             "tipo": "camion",
-            "capacidad": 10
+            "capacidad": 10,
+            "codigo": "MAQ-01"
           },
           {
             "id": "v2",
             "nombre": "Excavadora CAT 320",
             "tipo": "excavadora",
-            "capacidad": 5
+            "capacidad": 5,
+            "codigo": "MAQ-02"
           },
           {
             "id": "v3",
             "nombre": "Compactor Vibratorio",
             "tipo": "compactor",
-            "capacidad": 3
+            "capacidad": 3,
+            "codigo": "MAQ-03"
           }
         ],
         "registros": [
@@ -962,7 +1302,14 @@
             "vehiculo_id": "v1",
             "horas": 8,
             "combustible": 29.66793021224866,
-            "operador": "Operador 1"
+            "operador": "Operador 1",
+            "odometro_inicial": 10000,
+            "odometro_final": 10056,
+            "horas_trabajadas": 8,
+            "combustible_galones": 29.67,
+            "combustible_costo": 949.44,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_1"
           },
           {
             "id": "maq_2026-09-01",
@@ -970,7 +1317,14 @@
             "vehiculo_id": "v2",
             "horas": 8,
             "combustible": 21.950351691825574,
-            "operador": "Operador 2"
+            "operador": "Operador 2",
+            "odometro_inicial": 10420,
+            "odometro_final": 10476,
+            "horas_trabajadas": 8,
+            "combustible_galones": 21.95,
+            "combustible_costo": 702.4,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_2"
           },
           {
             "id": "maq_2026-09-02",
@@ -978,7 +1332,14 @@
             "vehiculo_id": "v3",
             "horas": 8,
             "combustible": 22.837745613496462,
-            "operador": "Operador 3"
+            "operador": "Operador 3",
+            "odometro_inicial": 10840,
+            "odometro_final": 10896,
+            "horas_trabajadas": 8,
+            "combustible_galones": 22.84,
+            "combustible_costo": 730.88,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_3"
           },
           {
             "id": "maq_2026-09-03",
@@ -986,7 +1347,14 @@
             "vehiculo_id": "v1",
             "horas": 8,
             "combustible": 26.692783618878988,
-            "operador": "Operador 4"
+            "operador": "Operador 4",
+            "odometro_inicial": 11260,
+            "odometro_final": 11316,
+            "horas_trabajadas": 8,
+            "combustible_galones": 26.69,
+            "combustible_costo": 854.08,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_4"
           },
           {
             "id": "maq_2026-09-04",
@@ -994,7 +1362,14 @@
             "vehiculo_id": "v2",
             "horas": 8,
             "combustible": 27.127572696328155,
-            "operador": "Operador 5"
+            "operador": "Operador 5",
+            "odometro_inicial": 11680,
+            "odometro_final": 11736,
+            "horas_trabajadas": 8,
+            "combustible_galones": 27.13,
+            "combustible_costo": 868.16,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_5"
           },
           {
             "id": "maq_2026-09-05",
@@ -1002,7 +1377,14 @@
             "vehiculo_id": "v3",
             "horas": 8,
             "combustible": 28.824429496987158,
-            "operador": "Operador 6"
+            "operador": "Operador 6",
+            "odometro_inicial": 12100,
+            "odometro_final": 12156,
+            "horas_trabajadas": 8,
+            "combustible_galones": 28.82,
+            "combustible_costo": 922.24,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_6"
           },
           {
             "id": "maq_2026-09-06",
@@ -1010,7 +1392,14 @@
             "vehiculo_id": "v1",
             "horas": 8,
             "combustible": 29.14042799933866,
-            "operador": "Operador 7"
+            "operador": "Operador 7",
+            "odometro_inicial": 12520,
+            "odometro_final": 12576,
+            "horas_trabajadas": 8,
+            "combustible_galones": 29.14,
+            "combustible_costo": 932.48,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_7"
           },
           {
             "id": "maq_2026-09-07",
@@ -1018,7 +1407,14 @@
             "vehiculo_id": "v2",
             "horas": 8,
             "combustible": 27.436341896095218,
-            "operador": "Operador 8"
+            "operador": "Operador 8",
+            "odometro_inicial": 12940,
+            "odometro_final": 12996,
+            "horas_trabajadas": 8,
+            "combustible_galones": 27.44,
+            "combustible_costo": 878.08,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_8"
           },
           {
             "id": "maq_2026-09-08",
@@ -1026,7 +1422,14 @@
             "vehiculo_id": "v3",
             "horas": 8,
             "combustible": 26.705867033665534,
-            "operador": "Operador 9"
+            "operador": "Operador 9",
+            "odometro_inicial": 13360,
+            "odometro_final": 13416,
+            "horas_trabajadas": 8,
+            "combustible_galones": 26.71,
+            "combustible_costo": 854.72,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_9"
           },
           {
             "id": "maq_2026-09-09",
@@ -1034,7 +1437,14 @@
             "vehiculo_id": "v1",
             "horas": 8,
             "combustible": 23.41519267575867,
-            "operador": "Operador 10"
+            "operador": "Operador 10",
+            "odometro_inicial": 13780,
+            "odometro_final": 13836,
+            "horas_trabajadas": 8,
+            "combustible_galones": 23.42,
+            "combustible_costo": 749.44,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_10"
           },
           {
             "id": "maq_2026-09-10",
@@ -1042,7 +1452,14 @@
             "vehiculo_id": "v2",
             "horas": 8,
             "combustible": 27.667350274268177,
-            "operador": "Operador 11"
+            "operador": "Operador 11",
+            "odometro_inicial": 14200,
+            "odometro_final": 14256,
+            "horas_trabajadas": 8,
+            "combustible_galones": 27.67,
+            "combustible_costo": 885.44,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_11"
           },
           {
             "id": "maq_2026-09-11",
@@ -1050,7 +1467,14 @@
             "vehiculo_id": "v3",
             "horas": 8,
             "combustible": 20.05999804031607,
-            "operador": "Operador 12"
+            "operador": "Operador 12",
+            "odometro_inicial": 14620,
+            "odometro_final": 14676,
+            "horas_trabajadas": 8,
+            "combustible_galones": 20.06,
+            "combustible_costo": 641.92,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_12"
           },
           {
             "id": "maq_2026-09-12",
@@ -1058,7 +1482,14 @@
             "vehiculo_id": "v1",
             "horas": 8,
             "combustible": 29.655510424339845,
-            "operador": "Operador 13"
+            "operador": "Operador 13",
+            "odometro_inicial": 15040,
+            "odometro_final": 15096,
+            "horas_trabajadas": 8,
+            "combustible_galones": 29.66,
+            "combustible_costo": 949.12,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_13"
           },
           {
             "id": "maq_2026-09-13",
@@ -1066,7 +1497,14 @@
             "vehiculo_id": "v2",
             "horas": 8,
             "combustible": 24.64832246463928,
-            "operador": "Operador 14"
+            "operador": "Operador 14",
+            "odometro_inicial": 15460,
+            "odometro_final": 15516,
+            "horas_trabajadas": 8,
+            "combustible_galones": 24.65,
+            "combustible_costo": 788.8,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_14"
           },
           {
             "id": "maq_2026-09-14",
@@ -1074,7 +1512,14 @@
             "vehiculo_id": "v3",
             "horas": 8,
             "combustible": 23.8747023179913,
-            "operador": "Operador 15"
+            "operador": "Operador 15",
+            "odometro_inicial": 15880,
+            "odometro_final": 15936,
+            "horas_trabajadas": 8,
+            "combustible_galones": 23.87,
+            "combustible_costo": 763.84,
+            "mantenimiento_costo": 0,
+            "gasto_id": "gmaq_prueba_mume9l13_15"
           }
         ]
       },
@@ -1910,91 +2355,109 @@
             "id": "cot_2026-08-31",
             "fecha": "2026-08-31",
             "proveedor_id": "p1",
-            "articulo": "Cemento",
             "cantidad": 44.32018861019767,
             "precio_unitario": 51.168298033830716,
-            "estado": "aprobado"
+            "estado": "aprobada",
+            "material_descripcion": "Cemento",
+            "total": 2267.79,
+            "gasto_id": "gcot_prueba_mume9l13_1"
           },
           {
             "id": "cot_2026-09-01",
             "fecha": "2026-09-01",
             "proveedor_id": "p2",
-            "articulo": "Varilla",
             "cantidad": 10.468701051559522,
             "precio_unitario": 61.206124847521124,
-            "estado": "pendiente"
+            "estado": "pendiente",
+            "material_descripcion": "Varilla",
+            "total": 640.75
           },
           {
             "id": "cot_2026-09-02",
             "fecha": "2026-09-02",
             "proveedor_id": "p3",
-            "articulo": "Bloque",
             "cantidad": 26.22477463089033,
             "precio_unitario": 147.6916146741301,
-            "estado": "aprobado"
+            "estado": "aprobada",
+            "material_descripcion": "Bloque",
+            "total": 3873.18,
+            "gasto_id": "gcot_prueba_mume9l13_2"
           },
           {
             "id": "cot_2026-09-03",
             "fecha": "2026-09-03",
             "proveedor_id": "p1",
-            "articulo": "Cemento",
             "cantidad": 16.954137492030384,
             "precio_unitario": 84.41770118895025,
-            "estado": "aprobado"
+            "estado": "aprobada",
+            "material_descripcion": "Cemento",
+            "total": 1431.23,
+            "gasto_id": "gcot_prueba_mume9l13_3"
           },
           {
             "id": "cot_2026-09-04",
             "fecha": "2026-09-04",
             "proveedor_id": "p2",
-            "articulo": "Varilla",
             "cantidad": 10.388908430519413,
             "precio_unitario": 55.05695739102951,
-            "estado": "aprobado"
+            "estado": "aprobada",
+            "material_descripcion": "Varilla",
+            "total": 571.98,
+            "gasto_id": "gcot_prueba_mume9l13_4"
           },
           {
             "id": "cot_2026-09-05",
             "fecha": "2026-09-05",
             "proveedor_id": "p3",
-            "articulo": "Bloque",
             "cantidad": 52.54764488996347,
             "precio_unitario": 62.71961206809611,
-            "estado": "aprobado"
+            "estado": "aprobada",
+            "material_descripcion": "Bloque",
+            "total": 3295.77,
+            "gasto_id": "gcot_prueba_mume9l13_5"
           },
           {
             "id": "cot_2026-09-06",
             "fecha": "2026-09-06",
             "proveedor_id": "p1",
-            "articulo": "Cemento",
             "cantidad": 40.63692982769,
             "precio_unitario": 75.40275478118565,
-            "estado": "aprobado"
+            "estado": "aprobada",
+            "material_descripcion": "Cemento",
+            "total": 3064.14,
+            "gasto_id": "gcot_prueba_mume9l13_6"
           },
           {
             "id": "cot_2026-09-07",
             "fecha": "2026-09-07",
             "proveedor_id": "p2",
-            "articulo": "Varilla",
             "cantidad": 58.819490986930326,
             "precio_unitario": 143.86850310190485,
-            "estado": "aprobado"
+            "estado": "aprobada",
+            "material_descripcion": "Varilla",
+            "total": 8462.27,
+            "gasto_id": "gcot_prueba_mume9l13_7"
           },
           {
             "id": "cot_2026-09-08",
             "fecha": "2026-09-08",
             "proveedor_id": "p3",
-            "articulo": "Bloque",
             "cantidad": 27.598770730248415,
             "precio_unitario": 51.866867571923144,
-            "estado": "pendiente"
+            "estado": "pendiente",
+            "material_descripcion": "Bloque",
+            "total": 1431.46
           },
           {
             "id": "cot_2026-09-09",
             "fecha": "2026-09-09",
             "proveedor_id": "p1",
-            "articulo": "Cemento",
             "cantidad": 45.21707374712178,
             "precio_unitario": 124.01461832652527,
-            "estado": "aprobado"
+            "estado": "aprobada",
+            "material_descripcion": "Cemento",
+            "total": 5607.58,
+            "gasto_id": "gcot_prueba_mume9l13_8"
           }
         ]
       },
@@ -2003,24 +2466,28 @@
           {
             "id": "r1",
             "nombre": "Ruta Principal - Botadero A",
-            "distancia_km": 15
+            "distancia": 15
           },
           {
             "id": "r2",
             "nombre": "Ruta Secundaria - Botadero B",
-            "distancia_km": 12
+            "distancia": 12
           }
         ],
         "camiones": [
           {
             "id": "c1",
             "nombre": "Volvo FH16",
-            "capacidad": 25
+            "capacidad": 25,
+            "propiedad": "propio",
+            "consumo": 0.38
           },
           {
             "id": "c2",
             "nombre": "Scania R450",
-            "capacidad": 25
+            "capacidad": 25,
+            "propiedad": "propio",
+            "consumo": 0.35
           }
         ],
         "equipo_alquilado": [
@@ -2037,12 +2504,14 @@
             "vehiculo_id": "ea1",
             "material": "Tierra",
             "numero": 1,
-            "km_total": 18.26816373444079,
-            "litros": 5.480449120332237,
-            "costo_combustible": 137.01122800830592,
+            "km_total": 30,
+            "litros": 0,
+            "costo_combustible": 0,
             "costo_alquiler": 800,
-            "total": 937.0112280083059,
-            "gasto_id": "gasto_viaje_2026-08-31"
+            "total": 800,
+            "gasto_id": "gasto_viaje_2026-08-31",
+            "ruta_id": "r1",
+            "propiedad": "alquilado"
           },
           {
             "id": "viaje_2026-09-01",
@@ -2050,12 +2519,14 @@
             "vehiculo_id": "c2",
             "material": "Grava",
             "numero": 2,
-            "km_total": 24.242217789591322,
-            "litros": 7.272665336877396,
-            "costo_combustible": 181.8166334219349,
+            "km_total": 48,
+            "litros": 16.8,
+            "costo_combustible": 420,
             "costo_alquiler": 0,
-            "total": 181.8166334219349,
-            "gasto_id": "gasto_viaje_2026-09-01"
+            "total": 420,
+            "gasto_id": "gasto_viaje_2026-09-01",
+            "ruta_id": "r2",
+            "propiedad": "propio"
           },
           {
             "id": "viaje_2026-09-02",
@@ -2063,12 +2534,14 @@
             "vehiculo_id": "c1",
             "material": "Arena",
             "numero": 3,
-            "km_total": 16.881226894881898,
-            "litros": 5.064368068464569,
-            "costo_combustible": 126.60920171161423,
+            "km_total": 90,
+            "litros": 34.2,
+            "costo_combustible": 855,
             "costo_alquiler": 0,
-            "total": 126.60920171161423,
-            "gasto_id": "gasto_viaje_2026-09-02"
+            "total": 855,
+            "gasto_id": "gasto_viaje_2026-09-02",
+            "ruta_id": "r1",
+            "propiedad": "propio"
           },
           {
             "id": "viaje_2026-09-03",
@@ -2076,12 +2549,14 @@
             "vehiculo_id": "ea1",
             "material": "Tierra",
             "numero": 4,
-            "km_total": 27.759168672319213,
-            "litros": 8.327750601695763,
-            "costo_combustible": 208.1937650423941,
+            "km_total": 96,
+            "litros": 0,
+            "costo_combustible": 0,
             "costo_alquiler": 800,
-            "total": 1008.193765042394,
-            "gasto_id": "gasto_viaje_2026-09-03"
+            "total": 800,
+            "gasto_id": "gasto_viaje_2026-09-03",
+            "ruta_id": "r2",
+            "propiedad": "alquilado"
           },
           {
             "id": "viaje_2026-09-04",
@@ -2089,12 +2564,14 @@
             "vehiculo_id": "c1",
             "material": "Grava",
             "numero": 5,
-            "km_total": 26.18465676125754,
-            "litros": 7.855397028377261,
-            "costo_combustible": 196.38492570943154,
+            "km_total": 150,
+            "litros": 57,
+            "costo_combustible": 1425,
             "costo_alquiler": 0,
-            "total": 196.38492570943154,
-            "gasto_id": "gasto_viaje_2026-09-04"
+            "total": 1425,
+            "gasto_id": "gasto_viaje_2026-09-04",
+            "ruta_id": "r1",
+            "propiedad": "propio"
           },
           {
             "id": "viaje_2026-09-05",
@@ -2102,12 +2579,14 @@
             "vehiculo_id": "c2",
             "material": "Arena",
             "numero": 6,
-            "km_total": 12.867060341369736,
-            "litros": 3.8601181024109206,
-            "costo_combustible": 96.50295256027302,
+            "km_total": 144,
+            "litros": 50.4,
+            "costo_combustible": 1260,
             "costo_alquiler": 0,
-            "total": 96.50295256027302,
-            "gasto_id": "gasto_viaje_2026-09-05"
+            "total": 1260,
+            "gasto_id": "gasto_viaje_2026-09-05",
+            "ruta_id": "r2",
+            "propiedad": "propio"
           },
           {
             "id": "viaje_2026-09-06",
@@ -2115,12 +2594,14 @@
             "vehiculo_id": "ea1",
             "material": "Tierra",
             "numero": 7,
-            "km_total": 14.923108599035245,
-            "litros": 4.4769325797105735,
-            "costo_combustible": 111.92331449276433,
+            "km_total": 210,
+            "litros": 0,
+            "costo_combustible": 0,
             "costo_alquiler": 800,
-            "total": 911.9233144927643,
-            "gasto_id": "gasto_viaje_2026-09-06"
+            "total": 800,
+            "gasto_id": "gasto_viaje_2026-09-06",
+            "ruta_id": "r1",
+            "propiedad": "alquilado"
           },
           {
             "id": "viaje_2026-09-07",
@@ -2128,12 +2609,14 @@
             "vehiculo_id": "c2",
             "material": "Grava",
             "numero": 8,
-            "km_total": 15.587350878815545,
-            "litros": 4.676205263644664,
-            "costo_combustible": 116.9051315911166,
+            "km_total": 192,
+            "litros": 67.2,
+            "costo_combustible": 1680,
             "costo_alquiler": 0,
-            "total": 116.9051315911166,
-            "gasto_id": "gasto_viaje_2026-09-07"
+            "total": 1680,
+            "gasto_id": "gasto_viaje_2026-09-07",
+            "ruta_id": "r2",
+            "propiedad": "propio"
           },
           {
             "id": "viaje_2026-09-08",
@@ -2141,12 +2624,14 @@
             "vehiculo_id": "c1",
             "material": "Arena",
             "numero": 9,
-            "km_total": 15.257305931218642,
-            "litros": 4.5771917793655925,
-            "costo_combustible": 114.42979448413982,
+            "km_total": 270,
+            "litros": 102.6,
+            "costo_combustible": 2565,
             "costo_alquiler": 0,
-            "total": 114.42979448413982,
-            "gasto_id": "gasto_viaje_2026-09-08"
+            "total": 2565,
+            "gasto_id": "gasto_viaje_2026-09-08",
+            "ruta_id": "r1",
+            "propiedad": "propio"
           },
           {
             "id": "viaje_2026-09-09",
@@ -2154,12 +2639,14 @@
             "vehiculo_id": "ea1",
             "material": "Tierra",
             "numero": 10,
-            "km_total": 16.176900844772433,
-            "litros": 4.85307025343173,
-            "costo_combustible": 121.32675633579323,
+            "km_total": 240,
+            "litros": 0,
+            "costo_combustible": 0,
             "costo_alquiler": 800,
-            "total": 921.3267563357932,
-            "gasto_id": "gasto_viaje_2026-09-09"
+            "total": 800,
+            "gasto_id": "gasto_viaje_2026-09-09",
+            "ruta_id": "r2",
+            "propiedad": "alquilado"
           }
         ]
       },
@@ -2176,10 +2663,16 @@
             "tipo": "camion"
           }
         ],
-        "formatos": [
-          "preventivo",
-          "correctivo"
-        ],
+        "formatos": {
+          "excavadora": [
+            "preventivo",
+            "correctivo"
+          ],
+          "camion": [
+            "preventivo",
+            "correctivo"
+          ]
+        },
         "ordenes": [
           {
             "id": "ord_2026-08-31",

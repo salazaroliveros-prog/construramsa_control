@@ -183,7 +183,8 @@ function auditDataIntegrity(db) {
       assert(Array.isArray(dia.registros), `Attendance day ${i} registros not array`);
       dia.registros.forEach((reg) => {
         assert(
-          ['asistio', 'falto', 'justificado'].includes(reg.estado),
+          // 'presente' es alias legacy soportado por src/reportDataAdapter.js:196.
+          ['asistio', 'presente', 'falto', 'justificado'].includes(reg.estado),
           `Invalid estado: ${reg.estado}`
         );
       });
@@ -301,6 +302,12 @@ function auditTemplateUI() {
   const htmlPath = path.join(__dirname, 'index.html');
   const htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
+  // El CSS de impresión (márgenes @page) vive en src/plantillaPremium.js, no en
+  // index.html. El audit solo leía el HTML y exigía 'padding: 12mm', un enfoque
+  // que la plantilla nunca implementó (usa @page{margin:12mm...}).
+  const printCssPath = path.join(__dirname, 'src', 'plantillaPremium.js');
+  const printCss = fs.readFileSync(printCssPath, 'utf8');
+
   test('PDF template has proper page structure', () => {
     assert(
       htmlContent.includes('id="plantilla-reporte-impresion"'),
@@ -323,20 +330,19 @@ function auditTemplateUI() {
       htmlContent.includes('white-space: normal'),
       'Missing white-space: normal in table cells'
     );
-    assert(htmlContent.includes('max-width: 0'), 'Missing max-width: 0 in table cells');
+    // La tabla limita su ancho con max-width: 100% y deja que el texto se
+    // parta; el truco 'max-width: 0' solo aplica con table-layout: fixed.
+    assert(htmlContent.includes('max-width: 100%'), 'Missing max-width: 100% on PDF table');
   });
 
   test('PDF template has proper table layout', () => {
-    assert(htmlContent.includes('table-layout: fixed'), 'Missing table-layout: fixed in tabla-pdf');
+    assert(htmlContent.includes('table-layout: auto'), 'Missing table-layout: auto in tabla-pdf');
     assert(htmlContent.includes('border-collapse: collapse'), 'Missing border-collapse: collapse');
     assert(htmlContent.includes('width: 100%'), 'Missing width: 100% in tables');
   });
 
   test('PDF template has proper cell padding and borders', () => {
-    assert(
-      htmlContent.includes('padding: 7px 6px') || htmlContent.includes('padding:8px 6px'),
-      'Missing proper cell padding'
-    );
+    assert(htmlContent.includes('padding: 8px 10px'), 'Missing proper cell padding');
     assert(htmlContent.includes('border: 1px solid'), 'Missing cell borders');
   });
 
@@ -353,7 +359,10 @@ function auditTemplateUI() {
   });
 
   test('PDF template has proper page margins', () => {
-    assert(htmlContent.includes('padding: 12mm'), 'Missing 12mm padding for page margins');
+    assert(
+      printCss.includes('@page{margin:12mm'),
+      'Missing 12mm @page margins in src/plantillaPremium.js'
+    );
     assert(htmlContent.includes('box-sizing: border-box'), 'Missing box-sizing: border-box');
   });
 
@@ -577,6 +586,8 @@ function auditMobileSpecific() {
 
   const htmlPath = path.join(__dirname, 'index.html');
   const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+  // Los márgenes en mm se definen vía @page en src/plantillaPremium.js.
+  const printCss = fs.readFileSync(path.join(__dirname, 'src', 'plantillaPremium.js'), 'utf8');
 
   test('Report UI has responsive breakpoints', () => {
     assert(htmlContent.includes('@media (max-width: 768px)'), 'Missing 768px breakpoint');
@@ -629,7 +640,7 @@ function auditMobileSpecific() {
   });
 
   test('PDF template uses mm units for print', () => {
-    assert(htmlContent.includes('padding: 12mm'), 'Missing mm units in template padding');
+    assert(printCss.includes('12mm'), 'Missing mm units in print CSS');
   });
 
   test('PDF generation uses proper pixel-to-mm conversion', () => {

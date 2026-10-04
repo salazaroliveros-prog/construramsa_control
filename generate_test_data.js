@@ -362,10 +362,11 @@ function generateComprehensiveTestData(db) {
   // ============================================================
   console.log('  🚛 Generating viajes de camiones...');
 
+  // El campo canónico es `distancia` (index.html:10570); `distancia_km` es legacy.
   const rutas = [
-    { id: generateId('ruta'), nombre: 'Ruta Principal - Botadero Central', distancia_km: 15 },
-    { id: generateId('ruta'), nombre: 'Ruta Norte - Botadero San Juan', distancia_km: 22 },
-    { id: generateId('ruta'), nombre: 'Ruta Sur - Botadero Las Flores', distancia_km: 18 },
+    { id: generateId('ruta'), nombre: 'Ruta Principal - Botadero Central', distancia: 15 },
+    { id: generateId('ruta'), nombre: 'Ruta Norte - Botadero San Juan', distancia: 22 },
+    { id: generateId('ruta'), nombre: 'Ruta Sur - Botadero Las Flores', distancia: 18 },
   ];
 
   const camiones = [
@@ -413,7 +414,7 @@ function generateComprehensiveTestData(db) {
     const esAlquilado = idx % 4 === 0;
     const ruta = rutas[idx % rutas.length];
     const camion = esAlquilado ? equipoAlquilado[0] : camiones[idx % camiones.length];
-    const distancia = ruta.distancia_km;
+    const distancia = ruta.distancia;
     const numeroViajes = randomInt(2, 8);
     const kmTotal = distancia * 2 * numeroViajes;
     const litros = esAlquilado ? 0 : kmTotal * camion.consumo;

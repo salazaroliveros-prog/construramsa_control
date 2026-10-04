@@ -90,6 +90,7 @@
     <script src="./src/reportDataAdapter.js" defer></script>
     <script src="./src/syncOptimizer.js" defer></script>
     <script src="./src/silentDownload.js" defer></script>
+    <script src="./src/backgroundSync.js" defer></script>
     <script src="./src/persistence.js" defer></script>
     <script src="./src/exportador.js" defer></script>
     <script src="./src/kpiEngine.js" defer></script>
@@ -6156,7 +6157,7 @@
                 if (c.estado === 'pendiente') pending.push({ texto: `📋 Cotización: ${c.material_descripcion} (${formatearMoneda(c.total)})`, fecha: c.fecha });
             });
             const hoy = new Date().toISOString().split('T')[0];
-            viajes.forEach(v => { if (v.fecha === hoy) pending.push({ texto: `🚛 Hoy: ${(camiones.find(x=>x.id===v.vehiculo_id))?.nombre || 'N/A'} — ${v.numero} viaje(s) de ${v.material}`, fecha: v.fecha }); });
+            viajes.forEach(v => { if (v.fecha === hoy) pending.push({ texto: `🚛 Hoy: ${([...(datos.viajes_camiones.camiones||[]), ...(datos.viajes_camiones.equipo_alquilado||[])].find(x=>x.id===v.vehiculo_id))?.nombre || 'N/A'} — ${v.numero} viaje(s) de ${v.material}`, fecha: v.fecha }); });
             ords.forEach(o => { if (o.fecha === hoy) pending.push({ texto: `🔧 Hoy: orden de mantenimiento ${o.tipo}`, fecha: o.fecha }); });
             ins.forEach(i => { if (i.fecha === hoy) pending.push({ texto: `🛒 Hoy: compra de ${i.articulo} (x${i.cantidad})`, fecha: i.fecha }); });
             pending.sort((a,b) => (a.fecha||'').localeCompare(b.fecha||''));
@@ -10691,7 +10692,9 @@ function cargarTablaCamiones() {
             const pag_ = viajes.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
             tbody.innerHTML = '';
 pag_.forEach(v => {
-                const cam = (datos.viajes_camiones.camiones || []).find(c => c.id === v.vehiculo_id);
+                // El viaje puede apuntar a un camión propio o a equipo alquilado.
+                const catalogo = [...(datos.viajes_camiones.camiones || []), ...(datos.viajes_camiones.equipo_alquilado || [])];
+                const cam = catalogo.find(c => c.id === v.vehiculo_id);
                 const nombre = cam ? cam.nombre : 'N/A';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `

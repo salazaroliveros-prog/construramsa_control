@@ -14,6 +14,8 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const net = require('net');
+const { spawn } = require('child_process');
 
 const DB_PATH = path.join(__dirname, 'construramsa_db.json');
 const BACKUP_PATH = path.join(__dirname, 'construramsa_db.json.backup_verification');
@@ -26,7 +28,62 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   cyan: '\x1b[36m',
+  white: '\x1b[37m',
 };
+
+const PORT = Number(process.env.PORT) || 3000;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+let serverProc = null;
+
+/** true si nadie está escuchando en el puerto de pruebas. */
+function isPortFree() {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.once('error', () => resolve(false));
+    probe.once('listening', () => probe.close(() => resolve(true)));
+    probe.listen(PORT, '127.0.0.1');
+  });
+}
+
+/**
+ * Levanta server.js solo si el puerto está libre. Antes este script exigía que
+ * el usuario arrancase `npm start` a mano, por lo que `npm run test-functional`
+ * fallaba siempre en un checkout limpio.
+ */
+async function startServerIfNeeded() {
+  if (!(await isPortFree())) return null;
+  serverProc = spawn('node', ['server.js'], { cwd: __dirname, stdio: 'ignore' });
+  serverProc.on('error', (e) => log(`[functional] Error spawn: ${e.message}`, 'red'));
+  return serverProc;
+}
+
+function stopServer() {
+  if (serverProc) {
+    serverProc.kill();
+    serverProc = null;
+  }
+}
+
+/**
+ * Espera hasta que el servidor responda por HTTP o se agote el tiempo.
+ * Sondeo puro por HTTP (como test_accesibilidad.js): comprobar el puerto con
+ * net.createServer da falso "libre" en Windows cuando otro socket ya escucha en
+ * 0.0.0.0, y hacía que la espera expirase aunque el servidor estuviese listo.
+ */
+async function waitForServer(timeoutMs = 20000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const res = await makeRequest('/');
+      if (res && res.status) return true;
+    } catch (e) {
+      /* todavía no responde */
+    }
+    await sleep(400);
+  }
+  return false;
+}
 
 // Resultados de pruebas
 const results = {
@@ -80,9 +137,23 @@ function readDatabase() {
   }
 }
 
-// Escribir base de datos
+// Escribir base de datos — atómico (temp + rename, temp ignorado por git).
+// Evita truncar la semilla si el proceso se interrumpe o si otro script la lee
+// a la vez; si Windows bloquea el rename, se escribe directo sin dejar basura.
 function writeDatabase(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+  const tmp = `${DB_PATH}.${process.pid}.tmp`;
+  const serialized = JSON.stringify(data, null, 2);
+  fs.writeFileSync(tmp, serialized);
+  try {
+    fs.renameSync(tmp, DB_PATH);
+  } catch (err) {
+    fs.writeFileSync(DB_PATH, serialized);
+    try {
+      fs.unlinkSync(tmp);
+    } catch (e) {
+      /* temp ya ausente */
+    }
+  }
 }
 
 // Hacer petición HTTP
@@ -90,7 +161,7 @@ function makeRequest(path, method = 'GET', data = null) {
   return new Promise((resolve, reject) => {
     const options = {
       hostname: '127.0.0.1',
-      port: 3000,
+      port: PORT,
       path: path,
       method: method,
       headers: {
@@ -173,7 +244,7 @@ async function testMaquinaria() {
   const db = readDatabase();
   if (!db) return;
 
-  const proyectos = db.configuracion.proyectos || [];
+  const proyectos = db.proyectos || [];
   if (proyectos.length === 0) return;
 
   const primerProyecto = proyectos[0];
@@ -196,7 +267,7 @@ async function testPersonal() {
   const db = readDatabase();
   if (!db) return;
 
-  const proyectos = db.configuracion.proyectos || [];
+  const proyectos = db.proyectos || [];
   if (proyectos.length === 0) return;
 
   const primerProyecto = proyectos[0];
@@ -219,7 +290,7 @@ async function testAdquisiciones() {
   const db = readDatabase();
   if (!db) return;
 
-  const proyectos = db.configuracion.proyectos || [];
+  const proyectos = db.proyectos || [];
   if (proyectos.length === 0) return;
 
   const primerProyecto = proyectos[0];
@@ -230,7 +301,10 @@ async function testAdquisiciones() {
 
     if (proyectoData.adquisiciones) {
       test('Proveedores definidos', Array.isArray(proyectoData.adquisiciones.proveedores));
-      test('Cotizaciones registradas', Array.isArray(proyectoData.adquisiciones.cotizaciones));
+      test(
+        'Cotizaciones registradas',
+        Array.isArray(proyectoData.adquisiciones.cotizaciones_compras)
+      );
     }
   }
 }
@@ -242,7 +316,7 @@ async function testViajes() {
   const db = readDatabase();
   if (!db) return;
 
-  const proyectos = db.configuracion.proyectos || [];
+  const proyectos = db.proyectos || [];
   if (proyectos.length === 0) return;
 
   const primerProyecto = proyectos[0];
@@ -253,7 +327,7 @@ async function testViajes() {
 
     if (proyectoData.viajes_camiones) {
       test('Camiones definidos', Array.isArray(proyectoData.viajes_camiones.camiones));
-      test('Rutas definidas', Array.isArray(proyectoData.viajes_camiones.rutas));
+      test('Rutas definidas', Array.isArray(proyectoData.viajes_camiones.rutas_botadero));
       test('Viajes registrados', Array.isArray(proyectoData.viajes_camiones.viajes));
     }
   }
@@ -266,7 +340,7 @@ async function testMantenimiento() {
   const db = readDatabase();
   if (!db) return;
 
-  const proyectos = db.configuracion.proyectos || [];
+  const proyectos = db.proyectos || [];
   if (proyectos.length === 0) return;
 
   const primerProyecto = proyectos[0];
@@ -278,7 +352,7 @@ async function testMantenimiento() {
     if (proyectoData.mantenimiento) {
       test('Maquinaria de mantenimiento', Array.isArray(proyectoData.mantenimiento.maquinaria));
       test('Órdenes de mantenimiento', Array.isArray(proyectoData.mantenimiento.ordenes));
-      test('Insumos registrados', Array.isArray(proyectoData.mantenimiento.insumos));
+      test('Insumos registrados', Array.isArray(proyectoData.mantenimiento.compras_insumos));
     }
   }
 }
@@ -320,10 +394,11 @@ async function testPWA() {
     test(`Archivo ${file} existe`, exists);
   }
 
-  // Verificar manifest.json
-  if (fs.existsSync('manifest.json')) {
+  // Verificar manifest.json (ruta absoluta: no depender del cwd)
+  const manifestPath = path.join(__dirname, 'manifest.json');
+  if (fs.existsSync(manifestPath)) {
     try {
-      const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
       test('Manifest JSON válido', !!manifest.name && !!manifest.start_url);
       test('Iconos definidos', Array.isArray(manifest.icons) && manifest.icons.length > 0);
     } catch (error) {
@@ -340,29 +415,41 @@ async function runAllTests() {
   // Backup de base de datos
   backupDatabase();
 
-  // Esperar a que el servidor esté listo
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  // Levantar servidor propio si nadie escucha ya en el puerto: antes este
+  // script exigía `npm start` manual y abortaba siempre en un checkout limpio.
+  await startServerIfNeeded();
 
-  // Verificar servidor
-  const serverRunning = await checkServer();
-
-  if (!serverRunning) {
+  if (!(await waitForServer())) {
+    test('Servidor corriendo', false, `No respondió en el puerto ${PORT} tras 20s`);
     log('Servidor no está corriendo. Abortando pruebas.', 'red');
+    restoreDatabase();
+    stopServer();
     return;
   }
 
-  // Ejecutar pruebas
-  await testCajaChica();
-  await testMaquinaria();
-  await testPersonal();
-  await testAdquisiciones();
-  await testViajes();
-  await testMantenimiento();
-  await testReportes();
-  await testPWA();
+  try {
+    // Verificar servidor
+    const serverRunning = await checkServer();
 
-  // Restaurar base de datos
-  restoreDatabase();
+    if (!serverRunning) {
+      log('Servidor no está corriendo. Abortando pruebas.', 'red');
+      return;
+    }
+
+    // Ejecutar pruebas
+    await testCajaChica();
+    await testMaquinaria();
+    await testPersonal();
+    await testAdquisiciones();
+    await testViajes();
+    await testMantenimiento();
+    await testReportes();
+    await testPWA();
+  } finally {
+    // Restaurar SIEMPRE la semilla y liberar el puerto, incluso si algo lanza.
+    restoreDatabase();
+    stopServer();
+  }
 
   // Imprimir resumen
   log('\n=== RESUMEN DE PRUEBAS ===', 'cyan');

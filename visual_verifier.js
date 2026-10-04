@@ -294,10 +294,36 @@ async function verifySelectors(selectors, testName) {
   return results;
 }
 
+/**
+ * Espera a que la app haya arrancado de verdad.
+ *
+ * Antes el primer clic de pestaña ocurría de inmediato: con un HTML de ~757 KB
+ * más 14 módulos, si el clic llegaba antes de que la app enlazase sus handlers
+ * se perdía, el módulo nunca recibía `.active` y el test fallaba de forma
+ * intermitente (el `waitForSelector(...).catch(() => {})` ocultaba el timeout).
+ * Reintenta el clic hasta que el módulo por defecto quede activo.
+ */
+async function waitForAppReady(timeoutMs = 20000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const activo = await page
+      .$eval('#caja-chica', (el) => el.classList.contains('active'))
+      .catch(() => false);
+    if (activo) return true;
+    await page.click('#tab-caja-chica').catch(() => {});
+    await page.waitForTimeout(400);
+  }
+  logWarning('La app no confirmó el arranque; los módulos podrían salir ocultos');
+  return false;
+}
+
 async function runVisualTests() {
   logInfo('\n══════════════════════════════════════════════');
   logInfo('  VISUAL VERIFICATION TESTING');
   logInfo('══════════════════════════════════════════════\n');
+
+  // Evita la carrera clic-vs-arranque de la app antes de medir nada.
+  await waitForAppReady();
 
   const results = [];
 

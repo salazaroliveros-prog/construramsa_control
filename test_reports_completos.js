@@ -88,9 +88,24 @@ function restoreDB() {
   }
 }
 
-// Guardar DB
+// Guardar DB — escritura atómica (temp + rename). El temp termina en `.tmp`
+// (patrón ya ignorado por git) para que una interrupción no ensucie el repo.
+// En Windows el rename puede fallar con EPERM si otro proceso tiene el destino
+// abierto leyéndolo: en ese caso se escribe directo y se limpia el temp.
 function saveDB(db) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+  const tmp = `${DB_FILE}.${process.pid}.tmp`;
+  const data = JSON.stringify(db, null, 2);
+  fs.writeFileSync(tmp, data);
+  try {
+    fs.renameSync(tmp, DB_FILE);
+  } catch (err) {
+    fs.writeFileSync(DB_FILE, data);
+    try {
+      fs.unlinkSync(tmp);
+    } catch (e) {
+      /* temp ya ausente */
+    }
+  }
 }
 
 // Leer DB
@@ -484,13 +499,13 @@ function generateCompleteTestData() {
             {
               id: 'ruta_1',
               nombre: 'Ruta Principal - Botadero A',
-              distancia_km: 25,
+              distancia: 25,
               tarifa: 150,
             },
             {
               id: 'ruta_2',
               nombre: 'Ruta Secundaria - Botadero B',
-              distancia_km: 18,
+              distancia: 18,
               tarifa: 120,
             },
           ],

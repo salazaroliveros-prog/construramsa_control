@@ -92,6 +92,23 @@ function waitServer(timeoutMs) {
 }
 
 // ─── test suite ───────────────────────────────────────────────────────────────
+/**
+ * Espera a que la app esté lista sin depender de 'networkidle'.
+ * La aplicación mantiene polling de sincronización activo, por lo que la red
+ * nunca queda completamente en reposo. Esperar 'networkidle' sin límite hacía
+ * que esta suite colgara hasta agotar el timeout en cada uno de los 5 tests
+ * cuando el servidor venía de una suite anterior.
+ */
+async function settle(page) {
+  // Espera acotada: aprovecha el reposo si ocurre, pero nunca bloquea.
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  // Señal real de que el shell de la app se pintó.
+  await page
+    .waitForFunction(() => !!document.querySelector('#tab-resumen'), null, { timeout: 15000 })
+    .catch(() => {});
+  await page.waitForTimeout(300);
+}
+
 async function runAccessibilityTests() {
   const results = {
     timestamp: new Date().toISOString(),
@@ -162,7 +179,7 @@ async function test1_MainPageAccessibility(page, results) {
   const test = { name: 'Accesibilidad página principal', status: 'PENDING', violations: [] };
   try {
     await page.goto(BASE_URL);
-    await page.waitForLoadState('networkidle');
+    await settle(page);
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
 
@@ -194,7 +211,7 @@ async function test2_ModulesAccessibility(page, results) {
 
   try {
     await page.goto(BASE_URL);
-    await page.waitForLoadState('networkidle');
+    await settle(page);
 
     for (const module of modules) {
       try {
@@ -230,7 +247,7 @@ async function test3_KeyboardNavigation(page, results) {
   const test = { name: 'Navegación por teclado', status: 'PENDING' };
   try {
     await page.goto(BASE_URL);
-    await page.waitForLoadState('networkidle');
+    await settle(page);
 
     // Probar navegación por tabs
     await page.keyboard.press('Tab');
@@ -266,7 +283,7 @@ async function test4_ColorContrast(page, results) {
   const test = { name: 'Contraste de colores', status: 'PENDING', contrastIssues: [] };
   try {
     await page.goto(BASE_URL);
-    await page.waitForLoadState('networkidle');
+    await settle(page);
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2aa', 'wcag21aa'])
@@ -294,7 +311,7 @@ async function test5_ARIACompliance(page, results) {
   const test = { name: 'Cumplimiento ARIA', status: 'PENDING', ariaIssues: [] };
   try {
     await page.goto(BASE_URL);
-    await page.waitForLoadState('networkidle');
+    await settle(page);
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag21aa'])
