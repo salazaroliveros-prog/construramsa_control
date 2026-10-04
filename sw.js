@@ -34,6 +34,7 @@ const STATIC_ASSETS = [
   './src/plantillaPremium.js',
   './src/syncOptimizer.js',
   './src/silentDownload.js',
+  './src/persistence.js',
   './src/backgroundSync.js',
   './src/formValidator.js',
   './splash-640x1136.png',

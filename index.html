@@ -4744,17 +4744,35 @@
         let _syncMaxInterval = 120000; // 2 minutos máximo cuando no hay actividad
         let _lastActivityTime = Date.now();
 
-        async function getDB() {
+        /**
+         * Hidrata la caché de sesión desde IndexedDB (CR_Persistence) al arranque.
+         * getDB()/saveDB() se mantienen SÍNCRONOS para no romper las llamadas
+         * existentes; este bootstrap async sólo precarga _dbCache y su espejo en
+         * localStorage antes de renderizar.
+         */
+        async function hidratarPersistencia() {
+            if (typeof CR_Persistence === 'undefined' || typeof CR_Persistence.readIdb !== 'function') return;
+            try {
+                const raw = await CR_Persistence.readIdb();
+                if (raw) {
+                    try { localStorage.setItem(DB_KEY, JSON.stringify(raw)); } catch (e) { /* cuota excedida */ }
+                    _dbCache = migrarDB(raw);
+                }
+            } catch (e) {
+                console.warn('[persistence] No se pudo hidratar desde IndexedDB:', e);
+            }
+        }
+
+        function getDB() {
             if (_dbCache) return _dbCache;
             try {
-                const persistence = typeof CR_Persistence !== 'undefined' ? CR_Persistence : null;
-                const raw = persistence ? await persistence.readIdb() : null;
+                const raw = localStorage.getItem(DB_KEY);
                 if (!raw) {
                     console.log('DB no encontrada en persistencia, inicializando nueva DB');
                     _dbCache = inicializarDB();
                     return _dbCache;
                 }
-                _dbCache = migrarDB(raw);
+                _dbCache = migrarDB(JSON.parse(raw));
                 console.log('DB cargada exitosamente desde persistencia');
                 return _dbCache;
             } catch (e) {
@@ -4789,15 +4807,17 @@
             }
         }
 
-        async function saveDB(db) {
+        function saveDB(db) {
             try {
                 _dbCache = db;
-                const persistence = typeof CR_Persistence !== 'undefined' ? CR_Persistence : null;
-                if (persistence && persistence.writeIdb) {
-                    await persistence.writeIdb(db);
-                } else {
-                    const serialized = JSON.stringify(db);
-                    localStorage.setItem(DB_KEY, serialized);
+                const serialized = JSON.stringify(db);
+                localStorage.setItem(DB_KEY, serialized);
+                // Espejo asíncrono a IndexedDB (durabilidad ante cierres de PWA).
+                // Sin await: no bloquea y no dispara descargas; falla sólo con log.
+                if (typeof CR_Persistence !== 'undefined' && typeof CR_Persistence.writeIdb === 'function') {
+                    Promise.resolve(CR_Persistence.writeIdb(db)).catch((err) =>
+                        console.warn('[persistence] No se pudo escribir en IndexedDB:', err)
+                    );
                 }
                 console.log('DB guardada exitosamente en persistencia');
                 
@@ -11130,7 +11150,8 @@ tbody.innerHTML = '';
             showConfirmModal('Limpiar caché local', 'Esto borra la persistencia local y recarga la app para volver al estado inicial desde construramsa_db.json. ¿Continuar?', async () => {
                 if (typeof CR_Persistence !== 'undefined' && typeof CR_Persistence.deleteIdb === 'function') {
                     await CR_Persistence.deleteIdb();
-                } else if (typeof localStorage !== 'undefined') {
+                }
+                if (typeof localStorage !== 'undefined') {
                     localStorage.removeItem(DB_KEY);
                 }
                 invalidarCacheDB();
@@ -11144,7 +11165,8 @@ tbody.innerHTML = '';
                 try {
                     if (typeof CR_Persistence !== 'undefined' && typeof CR_Persistence.deleteIdb === 'function') {
                         await CR_Persistence.deleteIdb();
-                    } else if (typeof localStorage !== 'undefined') {
+                    }
+                    if (typeof localStorage !== 'undefined') {
                         localStorage.removeItem(DB_KEY);
                     }
                     invalidarCacheDB();
@@ -12876,14 +12898,15 @@ function validarDependenciasExportacion() {
         // ============================================================
         // FIX #3: UN SOLO DOMContentLoaded — inicialización unificada
         // ============================================================
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', async function () {
             normalizarCamposFormulario();
 
-            // Paso 1: cargar datos desde JSON inicial (solo si persistencia vacía)
-            const persistence = typeof CR_Persistence !== 'undefined' ? CR_Persistence : null;
-            const tienePersistencia = persistence ? await persistence.readIdb().then(r => !!r).catch(() => false) : false;
+            // Paso 1: hidratar caché desde IndexedDB (persistencia robusta de PWA)
+            await hidratarPersistencia();
+
+            // Si no hay datos persistidos, sembrar desde el JSON inicial y recargar
             const tieneLocalStorage = typeof localStorage !== 'undefined' && !!localStorage.getItem(DB_KEY);
-            if (!tienePersistencia && !tieneLocalStorage) {
+            if (!tieneLocalStorage) {
                 fetch('./construramsa_db.json')
                     .then(r => { if (!r.ok) throw new Error('no-file'); return r.json(); })
                     .then(data => {

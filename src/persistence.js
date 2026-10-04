@@ -112,14 +112,32 @@
     return null;
   }
 
-  async function writeIdb(db) {
-    if (!isIdbAvailable()) {
-      return writeLocalBackup(db);
+  function writeLocalStorage(db) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        return true;
+      }
+    } catch (e) {
+      console.warn('[persistence] No se pudo escribir en localStorage:', e);
     }
-    const idb = await openIdb();
-    await idbSet(idb, DB_KEY, db);
-    await writeLocalBackup(db);
-    return true;
+    return false;
+  }
+
+  async function writeIdb(db) {
+    // Espejo síncrono en localStorage (fallback rápido) sin descargar archivos.
+    writeLocalStorage(db);
+    if (!isIdbAvailable()) {
+      return false;
+    }
+    try {
+      const idb = await openIdb();
+      await idbSet(idb, DB_KEY, db);
+      return true;
+    } catch (e) {
+      console.warn('[persistence] No se pudo escribir IndexedDB:', e);
+      return false;
+    }
   }
 
   async function readIdb() {
@@ -162,6 +180,7 @@
     isIdbAvailable,
     writeLocalBackup,
     readLocalBackup,
+    writeLocalStorage,
     writeIdb,
     readIdb,
     deleteIdb,
