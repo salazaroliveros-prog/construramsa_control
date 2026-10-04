@@ -139,6 +139,44 @@ Todos los montos están en **Quetzales (Q)**, moneda nacional de Guatemala:
 | Acento púrpura | `#a855f7` | `#090a0f` | ~4.6:1 | ✅ AA |
 | Footer PDF | `#6B7280` | `#ffffff` | ~4.6:1 | ✅ AA |
 
+## Integración Continua y Despliegue
+
+- **Producción**: https://construramsacontrolgastos-iota.vercel.app
+- **Repositorio**: `salazaroliveros-prog/construramsa_control`, rama `main`
+- **Plataforma**: Vercel (proyecto `construramsacontrolgastos`, equipo `proyectoswm`)
+
+### Flujo de despliegue
+
+1. Se hace `git push` a `main`.
+2. GitHub Actions (`.github/workflows/ci.yml`) ejecuta en paralelo `security`, `lint` y `validate` (incluye `npm test` con Chromium).
+3. **Solo si los tres jobs pasan**, el job `Deploy to Production` corre `vercel deploy --prod` con el secreto `VERCEL_TOKEN` y verifica que la nueva URL responda `2xx`/`3xx`.
+
+### Por qué Vercel *no* despliega `main` por su cuenta
+
+`vercel.json` define:
+
+```json
+"git": { "deploymentEnabled": { "main": false } }
+```
+
+La integración Git de Vercel **sigue conectada**, pero el auto-deploy de la rama `main` está desactivado. Sin esto, Vercel subiría cada push a producción al instante, saltándose los tests: un commit con CI roto llegará a producción (así ocurrió con `3cd2fdc`, desplegado mientras el pipeline fallaba).
+
+| Rama | Quién despliega | Ambiente |
+|------|-----------------|----------|
+| `main` | GitHub Actions, tras pasar los 3 jobs | Production |
+| Cualquier otra | Vercel Git | Preview (URL propia) |
+
+Para volver al auto-deploy sin gate, basta con eliminar el bloque `git` de `vercel.json`.
+
+### Comandos útiles
+
+| Comando | Uso |
+|---------|-----|
+| `vercel ls` | Lista los deployments del proyecto |
+| `vercel inspect <url>` | Detalle, commit y aliases de un deployment |
+| `gh run list` / `gh run view <id>` | Estado de las ejecuciones de CI |
+| `gh run watch <id>` | Sigue una ejecución hasta que termine |
+
 ## Historial de Cambios
 
 ### v2.8.4 (2026-08-29) — Roving tabindex completo en tablist
