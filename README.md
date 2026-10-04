@@ -62,19 +62,23 @@ Aplicación Web Progresiva (PWA) para el control de gastos y gestión de obra de
 
 ## Estructura de Archivos
 
-| Archivo | Descripción |
-|---------|-------------|
+| Archivo / carpeta | Descripción |
+|-------------------|-------------|
 | `index.html` | Aplicación principal (HTML + CSS + JavaScript) |
+| `src/` | Módulos IIFE que carga `index.html` (`persistence`, `kpiEngine`, `exportador`, `nominaEngine`, …) |
+| `vendor/` | Librerías locales sin CDN: `html2pdf`, `purify`, `xlsx`, `exceljs` |
 | `sw.js` | Service Worker v2.9.4 para funcionalidad offline |
 | `manifest.json` | Configuración PWA con shortcuts de módulos |
-| `icon.png` | Icono corporativo 1024×1024 (instalación/PWA) |
-| `icon-512.png` | Icono PWA 512×512 |
-| `icon-192.png` | Icono PWA 192×192 (instalación pantalla de inicio) |
-| `icon.svg` | Icono vectorial corporativo |
-| `wilson.png` | Firma Arq. Wilson Dario Salazar Oliveros |
-| `juan.png` | Firma Ing. Juan LLuis Ramirez Jimenez |
+| `logocr.png` | Logo corporativo (favicon, `apple-touch-icon`, splash y PWA) |
+| `icon.png`, `icon-512.png`, `icon-192.png`, `icon.svg` | Iconos PWA (1024/512/192 px y vectorial) |
+| `splash-*.png` | Pantallas de lanzamiento por tamaño de dispositivo |
+| `server.js` | Servidor estático local (`npm start`) y handler de Vercel |
 | `construramsa_db.json` | Base de datos inicial vacía para datos reales |
+| `vercel.json` | Configuración de despliegue (rutas, cabeceras, `git.deploymentEnabled`) |
+| `.github/workflows/ci.yml` | Pipeline: `security` + `lint` + `validate` → `Deploy to Production` |
 | `README.md` | Esta documentación |
+
+> `wilson.png` y `juan.png` (firmas personales) están en `.gitignore`: solo existen en el equipo local.
 
 ## Estructura de Base de Datos
 

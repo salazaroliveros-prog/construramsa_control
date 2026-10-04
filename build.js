@@ -1,5 +1,5 @@
 /**
- * Build Script - CONSTRURAMSA Control de Obra v2.9.2
+ * Build Script - CONSTRURAMSA Control de Obra v2.9.4
  * =================================================
  * Script de build que utiliza esbuild para bundling y minificación
  * de los módulos JavaScript de la aplicación.
@@ -28,6 +28,7 @@ const JS_FILES = [
   'backgroundSync.js',
   'syncOptimizer.js',
   'silentDownload.js',
+  'persistence.js',
   'formValidator.js',
 ];
 
@@ -70,11 +71,20 @@ async function build() {
     }
   }
 
-  // Crear bundle combinado opcional
+  // Bundle combinado: un único IIFE que ejecuta los módulos en orden de carga.
+  // esbuild exige `outdir` (no `outfile`) cuando hay varios entryPoints, así que
+  // se crea una entrada virtual con `import` para obtener un solo fichero.
+  let bundleFailed = false;
   try {
     const bundleFile = path.join(DIST_DIR, 'bundle.min.js');
+    const entryContents = JS_FILES.map((f) => `import './${f}';`).join('\n');
     await esbuild.build({
-      entryPoints: JS_FILES.map((f) => path.join(SRC_DIR, f)),
+      stdin: {
+        contents: entryContents,
+        resolveDir: SRC_DIR,
+        sourcefile: 'bundle-entry.js',
+        loader: 'js',
+      },
       bundle: true,
       minify: true,
       target: 'es2015',
@@ -84,12 +94,12 @@ async function build() {
       drop: ['console', 'debugger'],
       treeShaking: true,
       charset: 'utf8',
-      external: [], // No external dependencies
     });
 
     console.log(`✅ Bundle combinado creado: bundle.min.js`);
   } catch (error) {
-    console.warn(`⚠️  No se pudo crear bundle combinado: ${error.message}`);
+    bundleFailed = true;
+    console.error(`❌ Error creando bundle combinado: ${error.message}`);
   }
 
   // Procesar archivos HTML
@@ -152,6 +162,12 @@ async function build() {
 
   console.log('\n📊 Reporte de optimización:');
   console.table(stats);
+
+  if (bundleFailed) {
+    console.error('\n⚠️  Build incompleto: falló el bundle combinado (ver error arriba).');
+    process.exitCode = 1;
+    return;
+  }
 
   console.log('\n✅ Build completado exitosamente!');
   console.log(`📁 Archivos generados en: ${DIST_DIR}`);

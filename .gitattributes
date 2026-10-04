@@ -1,0 +1,35 @@
+# Fin de línea determinista: todo el texto se almacena y se trabaja en LF.
+# Sin esto, en Windows (core.autocrlf=true) algunos archivos quedan en CRLF y
+# `npm run format:check` falla en local aunque en CI (Linux) pase, porque
+# .prettierrc fija endOfLine: "lf".
+* text=auto
+
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.html   text eol=lf
+*.css    text eol=lf
+*.svg    text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.sh     text eol=lf
+.npmrc   text eol=lf
+
+# Scripts de shell de Windows: se ejecutan en cmd/PowerShell
+*.ps1    text eol=crlf
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+
+# Binarios
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.webp   binary
+*.pdf    binary
+*.docx   binary
+*.woff   binary
+*.woff2  binary
+*.zip    binary

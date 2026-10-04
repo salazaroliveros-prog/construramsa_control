@@ -1,3 +1,8 @@
+# Build outputs (never deployed; the SPA is served from the repo root)
+dist/
+build/
+coverage/
+
 # Development server (not part of the static SPA build; Vercel framework=null ignores it anyway)
 server.js
 server_log.txt

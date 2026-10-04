@@ -112,5 +112,6 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: ['node_modules/', 'vendor/', 'dist/', 'build/', '*.min.js', 'coverage/'],
+  // `_*.js` = scripts auxiliares locales (también en .gitignore), no forman parte del código fuente.
+  ignorePatterns: ['node_modules/', 'vendor/', 'dist/', 'build/', '*.min.js', 'coverage/', '_*.js'],
 };

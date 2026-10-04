@@ -16,7 +16,6 @@
     "test-nube": "node test_nube_script.js",
     "e2e": "node run_e2e_validation.js",
     "e2e:data-entry": "node e2e_data_entry.js",
-    "test-data": "node populate_test_data.js",
     "test-reports": "node test_all_reports.js",
     "test-functional": "node functional_test.js",
     "test-validacion": "node test_validacion_modulos.js",
