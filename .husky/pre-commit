@@ -1,1 +1,13 @@
 npx lint-staged
+
+# Guarda anti-regresión: valida la sintaxis del <script> inline de index.html.
+# Un error de sintaxis ahí rompe `npm test` en CI (job validate), lo que omite
+# el job "Deploy to Production" y deja el autodeploy sin ejecutarse.
+if git diff --cached --name-only --diff-filter=ACM | grep -q '^index\.html$'; then
+  echo '[pre-commit] Validando sintaxis inline de index.html...'
+  if ! node check_inline.js; then
+    echo '[pre-commit] index.html tiene errores de sintaxis inline; commit abortado.'
+    exit 1
+  fi
+fi
+
