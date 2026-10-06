@@ -26,7 +26,7 @@
     "lint:fix": "eslint src/**/*.js test_*.js *.js --fix",
     "format": "prettier --write \"src/**/*.js\" \"test_*.js\" \"*.js\"",
     "format:check": "prettier --check \"src/**/*.js\" \"test_*.js\" \"*.js\"",
-    "prepare": "husky",
+    "prepare": "node -e \"try{require('child_process').execSync('husky',{stdio:'ignore'})}catch(e){}\"",
     "bundle": "node build.js",
     "optimize-images": "node optimize-images.js",
     "test-a11y": "node test_accesibilidad.js",
@@ -85,5 +85,8 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
