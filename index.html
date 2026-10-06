@@ -5400,10 +5400,26 @@
             const totalPaginas = Math.ceil(total / REGISTROS_POR_PAGINA);
             if (totalPaginas <= 1) { container.innerHTML = ''; return; }
             let html = '';
-            html += `<button class="btn-secundario" onclick="${onCambio}(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''} aria-label="Página anterior">◀</button>`;
+            html += `<button type="button" class="btn-secundario" ${paginaActual === 1 ? 'disabled' : ''} aria-label="Página anterior">◀</button>`;
             html += `<span class="paginacion-info">Página ${paginaActual} de ${totalPaginas} (${total} registros)</span>`;
-            html += `<button class="btn-secundario" onclick="${onCambio}(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''} aria-label="Página siguiente">▶</button>`;
+            html += `<button type="button" class="btn-secundario" ${paginaActual === totalPaginas ? 'disabled' : ''} aria-label="Página siguiente">▶</button>`;
             safeSetHTML(container, html);
+            // FIX: DOMPurify (usado por safeSetHTML) elimina los atributos onclick
+            // inline al sanitizar, dejando estos botones sin acción. Los handlers se
+            // conectan por DOM después de inyectar el HTML sanitizado.
+            const botones = container.querySelectorAll('button');
+            const btnPrev = botones[0];
+            const btnNext = botones[1];
+            const navegar = (pagina) => {
+                const fn = typeof window[onCambio] === 'function' ? window[onCambio] : null;
+                if (fn) fn(pagina);
+            };
+            if (btnPrev && paginaActual > 1) {
+                btnPrev.addEventListener('click', () => navegar(paginaActual - 1));
+            }
+            if (btnNext && paginaActual < totalPaginas) {
+                btnNext.addEventListener('click', () => navegar(paginaActual + 1));
+            }
         }
 
         // ============================================================

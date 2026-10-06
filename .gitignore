@@ -149,3 +149,4 @@ construramsa_db.json.pre_alineacion
 *.pre_validacion
 sincronizacion_offline_report.json
 functional_test_results.json
+paginacion_report.json
