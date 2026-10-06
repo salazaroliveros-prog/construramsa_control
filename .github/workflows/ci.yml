@@ -145,3 +145,12 @@ jobs:
             echo "ERROR: deployment no responde (HTTP $STATUS)"
             exit 1
           fi
+          # Alias legacy "construramsacontrolgastos.vercel.app": Vercel no
+          # permite registrarlo como dominio de proyecto via CLI (*.vercel.app
+          # rechazado), asi que se reapunta manualmente a cada nuevo deploy
+          # para que el dominio de produccion siga los deploys automaticos.
+          if vercel alias set "$NEW_URL" construramsacontrolgastos.vercel.app --token="$VERCEL_TOKEN" --scope=proyectoswm; then
+            echo "Alias construramsacontrolgastos.vercel.app -> $NEW_URL"
+          else
+            echo "::warning::No se pudo actualizar el alias construramsacontrolgastos.vercel.app"
+          fi
