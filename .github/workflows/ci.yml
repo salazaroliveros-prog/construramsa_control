@@ -6,6 +6,12 @@ name: CI
   pull_request:
     branches: [ main ]
 
+# Un solo run a la vez por rama: si un run queda colgado, el siguiente push
+# lo cancela en lugar de dejarlo corriendo 6 horas.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   security:
     runs-on: ubuntu-latest
@@ -47,11 +53,27 @@ jobs:
       - run: |
           node -e "['sw.js','src/config.js','src/reportDataAdapter.js','src/kpiEngine.js','src/exportador.js','src/reporteEjecutivo.js','src/nominaEngine.js','src/plantillaPremium.js','src/signatureCapture.js','src/backgroundSync.js','src/syncOptimizer.js','src/silentDownload.js','src/formValidator.js','src/types.js'].forEach(f=>{try{new Function(require('fs').readFileSync(f,'utf8'));console.log(f+': OK')}catch(e){console.error(f+': SYNTAX ERROR: '+e.message);process.exit(1);}})"
       - name: Run npm test
-        # `tee` conserva la salida en consola y en un archivo para poder
-        # diagnosticar fallos subiendo el log como artefacto (if: always()).
+        # La cadena `npm test` se ejecuta sub-test por sub-test para poder:
+        # 1) imprimir un banner de progreso (si algo se cuelga, el resumen de
+        #    diagnostico muestra exactamente que sub-test lo hizo), y
+        # 2) limitar cada sub-test a 5 min (timeout 124) para que un cuelgue
+        #    falle rapido en vez de ocupar el runner 6 horas.
+        # El archivo npm-test.log se conserva para el artefacto/resumen.
         run: |
           set -o pipefail
-          npm test 2>&1 | tee npm-test.log
+          : > npm-test.log
+          mapfile -t STEPS < <(node -p "require('./package.json').scripts.test.split('&&').map(s => s.trim()).join('\n')")
+          echo "Sub-tests en la cadena: ${#STEPS[@]}" | tee -a npm-test.log
+          exit_code=0
+          for s in "${STEPS[@]}"; do
+            echo "########## INICIO: $s ##########" | tee -a npm-test.log
+            timeout --kill-after=30s 300 $s 2>&1 | tee -a npm-test.log
+            rc=${PIPESTATUS[0]}
+            echo "########## FIN: $s (rc=$rc) ##########" | tee -a npm-test.log
+            if [ "$rc" -ne 0 ]; then exit_code=$rc; break; fi
+          done
+          echo "CHAIN_EXIT=$exit_code" | tee -a npm-test.log
+          exit "$exit_code"
       - name: Diagnostico de fallo (resumen + artefacto)
         if: failure()
         run: |
