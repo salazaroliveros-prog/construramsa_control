@@ -326,6 +326,22 @@ async function testViajes(page) {
     );
     registro(M, 'Selector #cam-modalidad presente', (await selModalidad.count()) > 0);
 
+    // Regresión: el equipo alquilado debe ser SELECCIONABLE en el formulario de
+    // viajes. Antes vivía en un array paralelo (`equipo_alquilado`) que la app
+    // nunca leía, así que la unidad no aparecía en el <select> y un viaje
+    // alquilado no se podía registrar ni editar.
+    const opcionesAlquiladas = await selCamion.locator('option').allTextContents();
+    registro(
+      M,
+      'El selector #viaje-cam incluye la unidad alquilada de la semilla',
+      opcionesAlquiladas.some((t) => /alquilado/i.test(t))
+    );
+    registro(
+      M,
+      'El selector #viaje-cam lista unidades sin duplicar',
+      new Set(opcionesAlquiladas.map((t) => t.trim())).size === opcionesAlquiladas.length
+    );
+
     const tabla = page.locator('table');
     registro(M, 'Tabla historial de viajes presente', (await tabla.count()) > 0);
   } catch (e) {
@@ -614,44 +630,72 @@ async function testFlujoIntegracion(page) {
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
     await waitApp(page);
 
-    // Botón ➕ nuevo proyecto (suele estar junto al selector de proyectos)
-    const btnNuevo = page
-      .locator(
-        'button[onclick*="nuevoProyecto"], button[onclick*="crearProyecto"], ' +
-          'button[title*="royecto"], button[aria-label*="royecto"], ' +
-          'button:has-text("Nuevo proyecto"), button:has-text("Crear")'
-      )
-      .first();
+    // Guardar el proyecto original para restaurarlo al final (no dejar que el
+    // proyecto de prueba contamine las verificaciones siguientes).
+    const db0 = await getDB(page);
+    await page.evaluate(
+      (id) => {
+        window.__CR_TEST_ORIGINAL_PROJECT__ = id;
+      },
+      (db0.configuracion || {}).proyecto_actual
+    );
+
+    // Botón ➕ nuevo proyecto del header.
+    // El selector debe ser PRECISO: un `button:has-text("Crear")` amplio hace
+    // match con el botón "Crear Proyecto" del MODAL (oculto, index.html:2945),
+    // que aparece antes en el DOM, así que `.first()` resolvía a un elemento
+    // invisible y el test caía en un WARN aunque el header sí tuviera el botón.
+    const btnNuevo = page.locator('button[onclick="mostrarModalCrearProyecto()"]:visible').first();
 
     if (await btnNuevo.isVisible({ timeout: 3000 })) {
       await btnNuevo.click();
       await sleep(500);
 
-      const nombreInput = page.locator('input[placeholder*="nombre"], input[id*="nombre"]').first();
-      const presupInput = page
-        .locator('input[placeholder*="presupuesto"], input[id*="presupuesto"]')
-        .first();
-      if (await nombreInput.isVisible({ timeout: 2000 }))
-        await nombreInput.fill('Proyecto Test Validación');
-      if (await presupInput.isVisible({ timeout: 2000 })) await presupInput.fill('50000');
-
-      const btnConfirm = page
-        .locator('button[type="submit"], button:has-text("Crear"), button:has-text("Guardar")')
-        .first();
-      if (await btnConfirm.isVisible({ timeout: 2000 })) {
-        await btnConfirm.click();
-        await sleep(700);
-      }
-
-      const db2 = await getDB(page);
-      registro(M, 'Proyecto creado en DB', (db2.proyectos || []).length > 0);
-    } else {
+      const nombreInput = page.locator('#proyecto-nombre');
+      const presupInput = page.locator('#proyecto-presupuesto');
       registro(
         M,
-        'Botón nuevo proyecto',
-        'warn',
-        'No visible en header — requiere interacción con selector'
+        'Modal de crear proyecto se abre',
+        await nombreInput.isVisible({ timeout: 2000 }).catch(() => false)
       );
+      if (await nombreInput.isVisible({ timeout: 2000 })) {
+        await nombreInput.fill('Proyecto Test Validación');
+        await presupInput.fill('50000');
+        await page.locator('button[onclick="crearProyectoDesdeModal()"]').click();
+        await sleep(700);
+
+        const db2 = await getDB(page);
+        registro(
+          M,
+          'Proyecto creado en DB',
+          (db2.proyectos || []).some((p) => p.nombre === 'Proyecto Test Validación')
+        );
+        // La app debe haberlo activado y elegido como proyecto actual.
+        const creado = (db2.proyectos || []).find((p) => p.nombre === 'Proyecto Test Validación');
+        registro(
+          M,
+          'Proyecto nuevo queda como proyecto activo',
+          !!creado && db2.configuracion.proyecto_actual === creado.id
+        );
+        // Restaurar el proyecto original para no contaminar las pruebas siguientes.
+        if (creado) {
+          await page.evaluate((id) => {
+            const raw = localStorage.getItem('construramsa_db');
+            if (!raw) return;
+            const db = JSON.parse(raw);
+            db.configuracion.proyecto_actual = window.__CR_TEST_ORIGINAL_PROJECT__ || null;
+            db.proyectos = db.proyectos.filter((p) => p.id !== id);
+            delete db.proyectos_data[id];
+            localStorage.setItem('construramsa_db', JSON.stringify(db));
+          }, creado.id);
+          await page.reload({ waitUntil: 'domcontentloaded' });
+          await waitApp(page);
+        }
+      } else {
+        registro(M, 'Proyecto creado en DB', false, 'El modal no mostró el campo de nombre');
+      }
+    } else {
+      registro(M, 'Botón nuevo proyecto', false, 'No se encontró el botón ➕ visible en el header');
     }
 
     // Navegar a Caja Chica con proyecto activo

@@ -50,7 +50,8 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   /** Convierte cualquier valor a un número finito (default 0). */
@@ -279,6 +280,7 @@
         kpis.porDia[key].gastos += gasto;
         var cat = String(m.categoria || 'Sin categoría').trim();
         var categoriaKey = cat.split('/')[0].trim() || 'Otros';
+        if (gasto === 0) return;
         kpis.porCategoria[categoriaKey] = (kpis.porCategoria[categoriaKey] || 0) + gasto;
       }
     });

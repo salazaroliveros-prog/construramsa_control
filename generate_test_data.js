@@ -369,6 +369,11 @@ function generateComprehensiveTestData(db) {
     { id: generateId('ruta'), nombre: 'Ruta Sur - Botadero Las Flores', distancia: 18 },
   ];
 
+  // Catálogo ÚNICO de unidades. El modelo canónico de la app es `camiones`
+  // discriminado por `propiedad`; el array paralelo `equipo_alquilado` quedó
+  // obsoleto (la app nunca lo escribía ni lo mostraba) y se migra a este
+  // catálogo. `tarifa` + `modalidad` son los campos que lee el cálculo de
+  // index.html:10631.
   const camiones = [
     {
       id: generateId('cam'),
@@ -391,35 +396,40 @@ function generateComprehensiveTestData(db) {
       capacidad: 20,
       consumo: 0.38,
     },
-  ];
-
-  const equipoAlquilado = [
     {
       id: generateId('eq'),
       nombre: 'Camión de carga pesado',
       propiedad: 'alquilado',
-      tarifa_diaria: 1200,
+      capacidad: 20,
       consumo: 0,
+      tarifa: 1200,
+      modalidad: 'dia',
     },
   ];
 
   datos.viajes_camiones.rutas_botadero = rutas;
   datos.viajes_camiones.camiones = camiones;
-  datos.viajes_camiones.equipo_alquilado = equipoAlquilado;
+  datos.viajes_camiones.equipo_alquilado = [];
 
   // Generate trips
   const materiales = ['Tierra', 'Grava', 'Arena', 'Escombros', 'Cemento', 'Bloques', 'Agua'];
+  const alquilados = camiones.filter((c) => c.propiedad === 'alquilado');
 
   dates.slice(0, 18).forEach((fecha, idx) => {
     const esAlquilado = idx % 4 === 0;
     const ruta = rutas[idx % rutas.length];
-    const camion = esAlquilado ? equipoAlquilado[0] : camiones[idx % camiones.length];
+    const camion = esAlquilado
+      ? alquilados[0]
+      : camiones.filter((c) => c.propiedad === 'propio')[idx % 3];
     const distancia = ruta.distancia;
     const numeroViajes = randomInt(2, 8);
     const kmTotal = distancia * 2 * numeroViajes;
     const litros = esAlquilado ? 0 : kmTotal * camion.consumo;
     const costoCombustible = litros * 32; // Q32 per liter
-    const costoAlquiler = esAlquilado ? camion.tarifa_diaria : 0;
+    // Modalidad 'dia' => la tarifa se cobra una vez por viaje (índice.html:10632).
+    const costoAlquiler = esAlquilado
+      ? camion.tarifa * (camion.modalidad === 'viaje' ? numeroViajes : 1)
+      : 0;
     const total = costoCombustible + costoAlquiler;
 
     const viaje = {
@@ -435,7 +445,7 @@ function generateComprehensiveTestData(db) {
       costo_alquiler: parseFloat(costoAlquiler.toFixed(2)),
       total: parseFloat(total.toFixed(2)),
       propiedad: camion.propiedad,
-      tarifa_modalidad: 'dia',
+      tarifa_modalidad: camion.propiedad === 'alquilado' ? camion.modalidad : null,
       gasto_id: null,
     };
 

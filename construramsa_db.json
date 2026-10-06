@@ -2488,15 +2488,18 @@
             "capacidad": 25,
             "propiedad": "propio",
             "consumo": 0.35
-          }
-        ],
-        "equipo_alquilado": [
+          },
           {
             "id": "ea1",
             "nombre": "Camión Alquilado 1",
-            "tarifa_diaria": 800
+            "capacidad": 25,
+            "propiedad": "alquilado",
+            "consumo": 0,
+            "tarifa": 800,
+            "modalidad": "dia"
           }
         ],
+        "equipo_alquilado": [],
         "viajes": [
           {
             "id": "viaje_2026-08-31",
@@ -2511,7 +2514,8 @@
             "total": 800,
             "gasto_id": "gasto_viaje_2026-08-31",
             "ruta_id": "r1",
-            "propiedad": "alquilado"
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia"
           },
           {
             "id": "viaje_2026-09-01",
@@ -2556,7 +2560,8 @@
             "total": 800,
             "gasto_id": "gasto_viaje_2026-09-03",
             "ruta_id": "r2",
-            "propiedad": "alquilado"
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia"
           },
           {
             "id": "viaje_2026-09-04",
@@ -2601,7 +2606,8 @@
             "total": 800,
             "gasto_id": "gasto_viaje_2026-09-06",
             "ruta_id": "r1",
-            "propiedad": "alquilado"
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia"
           },
           {
             "id": "viaje_2026-09-07",
@@ -2646,7 +2652,8 @@
             "total": 800,
             "gasto_id": "gasto_viaje_2026-09-09",
             "ruta_id": "r2",
-            "propiedad": "alquilado"
+            "propiedad": "alquilado",
+            "tarifa_modalidad": "dia"
           }
         ]
       },
@@ -2796,30 +2803,5 @@
         ]
       }
     }
-  },
-  "caja_chica": [],
-  "maquinaria_flota": {
-    "vehiculos": [],
-    "registros": []
-  },
-  "personal": {
-    "trabajadores": [],
-    "asistencia": []
-  },
-  "adquisiciones": {
-    "proveedores": [],
-    "cotizaciones_compras": []
-  },
-  "viajes_camiones": {
-    "rutas_botadero": [],
-    "camiones": [],
-    "equipo_alquilado": [],
-    "viajes": []
-  },
-  "mantenimiento": {
-    "maquinaria": [],
-    "formatos": {},
-    "ordenes": [],
-    "compras_insumos": []
   }
 }

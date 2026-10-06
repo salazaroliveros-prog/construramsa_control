@@ -33,7 +33,8 @@
 
   function number(value) {
     const result = Number(value);
-    return Number.isFinite(result) ? result : 0;
+    if (!Number.isFinite(result)) return 0;
+    return Number(Math.round(result * 100) / 100);
   }
 
   function dateKey(value) {
@@ -62,6 +63,9 @@
         .map((item) => item?.gasto_id)
         .filter(Boolean),
       ...array(source.mantenimiento?.compras_insumos)
+        .map((item) => item?.gasto_id)
+        .filter(Boolean),
+      ...array(source.adquisiciones?.cotizaciones_compras)
         .map((item) => item?.gasto_id)
         .filter(Boolean),
     ]);

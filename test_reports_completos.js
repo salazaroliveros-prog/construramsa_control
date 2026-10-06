@@ -11,9 +11,14 @@
 
 const fs = require('fs');
 const path = require('path');
+const { createSandbox } = require('./test_sandbox');
 
-const DB_FILE = 'construramsa_db.json';
-const BACKUP_FILE = 'construramsa_db.json.reports_backup';
+// La suite genera una DB de prueba completa y la persiste, así que escribe en
+// una COPIA temporal de la semilla en vez del archivo versionado
+// (ver test_sandbox.js).
+const sandbox = createSandbox('reports');
+const DB_FILE = sandbox.dbPath;
+const BACKUP_FILE = DB_FILE + '.backup';
 
 // Colores para consola
 const colors = {
@@ -999,6 +1004,7 @@ function testIntegridadPorProyecto() {
 }
 
 // Ejecutar todos los tests
+let exitCode = 0;
 try {
   backupDB();
 
@@ -1013,15 +1019,17 @@ try {
   testPresupuestoGastos();
   testIntegridadPorProyecto();
 
-  restoreDB();
-
   logSection('RESULTADO FINAL');
   logInfo(`Total: ${passed} passed, ${failed} failed`);
   log('='.repeat(60), 'cyan');
 
-  process.exit(failed > 0 ? 1 : 0);
+  exitCode = failed > 0 ? 1 : 0;
 } catch (error) {
   logError(`Error inesperado: ${error.message}`);
-  restoreDB();
-  process.exit(1);
+  exitCode = 1;
+} finally {
+  // El sandbox se destruye pase lo que pase, sin dejar archivos temporales.
+  sandbox.cleanup();
 }
+
+process.exit(exitCode);

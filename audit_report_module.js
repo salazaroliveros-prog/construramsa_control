@@ -464,8 +464,14 @@ function auditFormatAndPagination() {
 
   test('PDF generation uses proper scale for quality', () => {
     assert(
-      htmlContent.includes('const scale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2)'),
+      htmlContent.includes(
+        'const rawScale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2)'
+      ),
       'Missing dynamic scale calculation'
+    );
+    assert(
+      htmlContent.includes('const scale = Math.min(rawScale, 1.5)'),
+      'Missing scale cap to prevent excessive memory usage'
     );
   });
 

@@ -10,9 +10,15 @@
 
 const fs = require('fs');
 const path = require('path');
+const { createSandbox } = require('./test_sandbox');
 
-const DB_FILE = 'construramsa_db.json';
-const BACKUP_FILE = 'construramsa_db.json.test_backup';
+// La suite hace CRUD real, así que escribe en una COPIA temporal de la
+// semilla en vez del archivo versionado (ver test_sandbox.js). Antes escribía
+// sobre `construramsa_db.json` y dependía de un restoreDB() al final: una
+// interrupción dejaba la semilla reemplazada por el fixture.
+const sandbox = createSandbox('db-ops');
+const DB_FILE = sandbox.dbPath;
+const BACKUP_FILE = DB_FILE + '.backup';
 
 // Colores para consola
 const colors = {
@@ -60,13 +66,20 @@ function backupDB() {
   }
 }
 
-// Restore original DB
+// Restaurar la base de datos dentro del sandbox (la semilla del repo nunca se toca).
 function restoreDB() {
   if (fs.existsSync(BACKUP_FILE)) {
     fs.copyFileSync(BACKUP_FILE, DB_FILE);
     fs.unlinkSync(BACKUP_FILE);
     logInfo('DB restaurada del backup');
   }
+}
+
+// Eliminar el sandbox. Se invoca siempre: el `finally` cubre tanto el éxito
+// como cualquier excepción, de modo que no quedan archivos temporales.
+function cleanupSandbox() {
+  restoreDB();
+  sandbox.cleanup();
 }
 
 // DB inicial vacía
@@ -355,6 +368,7 @@ function testDeleteProject() {
 }
 
 // Ejecutar todos los tests
+let exitCode = 0;
 try {
   backupDB();
 
@@ -370,15 +384,18 @@ try {
   testDataIntegrity();
   testDeleteProject();
 
-  restoreDB();
-
   logInfo('\n' + '='.repeat(50));
   logInfo(`RESULTADO: ${passed} passed, ${failed} failed`);
   logInfo('='.repeat(50));
 
-  process.exit(failed > 0 ? 1 : 0);
+  exitCode = failed > 0 ? 1 : 0;
 } catch (error) {
   logError(`Error inesperado: ${error.message}`);
-  restoreDB();
-  process.exit(1);
+  exitCode = 1;
+} finally {
+  // El sandbox se destruye pase lo que pase: así una interrupción nunca deja
+  // la semilla del repo (ni archivos temporales) en un estado inconsistente.
+  cleanupSandbox();
 }
+
+process.exit(exitCode);

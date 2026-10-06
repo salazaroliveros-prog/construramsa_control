@@ -191,11 +191,11 @@ function testReportGeneration(tipo, db) {
         csv += `Fecha,Unidad,Material,No.,Km,Litros,Combustible (Q),Alquiler (Q),Total (Q)\n`;
         let totalViajes = 0;
         viajes.forEach((v) => {
-          const catalogo = [
-            ...(datos.viajes_camiones.camiones || []),
-            ...(datos.viajes_camiones.equipo_alquilado || []),
-          ];
-          const c = catalogo.find((x) => x.id === v.vehiculo_id) || { nombre: 'N/A' };
+          // El equipo alquilado vive en el mismo catálogo `camiones`, discriminado
+          // por `propiedad` (ver migrarCatalogoVehiculos en index.html).
+          const c = (datos.viajes_camiones.camiones || []).find((x) => x.id === v.vehiculo_id) || {
+            nombre: 'N/A',
+          };
           totalViajes += v.total || 0;
           csv += `${csvRow([v.fecha, c.nombre, v.material, numToInt(v.numero), v.km_total, v.litros, v.costo_combustible, v.costo_alquiler, v.total])}\n`;
         });
@@ -275,11 +275,9 @@ function testReportGeneration(tipo, db) {
           totalLitros = 0,
           totalCost = 0;
         viajesAllV.forEach((v) => {
-          const catalogo = [
-            ...(datos.viajes_camiones.camiones || []),
-            ...(datos.viajes_camiones.equipo_alquilado || []),
-          ];
-          const c = catalogo.find((x) => x.id === v.vehiculo_id) || { nombre: 'N/A' };
+          const c = (datos.viajes_camiones.camiones || []).find((x) => x.id === v.vehiculo_id) || {
+            nombre: 'N/A',
+          };
           totalKm += v.km_total || 0;
           totalLitros += v.litros || 0;
           totalCost += v.total || 0;

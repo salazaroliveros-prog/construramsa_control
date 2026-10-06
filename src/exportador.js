@@ -5,7 +5,7 @@
  * de exportación ya existente en `index.html` (PDF con html2pdf, XLSX con
  * ExcelJS/SheetJS y CSV). Aquí se centraliza la lógica de:
  *   - Sanitización de celdas CSV (protección contra inyección de fórmulas).
- *   - Serialización de filas/objetos a CSV con BOM UTF-8 y separador ";" (GT).
+ *   - Serialización de filas/objetos a CSV con BOM UTF-8 y separador "," (RFC 4180).
  *   - Formateo de montos con moneda y precisión consistente.
  *   - Generación de nombres de archivo seguros.
  *   - Descarga en navegador único punto de entrada.
@@ -135,9 +135,7 @@
    */
   function nombreArchivoSeguro(base) {
     const limpio = String(base)
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9._-]+/g, '_')
+      .replace(/[^a-zA-Z0-9._áéíóúÁÉÍÓÚñÑüÜ\-/]+/g, '_')
       .replace(/_{2,}/g, '_')
       .replace(/^_+|_+$/g, '');
     return limpio || 'reporte';

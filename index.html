@@ -1736,10 +1736,14 @@
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.06);
             padding: 10px;
+            padding-top: 26px;
             margin-bottom: 12px;
             min-height: 180px;
             position: relative;
             overflow: visible;
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         .grafico-placeholder {
             display: flex;
@@ -1816,6 +1820,8 @@
             border-radius: 8px;
             padding: 12px;
             text-align: center;
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
         .metrica-label {
             font-size: 11px;
@@ -1826,6 +1832,8 @@
             font-size: 16px;
             font-weight: 700;
             color: var(--acento-cian);
+            overflow-wrap: anywhere;
+            font-variant-numeric: tabular-nums;
         }
         .metrica-value.positivo { color: var(--exito); }
         .metrica-value.negativo { color: var(--alerta-texto); }
@@ -1849,8 +1857,17 @@
             align-items: flex-end;
             gap: 6px;
             height: 140px;
-            padding: 8px 0;
+            padding: 8px 2px 8px 2px;
+            overflow-x: auto;
+            overflow-y: visible;
+            scroll-snap-type: x proximity;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
+        .css-chart-bars::-webkit-scrollbar { display: none; }
         .css-chart-labels {
             display: flex;
             gap: 6px;
@@ -1872,8 +1889,9 @@
             flex: 1 1 0;
             background: linear-gradient(180deg, var(--acento-cian), var(--acento-azul));
             border-radius: 3px 3px 0 0;
-            min-width: 16px;
-            max-width: 60px;
+            min-width: 40px;
+            max-width: 64px;
+            scroll-snap-align: start;
             position: relative;
             transition: height 0.3s ease;
         }
@@ -3186,10 +3204,10 @@
                 <!-- Proyecciones de Presupuesto -->
                 <div id="proyecciones-container">
                     <div class="proyeccion-card">
-                        <div class="proyeccion-title">💰 Presupuesto Mensual vs Gasto Real</div>
-                        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;">
-                            <span>Gastado: <strong id="gasto-mensual">Q0.00</strong></span>
-                            <span>Presupuesto: <strong id="presupuesto-mensual">Q0.00</strong></span>
+                        <div class="proyeccion-title" id="titulo-presupuesto">💰 Presupuesto vs Gasto Real (Mes)</div>
+                        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13px;margin-bottom:5px;min-width:0;">
+                            <span style="min-width:0;overflow-wrap:anywhere;">Gastado: <strong id="gasto-mensual">Q0.00</strong></span>
+                            <span style="min-width:0;overflow-wrap:anywhere;">Presupuesto: <strong id="presupuesto-mensual">Q0.00</strong></span>
                         </div>
                         <div class="barra-progreso">
                             <div class="barra-progreso-fill" id="barra-presupuesto" style="width:0%;"></div>
@@ -3200,7 +3218,7 @@
                     </div>
 
                     <div class="proyeccion-card" id="proyeccion-proxima">
-                        <div class="proyeccion-title">📈 Proyección de Gasto Fin de Mes</div>
+                        <div class="proyeccion-title" id="titulo-proyeccion">📈 Proyección de Gasto Fin de Mes</div>
                         <div style="font-size:13px;margin-bottom:10px;">
                             Basado en el ritmo actual: <strong id="proyeccion-valor">Q0.00</strong>
                         </div>
@@ -3236,7 +3254,7 @@
                         <div class="metrica-value" id="eficiencia-combustible">0 L/km</div>
                     </div>
                     <div class="metrica-item">
-                        <div class="metrica-label">Variación vs Mes Anterior</div>
+                        <div class="metrica-label" id="label-variacion">Variación vs Mes Anterior</div>
                         <div class="metrica-value" id="variacion-mensual">0%</div>
                     </div>
                 </div>
@@ -5067,6 +5085,86 @@
             return saveDB(db);
         }
 
+        /**
+         * Normaliza el catálogo de unidades de `viajes_camiones`.
+         *
+         * El modelo canónico es UNA sola lista, `camiones`, discriminada por
+         * `propiedad` ('propio' | 'alquilado'). `equipo_alquilado` fue un array
+         * paralelo con otro esquema ({id, nombre, tarifa_diaria}) que la app
+         * nunca escribía ni mostraba: sólo lo inicializaba y lo fusionaba al
+         * importar. Por eso el equipo alquilado no aparecía en el <select> de
+         * viajes, no se podía editar ni eliminar, y cada reporte que resolvía
+         * la unidad por `camiones` caía al fallback 'N/A'.
+         *
+         * Esta migración pliega `equipo_alquilado` dentro de `camiones` con el
+         * esquema canónico y lo deja vacío. Es idempotente: aplicarla sobre
+         * datos ya migrados no vuelve a cambiar nada.
+         *
+         * @param {object} vc    `viajes_camiones` del proyecto (o de la raíz)
+         * @returns {boolean}    true si modificó algo
+         */
+        function migrarCatalogoVehiculos(vc) {
+            if (!vc) return false;
+            if (!Array.isArray(vc.camiones)) vc.camiones = [];
+            if (!Array.isArray(vc.equipo_alquilado)) vc.equipo_alquilado = [];
+            let cambio = false;
+
+            const porId = new Map();
+            vc.camiones.forEach(c => { if (c && c.id && !porId.has(c.id)) porId.set(c.id, c); });
+
+            // 1) Plegar el catálogo paralelo al canónico.
+            if (vc.equipo_alquilado.length) {
+                vc.equipo_alquilado.forEach(eq => {
+                    if (!eq || !eq.id || porId.has(eq.id)) return;
+                    const tarifa = Number(eq.tarifa != null ? eq.tarifa : eq.tarifa_diaria);
+                    const unidad = {
+                        id: eq.id,
+                        nombre: String(eq.nombre != null ? eq.nombre : ''),
+                        capacidad: Number(eq.capacidad) || 25,
+                        propiedad: 'alquilado',
+                        consumo: Number(eq.consumo) || 0,
+                        tarifa: Number.isFinite(tarifa) ? tarifa : 0,
+                        modalidad: eq.modalidad === 'viaje' ? 'viaje' : 'dia',
+                    };
+                    vc.camiones.push(unidad);
+                    porId.set(unidad.id, unidad);
+                    cambio = true;
+                });
+                vc.equipo_alquilado = [];
+                cambio = true;
+            }
+
+            // 2) Completar los campos que el modelo canónico exige.
+            vc.camiones.forEach(c => {
+                if (!c || !c.id) return;
+                if (c.propiedad !== 'propio' && c.propiedad !== 'alquilado') {
+                    c.propiedad = 'propio';
+                    cambio = true;
+                }
+                if (!Number.isFinite(Number(c.capacidad))) { c.capacidad = 25; cambio = true; }
+                if (c.propiedad === 'alquilado') {
+                    if (!Number.isFinite(Number(c.tarifa))) {
+                        const t = Number(c.tarifa_diaria);
+                        c.tarifa = Number.isFinite(t) ? t : 0;
+                        cambio = true;
+                    }
+                    if (c.modalidad !== 'dia' && c.modalidad !== 'viaje') { c.modalidad = 'dia'; cambio = true; }
+                }
+                // El consumo debe ser numérico en TODAS las unidades, no sólo en
+                // las alquiladas: `litros = kmTotal * parseFloat(consumo)` (ver
+                // index.html:10575 y 10711) convierte `undefined` a 0, y el costo de
+                // combustible de un camión propio quedaría en Q0 en silencio.
+                // Sólo se rellena si falta o no es numérico: un 0 intencional se
+                // conserva.
+                if (!Number.isFinite(Number(c.consumo))) {
+                    c.consumo = c.propiedad === 'alquilado' ? 0 : 0.35;
+                    cambio = true;
+                }
+                if (c.tarifa_diaria !== undefined) { delete c.tarifa_diaria; cambio = true; }
+            });
+            return cambio;
+        }
+
         function migrarDB(db) {
             if (!db.version) db.version = '2.9.4';
             if (!db.configuracion) db.configuracion = { nombre_empresa:'CONSTRURAMSA', eslogan:'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA', logo_base64:'', presupuesto_inicial_caja:0 };
@@ -5102,11 +5200,22 @@
             if (!db.viajes_camiones.camiones) db.viajes_camiones.camiones = [];
             if (!db.viajes_camiones.equipo_alquilado) db.viajes_camiones.equipo_alquilado = [];
             if (!db.viajes_camiones.viajes) db.viajes_camiones.viajes = [];
+            migrarCatalogoVehiculos(db.viajes_camiones);
             if (!db.mantenimiento) db.mantenimiento = { maquinaria:[], formatos:{}, ordenes:[], compras_insumos:[] };
             if (!db.mantenimiento.maquinaria) db.mantenimiento.maquinaria = [];
             if (!db.mantenimiento.formatos) db.mantenimiento.formatos = {};
             if (!db.mantenimiento.ordenes) db.mantenimiento.ordenes = [];
             if (!db.mantenimiento.compras_insumos) db.mantenimiento.compras_insumos = [];
+            // Migrar también el catálogo de cada proyecto, no sólo el de la raíz:
+            // un respaldo importado puede traer proyectos INACTIVOS con el
+            // esquema legacy. Sin esto, esos proyectos sólo se normalizarían al
+            // seleccionarlos, y un reporte que los combine antes vería 'N/A'.
+            if (db.proyectos_data) {
+                Object.keys(db.proyectos_data).forEach((pid) => {
+                    const pd = db.proyectos_data[pid];
+                    if (pd && pd.viajes_camiones) migrarCatalogoVehiculos(pd.viajes_camiones);
+                });
+            }
             return db;
         }
 
@@ -5189,6 +5298,7 @@
                 if (!d.viajes_camiones.camiones) d.viajes_camiones.camiones = [];
                 if (!d.viajes_camiones.equipo_alquilado) d.viajes_camiones.equipo_alquilado = [];
                 if (!d.viajes_camiones.viajes) d.viajes_camiones.viajes = [];
+                migrarCatalogoVehiculos(d.viajes_camiones);
                 if (!d.mantenimiento) d.mantenimiento = { maquinaria:[], formatos:{}, ordenes:[], compras_insumos:[] };
                 if (!d.mantenimiento.maquinaria) d.mantenimiento.maquinaria = [];
                 if (!d.mantenimiento.formatos) d.mantenimiento.formatos = {};
@@ -6157,7 +6267,7 @@
                 if (c.estado === 'pendiente') pending.push({ texto: `📋 Cotización: ${c.material_descripcion} (${formatearMoneda(c.total)})`, fecha: c.fecha });
             });
             const hoy = new Date().toISOString().split('T')[0];
-            viajes.forEach(v => { if (v.fecha === hoy) pending.push({ texto: `🚛 Hoy: ${([...(datos.viajes_camiones.camiones||[]), ...(datos.viajes_camiones.equipo_alquilado||[])].find(x=>x.id===v.vehiculo_id))?.nombre || 'N/A'} — ${v.numero} viaje(s) de ${v.material}`, fecha: v.fecha }); });
+            viajes.forEach(v => { if (v.fecha === hoy) pending.push({ texto: `🚛 Hoy: ${(camiones.find(x=>x.id===v.vehiculo_id))?.nombre || 'N/A'} — ${v.numero} viaje(s) de ${v.material}`, fecha: v.fecha }); });
             ords.forEach(o => { if (o.fecha === hoy) pending.push({ texto: `🔧 Hoy: orden de mantenimiento ${o.tipo}`, fecha: o.fecha }); });
             ins.forEach(i => { if (i.fecha === hoy) pending.push({ texto: `🛒 Hoy: compra de ${i.articulo} (x${i.cantidad})`, fecha: i.fecha }); });
             pending.sort((a,b) => (a.fecha||'').localeCompare(b.fecha||''));
@@ -6310,12 +6420,25 @@
                     // Todos los gastos graficados provienen de caja chica: no se recorta nada.
                 } else {
                     const _sumArr = (arr, fn) => (Array.isArray(arr) ? arr.reduce((s, it) => s + (Number(fn(it)) || 0), 0) : 0);
+                    // FIX coherencia período: los totales por módulo respetan la ventana
+                    // efectiva del KPI (kpis.periodoInicioISO/FinISO = rango del reporte
+                    // o ventana del período del dashboard), no el histórico completo.
+                    const _enPeriodo = (fecha) => {
+                        const f = String(fecha || '').slice(0, 10);
+                        const ini = kpis.periodoInicioISO || '';
+                        const fin = kpis.periodoFinISO || '';
+                        return (!ini || f >= ini) && (!fin || f <= fin);
+                    };
+                    const _viajesPer = ((datos.viajes_camiones || {}).viajes || []).filter(v => _enPeriodo(v.fecha));
+                    const _ordsPer = ((datos.mantenimiento || {}).ordenes || []).filter(o => _enPeriodo(o.fecha));
+                    const _insPer = ((datos.mantenimiento || {}).compras_insumos || []).filter(i => _enPeriodo(i.fecha));
+                    const _regsPer = ((datos.maquinaria_flota || {}).registros || []).filter(r => _enPeriodo(r.fecha));
                     const _modTotal = {
-                        viajes: _sumArr((datos.viajes_camiones || {}).viajes, v => v.total),
-                        mantenimiento: _sumArr(((datos.mantenimiento || {}).ordenes), o => o.costo)
-                            + _sumArr(((datos.mantenimiento || {}).compras_insumos), i => i.costo_total || i.costo),
-                        personal: Number(kpis.totalNomina) || 0,
-                        maquinaria: _sumArr((datos.maquinaria_flota || {}).registros, r => r.costo_total || r.costo)
+                        viajes: _sumArr(_viajesPer, v => v.total),
+                        mantenimiento: _sumArr(_ordsPer, o => o.costo)
+                            + _sumArr(_insPer, i => i.costo_total || i.costo),
+                        personal: Number(kpis.nominaPeriodo) || 0,
+                        maquinaria: _sumArr(_regsPer, r => r.costo_total || r.costo)
                     }[filtroNorm.replace(/\s+/g, '')] || 0;
                     const etiquetaModulo = categoria.charAt(0).toUpperCase() + categoria.slice(1);
                     gastosPorCategoria = { [etiquetaModulo]: _modTotal };
@@ -6438,6 +6561,17 @@
                 }
             }
             
+            // Etiquetas dinámicas según período (evita incoherencia "Mes" fijo)
+            const _nombresPeriodo = { dia: 'Día', semana: 'Semana', mes: 'Mes', trimestre: 'Trimestre', anio: 'Año' };
+            const _nombrePer = _nombresPeriodo[periodo] || 'Mes';
+            const _nombrePerAnt = { dia: 'Día Anterior', semana: 'Semana Anterior', mes: 'Mes Anterior', trimestre: 'Trimestre Anterior', anio: 'Año Anterior' }[periodo] || 'Mes Anterior';
+            const _titPres = document.getElementById('titulo-presupuesto');
+            if (_titPres) _titPres.textContent = `💰 Presupuesto vs Gasto Real (${_nombrePer})`;
+            const _titProy = document.getElementById('titulo-proyeccion');
+            if (_titProy) _titProy.textContent = `📈 Proyección de Gasto Fin de ${_nombrePer}`;
+            const _lblVar = document.getElementById('label-variacion');
+            if (_lblVar) _lblVar.textContent = `Variación vs ${_nombrePerAnt}`;
+
             // Actualizar proyecciones de presupuesto (solo para período mensual)
             if (periodo === 'mes') {
                 const gastoMensual = kpis.gastoPeriodo;
@@ -6461,7 +6595,7 @@
                         elemBarraPresupuesto.style.background = 'linear-gradient(90deg, var(--acento-cian), var(--acento-azul))';
                     }
                 }
-                if (elemEstadoPresupuesto) elemEstadoPresupuesto.textContent = `${porcentajeUsado.toFixed(1)}% del presupuesto utilizado`;
+                if (elemEstadoPresupuesto) elemEstadoPresupuesto.textContent = `${porcentajeUsado.toFixed(1)}% del presupuesto utilizado (${_nombrePer})`;
                 
                 // Alerta si se excede el presupuesto
                 const proyeccionCard = document.getElementById('proyeccion-proxima');
@@ -6481,19 +6615,22 @@
                 if (elemProyeccionValor) elemProyeccionValor.textContent = formatearMoneda(kpis.proyeccionFinDeMes);
                 if (elemDiasRestantes) elemDiasRestantes.textContent = kpis.diasRestantes;
                 if (elemGastoDiario) elemGastoDiario.textContent = formatearMoneda(kpis.gastoDiarioPromedio);
-                
-                // Tendencia
+
+                // Tendencia (con guarda de nulo para no romper el dashboard si falta el nodo)
                 const tendenciaEl = document.getElementById('tendencia-gasto');
-                if (kpis.gastoDiarioPromedio > 0) {
-                    const tendencia = kpis.proyeccionFinDeMes > presupuesto ? '⚠️ Excederá' : '✅ Dentro';
-                    tendenciaEl.textContent = tendencia;
-                    tendenciaEl.className = `metrica-value ${kpis.proyeccionFinDeMes > presupuesto ? 'negativo' : 'positivo'}`;
-                } else {
-                    tendenciaEl.textContent = '--';
-                    tendenciaEl.className = 'metrica-value';
+                if (tendenciaEl) {
+                    if (kpis.gastoDiarioPromedio > 0) {
+                        const tendencia = kpis.proyeccionFinDeMes > presupuesto ? '⚠️ Excederá' : '✅ Dentro';
+                        tendenciaEl.textContent = tendencia;
+                        tendenciaEl.className = `metrica-value ${kpis.proyeccionFinDeMes > presupuesto ? 'negativo' : 'positivo'}`;
+                    } else {
+                        tendenciaEl.textContent = '--';
+                        tendenciaEl.className = 'metrica-value';
+                    }
                 }
             } else {
-                // Para otros períodos, adaptar proyecciones
+                // Para otros períodos se usa la misma lógica unificada (gastoPeriodo,
+                // proyección y tendencia del motor). Solo cambia la etiqueta del período.
                 const elemGastoMensual = document.getElementById('gasto-mensual');
                 const elemPresupuestoMensual = document.getElementById('presupuesto-mensual');
                 const elemBarraPresupuesto = document.getElementById('barra-presupuesto');
@@ -6513,7 +6650,12 @@
                         elemBarraPresupuesto.style.background = 'linear-gradient(90deg, var(--acento-cian), var(--acento-azul))';
                     }
                 }
-                if (elemEstadoPresupuesto) elemEstadoPresupuesto.textContent = `${porcentajeUsado.toFixed(1)}% del presupuesto utilizado (${periodo})`;
+                if (elemEstadoPresupuesto) elemEstadoPresupuesto.textContent = `${porcentajeUsado.toFixed(1)}% del presupuesto utilizado (${_nombrePer})`;
+                const proyeccionCard2 = document.getElementById('proyeccion-proxima');
+                if (proyeccionCard2) {
+                    if (porcentajeUsado > 90) proyeccionCard2.classList.add('alerta');
+                    else proyeccionCard2.classList.remove('alerta');
+                }
                 
                 // Actualizar proyección fin de período
                 const elemProyeccionValor = document.getElementById('proyeccion-valor');
@@ -6524,15 +6666,17 @@
                 if (elemDiasRestantes) elemDiasRestantes.textContent = kpis.diasRestantes;
                 if (elemGastoDiario) elemGastoDiario.textContent = formatearMoneda(kpis.gastoDiarioPromedio);
                 
-                // Tendencia
+                // Tendencia (blindada contra nodo ausente)
                 const tendenciaEl = document.getElementById('tendencia-gasto');
-                if (kpis.gastoDiarioPromedio > 0) {
-                    const tendencia = kpis.proyeccionFinDeMes > presupuesto ? '⚠️ Excederá' : '✅ Dentro';
-                    tendenciaEl.textContent = tendencia;
-                    tendenciaEl.className = `metrica-value ${kpis.proyeccionFinDeMes > presupuesto ? 'negativo' : 'positivo'}`;
-                } else {
-                    tendenciaEl.textContent = '--';
-                    tendenciaEl.className = 'metrica-value';
+                if (tendenciaEl) {
+                    if (kpis.gastoDiarioPromedio > 0) {
+                        const tendencia = kpis.proyeccionFinDeMes > presupuesto ? '⚠️ Excederá' : '✅ Dentro';
+                        tendenciaEl.textContent = tendencia;
+                        tendenciaEl.className = `metrica-value ${kpis.proyeccionFinDeMes > presupuesto ? 'negativo' : 'positivo'}`;
+                    } else {
+                        tendenciaEl.textContent = '--';
+                        tendenciaEl.className = 'metrica-value';
+                    }
                 }
             }
             
@@ -10692,9 +10836,10 @@ function cargarTablaCamiones() {
             const pag_ = viajes.slice(ini_, ini_ + REGISTROS_POR_PAGINA);
             tbody.innerHTML = '';
 pag_.forEach(v => {
-                // El viaje puede apuntar a un camión propio o a equipo alquilado.
-                const catalogo = [...(datos.viajes_camiones.camiones || []), ...(datos.viajes_camiones.equipo_alquilado || [])];
-                const cam = catalogo.find(c => c.id === v.vehiculo_id);
+                // El viaje puede apuntar a un camión propio o a equipo alquilado; ambos
+                // viven en el mismo catálogo `camiones` (discriminado por
+                // `propiedad`), ya normalizado por migrarCatalogoVehiculos().
+                const cam = (datos.viajes_camiones.camiones || []).find(c => c.id === v.vehiculo_id);
                 const nombre = cam ? cam.nombre : 'N/A';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -11273,12 +11418,21 @@ tbody.innerHTML = '';
             }
         }
 
+        function truncarTexto(texto, max = 150) {
+            const str = String(texto ?? '');
+            return str.length > max ? str.substring(0, max - 3) + '...' : str;
+        }
+
         function generarCSVReporte(tipo, fecha, rangoPersonalizado) {
-            const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
+            let rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
             
             // Validación de datos antes de exportar
             if (!rango.inicio && tipo !== 'asistencia') {
                 return '\uFEFFError: Debe seleccionar una fecha para generar el reporte.';
+            }
+            
+            if (rango.inicio && rango.fin && rango.inicio > rango.fin) {
+                return '\uFEFFError: La fecha de inicio no puede ser posterior a la fecha de fin.';
             }
             
             const db    = getDB();
@@ -11391,7 +11545,7 @@ tbody.innerHTML = '';
                 const viajes = viajesAll.filter(v => enRango(v.fecha));
                 let totalViajes = 0;
                 if (viajes.length > 0) {
-                    csv += `\n--- VIAJES DE CAMIONES ---\nFecha,Unidad,Material,No.,Km,Litros,Combustible (Q),Alquiler (Q),Total (Q)\n`;
+                    csv += `\n# --- VIAJES DE CAMIONES ---\nFecha,Unidad,Material,No.,Km,Litros,Combustible (Q),Alquiler (Q),Total (Q)\n`;
                     viajes.forEach(v => {
                         const c = (datos.viajes_camiones.camiones||[]).find(x=>x.id===v.vehiculo_id) || {nombre:'N/A'};
                         totalViajes += v.total || 0;
@@ -11406,7 +11560,7 @@ tbody.innerHTML = '';
                 const insMT  = insAll.filter(i => enRango(i.fecha));
                 let totalMT = 0;
                 if (ordsMT.length > 0 || insMT.length > 0) {
-                    csv += '\n--- MANTENIMIENTO E INSUMOS ---\n';
+                    csv += '\n# --- MANTENIMIENTO E INSUMOS ---\n';
                     ordsMT.forEach(o => { const m=(datos.mantenimiento.maquinaria||[]).find(x=>x.id===o.maquinaria_id) || {nombre:'N/A'}; totalMT += o.costo||0; totalEgr += o.costo||0; csv += `${csvRow([o.fecha, 'Mantenimiento ' + o.tipo, (o.observaciones||'N/A') + ' - ' + m.nombre, o.costo])}\n`; });
                     insMT.forEach(i => { totalMT += i.costo||0; totalEgr += i.costo||0; csv += `${csvRow([i.fecha, 'Insumo ' + i.tipo, i.articulo + ' (x' + numToInt(i.cantidad) + ')', i.costo])}\n`; });
                     csv += `\n`;
@@ -11422,7 +11576,7 @@ tbody.innerHTML = '';
                     );
                     if (nominaMes.trabajadores.length > 0) {
                         totalEgr += nominaMes.totalPagable;
-                        csv += `\n--- NÓMINA DEL PERÍODO ---\n`;
+                        csv += `\n# --- NÓMINA DEL PERÍODO ---\n`;
                         csv += `Trabajador,Puesto,Asist.,Faltas,H. Extra,Total (Q)\n`;
                         nominaMes.trabajadores.forEach(t => {
                             csv += `${csvRow([t.nombre, t.puesto||'—', t.diasAsistidos, t.diasFalta, numToF(t.horasExtra), numToF(t.totalPagar)])}\n`;
@@ -11603,7 +11757,7 @@ tbody.innerHTML = '';
                     
                     // Gastos por categoría si están disponibles
                     if (kpis.gastosPorCategoria) {
-                        csv += `\n--- GASTOS POR CATEGORIA ---\n`;
+                        csv += `\n# --- GASTOS POR CATEGORIA ---\n`;
                         csv += `Categoria,Monto (Q)\n`;
                         Object.entries(kpis.gastosPorCategoria).forEach(([cat, monto]) => {
                             if (monto > 0) {
@@ -11674,10 +11828,15 @@ tbody.innerHTML = '';
             const proy  = adaptador ? adaptador.project : db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
             const proyNombre = adaptador ? adaptador.projectName : (proy ? proy.nombre : 'General');
             let html = '';
+            
+            let rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
+            if (rango.inicio && rango.fin && rango.inicio > rango.fin) {
+                return '<p style="color:var(--pdf-rojo);padding:20px;">Error: La fecha de inicio no puede ser posterior a la fecha de fin.</p>';
+            }
 
             // ── REPORTE EJECUTIVO (Resumen Gerencial con KPIs) ──
             if (tipo === 'ejecutivo') {
-                const rangoEj = rangoPersonalizado || (fecha ? { inicio: fecha, fin: fecha } : { inicio: '', fin: '' });
+                let rangoEj = rangoPersonalizado || (fecha ? { inicio: fecha, fin: fecha } : { inicio: '', fin: '' });
                 const cfgEj = db.configuracion || {};
                 const portadaEj = (typeof _leerCamposPortada === 'function') ? _leerCamposPortada() : {};
                 const CR_Ej = (typeof window !== 'undefined') ? window.CR_ReporteEjecutivo : undefined;
@@ -11695,10 +11854,6 @@ tbody.innerHTML = '';
                 }
                 html += '<p>Módulo de reporte ejecutivo no disponible.</p>';
             }
-
-            const rango = rangoPersonalizado || (tipo === 'semanal' ? obtenerRangoSemana(fecha) : tipo === 'mensual' ? obtenerRangoMensual(fecha) : { inicio: fecha, fin: fecha });
-            const enRango = (f) => f >= rango.inicio && f <= rango.fin;
-            const periodoDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
 
             if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
                 const tipoNombre = tipo === 'diario' ? 'Reporte Diario Consolidado' : tipo === 'semanal' ? 'Informe Semanal Consolidado' : 'Reporte Mensual Consolidado';
@@ -11718,7 +11873,7 @@ tbody.innerHTML = '';
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
                     const esIng = g.tipo === 'ingreso';
-                    html += `<tr><td>${_esc(g.fecha)}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${_esc(g.tipo.toUpperCase())}</td><td>${_esc(etiquetaCategoria(g.categoria))}</td><td>${_esc(g.descripcion)}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
+                    html += `<tr><td>${_esc(g.fecha)}</td><td style="color:${esIng?'#059669':'#dc2626'};font-weight:600;">${_esc(g.tipo.toUpperCase())}</td><td>${_esc(etiquetaCategoria(g.categoria))}</td><td>${_esc(truncarTexto(g.descripcion, 150))}</td><td style="text-align:right;">${formatearMoneda(g.monto)}</td></tr>`;
                     if (esIng) totalIng += g.monto; else totalEgr += g.monto;
                 });
                 if (movs.length === 0) html += `<tr><td colspan="5" style="text-align:center;color:var(--pdf-gris-medio);padding:20px;">Sin movimientos de caja directos en este período</td></tr>`;
@@ -11753,7 +11908,7 @@ tbody.innerHTML = '';
                         totalMTmp += o.costo||0; 
                         totalEgr += o.costo||0; 
                         const firmaHtml = o.firma ? `<img src="${o.firma}" alt="Firma de aprobación" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
-                        html += `<tr><td>${_esc(m.nombre)}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td>${tieneFirmas ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`; 
+                        html += `<tr><td>${_esc(m.nombre)}</td><td>${_esc(o.tipo)}</td><td>${_esc(truncarTexto(o.observaciones||'—', 150))}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td>${tieneFirmas ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`; 
                     });
                     html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMTmp)}</td></tr>`;
                     html += `</tbody></table>`;
@@ -11769,7 +11924,7 @@ tbody.innerHTML = '';
                         totalITmp += i.costo||0; 
                         totalEgr += i.costo||0; 
                         const firmaHtml = i.firma ? `<img src="${i.firma}" alt="Firma de aprobación de insumos" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
-                        html += `<tr><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td>${tieneFirmas ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`; 
+                        html += `<tr><td>${_esc(i.tipo)}</td><td>${_esc(truncarTexto(i.articulo, 150))}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td>${tieneFirmas ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`; 
                     });
                     html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalITmp)}</td></tr>`;
                     html += `</tbody></table>`;
@@ -12139,7 +12294,7 @@ tbody.innerHTML = '';
         }
 
         // Esperar a que el logo y las firmas del membrete terminen de cargar.
-        // FIX BUG-PDF: solo se espera por elementos <img>; los contenedores de
+        // FIX BUG-PDF: solo se espera por elementos de imagen; los contenedores de
         // firma son <div> y no disparan onload/onerror, por lo que colgaban la
         // generación del PDF indefinidamente (el PDF nunca se descargaba).
         function esperarImagenesPlantilla() {
@@ -12185,18 +12340,18 @@ function validarDependenciasExportacion() {
                 //    position:fixed + left:-9999px lo saca del flujo pero sigue
                 //    siendo renderizable; asignamos el ancho en px para que
                 //    scrollWidth coincida exactamente con targetPx.
-                contenedor.style.width = targetPx + 'px';
-                contenedor.style.maxWidth = targetPx + 'px';
-                contenedor.style.minWidth = targetPx + 'px';
-                contenedor.style.overflowX = 'hidden';
-                contenedor.style.overflowY = 'hidden';
+                 contenedor.style.width = targetPx + 'px';
+                 contenedor.style.maxWidth = targetPx + 'px';
+                 contenedor.style.minWidth = targetPx + 'px';
+                 contenedor.style.overflowX = 'hidden';
 
                 // 2) Dar un tick al navegador para que recalcule el layout
                 //    con el nuevo ancho antes de leer scrollHeight.
                 await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
                 const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123);
-                const scale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
+                const rawScale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
+                const scale = Math.min(rawScale, 1.5);
 
                 // 3) Variables CSS del tema que usa la plantilla.
                 //    html2canvas clona el DOM en un iframe aislado donde las
@@ -12267,10 +12422,18 @@ function validarDependenciasExportacion() {
             }
         }
 
+        let _generandoReporte = false;
+
         async function compartirReporteWhatsApp() {
+            if (_generandoReporte) {
+                showToast('⚠️ Ya se está generando un reporte. Por favor espere.', 'info');
+                hideLoading();
+                return;
+            }
+            _generandoReporte = true;
             try {
                 const tipo = document.getElementById('reporte-tipo').value;
-                const rango = obtenerRangoReporte();
+                let rango = obtenerRangoReporte();
                 
                 if (!rango.inicio && tipo !== 'asistencia') {
                     showToast('⚠️ Seleccione una fecha para generar el reporte.', 'error');
@@ -12310,8 +12473,9 @@ function validarDependenciasExportacion() {
                     showToast('✅ Reporte compartido', 'success');
                 } else {
                     showToast('ℹ️ El navegador no soporta compartir archivos. Se descargarán localmente.', 'info');
-                    archivos.forEach(f => { const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;a.click();setTimeout(() => URL.revokeObjectURL(u), 1000); });
+                    archivos.forEach(f => { const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;a.click();setTimeout(() => URL.revokeObjectURL(u), 3000); });
                 }
+                _generandoReporte = false;
             } catch (err) {
                 // Asegurar que se remueva la clase en caso de error
                 const contenedor = document.getElementById('plantilla-reporte-impresion');
@@ -12319,15 +12483,23 @@ function validarDependenciasExportacion() {
                 
                 hideLoading();
                 if (err.name !== 'AbortError') { console.error(err); showToast('⚠️ Error al compartir. Se descargará localmente.', 'error'); generarReporteLocal(); }
+                _generandoReporte = false;
             }
         }
 
         function generarReporteLocal() {
+            if (_generandoReporte) {
+                showToast('⚠️ Ya se está generando un reporte. Por favor espere.', 'info');
+                return;
+            }
+            _generandoReporte = true;
+            
             const tipo = document.getElementById('reporte-tipo').value;
-            const rango = obtenerRangoReporte();
+            let rango = obtenerRangoReporte();
             
             if (!rango.inicio && tipo !== 'asistencia') {
                 showToast('⚠️ Seleccione una fecha para generar el reporte.', 'error');
+                _generandoReporte = false;
                 return;
             }
             
@@ -12358,7 +12530,7 @@ function validarDependenciasExportacion() {
                         actualizarProgresoReporte('Generando CSV...', 20 + (formatoCount / totalFormatos) * 30);
                         const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type:'text/csv;charset=utf-8;' });
                         const urlCSV = URL.createObjectURL(csvBlob);
-                        const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
+                        const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 3000);
                         formatoCount++;
                         actualizarProgresoReporte('CSV generado', 20 + (formatoCount / totalFormatos) * 30);
                     }
@@ -12381,7 +12553,7 @@ function validarDependenciasExportacion() {
                         document.body.appendChild(aPdf);
                         aPdf.click();
                         document.body.removeChild(aPdf);
-                        setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+                        setTimeout(() => URL.revokeObjectURL(pdfUrl), 3000);
 
                         contenedor.classList.remove('pdf-generating');
                         formatoCount++;
@@ -12396,6 +12568,7 @@ function validarDependenciasExportacion() {
                     setTimeout(() => {
                         ocultarProgresoReporte();
                         showToast('✅ Reporte generado y descargado', 'success');
+                        _generandoReporte = false;
                     }, 500);
                 } catch (err) { 
                     const contenedor = document.getElementById('plantilla-reporte-impresion');
@@ -12403,6 +12576,7 @@ function validarDependenciasExportacion() {
                     ocultarProgresoReporte();
                     showToast('❌ Error al generar reporte', 'error'); 
                     console.error(err); 
+                    _generandoReporte = false;
                 }
             }, 300);
         }
@@ -12439,7 +12613,7 @@ function validarDependenciasExportacion() {
         let vistaPreviaKeyHandler = null;
         function abrirVistaPrevia(modo) {
             const tipo = document.getElementById('reporte-tipo').value;
-            const rango = obtenerRangoReporte();
+            let rango = obtenerRangoReporte();
 
             // Validar fecha antes de abrir (excepto asistencia)
             if (!rango.inicio && tipo !== 'asistencia') {
@@ -12528,7 +12702,7 @@ function validarDependenciasExportacion() {
          */
         function actualizarVistaPrevia() {
             const tipo = document.getElementById('reporte-tipo').value;
-            const rango = obtenerRangoReporte();
+            let rango = obtenerRangoReporte();
 
             // Leer campos de la portada
             const portada = _leerCamposPortada();
@@ -12759,7 +12933,7 @@ function validarDependenciasExportacion() {
                 compartirReporteWhatsApp();
             } else {
                 const tipo = document.getElementById('reporte-tipo').value;
-                const rango = obtenerRangoReporte();
+                let rango = obtenerRangoReporte();
                 
                 if (!rango.inicio && tipo !== 'asistencia') {
                     showToast('⚠️ Seleccione una fecha para el reporte.', 'error');
@@ -12815,7 +12989,7 @@ function validarDependenciasExportacion() {
                             document.body.appendChild(aPdf);
                             aPdf.click();
                             document.body.removeChild(aPdf);
-                            setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+                            setTimeout(() => URL.revokeObjectURL(pdfUrl), 3000);
 
                             contenedor.classList.remove('pdf-generating');
                             formatoCount++;

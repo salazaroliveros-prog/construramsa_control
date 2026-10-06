@@ -137,6 +137,44 @@ function verifyProjects(db) {
     assert(idxVer === expected, `index.html has ${idxVer}, expected ${expected}`);
   });
 
+  // Regresión del audit crítico #2 (deriva de versión): si `sw.js` no se
+  // actualiza al hacer un bump, el Service Worker sigue sirviendo el bundle
+  // viejo desde `control-obra-vX` aunque la app crea que corre en la nueva.
+  // La app se queda "atascada" en la versión anterior sin que nada falle.
+  test('CACHE_VERSION del Service Worker coincide con package.json', () => {
+    const expected = readAppVersion();
+    const swVer = readSourceVersion('sw.js', /CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/);
+    assert(swVer !== null, 'No se encontró CACHE_VERSION en sw.js');
+    assert(swVer === expected, `sw.js tiene ${swVer}, esperado ${expected}`);
+  });
+
+  test('manifest.json y db declaran la misma versión', () => {
+    const expected = readAppVersion();
+    const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'), 'utf8'));
+    const swVer = readSourceVersion('sw.js', /CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/);
+    const mDesc = String(manifest.description || '');
+    assert(
+      mDesc.includes(`v${expected}`),
+      `manifest.json description no menciona v${expected}: "${mDesc}"`
+    );
+    assert(mDesc.includes(`v${swVer}`), 'manifest.json y sw.js no coinciden entre sí');
+  });
+
+  // Todo recurso que el SW precachea debe existir: si falta uno, `cache.addAll`
+  // rechaza el lote COMPLETO y el SW no se instala → la app pierde el modo
+  // offline sin ningún error visible en la UI.
+  test('Todos los recursos del precache del Service Worker existen', () => {
+    const swSrc = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8');
+    const block = swSrc.match(/STATIC_ASSETS\s*=\s*\[([\s\S]*?)\]/);
+    assert(!!block, 'No se encontró el array STATIC_ASSETS en sw.js');
+    const urls = [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1]);
+    const locales = urls.filter((u) => !/^https?:\/\//i.test(u));
+    const faltan = locales
+      .map((u) => u.replace(/^\.\//, '').split('?')[0])
+      .filter((rel) => rel && !fs.existsSync(path.join(__dirname, rel)));
+    assert(faltan.length === 0, `Recursos ausentes del precache: ${faltan.join(', ')}`);
+  });
+
   test('Database has configuracion', () => {
     assert(db.configuracion, 'Missing configuracion');
     assert(db.configuracion.nombre_empresa === 'CONSTRURAMSA', 'Wrong company name');
@@ -538,6 +576,9 @@ function verifyViajes(db) {
   });
 
   test('All trips reference valid vehicles and routes', () => {
+    // Tras la migración, TODO el equipo (propio y alquilado) vive en `camiones`;
+    // `equipo_alquilado` queda vacío. Comprobar ambos catálogos mantiene el
+    // test útil si alguien restaura una semilla anterior a la migración.
     const vehicleIds = new Set([
       ...camiones.map((c) => c.id),
       ...equipo_alquilado.map((e) => e.id),
@@ -551,6 +592,48 @@ function verifyViajes(db) {
       );
       assert(routeIds.has(viaje.ruta_id), `Trip ${idx} references invalid route: ${viaje.ruta_id}`);
     });
+  });
+
+  test('Catálogo de vehículos unificado (migración aplicada)', () => {
+    // Regresión: `equipo_alquilado` es un array paralelo obsoleto. Mientras
+    // tuviera entradas, la unidad no aparecía en el <select> de viajes, no se
+    // podía editar ni eliminar, y los reportes la resolvían como 'N/A'.
+    assert(
+      (equipo_alquilado || []).length === 0,
+      `equipo_alquilado debe quedar vacío tras la migración (tiene ${equipo_alquilado.length})`
+    );
+    const alquilados = camiones.filter((c) => c.propiedad === 'alquilado');
+    assert(
+      alquilados.length > 0 || (equipo_alquilado || []).length > 0,
+      'Debe existir al menos una unidad alquilada en el catálogo'
+    );
+    alquilados.forEach((c) => {
+      assert(
+        typeof c.tarifa === 'number' && Number.isFinite(c.tarifa),
+        `Alquilada ${c.id} sin tarifa`
+      );
+      assert(
+        c.modalidad === 'dia' || c.modalidad === 'viaje',
+        `Alquilada ${c.id} con modalidad inválida: ${c.modalidad}`
+      );
+      assert(
+        c.tarifa_diaria === undefined,
+        `Alquilada ${c.id} conserva el campo legacy tarifa_diaria`
+      );
+    });
+  });
+
+  test('Los viajes de equipo alquilado no consumen combustible', () => {
+    const alquilados = new Set(
+      camiones.filter((c) => c.propiedad === 'alquilado').map((c) => c.id)
+    );
+    viajes
+      .filter((v) => alquilados.has(v.vehiculo_id))
+      .forEach((viaje, idx) => {
+        assert(viaje.litros === 0, `Viaje alquilado ${idx} consume ${viaje.litros} L (debe ser 0)`);
+        assert(viaje.costo_combustible === 0, `Viaje alquilado ${idx} tiene costo de combustible`);
+        assert(viaje.costo_alquiler > 0, `Viaje alquilado ${idx} sin costo de alquiler`);
+      });
   });
 
   test('Trip calculations are correct', () => {
