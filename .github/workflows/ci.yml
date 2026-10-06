@@ -67,8 +67,13 @@ jobs:
           exit_code=0
           for s in "${STEPS[@]}"; do
             echo "########## INICIO: $s ##########" | tee -a npm-test.log
-            timeout --kill-after=30s 300 $s 2>&1 | tee -a npm-test.log
-            rc=${PIPESTATUS[0]}
+            # Importante: NO usar un pipe en vivo con `tee`. Si timeout deja
+            # procesos huerfanos (node/chrome) con el stdout heredado, el pipe
+            # no cerraria nunca y el step se colgaria. Se redirige a step.out
+            # y se vuelca al log despues de que timeout retorne.
+            timeout --kill-after=30s 600 $s > step.out 2>&1
+            rc=$?
+            tee -a npm-test.log < step.out
             echo "########## FIN: $s (rc=$rc) ##########" | tee -a npm-test.log
             if [ "$rc" -ne 0 ]; then exit_code=$rc; break; fi
           done
