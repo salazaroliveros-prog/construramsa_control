@@ -46,7 +46,20 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('construramsa_db.json','utf8')); console.log('DB JSON OK')"
       - run: |
           node -e "['sw.js','src/config.js','src/reportDataAdapter.js','src/kpiEngine.js','src/exportador.js','src/reporteEjecutivo.js','src/nominaEngine.js','src/plantillaPremium.js','src/signatureCapture.js','src/backgroundSync.js','src/syncOptimizer.js','src/silentDownload.js','src/formValidator.js','src/types.js'].forEach(f=>{try{new Function(require('fs').readFileSync(f,'utf8'));console.log(f+': OK')}catch(e){console.error(f+': SYNTAX ERROR: '+e.message);process.exit(1);}})"
-      - run: npm test
+      - name: Run npm test
+        # `tee` conserva la salida en consola y en un archivo para poder
+        # diagnosticar fallos subiendo el log como artefacto (if: always()).
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee npm-test.log
+      - name: Subir log de npm test
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-test-log
+          path: npm-test.log
+          if-no-files-found: ignore
+          retention-days: 7
 
   deploy:
     name: Deploy to Production
