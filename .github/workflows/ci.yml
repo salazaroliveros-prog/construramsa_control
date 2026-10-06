@@ -52,6 +52,21 @@ jobs:
         run: |
           set -o pipefail
           npm test 2>&1 | tee npm-test.log
+      - name: Diagnostico de fallo (resumen + artefacto)
+        if: failure()
+        run: |
+          {
+            echo "## npm test fallo (commit ${GITHUB_SHA::7})"
+            echo '```'
+            echo "--- ultimas 250 lineas ---"
+            tail -n 250 npm-test.log || echo "(sin npm-test.log)"
+            echo "--- lineas con fail/error ---"
+            grep -n -i -E 'fail|error|✖|not ok|✗' npm-test.log | tail -n 80 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          grep -n -i -E 'fail|error|✖|not ok|✗' npm-test.log | tail -n 40 | while IFS= read -r l; do
+            echo "::error::npm-test: $l"
+          done || true
       - name: Subir log de npm test
         if: always()
         uses: actions/upload-artifact@v4
