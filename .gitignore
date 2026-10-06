@@ -75,6 +75,8 @@ test_*.js
 !test_database_connection.js
 !test_cloud_sync.js
 !test_reports_completos.js
+!test_sandbox.js
+!test_migracion_vehiculos.js
 
 # Archivos de firmas personales (no se suben al repositorio)
 wilson.png
