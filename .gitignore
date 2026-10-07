@@ -77,6 +77,8 @@ test_*.js
 !test_reports_completos.js
 !test_sandbox.js
 !test_migracion_vehiculos.js
+!test_quality_contract.js
+.lighthouse-profile-*
 
 # Archivos de firmas personales (no se suben al repositorio)
 wilson.png

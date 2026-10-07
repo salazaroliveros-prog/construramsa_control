@@ -16,7 +16,9 @@ test_*.js
 *_test.js
 tests/
 audit_ui.js
+audit_report_exports_e2e.js
 functional_test.js
+test_quality_contract.js
 visual_verifier.js
 check_inline.js
 test_database_operations.js

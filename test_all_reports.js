@@ -209,7 +209,7 @@ function testReportGeneration(tipo, db) {
       const insMT = insAll.filter((i) => enRango(i.fecha));
       if (ordsMT.length > 0 || insMT.length > 0) {
         csv += `\n--- MANTENIMIENTO E INSUMOS ---\n`;
-        csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
+        csv += `Fecha,Tipo,Descripción,Monto (Q)\n`;
         let totalMT = 0;
         ordsMT.forEach((o) => {
           const m = (datos.mantenimiento.maquinaria || []).find(
@@ -290,7 +290,7 @@ function testReportGeneration(tipo, db) {
       break;
 
     case 'mantenimiento':
-      csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
+      csv += `Fecha,Tipo,Descripción,Monto (Q)\n`;
 
       const ords = datos.mantenimiento.ordenes || [];
       const ins = datos.mantenimiento.compras_insumos || [];

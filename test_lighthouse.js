@@ -10,7 +10,9 @@
 'use strict';
 
 const { chromium } = require('playwright');
-const lighthouse = require('lighthouse');
+const { once } = require('events');
+const { default: lighthouse } = require('lighthouse');
+const chromeLauncher = require('chrome-launcher');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -20,6 +22,7 @@ const PORT = process.env.PORT || '3000';
 const BASE_URL = 'http://localhost:' + PORT;
 const TIMEOUT = 60000;
 const REPORT_PATH = path.join(__dirname, 'lighthouse_report.json');
+const PROFILE_PREFIX = path.join(__dirname, '.lighthouse-profile-');
 
 // ─── server lifecycle ────────────────────────────────────────────────────────
 function startServer() {
@@ -47,6 +50,12 @@ function waitServer(timeoutMs) {
   });
 }
 
+async function stopServer(server) {
+  if (!server || server.exitCode !== null || server.signalCode !== null) return;
+  server.kill();
+  await Promise.race([once(server, 'exit'), new Promise((resolve) => setTimeout(resolve, 5000))]);
+}
+
 // ─── test suite ───────────────────────────────────────────────────────────────
 async function runLighthouseTests() {
   const results = {
@@ -55,7 +64,7 @@ async function runLighthouseTests() {
     summary: { total: 0, passed: 0, failed: 0, scores: {} },
   };
 
-  let browser, page, server;
+  let browser, page, server, chrome, profileDir;
 
   try {
     console.log('[lighthouse] Iniciando servidor...');
@@ -67,21 +76,35 @@ async function runLighthouseTests() {
     browser = await chromium.launch({ headless: true });
     page = await browser.newPage();
     page.setDefaultTimeout(TIMEOUT);
+    profileDir = fs.mkdtempSync(PROFILE_PREFIX);
+    chrome = await chromeLauncher.launch({
+      chromePath: chromium.executablePath(),
+      chromeFlags: ['--headless', '--no-sandbox'],
+      userDataDir: profileDir,
+    });
+    const lighthouseResult = await lighthouse(BASE_URL, {
+      port: chrome.port,
+      output: 'json',
+      logLevel: 'error',
+      onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
+    });
+    if (!lighthouseResult || !lighthouseResult.lhr)
+      throw new Error('Lighthouse did not return a report');
 
     // Test 1: Performance Score
-    await test1_PerformanceScore(page, results);
+    await test1_PerformanceScore(page, lighthouseResult.lhr, results);
 
     // Test 2: Core Web Vitals
-    await test2_CoreWebVitals(page, results);
+    await test2_CoreWebVitals(page, lighthouseResult.lhr, results);
 
     // Test 3: Accessibility Score
-    await test3_AccessibilityScore(page, results);
+    await test3_AccessibilityScore(page, lighthouseResult.lhr, results);
 
     // Test 4: Best Practices
-    await test4_BestPractices(page, results);
+    await test4_BestPractices(page, lighthouseResult.lhr, results);
 
     // Test 5: SEO Score
-    await test5_SEOScore(page, results);
+    await test5_SEOScore(page, lighthouseResult.lhr, results);
   } catch (error) {
     console.error('[lighthouse] Error en suite:', error.message);
     results.tests.push({
@@ -92,7 +115,22 @@ async function runLighthouseTests() {
   } finally {
     if (page) await page.close();
     if (browser) await browser.close();
-    if (server) server.kill();
+    // chrome-launcher cleans its automatic %TEMP% profile with a synchronous
+    // Windows taskkill path that can throw EPERM. We own this profile, so end
+    // its child process directly and then remove only our directory.
+    if (chrome && chrome.process && !chrome.process.killed) chrome.process.kill();
+    await stopServer(server);
+    if (profileDir) {
+      try {
+        fs.rmSync(profileDir, { recursive: true, force: true, maxRetries: 10 });
+      } catch (error) {
+        console.warn('[lighthouse] No se pudo limpiar el perfil temporal:', error.message);
+      }
+    }
+
+    results.summary.total = results.tests.length;
+    results.summary.passed = results.tests.filter((test) => test.status === 'PASSED').length;
+    results.summary.failed = results.tests.filter((test) => test.status === 'FAILED').length;
 
     // Guardar reporte
     fs.writeFileSync(REPORT_PATH, JSON.stringify(results, null, 2));
@@ -105,18 +143,11 @@ async function runLighthouseTests() {
 }
 
 // ─── test implementations ────────────────────────────────────────────────────
-async function test1_PerformanceScore(page, results) {
+async function test1_PerformanceScore(page, runnerResult, results) {
   const test = { name: 'Performance Score', status: 'PENDING', score: 0 };
   try {
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
-
-    const runnerResult = await lighthouse(BASE_URL, {
-      port: new URL(browser.wsEndpoint()).port,
-      output: 'json',
-      logLevel: 'error',
-      onlyCategories: ['performance'],
-    });
 
     const score = runnerResult.categories.performance.score * 100;
     test.score = Math.round(score);
@@ -132,18 +163,11 @@ async function test1_PerformanceScore(page, results) {
   console.log(`[lighthouse] ${test.name}: ${test.status} (${test.score}/100)`);
 }
 
-async function test2_CoreWebVitals(page, results) {
+async function test2_CoreWebVitals(page, runnerResult, results) {
   const test = { name: 'Core Web Vitals', status: 'PENDING', vitals: {} };
   try {
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
-
-    const runnerResult = await lighthouse(BASE_URL, {
-      port: new URL(browser.wsEndpoint()).port,
-      output: 'json',
-      logLevel: 'error',
-      onlyCategories: ['performance'],
-    });
 
     const audits = runnerResult.audits;
 
@@ -176,18 +200,11 @@ async function test2_CoreWebVitals(page, results) {
   console.log(`[lighthouse] ${test.name}: ${test.status}`);
 }
 
-async function test3_AccessibilityScore(page, results) {
+async function test3_AccessibilityScore(page, runnerResult, results) {
   const test = { name: 'Accessibility Score', status: 'PENDING', score: 0 };
   try {
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
-
-    const runnerResult = await lighthouse(BASE_URL, {
-      port: new URL(browser.wsEndpoint()).port,
-      output: 'json',
-      logLevel: 'error',
-      onlyCategories: ['accessibility'],
-    });
 
     const score = runnerResult.categories.accessibility.score * 100;
     test.score = Math.round(score);
@@ -203,18 +220,11 @@ async function test3_AccessibilityScore(page, results) {
   console.log(`[lighthouse] ${test.name}: ${test.status} (${test.score}/100)`);
 }
 
-async function test4_BestPractices(page, results) {
+async function test4_BestPractices(page, runnerResult, results) {
   const test = { name: 'Best Practices', status: 'PENDING', score: 0 };
   try {
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
-
-    const runnerResult = await lighthouse(BASE_URL, {
-      port: new URL(browser.wsEndpoint()).port,
-      output: 'json',
-      logLevel: 'error',
-      onlyCategories: ['best-practices'],
-    });
 
     const score = runnerResult.categories['best-practices'].score * 100;
     test.score = Math.round(score);
@@ -230,18 +240,11 @@ async function test4_BestPractices(page, results) {
   console.log(`[lighthouse] ${test.name}: ${test.status} (${test.score}/100)`);
 }
 
-async function test5_SEOScore(page, results) {
+async function test5_SEOScore(page, runnerResult, results) {
   const test = { name: 'SEO Score', status: 'PENDING', score: 0 };
   try {
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
-
-    const runnerResult = await lighthouse(BASE_URL, {
-      port: new URL(browser.wsEndpoint()).port,
-      output: 'json',
-      logLevel: 'error',
-      onlyCategories: ['seo'],
-    });
 
     const score = runnerResult.categories.seo.score * 100;
     test.score = Math.round(score);

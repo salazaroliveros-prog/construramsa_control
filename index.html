@@ -73,17 +73,17 @@
     <link rel="dns-prefetch" href="https://script.google.com">
     <link rel="dns-prefetch" href="https://accounts.google.com">
 
-    <!-- Vendor scripts cargados de forma sincrónica sin preload para evitar warnings de integridad -->
-    <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
+    <!-- Vendor scripts con defer: se descargan en paralelo sin bloquear el render inicial -->
+    <script src="./vendor/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous" defer></script>
 
     <!-- DOMPurify para sanitizar HTML antes de inyectar en PDF/Preview (XSS protection) -->
-    <script src="./vendor/purify.min.js" integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF" crossorigin="anonymous"></script>
+    <script src="./vendor/purify.min.js" integrity="sha384-0Olea29UkyQZfNulDPUf5MshXT3rXNrDqk+TXn1sY6UoVDiqIfEERRKn8oMgO9eF" crossorigin="anonymous" defer></script>
 
     <!-- SheetJS para exportación XLSX -->
-    <script src="./vendor/xlsx.full.min.js"></script>
+    <script src="./vendor/xlsx.full.min.js" defer></script>
 
     <!-- ExcelJS para exportación XLSX avanzada -->
-    <script src="./vendor/exceljs.min.js"></script>
+    <script src="./vendor/exceljs.min.js" defer></script>
 <!-- Módulos tipados y config central (IIFE: no filtran globals, no colisionan con el bundle) -->
     <script src="./src/types.js" defer></script>
     <script src="./src/config.js" defer></script>
@@ -947,7 +947,7 @@
             color: var(--pdf-gris-oscuro);
             background: var(--pdf-blanco);
             /* Márgenes uniformes aumentados para evitar desborde */
-            padding: 15mm;
+            padding: 14mm 16mm 18mm 16mm;
             box-sizing: border-box;
             opacity: 0;
             pointer-events: none;
@@ -1059,6 +1059,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             table-layout: auto;
             word-break: break-word;
+            overflow-wrap: break-word;
             max-width: 100%;
         }
         /* MEJORA PDF v2.9.1: thead se repite en cada página impresa */
@@ -1133,6 +1134,9 @@
             border-top: 2px solid var(--pdf-verde);
             border-bottom: 2px solid var(--pdf-verde);
         }
+
+        /* MEJORA PDF: secciones pequeñas que no deben cortarse entre páginas */
+        .tabla-pdf-no-break { page-break-inside: avoid; break-inside: avoid; }
 
         /* Mejoras en títulos de secciones de reportes */
         #plantilla-reporte-impresion h3 {
@@ -11554,9 +11558,9 @@ tbody.innerHTML = '';
                     if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto; 
                 }); }
                 csv += `\n`;
-                csv += `${csvRow(['', '', 'TOTAL INGRESOS:', totalIng])}\n`;
-                csv += `${csvRow(['', '', 'TOTAL EGRESOS:', totalEgr])}\n`;
-                csv += `${csvRow(['', '', 'SALDO:', totalIng - totalEgr])}\n`;
+                csv += `${csvRow(['', '', 'SUBTOTAL CAJA — INGRESOS:', totalIng])}\n`;
+                csv += `${csvRow(['', '', 'SUBTOTAL CAJA — EGRESOS:', totalEgr])}\n`;
+                csv += `${csvRow(['', '', 'SUBTOTAL CAJA — SALDO:', totalIng - totalEgr])}\n`;
                 /* ===== SECCION CONSOLIDADA: VIAJES ===== */
                 const viajes = viajesAll.filter(v => enRango(v.fecha));
                 let totalViajes = 0;
@@ -11600,7 +11604,8 @@ tbody.innerHTML = '';
                         csv += `,,,,TOTAL NÓMINA:,${numToF(nominaMes.totalPagable)}\n`;
                     }
                 }
-                csv += `,,,,\n,,,TOTAL INGRESOS:,${numToF(totalIng)}\n,,,TOTAL EGRESOS:,${numToF(totalEgr)}\n,,,SALDO NETO:,${numToF(totalIng - totalEgr)}\n`;
+                csv += `\n# RESUMEN CONSOLIDADO DEL PERÍODO\n`;
+                csv += `,,,,\n,,,TOTAL INGRESOS DEL PERÍODO:,${numToF(totalIng)}\n,,,TOTAL EGRESOS DEL PERÍODO:,${numToF(totalEgr)}\n,,,SALDO NETO DEL PERÍODO:,${numToF(totalIng - totalEgr)}\n`;
                 csv += generarFirmasCSV();
             } else if (tipo === 'asistencia') {
                 csv += `${csvRow(['Reporte de Asistencia - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
@@ -11687,7 +11692,7 @@ tbody.innerHTML = '';
                 csv += generarFirmasCSV();
             } else if (tipo === 'mantenimiento') {
                 csv += `${csvRow(['Reporte de Mantenimiento e Insumos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
-                csv += `Fecha,Módulo,Descripción,Monto (Q)\n`;
+                csv += `Fecha,Tipo,Descripción,Monto (Q)\n`;
                 let totalM = 0;
                 const enRangoM = (f) => f >= rango.inicio && f <= rango.fin;
                 const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => enRangoM(i.fecha));
@@ -11698,7 +11703,8 @@ tbody.innerHTML = '';
                     ords.forEach(o => {
                         const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
                         totalM += o.costo || 0;
-                        csv += `${csvRow([o.fecha, 'Mantenimiento ' + o.tipo, m?m.nombre:'N/A', o.costo || 0])}\n`;
+                        const descMant = (m ? m.nombre : 'N/A') + (o.observaciones ? ' — ' + o.observaciones.substring(0, 80) : '');
+                        csv += `${csvRow([o.fecha, 'Mantenimiento ' + o.tipo, descMant, o.costo || 0])}\n`;
                     });
                     ins.forEach(i => {
                         totalM += i.costo || 0;
@@ -11757,9 +11763,10 @@ tbody.innerHTML = '';
                     
                     // Métricas principales
                     const metricas = [
-                        { nombre: 'Saldo Disponible', valor: kpis.saldo || 0, desc: 'Fondos disponibles en caja' },
-                        { nombre: 'Total Ingresos', valor: kpis.totalIngresos || 0, desc: 'Suma de todos los ingresos' },
-                        { nombre: 'Total Egresos', valor: kpis.totalEgresos || 0, desc: 'Suma de todos los egresos' },
+                        { nombre: 'Presupuesto Inicial', valor: getPresupuestoActual() || 0, desc: 'Capital inicial del proyecto' },
+                        { nombre: 'Total Ingresos', valor: kpis.totalIngresos || 0, desc: 'Suma de todos los ingresos del período' },
+                        { nombre: 'Total Egresos', valor: kpis.totalEgresos || 0, desc: 'Suma de todos los egresos del período' },
+                        { nombre: 'Saldo Disponible', valor: kpis.saldo || 0, desc: 'Presupuesto inicial + Ingresos - Egresos' },
                         { nombre: 'Viajes Realizados', valor: kpis.totalViajes || 0, desc: 'Cantidad de viajes de camiones' },
                         { nombre: 'Km Recorridos', valor: kpis.totalKm || 0, desc: 'Kilometraje total recorrido' },
                         { nombre: 'Litros Combustible', valor: kpis.totalLitros || 0, desc: 'Combustible consumido (L)' },
@@ -12383,8 +12390,12 @@ function validarDependenciasExportacion() {
                     '--pdf-azul-claro:#00A4E4',
                     '--pdf-gris-oscuro:#374151',
                     '--pdf-gris-medio:#6B7280',
+                    '--pdf-gris-borde:#E5E7EB',
+                    '--pdf-fondo-claro:#F9FAFB',
+                    '--pdf-fondo-azul:#EFF6FF',
                     '--pdf-rojo:#DC2626',
-                    '--pdf-verde:#059669'
+                    '--pdf-verde:#059669',
+                    '--acento-purpura:#7C3AED'
                 ].join(';');
 
                 const opts = {

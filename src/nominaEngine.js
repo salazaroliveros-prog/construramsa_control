@@ -70,7 +70,8 @@
    * Consolida el historial de asistencia agrupando por trabajador.
    *
    * La estructura de entrada esperada es:
-   *   asistencia = [{ fecha: 'YYYY-MM-DD', registros: [{ trabajador_id, estado, horas_extras, calculos }] }]
+   *   asistencia = [{ fecha: 'YYYY-MM-DD', registros: [{ trabajador_id, estado, horas_extras|horas_extra, calculos }] }]
+   *   estado aceptados: 'asistio' | 'presente' (alias) | 'falto' | 'falta' (alias) | 'justificado'
    *   trabajadores = [{ id, nombre, puesto, pago_hora_normal, pago_hora_extra }]
    *
    * Si se proveen fechaInicio / fechaFin solo se procesan los días dentro
@@ -130,9 +131,10 @@
         var estado = String(reg.estado || '')
           .toLowerCase()
           .trim();
-        var he = num(reg.horas_extras || reg.horas_extras_cantidad);
+        var he = num(reg.horas_extras || reg.horas_extras_cantidad || reg.horas_extra);
 
-        if (estado === 'asistio') {
+        // 'presente' es alias legacy de 'asistio' (datos migrados / seed DB)
+        if (estado === 'asistio' || estado === 'presente') {
           entrada.diasAsistidos++;
           entrada.horasExtra += he;
 
