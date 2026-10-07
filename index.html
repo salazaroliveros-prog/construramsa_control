@@ -11849,6 +11849,11 @@ tbody.innerHTML = '';
             if (rango.inicio && rango.fin && rango.inicio > rango.fin) {
                 return '<p style="color:var(--pdf-rojo);padding:20px;">Error: La fecha de inicio no puede ser posterior a la fecha de fin.</p>';
             }
+            // FIX: estas dos constantes solo existían en generarCSVReporte; al
+            // generarse el reporte HTML (diario/semanal/mensual/categoría/…)
+            // se lanzaba "enRango is not defined" y el reporte quedaba roto.
+            const enRango = (f) => f >= rango.inicio && f <= rango.fin;
+            const periodoDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
 
             // ── REPORTE EJECUTIVO (Resumen Gerencial con KPIs) ──
             if (tipo === 'ejecutivo') {
