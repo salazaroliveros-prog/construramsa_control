@@ -248,12 +248,32 @@ function testReportGeneration(tipo, db) {
           totalExtra = 0,
           totalPago = 0;
         registrosAsistencia.forEach((a) => {
-          const t = trabajadores.find((w) => w.id === a.trabajador_id) || { nombre: 'N/A' };
-          const pago = a.horas_trabajadas * 25 + a.horas_extras * 35; // Mock calculation
-          totalHoras += a.horas_trabajadas || 0;
-          totalExtra += a.horas_extras || 0;
+          const t = trabajadores.find((w) => w.id === a.trabajador_id) || {};
+          const nombre = t.nombre || 'N/A';
+          // Estado normalizado: 'presente' es alias legacy de 'asistio'
+          const estado = String(a.estado || '')
+            .toLowerCase()
+            .trim();
+          const asistio = estado === 'asistio' || estado === 'presente';
+          // Horas normales: 8 si asistió, 0 si faltó
+          const horasNormales = asistio ? 8 : 0;
+          // Horas extra: campo real en DB es 'horas_extra' (alias: horas_extras, horas_extras_cantidad)
+          const he = Number(a.horas_extra || a.horas_extras || a.horas_extras_cantidad || 0);
+          // Pago real usando tarifas del trabajador
+          let pago = 0;
+          if (asistio) {
+            if (a.calculos && Number.isFinite(Number(a.calculos.total_diario))) {
+              pago = Number(a.calculos.total_diario);
+            } else {
+              const phn = Number(t.pago_hora_normal) || 0;
+              const phe = Number(t.pago_hora_extra) || 0;
+              pago = horasNormales * phn + he * phe;
+            }
+          }
+          totalHoras += horasNormales;
+          totalExtra += he;
           totalPago += pago;
-          csv += `${csvRow([t.nombre, a.fecha, a.estado, a.horas_trabajadas, a.horas_extras, pago])}\n`;
+          csv += `${csvRow([nombre, a.fecha, a.estado, horasNormales, he || '', pago])}\n`;
         });
         csv += `\n`;
         csv += `${csvRow(['', '', 'TOTAL HORAS:', totalHoras, '', ''])}\n`;
@@ -324,11 +344,15 @@ function testReportGeneration(tipo, db) {
       const gastosPorCat = {};
       movsCat.forEach((m) => {
         const cat = m.categoria || 'sin_categoria';
-        gastosPorCat[cat] = (gastosPorCat[cat] || 0) + (Number(m.monto) || 0);
+        const monto = Number(m.monto);
+        if (Number.isFinite(monto)) {
+          gastosPorCat[cat] = (gastosPorCat[cat] || 0) + monto;
+        }
       });
 
       const categorias = Object.entries(gastosPorCat).sort((a, b) => b[1] - a[1]);
-      const totalGastos = categorias.reduce((s, [, v]) => s + v, 0);
+      // Usar suma con precisión para evitar acumulación de errores flotantes
+      const totalGastos = parseFloat(categorias.reduce((s, [, v]) => s + v, 0).toFixed(2));
 
       if (categorias.length === 0) {
         csv += `"SIN GASTOS POR CATEGORÍA",,\n`;
@@ -363,11 +387,31 @@ function testReportGeneration(tipo, db) {
       } else {
         trabajadoresN.forEach((t) => {
           const registros = registrosN.filter((a) => a.trabajador_id === t.id);
-          const diasAsistidos = registros.filter((a) => a.estado === 'presente').length;
-          const faltas = registros.filter((a) => a.estado === 'falto').length;
-          const horasExtra = registros.reduce((s, a) => s + (a.horas_extras || 0), 0);
-          const pago =
-            diasAsistidos * 8 * (t.pago_hora_normal || 20) + horasExtra * (t.pago_hora_extra || 28);
+          // Aceptar 'presente' como alias legacy de 'asistio'
+          const regAsistidos = registros.filter((a) => {
+            const est = String(a.estado || '')
+              .toLowerCase()
+              .trim();
+            return est === 'asistio' || est === 'presente';
+          });
+          const diasAsistidos = regAsistidos.length;
+          const faltas = registros.filter((a) => {
+            const est = String(a.estado || '')
+              .toLowerCase()
+              .trim();
+            return est === 'falto' || est === 'falta';
+          }).length;
+          // Horas extra solo de días asistidos; campo real en DB es 'horas_extra' (alias: horas_extras, horas_extras_cantidad)
+          const horasExtra = regAsistidos.reduce(
+            (s, a) => s + Number(a.horas_extra || a.horas_extras || a.horas_extras_cantidad || 0),
+            0
+          );
+          // Pago usando tarifas reales del trabajador
+          const phn = Number(t.pago_hora_normal) || 0;
+          const phe = Number(t.pago_hora_extra) || 0;
+          const pagoNormal = diasAsistidos * 8 * phn;
+          const pagoExtra = horasExtra * phe;
+          const pago = pagoNormal + pagoExtra;
           csv += `${csvRow([t.nombre, diasAsistidos, faltas, horasExtra, pago])}\n`;
         });
         logSuccess(`Processed ${trabajadoresN.length} workers`);
@@ -378,11 +422,21 @@ function testReportGeneration(tipo, db) {
       csv += `KPI,Valor,Descripción\n`;
 
       const movsE = datos.caja_chica || [];
-      const ingresos = movsE.filter((m) => m.tipo === 'ingreso').reduce((s, m) => s + m.monto, 0);
-      const egresos = movsE.filter((m) => m.tipo === 'egreso').reduce((s, m) => s + m.monto, 0);
+      const ingresos = movsE
+        .filter((m) => m.tipo === 'ingreso')
+        .reduce((s, m) => {
+          const v = Number(m.monto);
+          return s + (Number.isFinite(v) ? v : 0);
+        }, 0);
+      const egresos = movsE
+        .filter((m) => m.tipo === 'egreso')
+        .reduce((s, m) => {
+          const v = Number(m.monto);
+          return s + (Number.isFinite(v) ? v : 0);
+        }, 0);
       const viajesE = datos.viajes_camiones.viajes || [];
-      const kmTotal = viajesE.reduce((s, v) => s + (v.km_total || 0), 0);
-      const litrosTotal = viajesE.reduce((s, v) => s + (v.litros || 0), 0);
+      const kmTotal = viajesE.reduce((s, v) => s + (Number(v.km_total) || 0), 0);
+      const litrosTotal = viajesE.reduce((s, v) => s + (Number(v.litros) || 0), 0);
 
       const kpis = [
         { nombre: 'Total Ingresos', valor: ingresos, desc: 'Suma de todos los ingresos' },

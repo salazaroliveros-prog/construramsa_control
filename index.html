@@ -7586,7 +7586,12 @@
             // categorías automáticas del sistema
             'Combustible/Mantenimiento': 'Combustible/Mantenimiento', 'Materiales': 'Materiales', 'Alquiler de Equipo': 'Alquiler de Equipo', 'Reembolso': 'Reembolso'
         };
-        function etiquetaCategoria(cat) { return CATEGORIAS_CAJA[cat] || cat || ''; }
+        function etiquetaCategoria(cat) {
+            if (!cat) return '';
+            if (CATEGORIAS_CAJA[cat]) return CATEGORIAS_CAJA[cat];
+            // Fallback: capitalizar primera letra de cada palabra y reemplazar guiones bajos
+            return String(cat).replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+        }
 
         estadoPaginacion.cajaChica = 1;
         function cambiarPaginaCajaChica(p) { estadoPaginacion.cajaChica = p; cargarTablaCajaChica(); }

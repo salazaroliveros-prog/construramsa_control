@@ -113,5 +113,16 @@ module.exports = {
     },
   ],
   // `_*.js` = scripts auxiliares locales (también en .gitignore), no forman parte del código fuente.
-  ignorePatterns: ['node_modules/', 'vendor/', 'dist/', 'build/', '*.min.js', 'coverage/', '_*.js'],
+  // `audit_visual_*.js` = scripts de auditoría visual E2E que usan globals del navegador (index.html).
+  ignorePatterns: [
+    'node_modules/',
+    'vendor/',
+    'dist/',
+    'build/',
+    '*.min.js',
+    'coverage/',
+    '_*.js',
+    'audit_visual_*.js',
+    'audit_report_*.js',
+  ],
 };

@@ -86,6 +86,10 @@ juan.png
 
 # Auditoría visual E2E local y screenshots (no versionables)
 audit_ui.js
+audit_visual_completo.js
+audit_visual_report.html
+audit_visual_results.json
+temp_audit_reports/
 scroll_audit_screenshots/
 ux_full_audit.js
 ux_manual_audit.js
