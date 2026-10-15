@@ -1,209 +1,202 @@
-/**
- * ╔═══════════════════════════════════════════════════════════════╗
- * ║   Background Synchronization Module                          ║
- * ║   Sincronización silenciosa de datos con OneDrive             ║
- * ║   No bloquea la UI, usa requestIdleCallback, completamente    ║
- * ║   no-intrusivo                                                ║
- * ╚═══════════════════════════════════════════════════════════════╝
+/*
+ * Background Synchronization Module — hardened
+ * - Más defensas contra funciones globales faltantes
+ * - Timeouts para llamadas externas (evitar hangs)
+ * - Backoff limitado para renovación de token
+ * - Uso de globalScope en lugar de `self` cuando corresponde
+ * - Logging controlado por SYNC_CONFIG.LOG_ENABLED (no consola por defecto)
  */
-
 (function (globalScope) {
   'use strict';
 
-  /**
-   * Configuración de sincronización en background
-   * - SYNC_INTERVAL: Cada cuánto sincronizar (ms)
-   * - IDLE_TIMEOUT: Máximo tiempo de espera para requestIdleCallback (ms)
-   * - MIN_CHANGE_THRESHOLD: Cambios mínimos para notificar al usuario
-   * - LOG_ENABLED: Debug mode
-   */
   const SYNC_CONFIG = {
     SYNC_INTERVAL: 5 * 60 * 1000, // 5 minutos
-    IDLE_TIMEOUT: 30 * 1000, // 30 segundos max de espera
-    MIN_CHANGE_THRESHOLD: 100, // Bytes de diferencia para considerar cambio
-    LOG_ENABLED: false, // true para debug
+    IDLE_TIMEOUT: 30 * 1000, // 30s
+    MIN_CHANGE_THRESHOLD: 100, // bytes
+    LOG_ENABLED: false,
+    CALL_TIMEOUT: 15 * 1000, // timeout para llamadas a APIs externas (ms)
+    TOKEN_RENEW_MAX_ATTEMPTS: 2,
+    TOKEN_RENEW_BACKOFF_MS: 2000,
   };
 
   let _syncTimerId = null;
   let _isSyncingNow = false;
   let _lastSyncHash = null;
 
-  /**
-   * Logging condicional para debug
-   */
   function log(msg, data = null) {
     if (!SYNC_CONFIG.LOG_ENABLED) return;
-    const time = new Date().toLocaleTimeString();
-    if (data) {
-      console.log(`[${time}] 🔄 BgSync: ${msg}`, data);
-    } else {
-      console.log(`[${time}] 🔄 BgSync: ${msg}`);
-    }
+    const time = new Date().toISOString();
+    if (data !== null) console.log(`[${time}] 🔄 BgSync: ${msg}`, data);
+    else console.log(`[${time}] 🔄 BgSync: ${msg}`);
   }
 
-  /**
-   * Calcula hash SHA-256 del JSON para detectar cambios de forma fiable.
-   * (Sustituye al hash de 32 bits anterior, que tenía alta tasa de
-   * colisiones y podía saltar sincronizaciones legítimas.)
-   */
+  // Env-safe access to crypto.subtle
+  const subtleCrypto = (globalScope && globalScope.crypto && globalScope.crypto.subtle) || null;
+
   async function simpleHash(obj) {
     try {
       const str = JSON.stringify(obj);
-      if (self.crypto && self.crypto.subtle) {
-        const buf = await self.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-        return Array.from(new Uint8Array(buf))
-          .map((b) => b.toString(16).padStart(2, '0'))
-          .join('');
+      if (subtleCrypto) {
+        const buf = await subtleCrypto.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
       }
+      // fallback 32-bit
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash = hash & hash;
+      }
+      return String(hash);
     } catch (e) {
-      /* fallback abajo */
+      log('simpleHash error', e.message);
+      return String(Date.now());
     }
-    // Fallback (entornos sin SubtleCrypto): hash 32-bit.
-    const str = JSON.stringify(obj);
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = (hash << 5) - hash + str.charCodeAt(i);
-      hash = hash & hash;
-    }
-    return String(hash);
   }
 
-  /**
-   * Ejecuta sincronización cuando el navegador esté inactivo
-   * Fallback a setTimeout si requestIdleCallback no está dispon
-   */
+  // Wrap a promise with timeout
+  function withTimeout(promise, ms, onTimeoutMessage) {
+    let timeoutId;
+    const timeout = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error(onTimeoutMessage || 'Timeout')), ms);
+    });
+    return Promise.race([promise.finally(() => clearTimeout(timeoutId)), timeout]);
+  }
+
+  // Safe call helper: if fn missing, return null; call with timeout
+  async function safeCall(fn, args = [], timeoutMs = SYNC_CONFIG.CALL_TIMEOUT) {
+    try {
+      if (typeof fn !== 'function') return null;
+      const result = fn.apply(null, args);
+      // If returns a promise, race with timeout
+      if (result && typeof result.then === 'function') {
+        return await withTimeout(result, timeoutMs, 'External call timeout');
+      }
+      return result;
+    } catch (e) {
+      log('safeCall error', e.message);
+      return null;
+    }
+  }
+
+  async function tryRenewTokenWithBackoff(renewFn, maxAttempts, backoffMs) {
+    if (typeof renewFn !== 'function') return false;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        log(`Intentando renovar token (intent ${attempt})`);
+        const res = await withTimeout(renewFn(), SYNC_CONFIG.CALL_TIMEOUT, 'Token renew timeout');
+        // Consider success if function returns truthy
+        if (res) return true;
+      } catch (e) {
+        log('renew token error', e.message);
+      }
+      // backoff before retry
+      await new Promise((r) => setTimeout(r, backoffMs * attempt));
+    }
+    return false;
+  }
+
   function runInIdle(callback) {
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(
-        () => {
+    try {
+      if (globalScope && 'requestIdleCallback' in globalScope) {
+        globalScope.requestIdleCallback(() => {
           log('Ejecutando en idle');
           callback();
-        },
-        { timeout: SYNC_CONFIG.IDLE_TIMEOUT }
-      );
-    } else {
-      // Fallback: muy corto delay para evitar bloqueo
-      setTimeout(() => {
-        log('Ejecutando con setTimeout fallback');
-        callback();
-      }, 100);
+        }, { timeout: SYNC_CONFIG.IDLE_TIMEOUT });
+      } else {
+        setTimeout(() => {
+          log('Ejecutando con setTimeout fallback');
+          callback();
+        }, 100);
+      }
+    } catch (e) {
+      // If something goes wrong, still attempt without idle
+      try {
+        setTimeout(() => callback(), 100);
+      } catch (_) {}
     }
   }
 
-  /**
-   * Sincronización bidireccional:
-   * 1. Subir cambios locales a OneDrive (si hay)
-   * 2. Descargar cambios remotos de OneDrive (si hay)
-   * 3. Fusionar sin interrupciones
-   *
-   * Completamente silenciosa — no abre dialogs, no recarga.
-   */
   async function performBidirectionalSync() {
     if (_isSyncingNow) {
       log('⏳ Sync ya en progreso, saltando');
       return;
     }
-
     _isSyncingNow = true;
 
     try {
-      // Verificar que OneDrive esté conectado
-      // (Nota: Esta función debe existir en el scope global del index.html)
-      if (typeof _nubeCfg !== 'function') {
-        log('❌ _nubeCfg no disponible');
+      // Safely obtain nube config
+      const cfg = typeof globalScope._nubeCfg === 'function' ? safeCall(globalScope._nubeCfg, [], 2000) : null;
+      const resolvedCfg = cfg instanceof Promise ? await cfg : cfg; // safeCall may return promise
+
+      if (!resolvedCfg) {
+        log('❌ _nubeCfg no disponible o no resolvió');
         return;
       }
 
-      const cfg = _nubeCfg();
-      if (!cfg.od_connected || !cfg.od_token) {
-        log('⏸️ OneDrive no conectado');
+      if (!resolvedCfg.od_connected || !resolvedCfg.od_token) {
+        log('⏸️ Proveedor nube no conectado o token ausente');
         return;
       }
 
-      // Fase 1: Intentar subir cambios locales
+      // Phase 1: check local changes
       log('📤 Fase 1: Verificando cambios locales...');
-      const localHash = await simpleHash(typeof getDB === 'function' ? getDB() : {});
+      let localDB = {};
+      try {
+        localDB = typeof globalScope.getDB === 'function' ? globalScope.getDB() : {};
+      } catch (e) {
+        log('getDB error', e.message);
+      }
+      const localHash = await simpleHash(localDB || {});
 
       if (_lastSyncHash === null || _lastSyncHash !== localHash) {
-        log('📊 Cambios locales detectados', {
-          lastHash: _lastSyncHash,
-          currentHash: localHash,
-        });
-
-        // Subir silenciosamente sin UI bloqueante
-        if (typeof onedriveSubirAhora === 'function') {
-          try {
-            await onedriveSubirAhora(true); // true = automático, sin UI
-            log('✅ Subida completada');
-          } catch (err) {
-            log('⚠️ Error en subida:', err.message);
-          }
-        }
+        log('📊 Cambios locales detectados', { lastHash: _lastSyncHash, currentHash: localHash });
+        // Try to upload (automatically) with timeout
+        await safeCall(globalScope.onedriveSubirAhora, [true], SYNC_CONFIG.CALL_TIMEOUT).catch((_) =>
+          log('onedriveSubirAhora failed or timed out')
+        );
       }
 
-      // Fase 2: Intentar descargar cambios remotos
+      // Phase 2: download remote if exists
       log('📥 Fase 2: Verificando cambios remotos...');
+      const remoteData = await safeCall(globalScope.onedriveDescargarSilencioso, [], SYNC_CONFIG.CALL_TIMEOUT);
 
-      if (typeof onedriveDescargarSilencioso === 'function') {
-        const remoteData = await onedriveDescargarSilencioso();
+      if (remoteData) {
+        const remoteHash = await simpleHash(remoteData);
+        if (_lastSyncHash === null || remoteHash !== localHash) {
+          log('📊 Cambios remotos detectados', { remoteHash, localHash });
 
-        if (remoteData) {
-          const remoteHash = await simpleHash(remoteData);
+          const fusionado = await safeCall(globalScope.importarBaseDatosConFusion, [remoteData], SYNC_CONFIG.CALL_TIMEOUT);
 
-          if (_lastSyncHash === null || remoteHash !== localHash) {
-            log('📊 Cambios remotos detectados', {
-              remoteHash,
-              localHash,
-            });
+          if (fusionado && typeof globalScope.saveDB === 'function') {
+            try {
+              // Ensure saveDB does not hang
+              await withTimeout(Promise.resolve().then(() => globalScope.saveDB(fusionado)), SYNC_CONFIG.CALL_TIMEOUT, 'saveDB timeout');
+              log('✅ Descarga y fusión completadas');
 
-            // Fusionar sin UI
-            if (typeof importarBaseDatosConFusion === 'function') {
-              try {
-                const fusionado = importarBaseDatosConFusion(remoteData);
-
-                if (typeof saveDB === 'function') {
-                  saveDB(fusionado);
-                  log('✅ Descarga y fusión completadas');
-
-                  // Notificación MUY discreta
-                  const bytesChanged = Math.abs(
-                    JSON.stringify(fusionado).length -
-                      JSON.stringify(typeof getDB === 'function' ? getDB() : {}).length
-                  );
-
-                  if (bytesChanged > SYNC_CONFIG.MIN_CHANGE_THRESHOLD) {
-                    if (typeof showToast === 'function') {
-                      showToast(
-                        '☁️ Datos sincronizados',
-                        'info',
-                        2000 // Solo 2 segundos — MUY discreta
-                      );
-                    }
-
-                    // Actualizar last sync timestamp
-                    if (typeof _nubeSetUltimo === 'function') {
-                      _nubeSetUltimo(new Date().toISOString());
-                    }
-                  }
-                }
-              } catch (err) {
-                log('⚠️ Error en fusión:', err.message);
+              // Small notification if changes significant
+              const bytesChanged = Math.abs(JSON.stringify(fusionado).length - JSON.stringify(localDB || {}).length);
+              if (bytesChanged > SYNC_CONFIG.MIN_CHANGE_THRESHOLD) {
+                await safeCall(globalScope.showToast, ['☁️ Datos sincronizados', 'info', 2000], 2000);
+                // update last sync timestamp
+                await safeCall(globalScope._nubeSetUltimo, [new Date().toISOString()], 2000);
               }
+            } catch (e) {
+              log('Error saving fused DB', e.message);
             }
           }
-        } else {
-          log('ℹ️ Sin cambios remotos');
         }
+      } else {
+        log('ℹ️ Sin cambios remotos o descarga silenciosa devolvió null');
       }
 
-      // Actualizar hash local
       _lastSyncHash = localHash;
     } catch (error) {
-      log('❌ Error en sync:', error.message);
-
-      // NO mostrar error al usuario — solo log silencioso
-      if (error.message.includes('401') || error.message.includes('403')) {
-        log('🔑 Token expirado, intentando renovar en próxima sync');
+      log('❌ Error en sync', error.message);
+      // If auth error, attempt to renew token but limit attempts
+      if (error && /401|403/.test(String(error.message))) {
+        const renewed = await tryRenewTokenWithBackoff(globalScope.onedriveRenovarToken, SYNC_CONFIG.TOKEN_RENEW_MAX_ATTEMPTS, SYNC_CONFIG.TOKEN_RENEW_BACKOFF_MS);
+        if (renewed) log('🔁 Token renovado (intento automático)');
+        else log('🔑 No se pudo renovar token automáticamente');
       }
     } finally {
       _isSyncingNow = false;
@@ -211,94 +204,46 @@
     }
   }
 
-  /**
-   * Inicia sincronización periódica en background
-   * - Usa requestIdleCallback para máxima performance
-   * - Se ejecuta sin interrupciones
-   * - Completamente silenciosa salvo cambios significativos
-   */
   function startBackgroundSync() {
     log('🚀 Iniciando background sync');
-
-    if (_syncTimerId) {
-      clearInterval(_syncTimerId);
-    }
-
-    // Sincronizar inmediatamente (en idle)
+    if (_syncTimerId) clearInterval(_syncTimerId);
     runInIdle(performBidirectionalSync);
-
-    // Sincronizar periódicamente
-    _syncTimerId = setInterval(() => {
-      runInIdle(performBidirectionalSync);
-    }, SYNC_CONFIG.SYNC_INTERVAL);
-
-    log('✅ Background sync iniciado', {
-      interval: `${SYNC_CONFIG.SYNC_INTERVAL / 1000 / 60} min`,
-      idleTimeout: `${SYNC_CONFIG.IDLE_TIMEOUT / 1000}s`,
-    });
+    _syncTimerId = setInterval(() => runInIdle(performBidirectionalSync), SYNC_CONFIG.SYNC_INTERVAL);
+    log('✅ Background sync iniciado', { interval: SYNC_CONFIG.SYNC_INTERVAL });
   }
 
-  /**
-   * Detiene sincronización en background
-   */
   function stopBackgroundSync() {
     if (_syncTimerId) {
       clearInterval(_syncTimerId);
       _syncTimerId = null;
-      log('⏹️  Background sync detenido');
+      log('⏹️ Background sync detenido');
     }
   }
 
-  /**
-   * Expone configuración para debug
-   */
   function getBackgroundSyncStatus() {
-    return {
-      enabled: _syncTimerId !== null,
-      isSyncing: _isSyncingNow,
-      lastSyncHash: _lastSyncHash,
-      config: SYNC_CONFIG,
-    };
+    return { enabled: _syncTimerId !== null, isSyncing: _isSyncingNow, lastSyncHash: _lastSyncHash, config: SYNC_CONFIG };
   }
 
-  /**
-   * Permite cambiar configuración en runtime
-   */
   function configureBackgroundSync(options) {
     Object.assign(SYNC_CONFIG, options || {});
     log('⚙️ Configuración actualizada', SYNC_CONFIG);
   }
 
-  // API pública del módulo
-  const api = Object.freeze({
-    start: startBackgroundSync,
-    stop: stopBackgroundSync,
-    status: getBackgroundSyncStatus,
-    configure: configureBackgroundSync,
-  });
+  const api = Object.freeze({ start: startBackgroundSync, stop: stopBackgroundSync, status: getBackgroundSyncStatus, configure: configureBackgroundSync });
 
-  // Exponer funciones individuales en window para compatibilidad con index.html
-  // y objeto API congelado bajo CR_BackgroundSync
   if (globalScope) {
     globalScope.startBackgroundSync = startBackgroundSync;
     globalScope.stopBackgroundSync = stopBackgroundSync;
     globalScope.getBackgroundSyncStatus = getBackgroundSyncStatus;
     globalScope.configureBackgroundSync = configureBackgroundSync;
     try {
-      Object.defineProperty(globalScope, 'CR_BackgroundSync', {
-        value: api,
-        writable: false,
-        enumerable: false,
-        configurable: false,
-      });
+      Object.defineProperty(globalScope, 'CR_BackgroundSync', { value: api, writable: false, enumerable: false, configurable: false });
     } catch (e) {
       /* entornos restringidos */
     }
   }
 
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = api;
-  }
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
 
-  log('✨ backgroundSync.js cargado');
+  log('✨ backgroundSync.js (hardened) cargado');
 })(typeof window !== 'undefined' ? window : globalThis);
