@@ -38,7 +38,9 @@
       const str = JSON.stringify(obj);
       if (subtleCrypto) {
         const buf = await subtleCrypto.digest('SHA-256', new TextEncoder().encode(str));
-        return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+        return Array.from(new Uint8Array(buf))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
       }
       // fallback 32-bit
       let hash = 0;
@@ -98,10 +100,13 @@
   function runInIdle(callback) {
     try {
       if (globalScope && 'requestIdleCallback' in globalScope) {
-        globalScope.requestIdleCallback(() => {
-          log('Ejecutando en idle');
-          callback();
-        }, { timeout: SYNC_CONFIG.IDLE_TIMEOUT });
+        globalScope.requestIdleCallback(
+          () => {
+            log('Ejecutando en idle');
+            callback();
+          },
+          { timeout: SYNC_CONFIG.IDLE_TIMEOUT }
+        );
       } else {
         setTimeout(() => {
           log('Ejecutando con setTimeout fallback');
@@ -125,7 +130,10 @@
 
     try {
       // Safely obtain nube config
-      const cfg = typeof globalScope._nubeCfg === 'function' ? safeCall(globalScope._nubeCfg, [], 2000) : null;
+      const cfg =
+        typeof globalScope._nubeCfg === 'function'
+          ? safeCall(globalScope._nubeCfg, [], 2000)
+          : null;
       const resolvedCfg = cfg instanceof Promise ? await cfg : cfg; // safeCall may return promise
 
       if (!resolvedCfg) {
@@ -151,32 +159,50 @@
       if (_lastSyncHash === null || _lastSyncHash !== localHash) {
         log('📊 Cambios locales detectados', { lastHash: _lastSyncHash, currentHash: localHash });
         // Try to upload (automatically) with timeout
-        await safeCall(globalScope.onedriveSubirAhora, [true], SYNC_CONFIG.CALL_TIMEOUT).catch((_) =>
-          log('onedriveSubirAhora failed or timed out')
+        await safeCall(globalScope.onedriveSubirAhora, [true], SYNC_CONFIG.CALL_TIMEOUT).catch(
+          (_) => log('onedriveSubirAhora failed or timed out')
         );
       }
 
       // Phase 2: download remote if exists
       log('📥 Fase 2: Verificando cambios remotos...');
-      const remoteData = await safeCall(globalScope.onedriveDescargarSilencioso, [], SYNC_CONFIG.CALL_TIMEOUT);
+      const remoteData = await safeCall(
+        globalScope.onedriveDescargarSilencioso,
+        [],
+        SYNC_CONFIG.CALL_TIMEOUT
+      );
 
       if (remoteData) {
         const remoteHash = await simpleHash(remoteData);
         if (_lastSyncHash === null || remoteHash !== localHash) {
           log('📊 Cambios remotos detectados', { remoteHash, localHash });
 
-          const fusionado = await safeCall(globalScope.importarBaseDatosConFusion, [remoteData], SYNC_CONFIG.CALL_TIMEOUT);
+          const fusionado = await safeCall(
+            globalScope.importarBaseDatosConFusion,
+            [remoteData],
+            SYNC_CONFIG.CALL_TIMEOUT
+          );
 
           if (fusionado && typeof globalScope.saveDB === 'function') {
             try {
               // Ensure saveDB does not hang
-              await withTimeout(Promise.resolve().then(() => globalScope.saveDB(fusionado)), SYNC_CONFIG.CALL_TIMEOUT, 'saveDB timeout');
+              await withTimeout(
+                Promise.resolve().then(() => globalScope.saveDB(fusionado)),
+                SYNC_CONFIG.CALL_TIMEOUT,
+                'saveDB timeout'
+              );
               log('✅ Descarga y fusión completadas');
 
               // Small notification if changes significant
-              const bytesChanged = Math.abs(JSON.stringify(fusionado).length - JSON.stringify(localDB || {}).length);
+              const bytesChanged = Math.abs(
+                JSON.stringify(fusionado).length - JSON.stringify(localDB || {}).length
+              );
               if (bytesChanged > SYNC_CONFIG.MIN_CHANGE_THRESHOLD) {
-                await safeCall(globalScope.showToast, ['☁️ Datos sincronizados', 'info', 2000], 2000);
+                await safeCall(
+                  globalScope.showToast,
+                  ['☁️ Datos sincronizados', 'info', 2000],
+                  2000
+                );
                 // update last sync timestamp
                 await safeCall(globalScope._nubeSetUltimo, [new Date().toISOString()], 2000);
               }
@@ -194,7 +220,11 @@
       log('❌ Error en sync', error.message);
       // If auth error, attempt to renew token but limit attempts
       if (error && /401|403/.test(String(error.message))) {
-        const renewed = await tryRenewTokenWithBackoff(globalScope.onedriveRenovarToken, SYNC_CONFIG.TOKEN_RENEW_MAX_ATTEMPTS, SYNC_CONFIG.TOKEN_RENEW_BACKOFF_MS);
+        const renewed = await tryRenewTokenWithBackoff(
+          globalScope.onedriveRenovarToken,
+          SYNC_CONFIG.TOKEN_RENEW_MAX_ATTEMPTS,
+          SYNC_CONFIG.TOKEN_RENEW_BACKOFF_MS
+        );
         if (renewed) log('🔁 Token renovado (intento automático)');
         else log('🔑 No se pudo renovar token automáticamente');
       }
@@ -208,7 +238,10 @@
     log('🚀 Iniciando background sync');
     if (_syncTimerId) clearInterval(_syncTimerId);
     runInIdle(performBidirectionalSync);
-    _syncTimerId = setInterval(() => runInIdle(performBidirectionalSync), SYNC_CONFIG.SYNC_INTERVAL);
+    _syncTimerId = setInterval(
+      () => runInIdle(performBidirectionalSync),
+      SYNC_CONFIG.SYNC_INTERVAL
+    );
     log('✅ Background sync iniciado', { interval: SYNC_CONFIG.SYNC_INTERVAL });
   }
 
@@ -221,7 +254,12 @@
   }
 
   function getBackgroundSyncStatus() {
-    return { enabled: _syncTimerId !== null, isSyncing: _isSyncingNow, lastSyncHash: _lastSyncHash, config: SYNC_CONFIG };
+    return {
+      enabled: _syncTimerId !== null,
+      isSyncing: _isSyncingNow,
+      lastSyncHash: _lastSyncHash,
+      config: SYNC_CONFIG,
+    };
   }
 
   function configureBackgroundSync(options) {
@@ -229,7 +267,12 @@
     log('⚙️ Configuración actualizada', SYNC_CONFIG);
   }
 
-  const api = Object.freeze({ start: startBackgroundSync, stop: stopBackgroundSync, status: getBackgroundSyncStatus, configure: configureBackgroundSync });
+  const api = Object.freeze({
+    start: startBackgroundSync,
+    stop: stopBackgroundSync,
+    status: getBackgroundSyncStatus,
+    configure: configureBackgroundSync,
+  });
 
   if (globalScope) {
     globalScope.startBackgroundSync = startBackgroundSync;
@@ -237,7 +280,12 @@
     globalScope.getBackgroundSyncStatus = getBackgroundSyncStatus;
     globalScope.configureBackgroundSync = configureBackgroundSync;
     try {
-      Object.defineProperty(globalScope, 'CR_BackgroundSync', { value: api, writable: false, enumerable: false, configurable: false });
+      Object.defineProperty(globalScope, 'CR_BackgroundSync', {
+        value: api,
+        writable: false,
+        enumerable: false,
+        configurable: false,
+      });
     } catch (e) {
       /* entornos restringidos */
     }

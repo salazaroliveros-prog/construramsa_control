@@ -7,7 +7,10 @@
   // DB cache simple en memoria + localStorage fallback
   if (typeof globalScope._dbCache === 'undefined') {
     try {
-      const existing = typeof globalScope.localStorage !== 'undefined' ? localStorage.getItem('construramsa_db') : null;
+      const existing =
+        typeof globalScope.localStorage !== 'undefined'
+          ? localStorage.getItem('construramsa_db')
+          : null;
       globalScope._dbCache = existing ? JSON.parse(existing) : {};
     } catch (e) {
       globalScope._dbCache = {};
@@ -35,7 +38,8 @@
   if (typeof globalScope.getDB !== 'function') {
     globalScope.getDB = function () {
       try {
-        if (globalScope._dbCache && Object.keys(globalScope._dbCache).length) return globalScope._dbCache;
+        if (globalScope._dbCache && Object.keys(globalScope._dbCache).length)
+          return globalScope._dbCache;
         if (typeof globalScope.localStorage !== 'undefined') {
           const raw = localStorage.getItem('construramsa_db');
           if (raw) {
@@ -113,7 +117,9 @@
         db.configuracion.nube.ultimo_respaldo = isoString;
         globalScope.saveDB(db);
       } catch (e) {
-        try { console.warn('[bootstrap-globals] _nubeSetUltimo error'); } catch (_) {}
+        try {
+          console.warn('[bootstrap-globals] _nubeSetUltimo error');
+        } catch (_) {}
       }
     };
   }
@@ -142,16 +148,26 @@
         el.style.marginTop = '6px';
         el.style.borderRadius = '6px';
         region.appendChild(el);
-        setTimeout(() => { try { region.removeChild(el); } catch (_) {} }, timeout);
+        setTimeout(() => {
+          try {
+            region.removeChild(el);
+          } catch (_) {}
+        }, timeout);
       } catch (e) {
-        try { console.log(message); } catch (_) {}
+        try {
+          console.log(message);
+        } catch (_) {}
       }
     };
   }
 
   // expose a marker
   try {
-    Object.defineProperty(globalScope, 'CR_Bootstrap', { value: true, writable: false, enumerable: false, configurable: false });
+    Object.defineProperty(globalScope, 'CR_Bootstrap', {
+      value: true,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    });
   } catch (e) {}
-
 })(typeof window !== 'undefined' ? window : globalThis);
