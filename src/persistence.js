@@ -77,13 +77,25 @@
   async function writeLocalBackup(db) {
     try {
       const serialized = JSON.stringify(db);
+      // Guardar copia en la clave de respaldo específica además de la clave normal.
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(DB_KEY, serialized);
+        try {
+          localStorage.setItem(DB_BACKUP_KEY, serialized);
+        } catch (e) {
+          // Puede fallar en entornos con storage lleno/restringido
+          console.warn('[persistence] No se pudo escribir DB_BACKUP_KEY en localStorage:', e);
+        }
+        try {
+          localStorage.setItem(DB_KEY, serialized);
+        } catch (e) {
+          console.warn('[persistence] No se pudo escribir DB_KEY en localStorage:', e);
+        }
       }
       if (
         typeof globalScope !== 'undefined' &&
         typeof globalScope.Blob !== 'undefined' &&
-        typeof globalScope.URL !== 'undefined'
+        typeof globalScope.URL !== 'undefined' &&
+        typeof globalScope.document !== 'undefined'
       ) {
         const blob = new Blob([serialized], { type: 'application/json' });
         const url = globalScope.URL.createObjectURL(blob);
@@ -103,8 +115,12 @@
 
   async function readLocalBackup() {
     try {
-      if (typeof localStorage !== 'undefined' && localStorage.getItem(DB_KEY)) {
-        return JSON.parse(localStorage.getItem(DB_KEY));
+      if (typeof localStorage !== 'undefined') {
+        // Preferir la clave de respaldo específica si existe
+        const backup = localStorage.getItem(DB_BACKUP_KEY);
+        if (backup) return JSON.parse(backup);
+        const normal = localStorage.getItem(DB_KEY);
+        if (normal) return JSON.parse(normal);
       }
     } catch (e) {
       console.warn('[persistence] No se pudo leer localStorage:', e);
@@ -160,6 +176,7 @@
     if (!isIdbAvailable()) {
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem(DB_KEY);
+        localStorage.removeItem(DB_BACKUP_KEY);
       }
       return;
     }
@@ -171,6 +188,7 @@
     }
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(DB_KEY);
+      localStorage.removeItem(DB_BACKUP_KEY);
     }
   }
 
