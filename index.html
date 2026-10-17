@@ -87,7 +87,9 @@
 <!-- Módulos tipados y config central (IIFE: no filtran globals, no colisionan con el bundle) -->
     <script src="./src/types.js" defer></script>
     <script src="./src/config.js" defer></script>
+    <script src="./src/exportConfig.js" defer></script>
     <script src="./src/reportDataAdapter.js" defer></script>
+    <script src="./src/syncManager.js" defer></script>
     <script src="./src/syncOptimizer.js" defer></script>
     <script src="./src/silentDownload.js" defer></script>
     <script src="./src/backgroundSync.js" defer></script>
@@ -942,17 +944,16 @@
             top: -9999px;
             width: 210mm;
             min-height: 297mm;
-            max-height: 297mm;
             font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
             color: var(--pdf-gris-oscuro);
             background: var(--pdf-blanco);
-            /* Márgenes uniformes aumentados para evitar desborde */
-            padding: 14mm 16mm 18mm 16mm;
+            /* Márgenes estándares A4: 12mm uniforme, 16mm inferior para footer */
+            padding: 12mm 12mm 16mm 12mm;
             box-sizing: border-box;
             opacity: 0;
             pointer-events: none;
             z-index: -1;
-            overflow: hidden;
+            overflow: visible;
             text-align: justify;
         }
 
@@ -971,8 +972,7 @@
         #plantilla-reporte-impresion .pdf-page {
             page-break-inside: avoid;
             break-inside: avoid;
-            page-break-after: always;
-            padding-bottom: 10mm;
+            page-break-after: auto;
         }
         #plantilla-reporte-impresion .pdf-page:last-child {
             page-break-after: auto;
@@ -4174,6 +4174,11 @@
                         <input type="checkbox" id="export-csv" checked> 
                         <span>📊 CSV</span>
                         <span style="font-size:10px;color:var(--texto-secundario);">(Excel compatible)</span>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-secundario);cursor:pointer;">
+                        <input type="checkbox" id="export-xlsx"> 
+                        <span>📗 XLSX</span>
+                        <span style="font-size:10px;color:var(--texto-secundario);">(Hoja de cálculo)</span>
                     </label>
                 </div>
             </div>
@@ -11484,21 +11489,7 @@ tbody.innerHTML = '';
             const csvCell = value => _ExportCSV ? _ExportCSV.celdaCSV(value)
                 : (() => { const text = String(value ?? '').replace(/\r?\n/g, ' '); const safeText = /^[=+\-@]/.test(text.trim()) ? "'" + text : text; return '"' + safeText.replace(/"/g, '""') + '"'; })();
             const csvRow = values => _ExportCSV ? _ExportCSV.filaCSV(values) : values.map(value => typeof value === 'number' ? numToF(value) : csvCell(value)).join(',');
-            const paginarCSV = (contenidoMultilinea, paginaTamano = ((typeof CR_CONFIG !== 'undefined' && CR_CONFIG.EXPORT_CONFIG) ? CR_CONFIG.EXPORT_CONFIG.maxRowsPerPage : 40)) => {
-                const lineas = contenidoMultilinea.split('\n');
-                const headerIndex = lineas.findIndex(linea => /^Fecha,|^Trabajador,|^KPI,|^Categoria,|^Resumen/.test(linea));
-                const header = headerIndex >= 0 ? lineas.slice(0, headerIndex + 1) : lineas.slice(0, 8);
-                const cuerpo = headerIndex >= 0 ? lineas.slice(headerIndex + 1) : lineas.slice(8);
-                if (cuerpo.length <= paginaTamano) return contenidoMultilinea;
-                const paginas = [];
-                const totalPaginas = Math.ceil(cuerpo.length / paginaTamano);
-                for (let i = 0; i < cuerpo.length; i += paginaTamano) {
-                    const pagina = i / paginaTamano + 1;
-                    const bloque = [...header, `# PÁGINA ${pagina} DE ${totalPaginas}`, ...cuerpo.slice(i, i + paginaTamano)];
-                    paginas.push(bloque.join('\n'));
-                }
-                return paginas.join('\n\n');
-            };
+
             let csv = '\uFEFF'; // BOM UTF-8 para Excel
             
             // Encabezado con información de la empresa (como comentarios para Excel)
@@ -11847,6 +11838,337 @@ tbody.innerHTML = '';
             }
 
             return csv;
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // EXPORTACIÓN XLSX (SheetJS — ya cargada en vendor/)
+        // ═════════════════════════════════════════════════════════════════
+        function generarXLSXReporte(tipo, fecha, rangoPersonalizado) {
+            const db    = getDB();
+            const adaptador = typeof CR_ReportData !== 'undefined' ? CR_ReportData.resolve(db) : null;
+            const datos = adaptador ? adaptador.data : getProyectoData();
+            const proy  = adaptador ? adaptador.project : db.proyectos.find(p => p.id === db.configuracion.proyecto_actual);
+            const proyNombre = adaptador ? adaptador.projectName : (proy ? proy.nombre : 'General');
+            const config = db.configuracion || {};
+            const empresa = config.nombre_empresa || 'CONSTRURAMSA';
+            const eslogan = config.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
+            const periodoDisplay = (rangoPersonalizado && rangoPersonalizado.inicio === rangoPersonalizado.fin)
+                ? rangoPersonalizado.inicio
+                : ((rangoPersonalizado && rangoPersonalizado.inicio && rangoPersonalizado.fin)
+                    ? `${rangoPersonalizado.inicio} al ${rangoPersonalizado.fin}`
+                    : (fecha || ''));
+
+            const _Export = (typeof CR_Export !== 'undefined' && CR_Export) ? CR_Export : null;
+            const fmtMonto = (v) => _Export ? _Export.formatearMonto(v, 2) : Number(v || 0).toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const csvCell = (v) => _Export ? _Export.celdaCSV(v) : String(v ?? '');
+
+            const enRango = (f) => {
+                if (!rangoPersonalizado || !rangoPersonalizado.inicio) return true;
+                return f >= rangoPersonalizado.inicio && f <= (rangoPersonalizado.fin || rangoPersonalizado.inicio);
+            };
+
+            const workbook = XLSX.utils.book_new();
+
+            // ── Hoja de metadatos / portada ──────────────────────────
+            const metaRows = [
+                [empresa],
+                [eslogan],
+                ['Proyecto: ' + proyNombre],
+                ['Tipo de Reporte: ' + (tipo || '').toUpperCase()],
+                ['Período: ' + periodoDisplay],
+                ['Fecha de generación: ' + new Date().toLocaleDateString('es-GT') + ' ' + new Date().toLocaleTimeString('es-GT')],
+                [],
+            ];
+            const metaWs = XLSX.utils.aoa_to_sheet(metaRows);
+            XLSX.utils.book_append_sheet(workbook, metaWs, 'Metadatos');
+
+            // ── Construir datos por tipo ─────────────────────────────
+            if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
+                const hojas = [];
+
+                // Caja chica
+                const idsExternos = typeof CR_ReportData !== 'undefined'
+                    ? CR_ReportData.linkedExpenseIds(datos)
+                    : new Set([
+                        ...((datos.viajes_camiones || {}).viajes || []).map(v => v.gasto_id).filter(Boolean),
+                        ...((datos.mantenimiento || {}).ordenes || []).map(o => o.gasto_id).filter(Boolean),
+                        ...((datos.mantenimiento || {}).compras_insumos || []).map(i => i.gasto_id).filter(Boolean),
+                    ]);
+                const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha) && !idsExternos.has(g.id));
+                let totalIng = 0, totalEgr = 0;
+                const cajaRows = [['Fecha', 'Tipo', 'Categoría', 'Descripción', 'Monto (Q)']];
+                movs.forEach(g => {
+                    cajaRows.push([g.fecha, g.tipo.toUpperCase(), g.categoria || '', (g.descripcion || '').substring(0, 100), fmtMonto(g.monto)]);
+                    if (g.tipo === 'ingreso') totalIng += g.monto; else totalEgr += g.monto;
+                });
+                cajaRows.push(['', '', 'SUBTOTAL CAJA — INGRESOS:', '', fmtMonto(totalIng)]);
+                cajaRows.push(['', '', 'SUBTOTAL CAJA — EGRESOS:', '', fmtMonto(totalEgr)]);
+                cajaRows.push(['', '', 'SUBTOTAL CAJA — SALDO:', '', fmtMonto(totalIng - totalEgr)]);
+                hojas.push({ nombre: 'Caja Chica', datos: cajaRows });
+
+                // Viajes
+                const viajes = (datos.viajes_camiones || {}).viajes || [];
+                const viajesFiltrados = viajes.filter(v => enRango(v.fecha));
+                let totalViajes = 0;
+                if (viajesFiltrados.length > 0) {
+                    const vRows = [['Fecha', 'Unidad', 'Material', 'No.', 'Km', 'Litros', 'Combustible (Q)', 'Alquiler (Q)', 'Total (Q)']];
+                    viajesFiltrados.forEach(v => {
+                        const c = (datos.viajes_camiones.camiones || []).find(x => x.id === v.vehiculo_id) || { nombre: 'N/A' };
+                        totalViajes += v.total || 0;
+                        totalEgr += v.total || 0;
+                        vRows.push([v.fecha, c.nombre, v.material || '', v.numero || '', fmtMonto(v.km_total || 0), fmtMonto(v.litros || 0), fmtMonto(v.costo_combustible || 0), fmtMonto(v.costo_alquiler || 0), fmtMonto(v.total || 0)]);
+                    });
+                    vRows.push(['', '', '', '', '', '', '', 'TOTAL VIAJES (Q):', fmtMonto(totalViajes)]);
+                    hojas.push({ nombre: 'Viajes', datos: vRows });
+                }
+
+                // Mantenimiento e insumos
+                const ords = (datos.mantenimiento || {}).ordenes || [];
+                const ins = (datos.mantenimiento || {}).compras_insumos || [];
+                const ordsFiltrados = ords.filter(o => enRango(o.fecha));
+                const insFiltrados = ins.filter(i => enRango(i.fecha));
+                let totalMT = 0;
+                if (ordsFiltrados.length > 0 || insFiltrados.length > 0) {
+                    const mRows = [['Fecha', 'Tipo', 'Descripción', 'Monto (Q)']];
+                    ordsFiltrados.forEach(o => {
+                        const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === o.maquinaria_id) || { nombre: 'N/A' };
+                        totalMT += o.costo || 0;
+                        totalEgr += o.costo || 0;
+                        mRows.push([o.fecha, 'Mantenimiento ' + o.tipo, ((o.observaciones || 'N/A') + ' — ' + m.nombre).substring(0, 100), fmtMonto(o.costo || 0)]);
+                    });
+                    insFiltrados.forEach(i => {
+                        totalMT += i.costo || 0;
+                        totalEgr += i.costo || 0;
+                        mRows.push([i.fecha, 'Insumo ' + i.tipo, (i.articulo || '') + ' (x' + (i.cantidad || 0) + ')', fmtMonto(i.costo || 0)]);
+                    });
+                    mRows.push(['', '', 'TOTAL MANTENIMIENTO E INSUMOS:', fmtMonto(totalMT)]);
+                    hojas.push({ nombre: 'Mantenimiento', datos: mRows });
+                }
+
+                // Nómina mensual
+                if (tipo === 'mensual' && typeof CR_NominaEngine !== 'undefined' && CR_NominaEngine.calcularNomina) {
+                    const nominaMes = CR_NominaEngine.calcularNomina(
+                        (datos.personal || {}).trabajadores || [],
+                        (datos.personal || {}).asistencia || [],
+                        rangoPersonalizado.inicio, rangoPersonalizado.fin
+                    );
+                    if (nominaMes.trabajadores.length > 0) {
+                        totalEgr += nominaMes.totalPagable;
+                        const nRows = [['Trabajador', 'Puesto', 'Asist.', 'Faltas', 'H. Extra', 'Total (Q)']];
+                        nominaMes.trabajadores.forEach(t => {
+                            nRows.push([t.nombre, t.puesto || '—', t.diasAsistidos, t.diasFalta, t.horasExtra.toFixed(1) + 'h', fmtMonto(t.totalPagar)]);
+                        });
+                        nRows.push(['', '', '', '', 'TOTAL NÓMINA:', fmtMonto(nominaMes.totalPagable)]);
+                        hojas.push({ nombre: 'Nómina', datos: nRows });
+                    }
+                }
+
+                // Resumen consolidado
+                const resRows = [
+                    ['RESUMEN CONSOLIDADO DEL PERÍODO'],
+                    ['TOTAL INGRESOS DEL PERÍODO:', fmtMonto(totalIng)],
+                    ['TOTAL EGRESOS DEL PERÍODO:', fmtMonto(totalEgr)],
+                    ['SALDO NETO DEL PERÍODO:', fmtMonto(totalIng - totalEgr)],
+                ];
+                hojas.push({ nombre: 'Resumen', datos: resRows });
+
+                hojas.forEach(h => {
+                    const ws = XLSX.utils.aoa_to_sheet(h.datos);
+                    // Ancho de columnas automático
+                    const maxCols = Math.max(...h.datos.map(r => r.length));
+                    const widths = [];
+                    for (let c = 0; c < maxCols; c++) {
+                        let maxLen = 0;
+                        h.datos.forEach(r => { const val = String(r[c] || ''); if (val.length > maxLen) maxLen = val.length; });
+                        widths.push({ wch: Math.min(Math.max(maxLen + 2, 10), 60) });
+                    }
+                    ws['!cols'] = widths;
+                    XLSX.utils.book_append_sheet(workbook, ws, h.nombre);
+                });
+
+            } else if (tipo === 'asistencia') {
+                const resumenPersonal = (datos.personal.trabajadores || []).map(trabajador => {
+                    let asistencias = 0, faltas = 0, justificados = 0, horasExtra = 0, totalPagar = 0;
+                    const periodos = (datos.personal.asistencia || []).filter(dia => enRango(dia.fecha));
+                    periodos.forEach(dia => {
+                        const reg = (dia.registros || []).find(r => r.trabajador_id === trabajador.id);
+                        if (!reg) return;
+                        if (reg.estado === 'asistio') {
+                            asistencias += 1;
+                            horasExtra += reg.horas_extras || 0;
+                            totalPagar += reg.calculos?.total_diario || (8 * (parseFloat(trabajador.pago_hora_normal) || 0) + (reg.horas_extras || 0) * (parseFloat(trabajador.pago_hora_extra) || 0));
+                        } else if (reg.estado === 'falto') { faltas += 1; }
+                        else if (reg.estado === 'justificado') { justificados += 1; }
+                    });
+                    return { trabajador, asistencias, faltas, justificados, horasExtra, totalPagar };
+                });
+
+                const resRows = [['Trabajador', 'Puesto', 'Asistencias', 'Faltas', 'Justificados', 'Horas Extra', 'Total a pagar (Q)']];
+                let totalPersonal = 0;
+                resumenPersonal.forEach(item => {
+                    totalPersonal += item.totalPagar;
+                    resRows.push([item.trabajador.nombre, item.trabajador.puesto, item.asistencias, item.faltas, item.justificados, item.horasExtra, fmtMonto(item.totalPagar)]);
+                });
+                resRows.push(['', '', '', '', '', 'TOTAL PERSONAL:', fmtMonto(totalPersonal)]);
+                const wsRes = XLSX.utils.aoa_to_sheet(resRows);
+                XLSX.utils.book_append_sheet(workbook, wsRes, 'Resumen Asistencia');
+
+                // Detalle por fecha
+                const regs = (datos.personal.asistencia || [])
+                    .filter(dia => enRango(dia.fecha))
+                    .flatMap(dia => (dia.registros || []).map(reg => ({ ...reg, fecha: dia.fecha })));
+                const detRows = [['Fecha', 'Trabajador', 'Puesto', 'Estado', 'H. Extra', 'Sueldo (Q)']];
+                let totalNomina = 0;
+                regs.forEach(reg => {
+                    const t = (datos.personal.trabajadores || []).find(t => t.id === reg.trabajador_id);
+                    let sueldo = 0;
+                    if (reg.calculos) { sueldo = reg.calculos.total_diario; }
+                    else if (reg.estado === 'asistio' && t) {
+                        const he = reg.horas_extras || 0;
+                        sueldo = 8 * (parseFloat(t.pago_hora_normal) || 0) + he * (parseFloat(t.pago_hora_extra) || 0);
+                    }
+                    totalNomina += sueldo;
+                    detRows.push([reg.fecha, t ? t.nombre : 'Desconocido', t ? t.puesto : 'N/A', reg.estado.toUpperCase(), (reg.horas_extras || 0) + 'h', fmtMonto(sueldo)]);
+                });
+                detRows.push(['', '', '', '', 'TOTAL NÓMINA:', fmtMonto(totalNomina)]);
+                const wsDet = XLSX.utils.aoa_to_sheet(detRows);
+                XLSX.utils.book_append_sheet(workbook, wsDet, 'Detalle Asistencia');
+
+            } else if (tipo === 'viajes') {
+                const viajes = (datos.viajes_camiones || {}).viajes || [];
+                const viajesFiltrados = viajes.filter(v => enRango(v.fecha)).sort((a, b) => a.fecha.localeCompare(b.fecha));
+                let totalV = 0;
+                const rows = [['Fecha', 'Unidad', 'Material', 'No. Viajes', 'Km Total', 'Litros', 'Costo Combustible (Q)', 'Costo Alquiler (Q)', 'Total (Q)']];
+                viajesFiltrados.forEach(v => {
+                    const cam = (datos.viajes_camiones.camiones || []).find(c => c.id === v.vehiculo_id);
+                    totalV += v.total || 0;
+                    rows.push([v.fecha, cam ? cam.nombre : 'N/A', v.material || '', v.numero || '', fmtMonto(v.km_total || 0), fmtMonto(v.litros || 0), fmtMonto(v.costo_combustible || 0), fmtMonto(v.costo_alquiler || 0), fmtMonto(v.total || 0)]);
+                });
+                rows.push(['', '', '', '', '', '', '', 'TOTAL VIAJES (Q):', fmtMonto(totalV)]);
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                const maxCols = Math.max(...rows.map(r => r.length));
+                const widths = [];
+                for (let c = 0; c < maxCols; c++) {
+                    let maxLen = 0;
+                    rows.forEach(r => { const val = String(r[c] || ''); if (val.length > maxLen) maxLen = val.length; });
+                    widths.push({ wch: Math.min(Math.max(maxLen + 2, 10), 60) });
+                }
+                ws['!cols'] = widths;
+                XLSX.utils.book_append_sheet(workbook, ws, 'Viajes');
+
+            } else if (tipo === 'mantenimiento') {
+                const ins = (datos.mantenimiento || {}).compras_insumos || [];
+                const ords = (datos.mantenimiento || {}).ordenes || [];
+                const insFiltrados = ins.filter(i => enRango(i.fecha));
+                const ordsFiltrados = ords.filter(o => enRango(o.fecha));
+                let totalM = 0;
+
+                const ordRows = [['Fecha', 'Equipo', 'Tipo', 'Observaciones', 'Costo (Q)']];
+                ordsFiltrados.forEach(o => {
+                    const m = (datos.mantenimiento.maquinaria || []).find(x => x.id === o.maquinaria_id);
+                    totalM += o.costo || 0;
+                    ordRows.push([o.fecha, m ? m.nombre : 'N/A', o.tipo || '', (o.observaciones || '—').substring(0, 100), fmtMonto(o.costo || 0)]);
+                });
+
+                const insRows = [['Fecha', 'Tipo', 'Artículo', 'Cant.', 'Costo (Q)']];
+                insFiltrados.forEach(i => {
+                    totalM += i.costo || 0;
+                    insRows.push([i.fecha, i.tipo || '', i.articulo || '', i.cantidad || 0, fmtMonto(i.costo || 0)]);
+                });
+
+                ordRows.push(['', '', '', 'TOTAL MANTENIMIENTO E INSUMOS:', fmtMonto(totalM)]);
+
+                const ws1 = XLSX.utils.aoa_to_sheet(ordRows);
+                const ws2 = XLSX.utils.aoa_to_sheet(insRows);
+                XLSX.utils.book_append_sheet(workbook, ws1, 'Órdenes Mantenimiento');
+                XLSX.utils.book_append_sheet(workbook, ws2, 'Compras Insumos');
+
+            } else if (tipo === 'categoria') {
+                const movsCat = (datos.caja_chica || []).filter(m => m.tipo === 'egreso' && enRango(m.fecha));
+                const gastosPorCat = {};
+                movsCat.forEach(m => {
+                    const cat = m.categoria || 'sin_categoria';
+                    gastosPorCat[cat] = (gastosPorCat[cat] || 0) + (Number(m.monto) || 0);
+                });
+                const catEntries = Object.entries(gastosPorCat).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+                const rows = [['Período', 'Categoría', 'Monto (Q)', 'Porcentaje']];
+                let totalGastosCat = 0;
+                if (catEntries.length > 0) {
+                    totalGastosCat = catEntries.reduce((s, [, v]) => s + v, 0);
+                    catEntries.forEach(([cat, monto]) => {
+                        const porcentaje = ((monto / totalGastosCat) * 100).toFixed(1);
+                        const etiquetaCat = (typeof etiquetaCategoria === 'function')
+                            ? etiquetaCategoria(cat)
+                            : cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        rows.push([periodoDisplay, etiquetaCat, fmtMonto(monto), porcentaje + '%']);
+                    });
+                    rows.push(['', 'TOTAL GASTOS:', fmtMonto(totalGastosCat), '100.0%']);
+                } else {
+                    rows.push(['SIN GASTOS EN EL PERÍODO', '', '', '']);
+                }
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                XLSX.utils.book_append_sheet(workbook, ws, 'Por Categoría');
+
+            } else if (tipo === 'nomina') {
+                const fechaNom = (rangoPersonalizado && rangoPersonalizado.inicio) || new Date().toISOString().slice(0, 10);
+                const rangNom = (rangoPersonalizado && rangoPersonalizado.fin) || fechaNom;
+                if (typeof CR_NominaEngine === 'undefined' || !CR_NominaEngine.calcularNomina) {
+                    const ws = XLSX.utils.aoa_to_sheet([['ERROR: Motor de nómina no disponible']]);
+                    XLSX.utils.book_append_sheet(workbook, ws, 'Nómina');
+                } else {
+                    const nomina = CR_NominaEngine.calcularNomina(
+                        (datos.personal || {}).trabajadores || [],
+                        (datos.personal || {}).asistencia || [],
+                        fechaNom, rangNom
+                    );
+                    const rows = [['Trabajador', 'Puesto', 'Pago/Hora Normal (Q)', 'Pago/Hora Extra (Q)', 'Días Asistidos', 'Días Falta', 'Días Justif.', 'Horas Extra', 'Pago Normal (Q)', 'Pago Extra (Q)', 'Total a Pagar (Q)']];
+                    nomina.trabajadores.forEach(t => {
+                        rows.push([t.nombre, t.puesto || '—', fmtMonto(t.pagoHoraNormal), fmtMonto(t.pagoHoraExtra), t.diasAsistidos, t.diasFalta, t.diasJustificados, t.horasExtra.toFixed(1) + 'h', fmtMonto(t.pagoNormal), fmtMonto(t.pagoExtra), fmtMonto(t.totalPagar)]);
+                    });
+                    rows.push(['TOTALES', '', '', '', nomina.totalDiasAsistidos, nomina.totalDiasFalta, '', nomina.totalHorasExtra.toFixed(1) + 'h', '', '', fmtMonto(nomina.totalPagable)]);
+                    const ws = XLSX.utils.aoa_to_sheet(rows);
+                    XLSX.utils.book_append_sheet(workbook, ws, 'Nómina');
+                }
+
+            } else if (tipo === 'ejecutivo') {
+                const kpis = typeof CR_KPIEngine !== 'undefined' && CR_KPIEngine.calcularKPIs
+                    ? CR_KPIEngine.calcularKPIs(datos, { presupuestoInicial: getPresupuestoActual() }, 'mes', { inicio: rangoPersonalizado.inicio, fin: rangoPersonalizado.fin })
+                    : null;
+                const rows = [['KPI', 'Valor', 'Descripción']];
+                if (kpis) {
+                    const metricas = [
+                        ['Presupuesto Inicial', fmtMonto(getPresupuestoActual() || 0), 'Capital inicial del proyecto'],
+                        ['Total Ingresos', fmtMonto(kpis.totalIngresos || 0), 'Suma de todos los ingresos del período'],
+                        ['Total Egresos', fmtMonto(kpis.totalEgresos || 0), 'Suma de todos los egresos del período'],
+                        ['Saldo Disponible', fmtMonto(kpis.saldo || 0), 'Presupuesto inicial + Ingresos - Egresos'],
+                        ['Viajes Realizados', (kpis.totalViajes || 0), 'Cantidad de viajes de camiones'],
+                        ['Km Recorridos', (kpis.totalKm || 0), 'Kilometraje total recorrido'],
+                        ['Litros Combustible', (kpis.totalLitros || 0), 'Combustible consumido (L)'],
+                        ['Costo Mantenimiento', fmtMonto(kpis.totalMantenimiento || 0), 'Gastos en mantenimiento e insumos'],
+                        ['Costo Nómina', fmtMonto(kpis.totalNomina || 0), 'Pagos de nómina y horas extra'],
+                    ];
+                    metricas.forEach(m => rows.push(m));
+                    if (kpis.gastosPorCategoria) {
+                        rows.push([]);
+                        rows.push(['Categoría', 'Monto (Q)', '']);
+                        Object.entries(kpis.gastosPorCategoria).forEach(([cat, monto]) => {
+                            if (monto > 0) {
+                                const etiquetaCat = cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                rows.push([etiquetaCat, fmtMonto(monto), '']);
+                            }
+                        });
+                    }
+                } else {
+                    rows.push(['Error: Motor de KPIs no disponible', '', '']);
+                }
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                XLSX.utils.book_append_sheet(workbook, ws, 'Ejecutivo');
+            }
+
+            // Generar y descargar
+            const nombre = `reporte_${tipo}_${periodoDisplay.replace(/[^a-zA-Z0-9._-]/g, '_') || 'reporte'}`;
+            XLSX.writeFile(workbook, nombre + '.xlsx');
+            return nombre + '.xlsx';
         }
 
         function generarHTMLReporte(tipo, fecha, rangoPersonalizado) {
@@ -12361,35 +12683,31 @@ function validarDependenciasExportacion() {
             if (!validarDependenciasExportacion()) throw new Error('Dependencias de exportación no disponibles');
             await esperarImagenesPlantilla();
 
-            const pageSize = (document.getElementById('vp-page-size')?.value || 'letter');
-            // Ancho en px a 96 dpi: letter=816, a4=794, legal=816
-            const PAGE_PX = { letter: 816, a4: 794, legal: 816 };
+            const pageSize = (document.getElementById('vp-page-size')?.value || 'a4');
             const PAGE_MM = { letter: '216mm', a4: '210mm', legal: '216mm' };
-            const targetPx = PAGE_PX[pageSize] || 816;
+
+            // ── Usar estándar de exportConfig (márgenes 12mm uniforme, bottom 16mm) ──
+            const contenedorStyle = typeof CR_ExportConfig !== 'undefined'
+                ? CR_ExportConfig.estiloContenedorImpresion(pageSize)
+                : ('font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#374151;background:#ffffff;' +
+                   'width:210mm;min-height:297mm;padding:12mm 12mm 16mm 12mm;box-sizing:border-box;overflow:visible;');
 
             contenedor.classList.add('pdf-generating');
             try {
-                // 1) Forzar ancho exacto ANTES de que html2canvas mida el elemento.
-                //    position:fixed + left:-9999px lo saca del flujo pero sigue
-                //    siendo renderizable; asignamos el ancho en px para que
-                //    scrollWidth coincida exactamente con targetPx.
-                 contenedor.style.width = targetPx + 'px';
-                 contenedor.style.maxWidth = targetPx + 'px';
-                 contenedor.style.minWidth = targetPx + 'px';
-                 contenedor.style.overflowX = 'hidden';
+                // 1) Aplicar estilo de contenedor con márgenes estándar (mm)
+                contenedor.style.cssText = contenedorStyle;
+                contenedor.style.overflowX = 'hidden';
 
-                // 2) Dar un tick al navegador para que recalcule el layout
-                //    con el nuevo ancho antes de leer scrollHeight.
+                // 2) Tick para recalcular layout
                 await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
+                // 3) Medir altura real del contenido
                 const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123);
-                const rawScale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
-                const scale = Math.min(rawScale, 1.5);
 
-                // 3) Variables CSS del tema que usa la plantilla.
-                //    html2canvas clona el DOM en un iframe aislado donde las
-                //    custom properties del :root principal NO están disponibles,
-                //    por eso se inyectan en el clon vía onclone.
+                // 4) Escala fija 1:1 (sin distorsión por altura). La calidad se controla por imagen JPEG.
+                const scale = typeof CR_ExportConfig !== 'undefined' ? CR_ExportConfig.EXPORT_CONFIG.pdfScale : 1.0;
+
+                // 5) Variables CSS del tema para el clon de html2canvas
                 const CSS_VARS = [
                     '--pdf-azul-oscuro:#004B93',
                     '--pdf-azul-claro:#00A4E4',
@@ -12403,33 +12721,35 @@ function validarDependenciasExportacion() {
                     '--acento-purpura:#7C3AED'
                 ].join(';');
 
+                const fechaGen = new Date().toLocaleDateString('es-GT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
                 const opts = {
                     margin: 0,
                     filename: filename,
-                    image: { type: 'jpeg', quality: 0.98 },
+                    image: { type: 'jpeg', quality: typeof CR_ExportConfig !== 'undefined' ? CR_ExportConfig.EXPORT_CONFIG.pdfImageQuality : 0.95 },
                     html2canvas: {
-                        scale,
+                        scale: scale,
                         useCORS: true,
                         logging: false,
                         scrollX: 0,
                         scrollY: 0,
-                        windowWidth: targetPx,
+                        windowWidth: contenedor.scrollWidth,
                         windowHeight: docHeight,
-                        width: targetPx,
+                        width: contenedor.scrollWidth,
                         height: docHeight,
                         allowTaint: false,
-                        onclone: function(clonedDoc) {
-                            // Inyectar variables CSS en el documento clonado
+                        onclone: function (clonedDoc) {
+                            // Inyectar variables CSS y @page en el clon
                             const style = clonedDoc.createElement('style');
-                            style.textContent = ':root{' + CSS_VARS + '}';
+                            style.textContent = ':root{' + CSS_VARS + '};' +
+                                '@page { margin: 12mm 12mm 16mm 12mm; ' +
+                                '@bottom-left { content: "CONSTRURAMSA"; font-size: 8pt; color: #6B7280; } ' +
+                                '@bottom-center { content: "' + fechaGen + '"; font-size: 8pt; color: #6B7280; } ' +
+                                '@bottom-right { content: counter(page) " / " counter(pages); font-size: 8pt; color: #6B7280; } }';
                             clonedDoc.head.appendChild(style);
-                            // Forzar el mismo ancho en el clon
                             const el = clonedDoc.getElementById('plantilla-reporte-impresion');
                             if (el) {
-                                el.style.width = targetPx + 'px';
-                                el.style.maxWidth = targetPx + 'px';
-                                el.style.minWidth = targetPx + 'px';
-                                el.style.overflowX = 'hidden';
+                                el.style.cssText = contenedorStyle;
                                 el.style.position = 'relative';
                                 el.style.left = '0';
                                 el.style.top = '0';
@@ -12438,24 +12758,33 @@ function validarDependenciasExportacion() {
                         }
                     },
                     jsPDF: { unit: 'mm', format: pageSize, orientation: 'portrait' },
-                    pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper'] }
+                    pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper', '.pdf-page', '.tabla-pdf-no-break'] }
                 };
 
                 const pdf = await html2pdf().set(opts).from(contenedor).toPdf().get('pdf');
                 const total = pdf.internal.getNumberOfPages();
+                const pageW = pdf.internal.pageSize.getWidth();
+                const pageH = pdf.internal.pageSize.getHeight();
+                const footerY = pageH - 8; // 8mm desde el borde inferior (dentro del margen de 16mm)
+
+                // Estampar footer numerado centrado en cada página (evita solaparse con contenido)
                 for (let i = 1; i <= total; i++) {
                     pdf.setPage(i);
                     pdf.setFontSize(8);
-                    pdf.setTextColor(156, 163, 175);
-                    pdf.text(`Página ${i} de ${total}`, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 5, { align: 'center' });
+                    pdf.setTextColor(102, 114, 120); // gris #6B7280
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text('CONSTRURAMSA', 12, footerY);
+                    pdf.text(fechaGen, pageW / 2, footerY, { align: 'center' });
+                    pdf.text(`Página ${i} de ${total}`, pageW - 12, footerY, { align: 'right' });
                 }
                 return pdf;
             } finally {
                 contenedor.classList.remove('pdf-generating');
-                contenedor.style.width = PAGE_MM[pageSize] || '216mm';
+                contenedor.style.width = PAGE_MM[pageSize] || '210mm';
                 contenedor.style.maxWidth = '';
                 contenedor.style.minWidth = '';
                 contenedor.style.overflowX = '';
+                contenedor.style.cssText = '';
             }
         }
 
@@ -12486,6 +12815,9 @@ function validarDependenciasExportacion() {
                 if (!validarDependenciasExportacion()) { hideLoading(); return; }
                 const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type:'text/csv;charset=utf-8;' });
                 archivos.push(new File([csvBlob], `${nombre}.csv`, { type:'text/csv' }));
+
+                // XLSX (descarga directa, no se comparte por WhatsApp por tamaño)
+                const xlsxName = generarXLSXReporte(tipo, rango.inicio, rango);
 
                 const htmlData = generarHTMLReporte(tipo, rango.inicio, rango);
                 const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
@@ -12542,8 +12874,9 @@ function validarDependenciasExportacion() {
             
             const exportPDF = document.getElementById('export-pdf').checked;
             const exportCSV = document.getElementById('export-csv').checked;
+            const exportXLSX = document.getElementById('export-xlsx').checked;
             
-            if (!exportPDF && !exportCSV) {
+            if (!exportPDF && !exportCSV && !exportXLSX) {
                 showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
                 return;
             }
@@ -12560,7 +12893,7 @@ function validarDependenciasExportacion() {
                     const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
 
                     let formatoCount = 0;
-                    const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0);
+                    const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0) + (exportXLSX ? 1 : 0);
                     
                     // CSV
                     if (exportCSV) {
@@ -12570,6 +12903,14 @@ function validarDependenciasExportacion() {
                         const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 3000);
                         formatoCount++;
                         actualizarProgresoReporte('CSV generado', 20 + (formatoCount / totalFormatos) * 30);
+                    }
+                    
+                    // XLSX
+                    if (exportXLSX) {
+                        actualizarProgresoReporte('Generando XLSX...', 20 + (formatoCount / totalFormatos) * 30);
+                        generarXLSXReporte(tipo, rango.inicio, rango);
+                        formatoCount++;
+                        actualizarProgresoReporte('XLSX generado', 20 + (formatoCount / totalFormatos) * 30);
                     }
                     
                     // PDF
@@ -12980,7 +13321,8 @@ function validarDependenciasExportacion() {
                 
                 const exportPDF = document.getElementById('export-pdf').checked;
                 const exportCSV = document.getElementById('export-csv').checked;
-                if (!exportPDF && !exportCSV) {
+                const exportXLSX = document.getElementById('export-xlsx').checked;
+                if (!exportPDF && !exportCSV && !exportXLSX) {
                     showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
                     hideLoading();
                     return;
@@ -12997,13 +13339,19 @@ function validarDependenciasExportacion() {
                         if (!validarDependenciasExportacion()) throw new Error('Dependencias de exportación no disponibles');
                         
                         let formatoCount = 0;
-                        const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0);
+                        const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0) + (exportXLSX ? 1 : 0);
                         
                         // CSV
                         if (exportCSV) {
                             const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type: 'text/csv;charset=utf-8;' });
                             const urlCSV = URL.createObjectURL(csvBlob);
                             const aC = document.createElement('a'); aC.href = urlCSV; aC.download = `${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
+                            formatoCount++;
+                        }
+                        
+                        // XLSX
+                        if (exportXLSX) {
+                            generarXLSXReporte(tipo, rango.inicio, rango);
                             formatoCount++;
                         }
                         

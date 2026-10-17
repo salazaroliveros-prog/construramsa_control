@@ -22,6 +22,8 @@
     "test-validacion": "node test_validacion_modulos.js",
     "test-paginacion": "node test_paginacion_registros.js",
     "test-report-exports": "node audit_report_exports_e2e.js",
+    "test-export-validation": "node export_validator.js",
+    "test-sync-validation": "node sync_validator.js",
     "test-quality-contract": "node test_quality_contract.js",
     "test-sync-offline": "node test_sincronizacion_offline.js",
     "clean": "node -e \"const fs=require('fs'); const path=require('path'); const nm=path.join(__dirname,'node_modules'); const pl=path.join(__dirname,'package-lock.json'); if(fs.existsSync(nm))fs.rmSync(nm,{recursive:true,force:true}); if(fs.existsSync(pl))fs.unlinkSync(pl); console.log('Cleaned node_modules and package-lock.json');\"",
