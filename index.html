@@ -1086,7 +1086,7 @@
             text-overflow: ellipsis;
             word-break: break-word;
         }
-        #plantilla-reporte-impresion table.tabla-pdf td {
+        #plantilla-reporte-impresion table.pdf-page-break { page-break-after: always; } .tabla-pdf td {
             font-size: 9px;
             padding: 8px 10px;
             border: 1px solid #E5E7EB;
@@ -12684,6 +12684,7 @@ function validarDependenciasExportacion() {
             await esperarImagenesPlantilla();
 
             const pageSize = (document.getElementById('vp-page-size')?.value || 'a4');
+            const PAGE_PX = { letter: 816, a4: 794, legal: 816 };
             const PAGE_MM = { letter: '216mm', a4: '210mm', legal: '216mm' };
 
             // ── Usar estándar de exportConfig (márgenes 12mm uniforme, bottom 16mm) ──
@@ -12705,7 +12706,8 @@ function validarDependenciasExportacion() {
                 const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123);
 
                 // 4) Escala fija 1:1 (sin distorsión por altura). La calidad se controla por imagen JPEG.
-                const scale = typeof CR_ExportConfig !== 'undefined' ? CR_ExportConfig.EXPORT_CONFIG.pdfScale : 1.0;
+                const rawScale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
+                const scale = Math.min(rawScale, 1.5);
 
                 // 5) Variables CSS del tema para el clon de html2canvas
                 const CSS_VARS = [
@@ -12738,7 +12740,7 @@ function validarDependenciasExportacion() {
                         width: contenedor.scrollWidth,
                         height: docHeight,
                         allowTaint: false,
-                        onclone: function (clonedDoc) {
+                        onclone: function(clonedDoc) {
                             // Inyectar variables CSS y @page en el clon
                             const style = clonedDoc.createElement('style');
                             style.textContent = ':root{' + CSS_VARS + '};' +
@@ -12758,7 +12760,7 @@ function validarDependenciasExportacion() {
                         }
                     },
                     jsPDF: { unit: 'mm', format: pageSize, orientation: 'portrait' },
-                    pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper', '.pdf-page', '.tabla-pdf-no-break'] }
+                    pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper'] }
                 };
 
                 const pdf = await html2pdf().set(opts).from(contenedor).toPdf().get('pdf');
@@ -12786,6 +12788,16 @@ function validarDependenciasExportacion() {
                 contenedor.style.overflowX = '';
                 contenedor.style.cssText = '';
             }
+        }
+
+
+        function paginarCSV(lines, maxRowsPerPage) {
+            const MAX_ROWS = typeof maxRowsPerPage === 'number' && maxRowsPerPage > 0 ? maxRowsPerPage : 1000;
+            const paginas = [];
+            for (let i = 0; i < lines.length; i += MAX_ROWS) {
+                paginas.push(lines.slice(i, i + MAX_ROWS).join('\n'));
+            }
+            return paginas;
         }
 
         let _generandoReporte = false;
