@@ -97,6 +97,16 @@ async function main() {
       'a failed share must fall back to the selected local CSV export'
     );
 
+    await loadSeed(page);
+    const previewDownload = page.waitForEvent('download', { timeout: 5000 });
+    await page.evaluate(() => window.confirmarYGenerar('local'));
+    const savedPreviewDownload = await previewDownload;
+    assert.match(
+      savedPreviewDownload.suggestedFilename(),
+      /^reporte_diario_.*\.csv$/,
+      'the preview flow must reuse the local export path'
+    );
+
     console.log('Report export UI guard tests OK');
   } finally {
     if (browser) await browser.close();

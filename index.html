@@ -8146,14 +8146,9 @@ tbody.innerHTML = '';
             
             generarPDFPlantilla(contenedor, `planilla_${fecha}.pdf`).then(pdf => {
                 const pdfBlob = pdf.output('blob');
-                const pdfUrl = URL.createObjectURL(pdfBlob);
-                const a = document.createElement('a');
-                a.href = pdfUrl;
-                a.download = `planilla_${fecha}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+                if (!CR_Export.descargarBlob(pdfBlob, `planilla_${fecha}.pdf`)) {
+                    throw new Error('No se pudo programar la descarga de la planilla PDF');
+                }
                 contenedor.classList.remove('pdf-generating');
                 showToast('✅ Planilla generada y descargada', 'success');
             }).catch(err => {
@@ -8205,14 +8200,10 @@ tbody.innerHTML = '';
 
             const csvContent = '\uFEFF' + csv.map(r => r.join(',')).join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `planilla_${fecha}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            if (!CR_Export.descargarBlob(blob, `planilla_${fecha}.csv`)) {
+                showToast('❌ No se pudo descargar la planilla CSV', 'error');
+                return;
+            }
             showToast('✅ Planilla CSV exportada', 'success');
         }
 
@@ -12168,8 +12159,15 @@ tbody.innerHTML = '';
 
             // Generar y descargar
             const nombre = `reporte_${tipo}_${periodoDisplay.replace(/[^a-zA-Z0-9._-]/g, '_') || 'reporte'}`;
-            XLSX.writeFile(workbook, nombre + '.xlsx');
-            return nombre + '.xlsx';
+            const filename = nombre + '.xlsx';
+            const workbookData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const workbookBlob = new Blob([workbookData], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            });
+            if (!CR_Export.descargarBlob(workbookBlob, filename)) {
+                throw new Error('No se pudo programar la descarga XLSX');
+            }
+            return filename;
         }
 
         function generarHTMLReporte(tipo, fecha, rangoPersonalizado) {
@@ -12737,7 +12735,10 @@ function validarDependenciasExportacion() {
                 const fechaGen = new Date().toLocaleDateString('es-GT', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
                 const opts = {
-                    margin: 0,
+                    // Reservar el margen inferior en cada página rasterizada;
+                    // el padding del contenedor sólo protege la primera hoja.
+                    // Sin esta reserva, una tabla larga invade el pie añadido por jsPDF.
+                    margin: [0, 0, 16, 0],
                     filename: filename,
                     image: { type: 'jpeg', quality: typeof CR_ExportConfig !== 'undefined' ? CR_ExportConfig.EXPORT_CONFIG.pdfImageQuality : 0.95 },
                     html2canvas: {
@@ -12866,7 +12867,9 @@ function validarDependenciasExportacion() {
                     showToast('✅ Reporte compartido', 'success');
                 } else {
                     showToast('ℹ️ El navegador no soporta compartir archivos. Se descargarán localmente.', 'info');
-                    archivos.forEach(f => { const u=URL.createObjectURL(f);const a=document.createElement('a');a.href=u;a.download=f.name;a.click();setTimeout(() => URL.revokeObjectURL(u), 3000); });
+                    if (!CR_Export.descargarArchivos(archivos.map((file) => ({ blob: file, nombre: file.name })))) {
+                        throw new Error('No se pudieron programar las descargas locales');
+                    }
                 }
                 _generandoReporte = false;
             } catch (err) {
@@ -12887,16 +12890,18 @@ function validarDependenciasExportacion() {
         function generarReporteLocal() {
             if (_generandoReporte) {
                 showToast('⚠️ Ya se está generando un reporte. Por favor espere.', 'info');
+                hideLoading();
                 return;
             }
             _generandoReporte = true;
             
             const tipo = document.getElementById('reporte-tipo').value;
-            let rango = obtenerRangoReporte();
+            const rango = obtenerRangoReporte();
             
             if (!rango.inicio && tipo !== 'asistencia') {
                 showToast('⚠️ Seleccione una fecha para generar el reporte.', 'error');
                 _generandoReporte = false;
+                hideLoading();
                 return;
             }
             
@@ -12907,6 +12912,7 @@ function validarDependenciasExportacion() {
             if (!exportPDF && !exportCSV && !exportXLSX) {
                 showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
                 _generandoReporte = false;
+                hideLoading();
                 return;
             }
             
@@ -12917,6 +12923,7 @@ function validarDependenciasExportacion() {
             // cuando el usuario haya solicitado el formato PDF.
             if (exportPDF && !validarDependenciasExportacion()) {
                 _generandoReporte = false;
+                hideLoading();
                 return;
             }
             
@@ -12924,8 +12931,6 @@ function validarDependenciasExportacion() {
             
             setTimeout(async () => {
                 try {
-                    const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
-
                     let formatoCount = 0;
                     const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0) + (exportXLSX ? 1 : 0);
                     
@@ -12933,8 +12938,9 @@ function validarDependenciasExportacion() {
                     if (exportCSV) {
                         actualizarProgresoReporte('Generando CSV...', 20 + (formatoCount / totalFormatos) * 30);
                         const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type:'text/csv;charset=utf-8;' });
-                        const urlCSV = URL.createObjectURL(csvBlob);
-                        const aC = document.createElement('a'); aC.href=urlCSV; aC.download=`${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 3000);
+                        if (!CR_Export.descargarBlob(csvBlob, `${nombre}.csv`)) {
+                            throw new Error('No se pudo programar la descarga CSV');
+                        }
                         formatoCount++;
                         actualizarProgresoReporte('CSV generado', 20 + (formatoCount / totalFormatos) * 30);
                     }
@@ -12956,16 +12962,10 @@ function validarDependenciasExportacion() {
 
                         const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
 
-                        // Forzar descarga usando Blob para asegurar que se abra el diálogo de guardar
                         const pdfBlob = pdf.output('blob');
-                        const pdfUrl = URL.createObjectURL(pdfBlob);
-                        const aPdf = document.createElement('a');
-                        aPdf.href = pdfUrl;
-                        aPdf.download = `${nombre}.pdf`;
-                        document.body.appendChild(aPdf);
-                        aPdf.click();
-                        document.body.removeChild(aPdf);
-                        setTimeout(() => URL.revokeObjectURL(pdfUrl), 3000);
+                        if (!CR_Export.descargarBlob(pdfBlob, `${nombre}.pdf`)) {
+                            throw new Error('No se pudo programar la descarga PDF');
+                        }
 
                         contenedor.classList.remove('pdf-generating');
                         formatoCount++;
@@ -12979,6 +12979,7 @@ function validarDependenciasExportacion() {
                     
                     setTimeout(() => {
                         ocultarProgresoReporte();
+                        hideLoading();
                         showToast('✅ Reporte generado y descargado', 'success');
                         _generandoReporte = false;
                     }, 500);
@@ -12986,6 +12987,7 @@ function validarDependenciasExportacion() {
                     const contenedor = document.getElementById('plantilla-reporte-impresion');
                     if (contenedor) contenedor.classList.remove('pdf-generating');
                     ocultarProgresoReporte();
+                    hideLoading();
                     showToast('❌ Error al generar reporte', 'error'); 
                     console.error(err); 
                     _generandoReporte = false;
@@ -13344,89 +13346,7 @@ function validarDependenciasExportacion() {
             if (modo === 'whatsapp') {
                 compartirReporteWhatsApp();
             } else {
-                const tipo = document.getElementById('reporte-tipo').value;
-                let rango = obtenerRangoReporte();
-                
-                if (!rango.inicio && tipo !== 'asistencia') {
-                    showToast('⚠️ Seleccione una fecha para el reporte.', 'error');
-                    hideLoading();
-                    return;
-                }
-                
-                const exportPDF = document.getElementById('export-pdf').checked;
-                const exportCSV = document.getElementById('export-csv').checked;
-                const exportXLSX = document.getElementById('export-xlsx').checked;
-                if (!exportPDF && !exportCSV && !exportXLSX) {
-                    showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
-                    hideLoading();
-                    return;
-                }
-                
-                const fechaDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio}_${rango.fin}`;
-                const nombre = `reporte_${tipo}_${fechaDisplay}`;
-                
-                setTimeout(async () => {
-                    try {
-                        const proyObj = (getDB().proyectos || []).find(p => p.id === getDB().configuracion.proyecto_actual);
-                        const proyNombreX = proyObj ? proyObj.nombre : 'General';
-                        
-                        if (!validarDependenciasExportacion()) throw new Error('Dependencias de exportación no disponibles');
-                        
-                        let formatoCount = 0;
-                        const totalFormatos = (exportPDF ? 1 : 0) + (exportCSV ? 1 : 0) + (exportXLSX ? 1 : 0);
-                        
-                        // CSV
-                        if (exportCSV) {
-                            const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type: 'text/csv;charset=utf-8;' });
-                            const urlCSV = URL.createObjectURL(csvBlob);
-                            const aC = document.createElement('a'); aC.href = urlCSV; aC.download = `${nombre}.csv`; aC.click(); setTimeout(() => URL.revokeObjectURL(urlCSV), 1000);
-                            formatoCount++;
-                        }
-                        
-                        // XLSX
-                        if (exportXLSX) {
-                            generarXLSXReporte(tipo, rango.inicio, rango);
-                            formatoCount++;
-                        }
-                        
-                        // PDF
-                        if (exportPDF) {
-                            const htmlData = generarHTMLReporte(tipo, rango.inicio, rango);
-                            const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
-                            // Reaplicar portada sobre la plantilla recién preparada
-                            aplicarPortadaPlantilla(portada);
-
-                            contenedor.classList.add('pdf-generating');
-                            const pdf = await generarPDFPlantilla(contenedor, `${nombre}.pdf`);
-
-                            // Forzar descarga usando Blob para asegurar que se abra el diálogo de guardar
-                            const pdfBlob = pdf.output('blob');
-                            const pdfUrl = URL.createObjectURL(pdfBlob);
-                            const aPdf = document.createElement('a');
-                            aPdf.href = pdfUrl;
-                            aPdf.download = `${nombre}.pdf`;
-                            document.body.appendChild(aPdf);
-                            aPdf.click();
-                            document.body.removeChild(aPdf);
-                            setTimeout(() => URL.revokeObjectURL(pdfUrl), 3000);
-
-                            contenedor.classList.remove('pdf-generating');
-                            formatoCount++;
-                        }
-                        
-                        // Agregar al cache
-                        agregarReporteCache(tipo, rango.inicio, rango.fin);
-                        
-                        hideLoading();
-                        showToast('✅ Reporte generado y descargado', 'success');
-                    } catch (err) {
-                        const c = document.getElementById('plantilla-reporte-impresion');
-                        if (c) c.classList.remove('pdf-generating');
-                        hideLoading();
-                        showToast('❌ Error al generar reporte', 'error');
-                        console.error(err);
-                    }
-                }, 300);
+                generarReporteLocal();
             }
         }
 

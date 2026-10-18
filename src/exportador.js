@@ -145,19 +145,40 @@
    * Dispara una descarga de blob en el navegador.
    * @param {Blob} blob
    * @param {string} nombreArchivo
+   * @param {number} [revokeDelayMs]
    * @returns {boolean} true si se programó la descarga.
    */
-  function descargarBlob(blob, nombreArchivo) {
-    if (typeof URL === 'undefined' || !URL.createObjectURL) return false;
+  function descargarBlob(blob, nombreArchivo, revokeDelayMs) {
+    if (
+      !blob ||
+      typeof document === 'undefined' ||
+      !document.createElement ||
+      typeof URL === 'undefined' ||
+      !URL.createObjectURL
+    ) {
+      return false;
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = nombreArchivo;
+    a.download = nombreArchivoSeguro(nombreArchivo);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    setTimeout(() => URL.revokeObjectURL(url), revokeDelayMs === undefined ? 3000 : revokeDelayMs);
     return true;
+  }
+
+  /**
+   * Programa una colección de descargas independientes. Falla como conjunto
+   * si no se puede programar cualquiera de sus archivos.
+   * @param {Array<{blob: Blob, nombre: string}>} archivos
+   * @param {number} [revokeDelayMs]
+   * @returns {boolean}
+   */
+  function descargarArchivos(archivos, revokeDelayMs) {
+    if (!Array.isArray(archivos) || archivos.length === 0) return false;
+    return archivos.every(({ blob, nombre }) => descargarBlob(blob, nombre, revokeDelayMs));
   }
 
   /**
@@ -173,6 +194,7 @@
     formatearMonto,
     nombreArchivoSeguro,
     descargarBlob,
+    descargarArchivos,
   });
 
   if (globalScope) {

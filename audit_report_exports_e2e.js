@@ -5,6 +5,8 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const assert = require('assert');
+const { execFileSync } = require('child_process');
 const { spawn } = require('child_process');
 const { chromium } = require('playwright');
 
@@ -23,6 +25,61 @@ const types = [
   'ejecutivo',
 ];
 const range = { inicio: '2020-01-01', fin: '2030-12-31' };
+
+function assertStoredFile(filePath, format) {
+  assert(fs.existsSync(filePath), `${format} was not saved to disk: ${filePath}`);
+  const content = fs.readFileSync(filePath);
+  assert(content.length > 0, `${format} is empty: ${filePath}`);
+
+  if (format === 'CSV') {
+    assert(
+      content.subarray(0, 3).equals(Buffer.from([0xef, 0xbb, 0xbf])),
+      'CSV is missing UTF-8 BOM'
+    );
+    assert.match(
+      content.toString('utf8'),
+      /CONSTRURAMSA|Reporte|REPORTE/i,
+      'CSV has no report content'
+    );
+    return;
+  }
+
+  if (format === 'PDF') {
+    assert(content.subarray(0, 5).equals(Buffer.from('%PDF-')), `Invalid PDF header: ${filePath}`);
+    const pageCount = Number(
+      execFileSync(
+        'python',
+        ['-c', 'import pymupdf,sys; print(len(pymupdf.open(sys.argv[1])))', filePath],
+        { encoding: 'utf8' }
+      ).trim()
+    );
+    assert(pageCount > 0, `PDF has no pages: ${filePath}`);
+    return;
+  }
+
+  assert(content.subarray(0, 2).equals(Buffer.from('PK')), `Invalid XLSX header: ${filePath}`);
+  const xlsxCheck = [
+    'import sys,zipfile',
+    'archive=zipfile.ZipFile(sys.argv[1])',
+    'names=set(archive.namelist())',
+    "assert '[Content_Types].xml' in names and 'xl/workbook.xml' in names",
+    "assert any(name.startswith('xl/worksheets/') for name in names)",
+    'archive.close()',
+  ].join(';');
+  execFileSync('python', ['-c', xlsxCheck, filePath], { stdio: 'pipe' });
+}
+
+async function waitForDownloads(downloads, count, timeoutMs = 20000) {
+  const deadline = Date.now() + timeoutMs;
+  while (downloads.length < count && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  assert.strictEqual(
+    downloads.length,
+    count,
+    `Expected ${count} downloads, received ${downloads.length}`
+  );
+}
 
 function waitForServer(timeoutMs = 15000) {
   return new Promise((resolve, reject) => {
@@ -61,7 +118,8 @@ async function main() {
     browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
     const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
 
-    // Capturar descargas XLSX (disparadas por XLSX.writeFile)
+    // Capturar descargas XLSX (disparadas por XLSX.writeFile).
+    // Guardar una copia estable permite validar el archivo real, no sólo el Blob.
     const downloads = {};
     page.on('download', async (download) => {
       const name = download.suggestedFilename();
@@ -86,11 +144,7 @@ async function main() {
           const pdf = await window.generarPDFPlantilla(container, `audit_${type}.pdf`);
           container.classList.remove('pdf-generating');
           // Disparar descarga XLSX (capturada por page.on('download') en Node)
-          try {
-            window.generarXLSXReporte(type, range.inicio, range);
-          } catch (e) {
-            console.warn('XLSX gen error:', e);
-          }
+          window.generarXLSXReporte(type, range.inicio, range);
           return { csv, pdf: pdf.output('datauristring') };
         },
         { type, range }
@@ -102,6 +156,8 @@ async function main() {
       const pdfPath = path.join(output, `audit_${type}.pdf`);
       fs.writeFileSync(csvPath, artifact.csv, 'utf8');
       fs.writeFileSync(pdfPath, Buffer.from(artifact.pdf.split(',')[1], 'base64'));
+      assertStoredFile(csvPath, 'CSV');
+      assertStoredFile(pdfPath, 'PDF');
 
       const entry = {
         type,
@@ -118,11 +174,42 @@ async function main() {
       if (xlsxName && downloads[xlsxName]) {
         const xlsxPath = path.join(output, `audit_${type}.xlsx`);
         fs.writeFileSync(xlsxPath, downloads[xlsxName]);
+        assertStoredFile(xlsxPath, 'XLSX');
         entry.xlsxPath = xlsxPath;
         entry.xlsxBytes = downloads[xlsxName].length;
         delete downloads[xlsxName];
+      } else {
+        assert.fail(`XLSX download was not received for report type: ${type}`);
       }
       manifest.push(entry);
+    }
+
+    // Ejercita el flujo de la interfaz que el usuario usa: tres descargas
+    // independientes, persistidas en disco por Playwright y reabiertas.
+    const uiDownloads = [];
+    page.on('download', (download) => uiDownloads.push(download));
+    await page.evaluate(() => {
+      document.getElementById('reporte-tipo').value = 'diario';
+      document.getElementById('reporte-fecha').value = '2026-10-17';
+      document.getElementById('export-pdf').checked = true;
+      document.getElementById('export-csv').checked = true;
+      document.getElementById('export-xlsx').checked = true;
+      window.generarReporteLocal();
+    });
+    await waitForDownloads(uiDownloads, 3);
+
+    const uiOutput = path.join(output, 'ui-downloads');
+    fs.mkdirSync(uiOutput, { recursive: true });
+    for (const download of uiDownloads) {
+      const filename = download.suggestedFilename();
+      const savedPath = path.join(uiOutput, filename);
+      await download.saveAs(savedPath);
+      const format = filename.endsWith('.pdf')
+        ? 'PDF'
+        : filename.endsWith('.xlsx')
+          ? 'XLSX'
+          : 'CSV';
+      assertStoredFile(savedPath, format);
     }
     fs.writeFileSync(path.join(output, 'manifest.json'), JSON.stringify(manifest, null, 2));
     console.log(JSON.stringify({ output, artifacts: manifest }, null, 2));

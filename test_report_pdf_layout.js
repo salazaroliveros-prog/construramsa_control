@@ -13,25 +13,35 @@ execFileSync(process.execPath, ['audit_report_exports_e2e.js'], {
 
 const pdfPath = path.join(__dirname, 'temp_audit_reports', 'audit_mensual.pdf').replace(/\\/g, '/');
 const python = [
-  'import fitz,numpy as np',
-  `page=fitz.open('${pdfPath}')[0]`,
+  'import pymupdf,numpy as np',
+  `document=pymupdf.open('${pdfPath}')`,
+  'page=document[0]',
   'pix=page.get_pixmap()',
   'image=np.frombuffer(pix.samples,np.uint8).reshape(pix.height,pix.width,pix.n)[:,:,:3]',
   'ink=image[:300].min(axis=2)<235',
   'ys,xs=np.where(ink)',
-  "print(f'{pix.width},{xs.min()},{xs.max()}')",
-].join(';');
-const [pageWidth, left, right] = execFileSync('python', ['-c', python], { encoding: 'utf8' })
+  "print(f'BOUNDS,{pix.width},{xs.min()},{xs.max()}')",
+  'footer_band=[]',
+  'for page in document:',
+  ' pix=page.get_pixmap()',
+  ' image=np.frombuffer(pix.samples,np.uint8).reshape(pix.height,pix.width,pix.n)[:,:,:3]',
+  ' footer_band.append(int((image[pix.height-50:pix.height-38].min(axis=2)<220).sum()))',
+  "print('FOOTER_BAND,'+','.join(map(str,footer_band)))",
+].join('\n');
+const [boundsLine, footerLine] = execFileSync('python', ['-c', python], { encoding: 'utf8' })
   .trim()
-  .split('\n')
-  .at(-1)
-  .split(',')
-  .map(Number);
+  .split('\n');
+const [, pageWidth, left, right] = boundsLine.split(',').map(Number);
+const footerInk = footerLine.split(',').slice(1).map(Number);
 
 assert(left >= 20, `report content is clipped against the left edge (${left}pt)`);
 assert(
   right >= pageWidth - 55,
   `report content does not use the printable width (${right}/${pageWidth}pt)`
+);
+assert(
+  footerInk.every((ink) => ink === 0),
+  `report content overlaps the reserved footer area (${footerInk.join(',')} ink pixels)`
 );
 
 console.log('Report PDF layout bounds OK');
