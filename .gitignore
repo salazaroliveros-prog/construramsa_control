@@ -62,6 +62,7 @@ test_*.js
 !test_ux_files.js
 !test_modulos.js
 !test_report_data_adapter.js
+!test_report_ui_guards.js
 !test_all_reports.js
 !test_validacion_modulos.js
 !test_sincronizacion_offline.js

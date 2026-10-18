@@ -12829,9 +12829,6 @@ function validarDependenciasExportacion() {
                 const csvBlob = new Blob([generarCSVReporte(tipo, rango.inicio, rango)], { type:'text/csv;charset=utf-8;' });
                 archivos.push(new File([csvBlob], `${nombre}.csv`, { type:'text/csv' }));
 
-                // XLSX (descarga directa, no se comparte por WhatsApp por tamaño)
-                const xlsxName = generarXLSXReporte(tipo, rango.inicio, rango);
-
                 const htmlData = generarHTMLReporte(tipo, rango.inicio, rango);
                 const contenedor = prepararContenedorImpresion(`Reporte ${tipo}`, htmlData);
 
@@ -12863,9 +12860,13 @@ function validarDependenciasExportacion() {
                 const contenedor = document.getElementById('plantilla-reporte-impresion');
                 if (contenedor) contenedor.classList.remove('pdf-generating');
                 
-                hideLoading();
-                if (err.name !== 'AbortError') { console.error(err); showToast('⚠️ Error al compartir. Se descargará localmente.', 'error'); generarReporteLocal(); }
                 _generandoReporte = false;
+                hideLoading();
+                if (err.name !== 'AbortError') {
+                    console.error(err);
+                    showToast('⚠️ Error al compartir. Se descargará localmente.', 'error');
+                    generarReporteLocal();
+                }
             }
         }
 
@@ -12891,13 +12892,19 @@ function validarDependenciasExportacion() {
             
             if (!exportPDF && !exportCSV && !exportXLSX) {
                 showToast('⚠️ Seleccione al menos un formato de exportación.', 'error');
+                _generandoReporte = false;
                 return;
             }
             
             const fechaDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio}_${rango.fin}`;
             const nombre = `reporte_${tipo}_${fechaDisplay}`;
             
-            if (!validarDependenciasExportacion()) { return; }
+            // CSV y XLSX no dependen de html2pdf. Validar esa librería únicamente
+            // cuando el usuario haya solicitado el formato PDF.
+            if (exportPDF && !validarDependenciasExportacion()) {
+                _generandoReporte = false;
+                return;
+            }
             
             actualizarProgresoReporte('Iniciando generación...', 10);
             
