@@ -91,7 +91,9 @@
     } catch (e) {
       try {
         setTimeout(() => callback(), 100);
-      } catch (_) {}
+      } catch (_) {
+        // The scheduler fallback is best-effort only.
+      }
     }
   }
 

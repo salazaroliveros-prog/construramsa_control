@@ -29,7 +29,9 @@
         // Silencioso: no debe romper la app
         try {
           console.warn('[bootstrap-globals] saveDB fallback error', e.message);
-        } catch (_) {}
+        } catch (_) {
+          // Logging must never interrupt the persistence fallback.
+        }
       }
     };
   }
@@ -50,7 +52,9 @@
       } catch (e) {
         try {
           console.warn('[bootstrap-globals] getDB fallback error', e.message);
-        } catch (_) {}
+        } catch (_) {
+          // Logging must never interrupt the database fallback.
+        }
       }
       return globalScope._dbCache || {};
     };
@@ -119,7 +123,9 @@
       } catch (e) {
         try {
           console.warn('[bootstrap-globals] _nubeSetUltimo error');
-        } catch (_) {}
+        } catch (_) {
+          // Logging must never interrupt the cloud timestamp fallback.
+        }
       }
     };
   }
@@ -151,12 +157,16 @@
         setTimeout(() => {
           try {
             region.removeChild(el);
-          } catch (_) {}
+          } catch (_) {
+            // The toast may already have been removed.
+          }
         }, timeout);
       } catch (e) {
         try {
           console.log(message);
-        } catch (_) {}
+        } catch (_) {
+          // Console access can be unavailable in embedded browsers.
+        }
       }
     };
   }
@@ -169,5 +179,7 @@
       enumerable: false,
       configurable: false,
     });
-  } catch (e) {}
+  } catch (e) {
+    // The marker is optional in restricted browser contexts.
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

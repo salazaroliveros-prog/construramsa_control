@@ -93,7 +93,16 @@ function auditModuleLogic(indexHtml) {
   while ((mDef = defRe.exec(indexHtml)) !== null) {
     defs.push({ name: mDef[2], indent: mDef[1].length });
   }
-  const definedFunctions = [...new Set(defs.map((d) => d.name))];
+  // Las funciones locales también suelen declararse como `const fn = () =>`.
+  // Se usan sólo para resolver llamadas: no participan en el detector de
+  // duplicados, que compara declaraciones de función del mismo ámbito.
+  const arrowDefinitions = [];
+  const arrowDefRe =
+    /^([ \t]*)(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?(?:\([^)]*\)|\w+)\s*=>/gm;
+  while ((mDef = arrowDefRe.exec(indexHtml)) !== null) {
+    arrowDefinitions.push(mDef[2]);
+  }
+  const definedFunctions = [...new Set([...defs.map((d) => d.name), ...arrowDefinitions])];
 
   const porNombre = new Map();
   defs.forEach((d) => {
@@ -127,10 +136,14 @@ function auditModuleLogic(indexHtml) {
   // Eliminar comentarios JS antes de analizar llamadas para evitar falsos positivos
   // como "DATOS (IndexedDB...)" o "OAuth (secret, ...)" dentro de comentarios.
   const jsWithoutComments = jsOnly.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '');
+  // Las cadenas de presentación pueden contener texto como "gradient(" o
+  // "postponida (" que no son llamadas JavaScript. Se eliminan antes del
+  // análisis superficial de invocaciones.
+  const jsWithoutStrings = jsWithoutComments.replace(/(["'`])(?:\\[\s\S]|(?!\1)[\s\S])*\1/g, '');
   // Se ignoran las llamadas a método (precedidas de punto): sin esto, nombres
   // como has(), includes(), now() o info() se reportan como funciones globales
   // inexistentes.
-  const functionCalls = jsWithoutComments.match(/(?<![.\w$])(\w+)\s*\(/g);
+  const functionCalls = jsWithoutStrings.match(/(?<![.\w$])(\w+)\s*\(/g);
   if (functionCalls) {
     const calledFunctions = [...new Set(functionCalls.map((m) => m.replace(/\s*\($/, '')))];
     const PALABRAS_CLAVE = new Set([
@@ -184,6 +197,10 @@ function auditModuleLogic(indexHtml) {
           'setTimeout',
           'setInterval',
           'fetch',
+          'requestAnimationFrame',
+          'MutationObserver',
+          'Notification',
+          'Image',
           'XMLHttpRequest',
           'URLSearchParams',
           'IndexedDB',

@@ -107,7 +107,9 @@
           .map((b) => b.toString(16).padStart(2, '0'))
           .join('');
       }
-    } catch (_) {}
+    } catch (_) {
+      // Web Crypto is optional; use the deterministic DJB2 fallback below.
+    }
     // Fallback DJB2
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -188,7 +190,9 @@
         const raw = localStorage.getItem(CONFIG.STATE_KEY);
         if (raw) return JSON.parse(raw);
       }
-    } catch (_) {}
+    } catch (_) {
+      // Invalid or unavailable persisted state falls back to an empty state.
+    }
     return { lastSyncTs: null, moduleHashes: {}, pendingCount: 0 };
   }
 
@@ -198,7 +202,9 @@
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem(CONFIG.STATE_KEY, JSON.stringify(state));
       }
-    } catch (_) {}
+    } catch (_) {
+      // Persistence is best-effort while the app remains usable in memory.
+    }
   }
 
   function loadPendingQueue() {
@@ -221,7 +227,9 @@
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem(CONFIG.PENDING_KEY, JSON.stringify(_pendingQueue));
       }
-    } catch (_) {}
+    } catch (_) {
+      // Queue persistence is best-effort while the app remains usable in memory.
+    }
   }
 
   function addPending(op, module, recordId, payload) {
@@ -688,11 +696,15 @@
         enumerable: false,
         configurable: false,
       });
-    } catch (_) {}
+    } catch (_) {
+      // The API marker is optional in restricted browser contexts.
+    }
     // También exponer funciones individuales para compatibilidad
     try {
       globalScope.syncManager = api;
-    } catch (_) {}
+    } catch (_) {
+      // The compatibility alias is optional in restricted browser contexts.
+    }
   }
 
   if (typeof module !== 'undefined' && module.exports) {

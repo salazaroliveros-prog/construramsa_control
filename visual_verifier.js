@@ -14,6 +14,8 @@
 
 const { chromium } = require('playwright');
 const fs = require('fs');
+const http = require('http');
+const net = require('net');
 const path = require('path');
 
 // Configuration
@@ -57,6 +59,42 @@ function ensureDirectories() {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
+  });
+}
+
+function findAvailablePort() {
+  return new Promise((resolve, reject) => {
+    const probe = net.createServer();
+    probe.once('error', reject);
+    probe.listen(0, '127.0.0.1', () => {
+      const { port } = probe.address();
+      probe.close((error) => (error ? reject(error) : resolve(port)));
+    });
+  });
+}
+
+function waitForServer(port, timeoutMs = 15000) {
+  return new Promise((resolve, reject) => {
+    const deadline = Date.now() + timeoutMs;
+    const retry = () => {
+      if (Date.now() >= deadline) {
+        reject(new Error(`Server did not become ready on port ${port}`));
+      } else {
+        setTimeout(check, 150);
+      }
+    };
+    const check = () => {
+      const request = http.get(`http://127.0.0.1:${port}`, (response) => {
+        response.resume();
+        response.statusCode === 200 ? resolve() : retry();
+      });
+      request.once('error', retry);
+      request.setTimeout(1000, () => {
+        request.destroy();
+        retry();
+      });
+    };
+    check();
   });
 }
 
@@ -571,52 +609,29 @@ async function main() {
 
   ensureDirectories();
 
+  let server;
   try {
     // Start local server
     logInfo('Starting local server...');
     const { spawn } = require('child_process');
-    const server = spawn('node', ['server.js'], {
+    const port = await findAvailablePort();
+    server = spawn(process.execPath, ['server.js'], {
       cwd: __dirname,
+      env: { ...process.env, PORT: String(port) },
       stdio: 'inherit',
       detached: false,
     });
 
-    // Wait for server to start - increased timeout
-    logInfo('Waiting for server to start (5 seconds)...');
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-
-    // Verify server is running
-    try {
-      const http = require('http');
-      const PORT = process.env.PORT || 3000;
-      await new Promise((resolve, reject) => {
-        const req = http.get(`http://127.0.0.1:${PORT}`, (res) => {
-          if (res.statusCode === 200) {
-            logSuccess('Server is running');
-            resolve();
-          } else {
-            reject(new Error(`Server returned status ${res.statusCode}`));
-          }
-        });
-        req.on('error', reject);
-        req.setTimeout(3000, () => {
-          req.destroy();
-          reject(new Error('Server connection timeout'));
-        });
-      });
-    } catch (error) {
-      logError(`Server health check failed: ${error.message}`);
-      server.kill();
-      process.exit(1);
-    }
+    logInfo(`Waiting for server on port ${port}...`);
+    await waitForServer(port);
+    logSuccess('Server is running');
 
     // Setup browser
     await setupBrowser();
 
     // Navigate to app
-    const PORT = process.env.PORT || 3000;
     logInfo('Navigating to application...');
-    await page.goto(`http://127.0.0.1:${PORT}`, { waitUntil: 'networkidle', timeout: 10000 });
+    await page.goto(`http://127.0.0.1:${port}`, { waitUntil: 'networkidle', timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Run tests
@@ -630,6 +645,7 @@ async function main() {
     // Cleanup
     await closeBrowser();
     server.kill();
+    server = null;
 
     // Summary
     const totalTests = visualResults.length + responsiveResults.length + 1;
@@ -651,6 +667,7 @@ async function main() {
   } catch (error) {
     logError(`Fatal error: ${error.message}`);
     await closeBrowser();
+    if (server) server.kill();
     process.exit(1);
   }
 }

@@ -62,9 +62,9 @@
 
   // ── Configuración de exportación ───────────────────────────────────
   const EXPORT_CONFIG = Object.freeze({
-    // Escala fija de html2canvas (1:1 sin distorsión). Se ajusta por calidad
-    // de imagen, no por altura del documento.
-    pdfScale: 1.0,
+    // Escala de alta resolución de html2canvas para PDF. La compresión JPEG
+    // no recupera detalle perdido cuando el canvas se rasteriza a 1:1.
+    pdfScale: 1.5,
     pdfImageQuality: 0.95,
     csvBom: true,
     csvSeparator: ',',
@@ -90,6 +90,14 @@
 
   // ── Formatos de exportación soportados ─────────────────────────────
   const EXPORT_FORMATS = Object.freeze(['pdf', 'csv', 'xlsx']);
+
+  /**
+   * Conserva la nitidez de los reportes habituales y limita el uso de memoria
+   * sólo cuando un documento excepcionalmente largo requiere un canvas menor.
+   */
+  function pdfScaleForHeight(documentHeight) {
+    return Number(documentHeight) > 8000 ? 1.2 : EXPORT_CONFIG.pdfScale;
+  }
 
   // ── CSS @page listo para inyectar (márgenes estándar) ──────────────
   function cssPage(pageSize = 'a4') {
@@ -178,6 +186,7 @@
     EXPORT_CONFIG,
     REPORT_TYPES,
     EXPORT_FORMATS,
+    pdfScaleForHeight,
     cssPage,
     estiloContenedorImpresion,
     /** Devuelve el ancho imprimible en mm para una hoja dada. */

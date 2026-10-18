@@ -12,21 +12,22 @@ const fs = require('fs');
 const path = require('path');
 
 const root = __dirname;
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const npmCli =
+  process.env.npm_execpath ||
+  path.join(path.dirname(require.resolve('npm/package.json')), 'bin', 'npm-cli.js');
 const lighthouseReport = path.join(root, 'lighthouse_report.json');
 const indexPath = path.join(root, 'index.html');
 
-function run(command, args) {
-  return spawnSync(command, args, {
+function run(args) {
+  return spawnSync(process.execPath, [npmCli, ...args], {
     cwd: root,
     encoding: 'utf8',
     timeout: 120000,
-    shell: process.platform === 'win32',
   });
 }
 
 function testLighthouseReportsEveryExecutedCheck() {
-  const result = run(npm, ['run', 'test-lighthouse']);
+  const result = run(['run', 'test-lighthouse']);
   assert.notStrictEqual(
     result.error && result.error.code,
     'ETIMEDOUT',
@@ -57,7 +58,7 @@ function testLighthouseReportsEveryExecutedCheck() {
 }
 
 function testReportExportAuditIsAPublicTestCommand() {
-  const result = run(npm, ['run', 'test-report-exports']);
+  const result = run(['run', 'test-report-exports']);
   assert.strictEqual(
     result.status,
     0,

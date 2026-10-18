@@ -143,7 +143,7 @@
     csvEncoding: 'utf-8',
     csvFormulaGuard: true,
     xlsxUseExcelJS: true,
-    pdfScale: 1.0,
+    pdfScale: 1.5,
     pdfQuality: 0.95,
   });
 

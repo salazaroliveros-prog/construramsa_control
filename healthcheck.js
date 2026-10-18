@@ -15,11 +15,13 @@ const https = require('https');
 function get(url) {
   return new Promise((resolve, reject) => {
     const lib = url.startsWith('https:') ? https : http;
-    lib.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => (data += chunk));
-      res.on('end', () => resolve({ status: res.statusCode, body: data, headers: res.headers }));
-    }).on('error', reject);
+    lib
+      .get(url, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => resolve({ status: res.statusCode, body: data, headers: res.headers }));
+      })
+      .on('error', reject);
   });
 }
 

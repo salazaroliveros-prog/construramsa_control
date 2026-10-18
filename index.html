@@ -8454,7 +8454,7 @@ tbody.innerHTML = '';
             const counterEl = document.getElementById('counter-marcados');
             const btnGuardar = document.getElementById('btn-guardar-asistencia');
             const fechaInput = document.getElementById('fecha-asistencia');
-            function actualizarContador() {
+            function actualizarContadorLista() {
                 let marcados = 0;
                 trabajadoresFiltrados.forEach(t => {
                     const checked = document.querySelector(`input[name="asistencia-${t.id}"]:checked`);
@@ -8466,13 +8466,13 @@ tbody.innerHTML = '';
             }
             trabajadoresFiltrados.forEach(t => {
                 document.querySelectorAll(`input[name="asistencia-${t.id}"]`).forEach(radio => {
-                    radio.addEventListener('change', actualizarContador);
+                    radio.addEventListener('change', actualizarContadorLista);
                 });
                 document.getElementById(`horas-extra-${t.id}`).addEventListener('input', actualizarResumenNominaDia);
             });
-            fechaInput.addEventListener('change', actualizarContador);
+            fechaInput.addEventListener('change', actualizarContadorLista);
             btnGuardar.addEventListener('click', () => guardarAsistenciaDiaria(fechaInput.value));
-            actualizarContador();
+            actualizarContadorLista();
         }
 
         function guardarAsistenciaDiaria(fecha) {
@@ -12706,9 +12706,19 @@ function validarDependenciasExportacion() {
                 // 3) Medir altura real del contenido
                 const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123);
 
-                // 4) Escala fija 1:1 (sin distorsión por altura). La calidad se controla por imagen JPEG.
-                const rawScale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2);
-                const scale = Math.min(rawScale, 1.5);
+                // 4) Renderizar a alta resolución. La calidad JPEG controla la
+                // compresión, pero no puede recuperar detalle perdido por un canvas
+                // con escala 1:1. Sólo los documentos muy largos reducen la escala.
+                const scale = typeof CR_ExportConfig !== 'undefined' && CR_ExportConfig.pdfScaleForHeight
+                    ? CR_ExportConfig.pdfScaleForHeight(docHeight)
+                    : (docHeight > 8000 ? 1.2 : 1.5);
+                // html2pdf captura el contenedor de trabajo desde su caja de
+                // contenido. Compensar el padding conserva el margen izquierdo
+                // de la plantilla dentro del canvas final.
+                const captureOffsetX = Math.max(
+                    0,
+                    parseFloat(window.getComputedStyle(contenedor).paddingLeft) || 0
+                );
 
                 // 5) Variables CSS del tema para el clon de html2canvas
                 const CSS_VARS = [
@@ -12734,6 +12744,7 @@ function validarDependenciasExportacion() {
                         scale: scale,
                         useCORS: true,
                         logging: false,
+                        x: -captureOffsetX,
                         scrollX: 0,
                         scrollY: 0,
                         windowWidth: contenedor.scrollWidth,
@@ -12753,7 +12764,10 @@ function validarDependenciasExportacion() {
                             const el = clonedDoc.getElementById('plantilla-reporte-impresion');
                             if (el) {
                                 el.style.cssText = contenedorStyle;
-                                el.style.position = 'relative';
+                                // Debe quedar fuera del flujo del documento clonado: `relative`
+                                // conserva la altura acumulada de la app y html2canvas desplaza
+                                // la captura, recortando márgenes y ancho del reporte.
+                                el.style.position = 'absolute';
                                 el.style.left = '0';
                                 el.style.top = '0';
                                 el.style.opacity = '1';

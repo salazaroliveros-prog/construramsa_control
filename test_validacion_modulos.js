@@ -15,16 +15,32 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const net = require('net');
 const { spawn } = require('child_process');
 
-const PORT = process.env.PORT || '3000';
-const BASE_URL = 'http://localhost:' + PORT;
+let PORT = null;
+let BASE_URL = null;
 const TIMEOUT = 30000;
 const REPORT_PATH = path.join(__dirname, 'validacion_modulos_report.json');
 
 // ─── server lifecycle ────────────────────────────────────────────────────────
+function findAvailablePort() {
+  return new Promise((resolve, reject) => {
+    const probe = net.createServer();
+    probe.once('error', reject);
+    probe.listen(0, '127.0.0.1', () => {
+      const { port } = probe.address();
+      probe.close((error) => (error ? reject(error) : resolve(port)));
+    });
+  });
+}
+
 function startServer() {
-  const srv = spawn('node', ['server.js'], { cwd: __dirname, stdio: 'ignore' });
+  const srv = spawn(process.execPath, ['server.js'], {
+    cwd: __dirname,
+    env: { ...process.env, PORT: String(PORT), NODE_OPTIONS: '' },
+    stdio: 'ignore',
+  });
   srv.on('error', (e) => console.error('[validacion] Error spawn:', e.message));
   return srv;
 }
@@ -747,17 +763,13 @@ async function run() {
   console.log('═══════════════════════════════════════════════════════');
   console.log(` Inicio: ${ts()}\n`);
 
-  // ── levantar servidor si no está corriendo ──────────────────────────────
-  let serverProc = null;
-  try {
-    await waitServer(1500);
-    console.log('[validacion] Servidor ya activo en ' + PORT);
-  } catch (_) {
-    serverProc = startServer();
-    console.log('[validacion] Servidor iniciado en puerto ' + PORT + '...');
-    await waitServer(15000);
-    console.log('[validacion] Servidor listo\n');
-  }
+  // ── iniciar un servidor aislado para evitar competir con otros E2E ─────
+  PORT = await findAvailablePort();
+  BASE_URL = 'http://127.0.0.1:' + PORT;
+  const serverProc = startServer();
+  console.log('[validacion] Servidor aislado iniciado en puerto ' + PORT + '...');
+  await waitServer(15000);
+  console.log('[validacion] Servidor listo\n');
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
