@@ -1122,6 +1122,9 @@
             font-weight: 700;
             color: var(--pdf-rojo);
             text-align: right;
+            white-space: nowrap;
+            word-break: normal;
+            overflow-wrap: normal;
             background: linear-gradient(90deg, rgba(220,38,38,0.1) 0%, rgba(220,38,38,0.2) 100%) !important;
             border-top: 2px solid var(--pdf-rojo);
             border-bottom: 2px solid var(--pdf-rojo);
@@ -11404,6 +11407,12 @@ tbody.innerHTML = '';
             }
             
             if (tipo === 'mensual') {
+                if (modo === 'rango') {
+                    return {
+                        inicio: document.getElementById('reporte-fecha-inicio').value,
+                        fin: document.getElementById('reporte-fecha-fin').value
+                    };
+                }
                 const fecha = document.getElementById('reporte-fecha').value;
                 return obtenerRangoMensual(fecha);
             }
@@ -12694,15 +12703,40 @@ function validarDependenciasExportacion() {
 
             contenedor.classList.add('pdf-generating');
             try {
-                // 1) Aplicar estilo de contenedor con márgenes estándar (mm)
+                // 1) Aplicar estilo de contenedor con márgenes estándar (mm).
+                // El margen superior lo aporta jsPDF en cada página (ver `margin`
+                // en `opts`), por lo que el padding superior del contenedor se
+                // neutraliza para no duplicarlo en la primera hoja.
+                const MARGEN_SUPERIOR_MM = (typeof CR_ExportConfig !== 'undefined')
+                    ? CR_ExportConfig.MARGENES_PDF.top
+                    : 12;
+                const MARGEN_INFERIOR_MM = 16;
+                const PAGE_ALTO_MM = (typeof CR_ExportConfig !== 'undefined' && CR_ExportConfig.PAGE_SIZES[pageSize])
+                    ? CR_ExportConfig.PAGE_SIZES[pageSize].alto
+                    : ({ letter: 279, a4: 297, legal: 356 }[pageSize] || 297);
+                // Área imprimible real de una hoja (alto de página menos márgenes
+                // superior/inferior reservados por jsPDF). El contenedor no debe
+                // medir la hoja completa: eso generaba una página final en blanco
+                // en los reportes cortos.
+                const AREA_ALTO_MM = PAGE_ALTO_MM - MARGEN_SUPERIOR_MM - MARGEN_INFERIOR_MM;
                 contenedor.style.cssText = contenedorStyle;
+                contenedor.style.paddingTop = '0mm';
+                contenedor.style.paddingBottom = '0mm';
+                contenedor.style.minHeight = AREA_ALTO_MM + 'mm';
                 contenedor.style.overflowX = 'hidden';
 
                 // 2) Tick para recalcular layout
                 await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-                // 3) Medir altura real del contenido
-                const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123);
+                // 3) Medir altura real del contenido. Se añade una página completa
+                // de holgura: `scrollHeight` puede subestimar el alto final cuando
+                // los márgenes colapsan o las firmas se reflotan, y recortar la
+                // imagen perdería contenido. Las páginas en blanco resultantes se
+                // eliminan tras paginar (ver recorte de páginas sobrantes).
+                const MM_A_PX = 96 / 25.4;
+                const PAGE_INNER_PX = Math.ceil(AREA_ALTO_MM * MM_A_PX);
+                const docHeight =
+                    Math.max(Math.ceil(contenedor.scrollHeight), PAGE_INNER_PX) + PAGE_INNER_PX;
 
                 // 4) Renderizar a alta resolución. La calidad JPEG controla la
                 // compresión, pero no puede recuperar detalle perdido por un canvas
@@ -12710,14 +12744,6 @@ function validarDependenciasExportacion() {
                 const scale = typeof CR_ExportConfig !== 'undefined' && CR_ExportConfig.pdfScaleForHeight
                     ? CR_ExportConfig.pdfScaleForHeight(docHeight)
                     : (docHeight > 8000 ? 1.2 : 1.5);
-                // html2pdf captura el contenedor de trabajo desde su caja de
-                // contenido. Compensar el padding conserva el margen izquierdo
-                // de la plantilla dentro del canvas final.
-                const captureOffsetX = Math.max(
-                    0,
-                    parseFloat(window.getComputedStyle(contenedor).paddingLeft) || 0
-                );
-
                 // 5) Variables CSS del tema para el clon de html2canvas
                 const CSS_VARS = [
                     '--pdf-azul-oscuro:#004B93',
@@ -12735,17 +12761,22 @@ function validarDependenciasExportacion() {
                 const fechaGen = new Date().toLocaleDateString('es-GT', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
                 const opts = {
-                    // Reservar el margen inferior en cada página rasterizada;
-                    // el padding del contenedor sólo protege la primera hoja.
-                    // Sin esta reserva, una tabla larga invade el pie añadido por jsPDF.
-                    margin: [0, 0, 16, 0],
+                    // Reservar margen superior e inferior en cada página
+                    // rasterizada. El padding del contenedor sólo protege la
+                    // primera hoja: sin la reserva superior, las páginas de
+                    // continuación quedaban pegadas al borde; sin la inferior,
+                    // una tabla larga invadía el pie añadido por jsPDF.
+                    margin: [MARGEN_SUPERIOR_MM, 0, MARGEN_INFERIOR_MM, 0],
                     filename: filename,
                     image: { type: 'jpeg', quality: typeof CR_ExportConfig !== 'undefined' ? CR_ExportConfig.EXPORT_CONFIG.pdfImageQuality : 0.95 },
                     html2canvas: {
                         scale: scale,
                         useCORS: true,
                         logging: false,
-                        x: -captureOffsetX,
+                        // html2canvas captura el contenedor desde su border-box,
+                        // que ya incluye el padding de 12mm. Un x negativo duplicaba
+                        // el margen izquierdo y eliminaba el derecho.
+                        x: 0,
                         scrollX: 0,
                         scrollY: 0,
                         windowWidth: contenedor.scrollWidth,
@@ -12765,6 +12796,9 @@ function validarDependenciasExportacion() {
                             const el = clonedDoc.getElementById('plantilla-reporte-impresion');
                             if (el) {
                                 el.style.cssText = contenedorStyle;
+                                el.style.paddingTop = '0mm';
+                                el.style.paddingBottom = '0mm';
+                                el.style.minHeight = AREA_ALTO_MM + 'mm';
                                 // Debe quedar fuera del flujo del documento clonado: `relative`
                                 // conserva la altura acumulada de la app y html2canvas desplaza
                                 // la captura, recortando márgenes y ancho del reporte.
@@ -12779,11 +12813,55 @@ function validarDependenciasExportacion() {
                     pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper'] }
                 };
 
-                const pdf = await html2pdf().set(opts).from(contenedor).toPdf().get('pdf');
-                const total = pdf.internal.getNumberOfPages();
+                const worker = html2pdf().set(opts).from(contenedor);
+                const pdf = await worker.toPdf().get('pdf');
                 const pageW = pdf.internal.pageSize.getWidth();
                 const pageH = pdf.internal.pageSize.getHeight();
                 const footerY = pageH - 8; // 8mm desde el borde inferior (dentro del margen de 16mm)
+
+                // Recortar páginas sobrantes: la captura añadió una página de
+                // holgura. Se mide hasta dónde llega el contenido real en el canvas
+                // y se eliminan las hojas posteriores que quedarían vacías.
+                const canvas = worker.prop && worker.prop.canvas;
+                if (canvas && canvas.width > 0 && canvas.height > 0) {
+                    const medida = document.createElement('canvas');
+                    const miniW = 160;
+                    const miniH = Math.max(1, Math.round((canvas.height * miniW) / canvas.width));
+                    medida.width = miniW;
+                    medida.height = miniH;
+                    const ctx = medida.getContext('2d');
+                    let ultimaFilaInk = miniH - 1;
+                    try {
+                        ctx.drawImage(canvas, 0, 0, miniW, miniH);
+                        const data = ctx.getImageData(0, 0, miniW, miniH).data;
+                        let found = false;
+                        for (let y = miniH - 1; y >= 0 && !found; y--) {
+                            for (let x = 0; x < miniW; x++) {
+                                const i = (y * miniW + x) * 4;
+                                if (data[i + 3] > 8 && (data[i] < 246 || data[i + 1] < 246 || data[i + 2] < 246)) {
+                                    ultimaFilaInk = y;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        const escala = canvas.height / miniH;
+                        const contenidoPx = (ultimaFilaInk + 1) * escala;
+                        const contenidoMm = (contenidoPx * pageW) / canvas.width;
+                        const totalActual = pdf.internal.getNumberOfPages();
+                        const paginasNecesarias = Math.min(
+                            totalActual,
+                            Math.max(1, Math.ceil(contenidoMm / AREA_ALTO_MM))
+                        );
+                        for (let p = totalActual; p > paginasNecesarias; p--) {
+                            pdf.deletePage(p);
+                        }
+                    } catch (_e) {
+                        /* Si no se puede medir, se conservan todas las páginas */
+                    }
+                }
+
+                const total = pdf.internal.getNumberOfPages();
 
                 // Estampar footer numerado centrado en cada página (evita solaparse con contenido)
                 for (let i = 1; i <= total; i++) {
