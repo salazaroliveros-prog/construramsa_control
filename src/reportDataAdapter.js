@@ -37,14 +37,52 @@
     return Number(Math.round(result * 100) / 100);
   }
 
+  const TIPO_ALIASES = Object.freeze({
+    apertura: 'ingreso',
+    entrada: 'ingreso',
+    deposito: 'ingreso',
+    salida: 'egreso',
+    gasto: 'egreso',
+  });
+
+  const ESTADO_ALIASES = Object.freeze({
+    presente: 'asistio',
+    asistió: 'asistio',
+    falta: 'falto',
+    ausente: 'falto',
+    permiso: 'justificado',
+  });
+
+  function tipoCaja(value) {
+    const text = String(value ?? '')
+      .trim()
+      .toLowerCase();
+    return TIPO_ALIASES[text] || text;
+  }
+
+  function estadoAsistencia(value) {
+    const text = String(value ?? '')
+      .trim()
+      .toLowerCase();
+    return ESTADO_ALIASES[text] || text;
+  }
+
+  /** Formatea una fecha en horario local como 'YYYY-MM-DD'. */
+  function localDateKey(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
   function dateKey(value) {
     if (value instanceof Date && !Number.isNaN(value.getTime())) {
-      return value.toISOString().slice(0, 10);
+      return localDateKey(value);
     }
     const text = String(value ?? '');
     if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
     const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
+    return Number.isNaN(parsed.getTime()) ? '' : localDateKey(parsed);
   }
 
   function inRange(value, range) {
@@ -53,22 +91,29 @@
     return (!range?.inicio || date >= range.inicio) && (!range?.fin || date <= range.fin);
   }
 
-  function linkedExpenseIds(data) {
+  /**
+   * IDs de movimientos de caja ya detallados en otra sección del reporte.
+   * Si se pasa `range`, solo se excluyen los registros cuyo propio `fecha`
+   * cae en el período; así un movimiento vinculado a un registro de otra
+   * fecha no desaparece del reporte (ni se duplica).
+   * @param {Object} data
+   * @param {{inicio?:string, fin?:string}} [range]
+   * @returns {Set<string>}
+   */
+  function linkedExpenseIds(data, range) {
     const source = data || {};
-    return new Set([
-      ...array(source.viajes_camiones?.viajes)
+    const include = (item) => !range || inRange(item?.fecha, range);
+    return new Set(
+      [
+        ...array(source.viajes_camiones?.viajes),
+        ...array(source.mantenimiento?.ordenes),
+        ...array(source.mantenimiento?.compras_insumos),
+        ...array(source.adquisiciones?.cotizaciones_compras),
+      ]
+        .filter(include)
         .map((item) => item?.gasto_id)
-        .filter(Boolean),
-      ...array(source.mantenimiento?.ordenes)
-        .map((item) => item?.gasto_id)
-        .filter(Boolean),
-      ...array(source.mantenimiento?.compras_insumos)
-        .map((item) => item?.gasto_id)
-        .filter(Boolean),
-      ...array(source.adquisiciones?.cotizaciones_compras)
-        .map((item) => item?.gasto_id)
-        .filter(Boolean),
-    ]);
+        .filter(Boolean)
+    );
   }
 
   function normalizeProjectData(raw) {
@@ -79,7 +124,7 @@
         monto: number(item?.monto),
         descripcion: String(item?.descripcion ?? item?.concepto ?? item?.detalle ?? ''),
         fecha: dateKey(item?.fecha),
-        tipo: String(item?.tipo ?? '').toLowerCase(),
+        tipo: tipoCaja(item?.tipo),
       })),
       maquinaria_flota: {
         vehiculos: array(source.maquinaria_flota?.vehiculos),
@@ -106,7 +151,7 @@
           registros: array(day?.registros).map((record) => ({
             ...record,
             trabajador_id: String(record?.trabajador_id ?? ''),
-            estado: String(record?.estado ?? '').toLowerCase(),
+            estado: estadoAsistencia(record?.estado),
             horas_extras: number(record?.horas_extras ?? record?.horas_extra),
             calculos: record?.calculos
               ? {

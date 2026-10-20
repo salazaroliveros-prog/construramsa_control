@@ -66,7 +66,28 @@
     if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
     var d = new Date(v);
     if (isNaN(d.getTime())) return String(v);
-    return d.toISOString().slice(0, 10);
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  /**
+   * Presupuesto del proyecto activo. `configuracion.presupuesto_inicial_caja`
+   * es sólo el valor de respaldo/legado; el presupuesto real vive en el
+   * proyecto (`proyectos[].presupuesto_inicial`).
+   */
+  function _presupuestoActivo(db) {
+    var cfg = (db && db.configuracion) || {};
+    var proyectos = Array.isArray(db && db.proyectos) ? db.proyectos : [];
+    var proyecto = proyectos.find(function (p) {
+      return p && p.id === cfg.proyecto_actual;
+    });
+    return (
+      num(proyecto && proyecto.presupuesto_inicial) ||
+      num(cfg.presupuesto_inicial_caja) ||
+      num(cfg.presupuesto)
+    );
   }
 
   /** Filtra por rango [inicio, fin] inclusivo sobre claves fecha. */
@@ -151,10 +172,9 @@
       typeof globalScope.CR_KPIEngine.calcularKPIs === 'function'
     ) {
       var datosProyecto = db2;
-      var cfg = db2.configuracion || {};
       var kpisEngine = globalScope.CR_KPIEngine.calcularKPIs(
         datosProyecto,
-        { presupuestoInicial: num(cfg.presupuesto_inicial_caja || cfg.presupuesto) },
+        { presupuestoInicial: _presupuestoActivo(db2) },
         'mes',
         { inicio: opts.inicio, fin: opts.fin }
       );
@@ -245,8 +265,7 @@
    * @private
    */
   function _calcularKPIsLocal(db2, inicio, fin) {
-    var cfg = db2.configuracion || {};
-    var presupuesto = num(cfg.presupuesto) || num(cfg.presupuesto_inicial_caja);
+    var presupuesto = _presupuestoActivo(db2);
     var kpis = {
       totalGastos: 0,
       totalIngresos: 0,
@@ -322,8 +341,7 @@
 
   /** Genera alertas gerenciales según reglas de negocio. */
   function _alertas(kpis, db2) {
-    var cfg = db2.configuracion || {};
-    var presupuesto = num(cfg.presupuesto) || num(cfg.presupuesto_inicial_caja);
+    var presupuesto = _presupuestoActivo(db2);
     if (presupuesto > 0 && kpis.totalGastos > 0) {
       var ejecucion = (kpis.totalGastos / presupuesto) * 100;
       if (ejecucion >= 90)
@@ -875,7 +893,11 @@
       CSS_CORPORATIVO +
       '</style>' +
       // ---- PORTADA / MEMBRETE ----
-      '<div class="ej-cover">' +
+      '<div class="ej-cover" data-empresa="' +
+      empresa +
+      '" data-fecha-gen="' +
+      fechaEmision +
+      '">' +
       '<div style="display:flex;align-items:center;gap:16px;">' +
       (portada.logo
         ? '<img src="' + esc(portada.logo) + '" style="height:64px;object-fit:contain;" alt="">'
@@ -972,14 +994,6 @@
       '<div style="font-size:11px;color:' +
       COLORES.gris +
       ';">Firma y sello</div></div></div>' +
-      '<div style="margin-top:16px;padding-top:12px;border-top:1px solid ' +
-      COLORES.lineas +
-      ';font-size:10px;color:' +
-      COLORES.gris +
-      ';text-align:center;">' +
-      'Informe generado por CONSTRURAMSA · ' +
-      empresa +
-      ' · Documento confidencial de uso gerencial</div>' +
       // ── Footer de metadata visible en el PDF generado por html2pdf ──
       // (la numeración "Página i de N" la estampa generarPDFPlantilla() via jsPDF post-render)
       '<div class="ej-pdf-footer">' +
@@ -996,7 +1010,7 @@
       esc(fechaEmision) +
       ' ' +
       esc(horaEmision) +
-      '<br><span style="color:#6B7280;">Documento confidencial</span></div>' +
+      '<br><span style="color:#6B7280;">Documento confidencial de uso gerencial</span></div>' +
       '</div>' +
       '</div>'
     ); // ← cierre de div.ej-cover
@@ -1070,7 +1084,7 @@
 
   var CSS_CORPORATIVO =
     '@page{margin:12mm;}' +
-    '@page{@bottom-left{content:"CONSTRURAMSA";font-size:8pt;color:#6B7280;}' +
+    '@page{@bottom-left{content:attr(data-empresa);font-size:8pt;color:#6B7280;}' +
     '@bottom-center{content:"Generado el " attr(data-fecha-gen);font-size:8pt;color:#6B7280;}' +
     '@bottom-right{content:counter(page) " / " counter(pages);font-size:8pt;color:#6B7280;}}' +
     '*{box-sizing:border-box;}' +

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -4597,7 +4597,7 @@
                             <span style="font-size: 7.5px; color: #D1D5DB; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Sello / Timbre</span>
                         </div>
                         <div style="font-size: 7.5px; color: #9CA3AF; text-align: center; line-height: 1.4;">
-                            Documento oficial<br>CONSTRURAMSA
+                            Documento oficial<br><span id="pdf-sello-empresa">CONSTRURAMSA</span>
                         </div>
                     </td>
                 </tr>
@@ -4724,14 +4724,14 @@
                         <td style="width: 50%; vertical-align: middle;">
                             <div style="height: 3px; width: 60px; background: linear-gradient(90deg, var(--pdf-azul-oscuro), #00A4E4); border-radius: 2px; margin-bottom: 5px;"></div>
                             <div style="font-size: 8px; color: var(--pdf-gris-medio); line-height: 1.5;">
-                                <strong style="color: var(--pdf-gris-oscuro); font-size: 8.5px;">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura<br>
+                                <strong id="pdf-pie-empresa" style="color: var(--pdf-gris-oscuro); font-size: 8.5px;">CONSTRURAMSA</strong> — <span id="pdf-pie-eslogan">Soluciones en Ingeniería y Arquitectura</span><br>
                                 <span style="color: #9CA3AF;">Documento generado digitalmente · Confidencial — Uso interno autorizado</span>
                             </div>
                         </td>
                         <td style="width: 50%; text-align: right; vertical-align: middle;">
                             <img src="./icon.png" alt="CONSTRURAMSA" width="28" height="28"
                                  style="max-height: 28px; width: auto; object-fit: contain; opacity: 0.35; vertical-align: middle; margin-right: 6px;">
-                            <span style="font-size: 7.5px; color: #D1D5DB; vertical-align: middle;">construramsa.com</span>
+                            <span id="pdf-pie-website" style="font-size: 7.5px; color: #D1D5DB; vertical-align: middle;">construramsa.com</span>
                         </td>
                     </tr>
                 </table>
@@ -5811,7 +5811,7 @@
                 nombre: nombre.trim(), 
                 descripcion: descripcion ? descripcion.trim() : '', 
                 presupuesto_inicial: presupuestoNum, 
-                fecha_creacion: new Date().toISOString().split('T')[0], 
+                fecha_creacion: _fechasISO(new Date()),
                 fecha_ultima_modificacion: new Date().toISOString(),
                 activo: true,
                 color: '#004B93' // Color corporativo por defecto
@@ -6065,7 +6065,7 @@
             if (form) {
                 delete form.dataset.editando;
                 form.reset();
-                document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
+                document.getElementById('caja-fecha').value = _fechasISO(new Date());
             }
             if (submitBtn) submitBtn.textContent = '💾 Registrar Movimiento';
             if (btn) btn.style.display = 'none';
@@ -6077,7 +6077,7 @@
             if (form) {
                 delete form.dataset.editando;
                 form.reset();
-                document.getElementById('maq-fecha').value = new Date().toISOString().split('T')[0];
+                document.getElementById('maq-fecha').value = _fechasISO(new Date());
             }
             if (submitBtn) submitBtn.textContent = '💾 Guardar Registro de Maquinaria';
             if (btn) btn.style.display = 'none';
@@ -6090,7 +6090,7 @@
             if (form) {
                 delete form.dataset.editando;
                 form.reset();
-                document.getElementById('viaje-fecha').value  = new Date().toISOString().split('T')[0];
+                document.getElementById('viaje-fecha').value  = _fechasISO(new Date());
                 document.getElementById('viaje-numero').value = 1;
             }
             if (submitBtn) submitBtn.textContent = '📦 Registrar Viaje';
@@ -6103,7 +6103,7 @@
             if (form) {
                 delete form.dataset.editando;
                 form.reset();
-                document.getElementById('ord-fecha').value = new Date().toISOString().split('T')[0];
+                document.getElementById('ord-fecha').value = _fechasISO(new Date());
             }
             if (submitBtn) submitBtn.textContent = '💾 Guardar Orden';
             buildFormatosInspeccion();
@@ -6118,7 +6118,7 @@
             if (form) {
                 delete form.dataset.editando;
                 form.reset();
-                document.getElementById('insumo-fecha').value     = new Date().toISOString().split('T')[0];
+                document.getElementById('insumo-fecha').value     = _fechasISO(new Date());
             }
             if (submitBtn) submitBtn.textContent = '💾 Registrar Compra';
             if (btn) btn.style.display = 'none';
@@ -6131,7 +6131,7 @@
             const datos = getProyectoData();
             const v = datos.viajes_camiones.viajes.find(x => x.id === id);
             if (!v) return;
-            document.getElementById('viaje-fecha').value    = v.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('viaje-fecha').value    = v.fecha || _fechasISO(new Date());
             document.getElementById('viaje-cam').value      = v.vehiculo_id || '';
             document.getElementById('viaje-ruta').value     = v.ruta_id || '';
             document.getElementById('viaje-material').value = v.material || 'tierra';
@@ -6159,7 +6159,7 @@
             const datos = getProyectoData();
             const o = datos.mantenimiento.ordenes.find(x => x.id === id);
             if (!o) return;
-            document.getElementById('ord-fecha').value         = o.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('ord-fecha').value         = o.fecha || _fechasISO(new Date());
             document.getElementById('ord-maquina').value       = o.maquinaria_id || '';
             document.getElementById('ord-tipo').value          = o.tipo || 'preventivo';
             document.getElementById('ord-costo').value         = o.costo || 0;
@@ -6198,7 +6198,7 @@
             const datos = getProyectoData();
             const i = datos.mantenimiento.compras_insumos.find(x => x.id === id);
             if (!i) return;
-            document.getElementById('insumo-fecha').value     = i.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('insumo-fecha').value     = i.fecha || _fechasISO(new Date());
             document.getElementById('insumo-tipo').value      = i.tipo || 'repuesto';
             document.getElementById('insumo-articulo').value  = i.articulo || '';
             document.getElementById('insumo-cantidad').value  = i.cantidad || 1;
@@ -6295,7 +6295,7 @@
             (datos.adquisiciones.cotizaciones_compras || []).forEach(c => {
                 if (c.estado === 'pendiente') pending.push({ texto: `📋 Cotización: ${c.material_descripcion} (${formatearMoneda(c.total)})`, fecha: c.fecha });
             });
-            const hoy = new Date().toISOString().split('T')[0];
+            const hoy = _fechasISO(new Date());
             viajes.forEach(v => { if (v.fecha === hoy) pending.push({ texto: `🚛 Hoy: ${(camiones.find(x=>x.id===v.vehiculo_id))?.nombre || 'N/A'} — ${v.numero} viaje(s) de ${v.material}`, fecha: v.fecha }); });
             ords.forEach(o => { if (o.fecha === hoy) pending.push({ texto: `🔧 Hoy: orden de mantenimiento ${o.tipo}`, fecha: o.fecha }); });
             ins.forEach(i => { if (i.fecha === hoy) pending.push({ texto: `🛒 Hoy: compra de ${i.articulo} (x${i.cantidad})`, fecha: i.fecha }); });
@@ -7264,7 +7264,7 @@
 
         async function generarReporteProgramado(tipo, destino) {
             try {
-                const fecha = new Date().toISOString().split('T')[0];
+                const fecha = _fechasISO(new Date());
                 const elemReporteTipo = document.getElementById('reporte-tipo');
                 const elemReporteFecha = document.getElementById('reporte-fecha');
                 const elemReporteModo = document.getElementById('reporte-modo-fecha');
@@ -7512,7 +7512,7 @@
                 return false;
             }
             const datos = getProyectoData();
-            const mov = { id:generarId(), fecha:fecha || new Date().toISOString().split('T')[0], tipo:'egreso', categoria, descripcion, monto, responsable:'Sistema Automático' };
+            const mov = { id:generarId(), fecha:fecha || _fechasISO(new Date()), tipo:'egreso', categoria, descripcion, monto, responsable:'Sistema Automático' };
             datos.caja_chica.push(mov);
             saveProyectoData(datos);
             actualizarSaldoCajaChica();
@@ -7560,7 +7560,7 @@
                 showToast(`❌ Fondos insuficientes. Saldo: ${formatearMoneda(saldo)}. Gasto: ${formatearMoneda(gastoNuevo)}`, 'error', 5000);
                 return false;
             }
-            const mov = { id: generarId(), fecha: fecha || new Date().toISOString().split('T')[0], tipo: 'egreso', categoria, descripcion, monto: gastoNuevo, responsable: 'Sistema Automático' };
+            const mov = { id: generarId(), fecha: fecha || _fechasISO(new Date()), tipo: 'egreso', categoria, descripcion, monto: gastoNuevo, responsable: 'Sistema Automático' };
             datos.caja_chica.push(mov);
             previo.gasto_id = mov.id;
             return true;
@@ -7706,7 +7706,7 @@ tbody.innerHTML = '';
             const datos = getProyectoData();
             const mov = datos.caja_chica.find(m => m.id === id);
             if (!mov) return;
-            document.getElementById('caja-fecha').value        = mov.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('caja-fecha').value        = mov.fecha || _fechasISO(new Date());
             document.getElementById('caja-tipo').value          = mov.tipo;
             document.getElementById('caja-categoria').value     = mov.categoria;
             document.getElementById('caja-descripcion').value   = mov.descripcion;
@@ -7941,7 +7941,7 @@ tbody.innerHTML = '';
             const reg = datos.maquinaria_flota.registros.find(r => r.id === id);
             if (!reg) return;
             const veh = datos.maquinaria_flota.vehiculos.find(v => v.id === reg.vehiculo_id);
-            document.getElementById('maq-fecha').value  = reg.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('maq-fecha').value  = reg.fecha || _fechasISO(new Date());
             document.getElementById('maq-tipo').value   = claveMaquinariaPorNombre(veh?.tipo);
             document.getElementById('maq-codigo').value = veh?.codigo || '';
             document.getElementById('maq-val-inicial').value = reg.odometro_inicial;
@@ -8857,8 +8857,26 @@ function cargarTablaProveedores() {
 
             if (editandoId) {
                 showConfirmModal('Actualizar Cotización', '¿Guardar los cambios en esta cotización?', () => {
-                    const idx = datos.adquisiciones.cotizaciones_compras.findIndex(c => c.id === editandoId);
-                    if (idx !== -1) { datos.adquisiciones.cotizaciones_compras[idx] = { ...datos.adquisiciones.cotizaciones_compras[idx], fecha, proveedor_id:provId, material_descripcion:material, precio_unitario:precio, cantidad, total }; saveProyectoData(datos); }
+                    const datosEdit = getProyectoData();
+                    const idx = datosEdit.adquisiciones.cotizaciones_compras.findIndex(c => c.id === editandoId);
+                    if (idx === -1) { cancelarEdicionCotizacion(); return; }
+                    const prev = datosEdit.adquisiciones.cotizaciones_compras[idx];
+                    // Una cotización aprobada tiene un egreso vinculado: hay que
+                    // mantener monto y fecha sincronizados para que la caja y los
+                    // reportes no queden descuadrados.
+                    if (prev.estado === 'aprobada' || prev.gasto_id) {
+                        if (!validarAjusteGasto(Number(prev.total) || 0, total)) return;
+                        const provEdit = datosEdit.adquisiciones.proveedores.find(p => p.id === provId);
+                        if (!sincronizarGastoVinculado(
+                            datosEdit, prev, total, 'Materiales',
+                            `Compra: ${material} - ${provEdit ? provEdit.nombre : 'N/A'}`,
+                            fecha, 'la cotización aprobada'
+                        )) return;
+                    }
+                    datosEdit.adquisiciones.cotizaciones_compras[idx] = { ...prev, fecha, proveedor_id:provId, material_descripcion:material, precio_unitario:precio, cantidad, total };
+                    saveProyectoData(datosEdit);
+                    actualizarSaldoCajaChica();
+                    cargarTablaCajaChica();
                     cancelarEdicionCotizacion();
                     cargarTablaCotizaciones();
                     showToast('✅ Cotización actualizada', 'success');
@@ -8868,7 +8886,7 @@ function cargarTablaProveedores() {
             datos.adquisiciones.cotizaciones_compras.push({ id:generarId(), fecha, proveedor_id:provId, material_descripcion:material, precio_unitario:precio, cantidad, total, estado:'pendiente' });
             saveProyectoData(datos);
             this.reset();
-            document.getElementById('cot-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('cot-fecha').value = _fechasISO(new Date());
             cargarTablaCotizaciones();
             showToast('✅ Cotización registrada', 'success');
         });
@@ -8877,7 +8895,7 @@ function cargarTablaProveedores() {
             const form = document.getElementById('form-cotizacion');
             delete form.dataset.editando;
             form.reset();
-            document.getElementById('cot-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('cot-fecha').value = _fechasISO(new Date());
             form.querySelector('button[type="submit"]').textContent = '📊 Registrar Cotización';
             const btn = document.getElementById('btn-cancelar-cot');
             if (btn) btn.style.display = 'none';
@@ -8887,7 +8905,7 @@ function cargarTablaProveedores() {
             const datos = getProyectoData();
             const c = datos.adquisiciones.cotizaciones_compras.find(c => c.id === id);
             if (!c) return;
-            document.getElementById('cot-fecha').value     = c.fecha || new Date().toISOString().split('T')[0];
+            document.getElementById('cot-fecha').value     = c.fecha || _fechasISO(new Date());
             document.getElementById('cot-proveedor').value = c.proveedor_id;
             document.getElementById('cot-material').value  = c.material_descripcion;
             document.getElementById('cot-precio').value    = c.precio_unitario;
@@ -8941,12 +8959,26 @@ pag_.forEach(c => {
             const c    = datos.adquisiciones.cotizaciones_compras.find(c => c.id === id);
             const prov = datos.adquisiciones.proveedores.find(p => p.id === c?.proveedor_id);
             if (!c) return;
-            const movGasto = procesarGastoCajaChica(c.total, 'Materiales', `Compra: ${c.material_descripcion} - ${prov?prov.nombre:'N/A'}`);
+            // Evita duplicar el egreso si se aprueba dos veces (doble clic,
+            // llamada directa o datos ya inconsistentes).
+            if (c.estado !== 'pendiente' || c.gasto_id) {
+                showToast('⚠️ Esta cotización ya fue procesada.', 'info');
+                return;
+            }
+            const total = Number(c.total);
+            if (!Number.isFinite(total) || total <= 0) {
+                showToast('❌ El total de la cotización no es válido.', 'error');
+                return;
+            }
+            // El egreso debe llevar la fecha de la cotización (no la de hoy):
+            // de lo contrario el reporte diario no cuadra con la compra.
+            const movGasto = procesarGastoCajaChica(total, 'Materiales', `Compra: ${c.material_descripcion} - ${prov?prov.nombre:'N/A'}`, c.fecha);
             if (!movGasto) return;
             // procesarGastoCajaChica ya guardó; recargar y actualizar estado
             const datos2 = getProyectoData();
             const c2 = datos2.adquisiciones.cotizaciones_compras.find(x => x.id === id);
             if (c2) { c2.estado = 'aprobada'; c2.gasto_id = movGasto.id; saveProyectoData(datos2); }
+            actualizarSaldoCajaChica(); cargarTablaCajaChica();
             cargarTablaCotizaciones();
             showToast('✅ Cotización aprobada y compra procesada', 'success');
         }
@@ -9136,7 +9168,7 @@ pag_.forEach(c => {
                 const str = JSON.stringify(db, null, 2);
                 const uri = 'data:application/json;charset=utf-8,' + encodeURIComponent(str);
                 const a   = document.createElement('a');
-                a.href = uri; a.download = 'control_obra_backup_' + new Date().toISOString().split('T')[0] + '.json';
+                a.href = uri; a.download = 'control_obra_backup_' + _fechasISO(new Date()) + '.json';
                 a.click();
                 hideLoading();
                 showToast('✅ Base de datos exportada', 'success');
@@ -9941,7 +9973,7 @@ pag_.forEach(c => {
                 const db = getDB();
                 const content = JSON.stringify(_nubeSanitizarPayload(db), null, 2);
                 const boundary = '-------cob' + Date.now();
-                const nombre = `control_obra_${new Date().toISOString().split('T')[0]}.json`;
+                const nombre = `control_obra_${_fechasISO(new Date())}.json`;
                 const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and (name='${nombre}' or name='latest.json')`);
                 const listRes = await fetch(`${GDRIVE_API}/files?q=${q}&fields=files(id,name)`, {
                     headers: { 'Authorization': `Bearer ${c.gd_token}` }
@@ -10209,7 +10241,7 @@ pag_.forEach(c => {
                 if (!auto) _nubeSetEstado('⬆️ Subiendo a OneDrive...', true);
                 
                 const db = getDB();
-                const fileName = `control_obra_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
+                const fileName = `control_obra_${_fechasISO(new Date())}_${Date.now()}.json`;
                 const fileContent = JSON.stringify(_nubeSanitizarPayload(db), null, 2);
                 
                 // Subir archivo
@@ -10841,7 +10873,7 @@ function cargarTablaCamiones() {
             datos2.viajes_camiones.viajes.push(viajeObj);
             saveProyectoData(datos2);
             this.reset();
-            document.getElementById('viaje-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('viaje-fecha').value = _fechasISO(new Date());
             document.getElementById('viaje-numero').value = 1;
             cargarTablaViajes(); actualizarSaldoCajaChica(); cargarTablaCajaChica();
             showToast('Viaje registrado y descontado de caja', 'success');
@@ -11065,7 +11097,7 @@ lista.forEach(m => {
             }
             this.reset();
             limpiarFotos();
-            document.getElementById('ord-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('ord-fecha').value = _fechasISO(new Date());
             buildFormatosInspeccion();
             cargarTablaOrdenes(); actualizarSaldoCajaChica(); cargarTablaCajaChica();
             showToast('Orden de mantenimiento guardada', 'success');
@@ -11168,7 +11200,7 @@ tbody.innerHTML = '';
                 window.signatureCaptureInsumo.clear();
             }
             this.reset();
-            document.getElementById('insumo-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('insumo-fecha').value = _fechasISO(new Date());
             cargarTablaInsumos(); actualizarSaldoCajaChica(); cargarTablaCajaChica(); cargarResumen();
             showToast('Compra de insumo registrada', 'success');
         });
@@ -11220,20 +11252,31 @@ tbody.innerHTML = '';
         // FIX #6: total distingue ingresos de egresos en PDF y CSV
         // FIX #1: reportes leen del proyecto activo
         // ============================================================
+        // Convierte a 'YYYY-MM-DD' en horario local sin corrimiento de zona
+        // (toISOString() usa UTC y puede desplazar el día).
+        function _fechasISO(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
         function obtenerRangoSemana(fechaStr) {
             const f = new Date(fechaStr + 'T00:00:00');
+            if (!fechaStr || Number.isNaN(f.getTime())) return { inicio: '', fin: '' };
             const d = f.getDay();
             const dist = d === 0 ? -6 : 1 - d;
             const lunes = new Date(f); lunes.setDate(f.getDate() + dist);
             const dom   = new Date(lunes); dom.setDate(lunes.getDate() + 6);
-            return { inicio: lunes.toISOString().split('T')[0], fin: dom.toISOString().split('T')[0] };
+            return { inicio: _fechasISO(lunes), fin: _fechasISO(dom) };
         }
 
         function obtenerRangoMensual(fechaStr) {
             const fecha = new Date(fechaStr + 'T00:00:00');
+            if (!fechaStr || Number.isNaN(fecha.getTime())) return { inicio: '', fin: '' };
             const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
             const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
-            return { inicio: primerDia.toISOString().split('T')[0], fin: ultimoDia.toISOString().split('T')[0] };
+            return { inicio: _fechasISO(primerDia), fin: _fechasISO(ultimoDia) };
         }
 
         // Cache de reportes recientes (máximo 10)
@@ -11301,7 +11344,7 @@ tbody.innerHTML = '';
             if (!statsTotal || !statsHoy || !statsUltima) return;
             
             const total = cacheReportes.length;
-            const hoy = new Date().toISOString().split('T')[0];
+            const hoy = _fechasISO(new Date());
             const hoyCount = cacheReportes.filter(r => r.fechaInicio === hoy || r.fechaFin === hoy).length;
             const ultima = cacheReportes.length > 0 ? cacheReportes[0].fechaInicio : '—';
             
@@ -11400,29 +11443,26 @@ tbody.innerHTML = '';
         function obtenerRangoReporte() {
             const tipo = document.getElementById('reporte-tipo').value;
             const modo = document.getElementById('reporte-modo-fecha').value;
-            
+
+            // Un rango personalizado explícito tiene prioridad para cualquier
+            // tipo que lo permita (semanal/mensual/ejecutivo/nómina). Antes se
+            // ignoraba para 'semanal' y el reporte quedaba vacío.
+            if (modo === 'rango') {
+                const inicio = document.getElementById('reporte-fecha-inicio').value;
+                const fin = document.getElementById('reporte-fecha-fin').value;
+                return { inicio, fin: fin || inicio };
+            }
+
             if (tipo === 'semanal') {
                 const fecha = document.getElementById('reporte-fecha').value;
                 return obtenerRangoSemana(fecha);
             }
-            
+
             if (tipo === 'mensual') {
-                if (modo === 'rango') {
-                    return {
-                        inicio: document.getElementById('reporte-fecha-inicio').value,
-                        fin: document.getElementById('reporte-fecha-fin').value
-                    };
-                }
                 const fecha = document.getElementById('reporte-fecha').value;
                 return obtenerRangoMensual(fecha);
             }
-            
-            if (modo === 'rango') {
-                const inicio = document.getElementById('reporte-fecha-inicio').value;
-                const fin = document.getElementById('reporte-fecha-fin').value;
-                return { inicio, fin };
-            }
-            
+
             // Fecha única
             const fecha = document.getElementById('reporte-fecha').value;
             return { inicio: fecha, fin: fecha };
@@ -11524,12 +11564,13 @@ tbody.innerHTML = '';
                 return firmasCSV;
             };
 
-            const enRango = (f) => f >= rango.inicio && f <= rango.fin;
+            const enRango = (f) => (!rango.inicio || f >= rango.inicio) && (!rango.fin || f <= rango.fin);
+            const lineaTexto = (v) => String(v == null ? '' : v).replace(/[\r\n]+/g, ' ');
             const periodoDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
 
             if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
                 const tipoNombre = tipo === 'diario' ? 'Reporte Diario Consolidado' : tipo === 'semanal' ? 'Informe Semanal Consolidado' : 'Reporte Mensual Consolidado';
-                csv += `# ${csvCell(tipoNombre)} - ${csvCell(empresa)} - Proyecto: ${csvCell(proyNombre)}\n`;
+                csv += `# ${lineaTexto(tipoNombre)} - ${lineaTexto(empresa)} - Proyecto: ${lineaTexto(proyNombre)}\n`;
                 csv += `# Periodo: ${periodoDisplay}\n`;
                 csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
                 csv += `Fecha,Tipo,Categoria,Descripcion,Monto (Q)\n`;
@@ -11538,12 +11579,16 @@ tbody.innerHTML = '';
                 const viajesAll = datos.viajes_camiones.viajes || [];
                 const ordsAll   = datos.mantenimiento.ordenes || [];
                 const insAll    = datos.mantenimiento.compras_insumos || [];
+                // Sólo se excluyen los vínculos cuyo registro cae en ESTE período;
+                // así un movimiento cuya fecha difiere de la del registro sigue
+                // contabilizado una sola vez (sin pérdidas ni duplicados).
                 const idsExternos = typeof CR_ReportData !== 'undefined'
-                    ? CR_ReportData.linkedExpenseIds(datos)
+                    ? CR_ReportData.linkedExpenseIds(datos, rango)
                     : new Set([
-                        ...viajesAll.map(v => v.gasto_id).filter(Boolean),
-                        ...ordsAll.map(o => o.gasto_id).filter(Boolean),
-                        ...insAll.map(i => i.gasto_id).filter(Boolean)
+                        ...viajesAll.filter(v => enRango(v.fecha)).map(v => v.gasto_id).filter(Boolean),
+                        ...ordsAll.filter(o => enRango(o.fecha)).map(o => o.gasto_id).filter(Boolean),
+                        ...insAll.filter(i => enRango(i.fecha)).map(i => i.gasto_id).filter(Boolean),
+                        ...((datos.adquisiciones || {}).cotizaciones_compras || []).filter(c => enRango(c.fecha)).map(c => c.gasto_id).filter(Boolean)
                     ]);
                 // Solo movimientos de caja chica propios (sin gasto_id externo)
                 const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha) && !idsExternos.has(g.id));
@@ -11583,6 +11628,24 @@ tbody.innerHTML = '';
                     csv += `\n`;
                     csv += `${csvRow(['', '', 'TOTAL MANTENIMIENTO E INSUMOS:', totalMT])}\n`;
                 }
+                /* ===== CONSOLIDADO: ADQUISICIONES (COMPRAS) =====
+                   Los movimientos de caja vinculados a compras (gasto_id) se
+                   excluyen de la sección de caja; deben reintroducirse aquí para
+                   que el total consolidado coincida con el KPI de egresos. */
+                const comprasAdq = ((datos.adquisiciones || {}).cotizaciones_compras || [])
+                    .filter(c => c.gasto_id && enRango(c.fecha));
+                let totalAdq = 0;
+                if (comprasAdq.length > 0) {
+                    csv += '\n# --- ADQUISICIONES / COMPRAS ---\nFecha,Proveedor,Material,Estado,Total (Q)\n';
+                    comprasAdq.forEach(c => {
+                        const prov = ((datos.adquisiciones || {}).proveedores || []).find(p => p.id === c.proveedor_id) || { nombre: 'N/A' };
+                        totalAdq += c.total || 0;
+                        totalEgr += c.total || 0;
+                        csv += `${csvRow([c.fecha, prov.nombre, c.material_descripcion || '', c.estado || '', c.total || 0])}\n`;
+                    });
+                    csv += `\n`;
+                    csv += `${csvRow(['', '', '', 'TOTAL ADQUISICIONES:', totalAdq])}\n`;
+                }
                 /* NÓMINA — solo en mensual */
                 if (tipo === 'mensual' && typeof CR_NominaEngine !== 'undefined' && CR_NominaEngine.calcularNomina) {
                     const personal = datos.personal || {};
@@ -11605,7 +11668,9 @@ tbody.innerHTML = '';
                 csv += `,,,,\n,,,TOTAL INGRESOS DEL PERÍODO:,${numToF(totalIng)}\n,,,TOTAL EGRESOS DEL PERÍODO:,${numToF(totalEgr)}\n,,,SALDO NETO DEL PERÍODO:,${numToF(totalIng - totalEgr)}\n`;
                 csv += generarFirmasCSV();
             } else if (tipo === 'asistencia') {
-                csv += `${csvRow(['Reporte de Asistencia - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `# Reporte de Asistencia - ${lineaTexto(empresa)} - Proyecto: ${lineaTexto(proyNombre)}\n`;
+                csv += `# Período: ${lineaTexto(periodoDisplay)}\n`;
+                csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n`;
                 csv += `# Resumen del personal por periodo\n`;
                 csv += `Trabajador,Puesto,Asistencias,Faltas,Justificados,Horas Extra,Total a pagar (Q)\n`;
                 const periodos = (datos.personal.asistencia || []).filter(dia => enRango(dia.fecha));
@@ -11633,7 +11698,7 @@ tbody.innerHTML = '';
                         horasExtra,
                         totalPagar
                     };
-                });
+                }).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), 'es'));
                 if (resumenPersonal.length === 0) {
                     csv += `"SIN REGISTROS DE PERSONAL EN EL PERIODO",,,,,,\n`;
                 } else {
@@ -11669,10 +11734,10 @@ tbody.innerHTML = '';
                 csv += `,,,,TOTAL NÓMINA:,${total.toFixed(2)}\n`;
                 csv += generarFirmasCSV();
             } else if (tipo === 'viajes') {
-                csv += `${csvRow(['Reporte de Viajes de Camiones - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `# Reporte de Viajes de Camiones - ${lineaTexto(empresa)} - Proyecto: ${lineaTexto(proyNombre)}\n`;
                 csv += `# Período: ${periodoDisplay}\n`;
                 csv += `Fecha,Unidad,Material,No. Viajes,Km Total,Litros,Costo Combustible (Q),Costo Alquiler (Q),Total (Q)\n`;
-                const enRangoV = (f) => f >= rango.inicio && f <= rango.fin;
+                const enRangoV = (f) => (!rango.inicio || f >= rango.inicio) && (!rango.fin || f <= rango.fin);
                 const viajes = (datos.viajes_camiones.viajes||[]).filter(v => enRangoV(v.fecha)).sort((a,b) => a.fecha.localeCompare(b.fecha));
                 let totalV = 0;
                 if (viajes.length === 0) {
@@ -11688,10 +11753,12 @@ tbody.innerHTML = '';
                 csv += `${csvRow(['', '', '', '', '', '', '', 'TOTAL VIAJES (Q):', totalV])}\n`;
                 csv += generarFirmasCSV();
             } else if (tipo === 'mantenimiento') {
-                csv += `${csvRow(['Reporte de Mantenimiento e Insumos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `# Reporte de Mantenimiento e Insumos - ${lineaTexto(empresa)} - Proyecto: ${lineaTexto(proyNombre)}\n`;
+                csv += `# Período: ${lineaTexto(periodoDisplay)}\n`;
+                csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n`;
                 csv += `Fecha,Tipo,Descripción,Monto (Q)\n`;
                 let totalM = 0;
-                const enRangoM = (f) => f >= rango.inicio && f <= rango.fin;
+                const enRangoM = (f) => (!rango.inicio || f >= rango.inicio) && (!rango.fin || f <= rango.fin);
                 const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => enRangoM(i.fecha));
                 const ords = (datos.mantenimiento.ordenes||[]).filter(o => enRangoM(o.fecha));
                 if (ins.length === 0 && ords.length === 0) {
@@ -11712,7 +11779,9 @@ tbody.innerHTML = '';
                 csv += `${csvRow(['', '', 'TOTAL MANTENIMIENTO E INSUMOS:', totalM])}\n`;
                 csv += generarFirmasCSV();
             } else if (tipo === 'categoria') {
-                csv += `${csvRow(['Reporte por Categoría de Gastos - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `# Reporte por Categoría de Gastos - ${lineaTexto(empresa)} - Proyecto: ${lineaTexto(proyNombre)}\n`;
+                csv += `# Período: ${lineaTexto(periodoDisplay)}\n`;
+                csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n`;
                 csv += `Período,Categoría,Monto (Q),Porcentaje\n`;
                 
                 // Calcular gastos por categoría filtrando por el rango seleccionado (no 'mes' en curso)
@@ -11745,7 +11814,9 @@ tbody.innerHTML = '';
                 }
                 csv += generarFirmasCSV();
             } else if (tipo === 'ejecutivo') {
-                csv += `${csvRow(['Resumen Ejecutivo (KPIs Gerenciales) - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `# Resumen Ejecutivo (KPIs Gerenciales) - ${lineaTexto(empresa)} - Proyecto: ${lineaTexto(proyNombre)}\n`;
+                csv += `# Período: ${lineaTexto(periodoDisplay)}\n`;
+                csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
                 csv += `KPI,Valor,Descripcion\n`;
                 
                 // Usar el motor de KPIs para obtener métricas ejecutivas
@@ -11754,10 +11825,6 @@ tbody.innerHTML = '';
                     : null;
                 
                 if (kpis) {
-                    const periodo = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
-                    csv += `# Periodo: ${periodo}\n`;
-                    csv += `# Fecha de generacion: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
-                    
                     // Métricas principales
                     const metricas = [
                         { nombre: 'Presupuesto Inicial', valor: getPresupuestoActual() || 0, desc: 'Capital inicial del proyecto' },
@@ -11794,9 +11861,9 @@ tbody.innerHTML = '';
 
             // ── Reporte de Nómina Consolidada ──────────────────────────────────
             if (tipo === 'nomina') {
-                const fechaNom = rango.inicio || new Date().toISOString().slice(0, 10);
+                const fechaNom = rango.inicio || _fechasISO(new Date());
                 const rangNom = rango.fin || fechaNom;
-                csv += `${csvRow(['Reporte de Nómina Consolidada - ' + empresa + ' - Proyecto: ' + proyNombre])}\n`;
+                csv += `# Reporte de Nómina Consolidada - ${lineaTexto(empresa)} - Proyecto: ${lineaTexto(proyNombre)}\n`;
                 csv += `# Período: ${periodoDisplay}\n`;
                 csv += `# Fecha de generación: ${new Date().toLocaleDateString('es-GT')}\n# \n`;
 
@@ -11860,7 +11927,9 @@ tbody.innerHTML = '';
                     : (fecha || ''));
 
             const _Export = (typeof CR_Export !== 'undefined' && CR_Export) ? CR_Export : null;
-            const fmtMonto = (v) => _Export ? _Export.formatearMonto(v, 2) : Number(v || 0).toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            // Los montos se escriben como NÚMEROS (no strings formateados) para
+            // que Excel/Sheets puedan sumarlos; el formato visual lo aplica la hoja.
+            const fmtMonto = (v) => Math.round((Number(v) || 0) * 100) / 100;
             const csvCell = (v) => _Export ? _Export.celdaCSV(v) : String(v ?? '');
 
             const enRango = (f) => {
@@ -11889,11 +11958,12 @@ tbody.innerHTML = '';
 
                 // Caja chica
                 const idsExternos = typeof CR_ReportData !== 'undefined'
-                    ? CR_ReportData.linkedExpenseIds(datos)
+                    ? CR_ReportData.linkedExpenseIds(datos, rangoPersonalizado)
                     : new Set([
-                        ...((datos.viajes_camiones || {}).viajes || []).map(v => v.gasto_id).filter(Boolean),
-                        ...((datos.mantenimiento || {}).ordenes || []).map(o => o.gasto_id).filter(Boolean),
-                        ...((datos.mantenimiento || {}).compras_insumos || []).map(i => i.gasto_id).filter(Boolean),
+                        ...((datos.viajes_camiones || {}).viajes || []).filter(v => enRango(v.fecha)).map(v => v.gasto_id).filter(Boolean),
+                        ...((datos.mantenimiento || {}).ordenes || []).filter(o => enRango(o.fecha)).map(o => o.gasto_id).filter(Boolean),
+                        ...((datos.mantenimiento || {}).compras_insumos || []).filter(i => enRango(i.fecha)).map(i => i.gasto_id).filter(Boolean),
+                        ...((datos.adquisiciones || {}).cotizaciones_compras || []).filter(c => enRango(c.fecha)).map(c => c.gasto_id).filter(Boolean),
                     ]);
                 const movs = (datos.caja_chica || []).filter(g => enRango(g.fecha) && !idsExternos.has(g.id));
                 let totalIng = 0, totalEgr = 0;
@@ -11944,6 +12014,21 @@ tbody.innerHTML = '';
                     });
                     mRows.push(['', '', 'TOTAL MANTENIMIENTO E INSUMOS:', fmtMonto(totalMT)]);
                     hojas.push({ nombre: 'Mantenimiento', datos: mRows });
+                }
+
+                // Adquisiciones / compras vinculadas a caja
+                const comprasAdq = ((datos.adquisiciones || {}).cotizaciones_compras || []).filter(c => c.gasto_id && enRango(c.fecha));
+                let totalAdq = 0;
+                if (comprasAdq.length > 0) {
+                    const aRows = [['Fecha', 'Proveedor', 'Material', 'Estado', 'Total (Q)']];
+                    comprasAdq.forEach(c => {
+                        const prov = ((datos.adquisiciones || {}).proveedores || []).find(p => p.id === c.proveedor_id) || { nombre: 'N/A' };
+                        totalAdq += c.total || 0;
+                        totalEgr += c.total || 0;
+                        aRows.push([c.fecha, prov.nombre, c.material_descripcion || '', c.estado || '', c.total || 0]);
+                    });
+                    aRows.push(['', '', '', 'TOTAL ADQUISICIONES:', totalAdq]);
+                    hojas.push({ nombre: 'Adquisiciones', datos: aRows });
                 }
 
                 // Nómina mensual
@@ -12002,7 +12087,7 @@ tbody.innerHTML = '';
                         else if (reg.estado === 'justificado') { justificados += 1; }
                     });
                     return { trabajador, asistencias, faltas, justificados, horasExtra, totalPagar };
-                });
+                }).sort((a, b) => String(a.trabajador.nombre).localeCompare(String(b.trabajador.nombre), 'es'));
 
                 const resRows = [['Trabajador', 'Puesto', 'Asistencias', 'Faltas', 'Justificados', 'Horas Extra', 'Total a pagar (Q)']];
                 let totalPersonal = 0;
@@ -12111,7 +12196,7 @@ tbody.innerHTML = '';
                 XLSX.utils.book_append_sheet(workbook, ws, 'Por Categoría');
 
             } else if (tipo === 'nomina') {
-                const fechaNom = (rangoPersonalizado && rangoPersonalizado.inicio) || new Date().toISOString().slice(0, 10);
+                const fechaNom = (rangoPersonalizado && rangoPersonalizado.inicio) || _fechasISO(new Date());
                 const rangNom = (rangoPersonalizado && rangoPersonalizado.fin) || fechaNom;
                 if (typeof CR_NominaEngine === 'undefined' || !CR_NominaEngine.calcularNomina) {
                     const ws = XLSX.utils.aoa_to_sheet([['ERROR: Motor de nómina no disponible']]);
@@ -12194,7 +12279,7 @@ tbody.innerHTML = '';
             // FIX: estas dos constantes solo existían en generarCSVReporte; al
             // generarse el reporte HTML (diario/semanal/mensual/categoría/…)
             // se lanzaba "enRango is not defined" y el reporte quedaba roto.
-            const enRango = (f) => f >= rango.inicio && f <= rango.fin;
+            const enRango = (f) => (!rango.inicio || f >= rango.inicio) && (!rango.fin || f <= rango.fin);
             const periodoDisplay = rango.inicio === rango.fin ? rango.inicio : `${rango.inicio} al ${rango.fin}`;
 
             // ── REPORTE EJECUTIVO (Resumen Gerencial con KPIs) ──
@@ -12221,17 +12306,19 @@ tbody.innerHTML = '';
             if (tipo === 'diario' || tipo === 'semanal' || tipo === 'mensual') {
                 const tipoNombre = tipo === 'diario' ? 'Reporte Diario Consolidado' : tipo === 'semanal' ? 'Informe Semanal Consolidado' : 'Reporte Mensual Consolidado';
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">${_esc(tipoNombre)}</h2>`;
-                html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">${tipo === 'diario' ? ('Fecha: ' + _esc(rango.inicio)) : ('Período: ' + _esc(periodoDisplay))} | Proyecto: ${_esc(proyNombre)}</p>`;
-                html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:var(--pdf-gris-medio);">(movimientos directos — los descuentos de viajes y mantenimiento se detallan abajo)</small></h3>`;
+                html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">${rango.inicio === rango.fin ? ('Fecha: ' + _esc(rango.inicio)) : ('Período: ' + _esc(periodoDisplay))} | Proyecto: ${_esc(proyNombre)}</p>`;
+                html += `<h3 style="color:var(--pdf-azul-oscuro);font-size:13px;margin:15px 0 8px 0;">💰 Caja Chica <small style="font-size:10px;color:var(--pdf-gris-medio);">(movimientos directos — los movimientos vinculados a viajes, mantenimiento y compras se detallan abajo)</small></h3>`;
                 html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:10%"><col style="width:18%"><col style="width:40%"><col style="width:20%"></colgroup><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th style="text-align:right;">Monto (Q)</th></tr></thead><tbody>`;
-                /* FIX DUPLICIDAD: armar Set de gasto_id vinculados a viajes y mantenimiento
-                   para excluirlos de la sección de caja chica y no contarlos dos veces */
-                const _idsViajesGasto = new Set((datos.viajes_camiones.viajes||[]).map(v=>v.gasto_id).filter(Boolean));
-                const _idsOrdsGasto   = new Set((datos.mantenimiento.ordenes||[]).map(o=>o.gasto_id).filter(Boolean));
-                const _idsInsGasto    = new Set((datos.mantenimiento.compras_insumos||[]).map(i=>i.gasto_id).filter(Boolean));
+                /* FIX DUPLICIDAD: excluir de caja chica los gasto_id vinculados a
+                   viajes, mantenimiento y compras que pertenecen a este período. */
                 const _idsExternosHTML = typeof CR_ReportData !== 'undefined'
-                    ? CR_ReportData.linkedExpenseIds(datos)
-                    : new Set([..._idsViajesGasto, ..._idsOrdsGasto, ..._idsInsGasto]);
+                    ? CR_ReportData.linkedExpenseIds(datos, rango)
+                    : new Set([
+                        ...(datos.viajes_camiones.viajes||[]).filter(v => enRango(v.fecha)).map(v=>v.gasto_id).filter(Boolean),
+                        ...(datos.mantenimiento.ordenes||[]).filter(o => enRango(o.fecha)).map(o=>o.gasto_id).filter(Boolean),
+                        ...(datos.mantenimiento.compras_insumos||[]).filter(i => enRango(i.fecha)).map(i=>i.gasto_id).filter(Boolean),
+                        ...((datos.adquisiciones||{}).cotizaciones_compras||[]).filter(c => enRango(c.fecha)).map(c=>c.gasto_id).filter(Boolean)
+                    ]);
                 const movs = (datos.caja_chica||[]).filter(g => enRango(g.fecha) && !_idsExternosHTML.has(g.id)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
                 let totalIng = 0, totalEgr = 0;
                 movs.forEach(g => {
@@ -12292,7 +12379,21 @@ tbody.innerHTML = '';
                     html += `<tr><td colspan="${3 + (tieneFirmas ? 1 : 0)}" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalITmp)}</td></tr>`;
                     html += `</tbody></table>`;
                 }
-                if (movs.length === 0 && viajesC.length === 0 && ordsMT.length === 0 && insMT.length === 0) {
+                /* ADQUISICIONES (compras vinculadas a caja) */
+                const comprasAdqHTML = ((datos.adquisiciones || {}).cotizaciones_compras || []).filter(c => c.gasto_id && enRango(c.fecha)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+                if (comprasAdqHTML.length > 0) {
+                    let totalAdqHTML = 0;
+                    html += `<h3 style="color:var(--acento-purpura);font-size:13px;margin:15px 0 8px 0;">🧾 Adquisiciones / Compras</h3>`;
+                    html += `<table class="tabla-pdf"><colgroup><col style="width:12%"><col style="width:28%"><col style="width:33%"><col style="width:12%"><col style="width:15%"></colgroup><thead><tr><th>Fecha</th><th>Proveedor</th><th>Material</th><th>Estado</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
+                    comprasAdqHTML.forEach(c => {
+                        const prov = ((datos.adquisiciones || {}).proveedores || []).find(p => p.id === c.proveedor_id) || { nombre: 'N/A' };
+                        totalAdqHTML += c.total || 0; totalEgr += c.total || 0;
+                        html += `<tr><td>${_esc(c.fecha)}</td><td>${_esc(prov.nombre)}</td><td>${_esc(truncarTexto(c.material_descripcion || '', 150))}</td><td>${_esc(c.estado || '')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(c.total)}</td></tr>`;
+                    });
+                    html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL ADQUISICIONES:</td><td class="total-egreso">${formatearMoneda(totalAdqHTML)}</td></tr>`;
+                    html += `</tbody></table>`;
+                }
+                if (movs.length === 0 && viajesC.length === 0 && ordsMT.length === 0 && insMT.length === 0 && comprasAdqHTML.length === 0) {
                     html += `<p style="text-align:center;color:var(--pdf-gris-medio);padding:20px;">Sin registros en este período</p>`;
                 }
                 /* NÓMINA MENSUAL — solo se muestra en el reporte mensual */
@@ -12339,7 +12440,8 @@ tbody.innerHTML = '';
                         }
                     });
                     return { trabajador, asistencias, faltas, justificados, horasExtra, totalPagar };
-                });
+                }).sort((a, b) => String(a.trabajador.nombre).localeCompare(String(b.trabajador.nombre), 'es'));
+                html += `<p style="color:var(--pdf-gris-medio);margin-bottom:16px;">Período: <strong>${_esc(periodoDisplay)}</strong> | Proyecto: <strong>${_esc(proyNombre)}</strong></p>`;
                 html += `<div class="info-box"><strong>Resumen del personal</strong><br>Asistencias, faltas, horas extra y total correspondiente del personal en el período seleccionado.</div>`;
                 html += `<table class="tabla-pdf"><thead><tr><th>Trabajador</th><th>Puesto</th><th>Asist.</th><th>Faltas</th><th>Justif.</th><th>H. Extra</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
                 let totalPersonal = 0;
@@ -12448,8 +12550,8 @@ tbody.innerHTML = '';
             } else if (tipo === 'viajes') {
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Viajes de Camiones</h2>`;
                 html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
-                html += `<table class="tabla-pdf"><colgroup><col style="width:10%"><col style="width:22%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km Total</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
-                const enRangoVH = (f) => f >= rango.inicio && f <= rango.fin;
+                html += `<table class="tabla-pdf"><colgroup><col style="width:10%"><col style="width:22%"><col style="width:12%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr><th>Fecha</th><th>Unidad</th><th>Material</th><th>No. Viajes</th><th>Km</th><th>Litros</th><th style="text-align:right;">Costo Comb.</th><th style="text-align:right;">Alquiler</th><th style="text-align:right;">Total (Q)</th></tr></thead><tbody>`;
+                const enRangoVH = (f) => (!rango.inicio || f >= rango.inicio) && (!rango.fin || f <= rango.fin);
                 const viajes = (datos.viajes_camiones.viajes||[]).filter(v => enRangoVH(v.fecha)).sort((a,b) => a.fecha.localeCompare(b.fecha));
                 let totalV = 0;
                 if (viajes.length === 0) {
@@ -12467,10 +12569,12 @@ tbody.innerHTML = '';
             } else if (tipo === 'mantenimiento') {
                 html += `<h2 style="color:var(--pdf-azul-oscuro);border-bottom:2px solid var(--pdf-azul-oscuro);padding-bottom:10px;margin-top:0;">Reporte de Mantenimiento e Insumos</h2>`;
                 html += `<p style="color:var(--pdf-gris-medio);margin-bottom:20px;">Período: ${_esc(periodoDisplay)} | Proyecto: ${_esc(proyNombre)}</p>`;
-                const enRangoMH = (f) => f >= rango.inicio && f <= rango.fin;
+                const enRangoMH = (f) => (!rango.inicio || f >= rango.inicio) && (!rango.fin || f <= rango.fin);
                 const ins = (datos.mantenimiento.compras_insumos||[]).filter(i => enRangoMH(i.fecha));
                 const ords = (datos.mantenimiento.ordenes||[]).filter(o => enRangoMH(o.fecha));
                 let totalM = 0;
+                let totalMOrdenes = 0;
+                let totalMInsumos = 0;
                 
                 // Órdenes de mantenimiento
                 const tieneFirmasOrdenes = ords.some(o => o.firma);
@@ -12481,10 +12585,14 @@ tbody.innerHTML = '';
                 } else {
                     ords.forEach(o => {
                         const m = (datos.mantenimiento.maquinaria||[]).find(x => x.id === o.maquinaria_id);
+                        totalMOrdenes += o.costo || 0;
                         totalM += o.costo || 0;
                         const firmaHtml = o.firma ? `<img src="${o.firma}" alt="Firma de aprobación de orden de mantenimiento" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
                         html += `<tr><td>${_esc(o.fecha)}</td><td>${_esc(m?m.nombre:'N/A')}</td><td>${_esc(o.tipo)}</td><td>${_esc(o.observaciones||'—')}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(o.costo)}</td>${tieneFirmasOrdenes ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`;
                     });
+                }
+                if (ords.length) {
+                    html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);">TOTAL ÓRDENES DE MANTENIMIENTO:</td><td class="total-egreso">${formatearMoneda(totalMOrdenes)}</td>${tieneFirmasOrdenes ? '<td></td>' : ''}</tr>`;
                 }
                 html += `</tbody></table>`;
                 
@@ -12496,10 +12604,14 @@ tbody.innerHTML = '';
                     html += `<tr><td colspan="${5 + (tieneFirmasInsumos ? 1 : 0)}" style="text-align:center;color:var(--pdf-gris-medio);padding:15px;">Sin compras en esta fecha</td></tr>`;
                 } else {
                     ins.forEach(i => {
+                        totalMInsumos += i.costo || 0;
                         totalM += i.costo || 0;
                         const firmaHtml = i.firma ? `<img src="${i.firma}" alt="Firma de aprobación de compra de insumos" style="height:30px;width:auto;border:1px solid #ddd;">` : '—';
                         html += `<tr><td>${_esc(i.fecha)}</td><td>${_esc(i.tipo)}</td><td>${_esc(i.articulo)}</td><td>${i.cantidad}</td><td style="text-align:right;font-weight:bold;">${formatearMoneda(i.costo)}</td>${tieneFirmasInsumos ? `<td style="text-align:center;">${firmaHtml}</td>` : ''}</tr>`;
                     });
+                }
+                if (ins.length) {
+                    html += `<tr><td colspan="4" style="text-align:right;font-weight:bold;color:var(--acento-purpura);">TOTAL INSUMOS:</td><td class="total-egreso">${formatearMoneda(totalMInsumos)}</td>${tieneFirmasInsumos ? '<td></td>' : ''}</tr>`;
                 }
                 html += `</tbody></table>`;
                 html += `<div style="text-align:right;font-weight:bold;color:var(--pdf-azul-oscuro);background:var(--pdf-fondo-azul);padding:10px;margin-top:10px;">TOTAL MANTENIMIENTO E INSUMOS: ${formatearMoneda(totalM)}</div>`;
@@ -12552,7 +12664,7 @@ tbody.innerHTML = '';
                             <div style="display:flex;align-items:center;gap:10px;">
                                 <div style="width:140px;font-size:10px;color:var(--pdf-gris-oscuro);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_esc(etiquetaCat)}</div>
                                     <div style="flex:1;background:var(--pdf-gris-borde);border-radius:4px;height:16px;overflow:hidden;">
-                                        <div style="width:${barraWidth}%;background:linear-gradient(90deg,var(--pdf-azul-claro),var(--pdf-azul-oscuro));height:100%;"></div>
+                                        <div style="width:${barraWidth}%;background:var(--pdf-azul-oscuro);height:100%;"></div>
                                     </div>
                                     <div style="width:80px;text-align:right;font-size:11px;color:var(--pdf-gris-oscuro);">${porcentaje}%</div>
                                     <div style="width:80px;text-align:right;font-size:11px;font-weight:600;color:var(--pdf-gris-oscuro);">${formatearMoneda(monto)}</div>
@@ -12603,7 +12715,7 @@ tbody.innerHTML = '';
                 if (firma.imagen_base64 && firma.imagen_base64.startsWith('data:image')) {
                     cont.innerHTML = '<img src="' + firma.imagen_base64 + '" alt="Firma digital" style="max-height:58px;max-width:140px;">';
                 } else {
-                    cont.textContent = firma.nombre || '';
+                    cont.textContent = '';
                 }
                 const nEl = document.getElementById(nombreId);
                 const cEl = document.getElementById(cargoId);
@@ -12639,6 +12751,14 @@ tbody.innerHTML = '';
             if (esloganEl) esloganEl.textContent = cfg.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA';
             if (direccionEl) direccionEl.textContent = cfg.direccion || 'Guatemala, C.A.';
             if (websiteEl) websiteEl.textContent = cfg.website || 'construramsa.com';
+            const selloEl = document.getElementById('pdf-sello-empresa');
+            const pieEmpresaEl = document.getElementById('pdf-pie-empresa');
+            const pieEsloganEl = document.getElementById('pdf-pie-eslogan');
+            const pieWebsiteEl = document.getElementById('pdf-pie-website');
+            if (selloEl) selloEl.textContent = cfg.nombre_empresa || 'CONSTRURAMSA';
+            if (pieEmpresaEl) pieEmpresaEl.textContent = cfg.nombre_empresa || 'CONSTRURAMSA';
+            if (pieEsloganEl) pieEsloganEl.textContent = cfg.eslogan || 'Soluciones en Ingeniería y Arquitectura';
+            if (pieWebsiteEl) pieWebsiteEl.textContent = cfg.website || 'construramsa.com';
 
             // ── Metadatos del reporte ──
             const proy = db.proyectos.find(p => p.id === cfg.proyecto_actual);
@@ -12759,6 +12879,7 @@ function validarDependenciasExportacion() {
                 ].join(';');
 
                 const fechaGen = new Date().toLocaleDateString('es-GT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const empresaPie = ((getDB().configuracion || {}).nombre_empresa) || 'CONSTRURAMSA';
 
                 const opts = {
                     // Reservar margen superior e inferior en cada página
@@ -12787,9 +12908,10 @@ function validarDependenciasExportacion() {
                         onclone: function(clonedDoc) {
                             // Inyectar variables CSS y @page en el clon
                             const style = clonedDoc.createElement('style');
+                            const empresaPieCSS = String(empresaPie).replace(/["\\\r\n]/g, '');
                             style.textContent = ':root{' + CSS_VARS + '};' +
                                 '@page { margin: 12mm 12mm 16mm 12mm; ' +
-                                '@bottom-left { content: "CONSTRURAMSA"; font-size: 8pt; color: #6B7280; } ' +
+                                '@bottom-left { content: "' + empresaPieCSS + '"; font-size: 8pt; color: #6B7280; } ' +
                                 '@bottom-center { content: "' + fechaGen + '"; font-size: 8pt; color: #6B7280; } ' +
                                 '@bottom-right { content: counter(page) " / " counter(pages); font-size: 8pt; color: #6B7280; } }';
                             clonedDoc.head.appendChild(style);
@@ -12869,7 +12991,7 @@ function validarDependenciasExportacion() {
                     pdf.setFontSize(8);
                     pdf.setTextColor(102, 114, 120); // gris #6B7280
                     pdf.setFont('helvetica', 'normal');
-                    pdf.text('CONSTRURAMSA', 12, footerY);
+                    pdf.text(empresaPie, 12, footerY);
                     pdf.text(fechaGen, pageW / 2, footerY, { align: 'center' });
                     pdf.text(`Página ${i} de ${total}`, pageW - 12, footerY, { align: 'right' });
                 }
@@ -13000,6 +13122,20 @@ function validarDependenciasExportacion() {
             // CSV y XLSX no dependen de html2pdf. Validar esa librería únicamente
             // cuando el usuario haya solicitado el formato PDF.
             if (exportPDF && !validarDependenciasExportacion()) {
+                _generandoReporte = false;
+                hideLoading();
+                return;
+            }
+
+            // CSV/XLSX dependen del helper de descarga y (XLSX) de SheetJS.
+            if ((exportCSV || exportXLSX) && (typeof CR_Export === 'undefined' || !CR_Export.descargarBlob)) {
+                showToast('⚠️ No se puede exportar: falta el módulo de descargas (CR_Export).', 'error', 6000);
+                _generandoReporte = false;
+                hideLoading();
+                return;
+            }
+            if (exportXLSX && typeof XLSX === 'undefined') {
+                showToast('⚠️ No se puede exportar XLSX: falta la librería SheetJS.', 'error', 6000);
                 _generandoReporte = false;
                 hideLoading();
                 return;
@@ -13219,7 +13355,8 @@ function validarDependenciasExportacion() {
                 tipoReporte: (ETIQUETAS_REPORTE[tipo] || tipo).toUpperCase(),
                 portada, htmlReporte,
                 nombreEmpresa: cfg.nombre_empresa || 'CONSTRURAMSA',
-                esloganEmpresa: cfg.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA'
+                esloganEmpresa: cfg.eslogan || 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA',
+                firmas: cfg.firmas
             });
 
             document.getElementById('vp-plantilla-preview').innerHTML = DOMPurify.sanitize(htmlPreview, {USE_PROFILES: {html: true}, ADD_TAGS: ['style']});
@@ -13240,7 +13377,28 @@ function validarDependenciasExportacion() {
          * Construye el HTML completo que se muestra en el panel de preview.
          * Replica visualmente la plantilla real (membrete + portada + contenido).
          */
-        function _construirHTMLPreview({ logoSrc, proyNombre, telEmail, fechaEmision, tipoReporte, portada, htmlReporte, nombreEmpresa, esloganEmpresa }) {
+        function _construirHTMLPreview({ logoSrc, proyNombre, telEmail, fechaEmision, tipoReporte, portada, htmlReporte, nombreEmpresa, esloganEmpresa, firmas }) {
+            // Firmas configurables (coherentes con prepararContenedorImpresion).
+            const _firmasCfg = (Array.isArray(firmas) && firmas.length) ? firmas : [
+                { nombre: 'Arq. Wilson Dario Salazar', cargo: 'Jefe de Proyectos' },
+                { nombre: 'Ing. Juan Luis Ramirez Jimenez', cargo: 'Gerente Comercial' }
+            ];
+            const _matchFirma = (re) => _firmasCfg.find(f => re.test(String((f && f.cargo) || ''))) || null;
+            const firmaJefePrev    = _matchFirma(/jefe.*proyecto/i) || _firmasCfg[0] || { nombre: '', cargo: '' };
+            const firmaGerentePrev = _matchFirma(/gerente.*comercial/i) || _firmasCfg[1] || { nombre: '', cargo: '' };
+            const firmaVistoPrev   = _matchFirma(/visto.*bueno|encargado.*obra/i) || _firmasCfg[2] || { nombre: '', cargo: 'Encargado de Obra' };
+            const _firmaSlot = (firma, etiqueta, nombreFallback, cargoFallback) => {
+                const nombre = (firma && firma.nombre) || nombreFallback;
+                const cargo  = (firma && firma.cargo)  || cargoFallback;
+                const img    = firma && firma.imagen_base64 && String(firma.imagen_base64).startsWith('data:image')
+                    ? `<img src="${firma.imagen_base64}" alt="Firma digital" style="max-height:44px;max-width:140px;">`
+                    : `<span style="color:var(--pdf-gris-claro);font-size:8px;opacity:0.85;">${_esc(etiqueta)}</span>`;
+                return `<div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:0;">${img}</div>
+                        <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
+                            <div style="font-size:9.5px;font-weight:700;color:var(--pdf-gris-oscuro);">${_esc(nombre)}</div>
+                            <div style="font-size:7.5px;color:var(--pdf-azul-oscuro);font-weight:600;text-transform:uppercase;margin-top:1px;">${_esc(cargo)}</div>
+                        </div>`;
+            };
             // ── Portada HTML ──
             let portadaHTML = '';
             const tienePortada = portada.fecha || portada.remitente || portada.destinatario
@@ -13330,31 +13488,23 @@ function validarDependenciasExportacion() {
             <table style="width:100%;border-collapse:collapse;">
                 <tr>
                     <td style="width:32%;text-align:center;vertical-align:bottom;padding:0 6px;">
-                        <div style="height:48px;display:flex;align-items:center;justify-content:center;color:var(--pdf-gris-claro);font-size:8px;opacity:0.85;margin-bottom:0;">Firma Jefe de Proyectos</div>
-                        <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
-                            <div style="font-size:9.5px;font-weight:700;color:var(--pdf-gris-oscuro);">Arq. Wilson Dario Salazar</div>
-                            <div style="font-size:7.5px;color:var(--pdf-azul-oscuro);font-weight:600;text-transform:uppercase;margin-top:1px;">Jefe de Proyectos</div>
-                        </div>
+                        ${_firmaSlot(firmaJefePrev, 'Firma Jefe de Proyectos', '', 'Jefe de Proyectos')}
                     </td>
                     <td style="width:36%;text-align:center;vertical-align:bottom;padding:0 6px;">
                         <div style="height:48px;border-bottom:1.5px solid #374151;width:88%;margin:0 auto;"></div>
                         <div style="width:88%;margin:0 auto;padding-top:5px;">
                             <div style="font-size:9px;font-weight:800;color:var(--pdf-gris-oscuro);text-transform:uppercase;letter-spacing:0.5px;">V°B° — Visto Bueno</div>
-                            <div style="font-size:7.5px;color:var(--pdf-gris-medio);text-transform:uppercase;margin-top:1px;">Encargado de Obra</div>
+                            <div style="font-size:7.5px;color:var(--pdf-gris-medio);text-transform:uppercase;margin-top:1px;">${_esc((firmaVistoPrev && firmaVistoPrev.nombre) || firmaVistoPrev.cargo || 'Encargado de Obra')}</div>
                         </div>
                     </td>
                     <td style="width:32%;text-align:center;vertical-align:bottom;padding:0 6px;">
-                        <div style="height:48px;display:flex;align-items:center;justify-content:center;color:var(--pdf-gris-claro);font-size:8px;opacity:0.85;margin-bottom:0;">Firma Gerente Comercial</div>
-                        <div style="border-top:1.5px solid #374151;width:88%;margin:0 auto;padding-top:5px;">
-                            <div style="font-size:9.5px;font-weight:700;color:var(--pdf-gris-oscuro);">Ing. Juan Luis Ramirez Jimenez</div>
-                            <div style="font-size:7.5px;color:var(--pdf-azul-oscuro);font-weight:600;text-transform:uppercase;margin-top:1px;">Gerente Comercial</div>
-                        </div>
+                        ${_firmaSlot(firmaGerentePrev, 'Firma Gerente Comercial', '', 'Gerente Comercial')}
                     </td>
                 </tr>
             </table>
             <div style="margin-top:16px;padding-top:10px;border-top:1px solid var(--pdf-gris-borde);">
                 <div style="font-size:7.5px;color:var(--pdf-gris-claro);text-align:center;">
-                    <strong style="color:var(--pdf-gris-medio);">CONSTRURAMSA</strong> — Soluciones en Ingeniería y Arquitectura &nbsp;·&nbsp; Confidencial — Uso interno autorizado
+                    <strong style="color:var(--pdf-gris-medio);">${_esc(nombreEmpresa)}</strong> — ${_esc(esloganEmpresa)} &nbsp;·&nbsp; Confidencial — Uso interno autorizado
                 </div>
             </div>`;
         }
@@ -13547,7 +13697,7 @@ function validarDependenciasExportacion() {
             // Paso 3.2: establecer fecha actual por defecto en reportes
             const reporteFecha = document.getElementById('reporte-fecha');
             if (reporteFecha && !reporteFecha.value) {
-                reporteFecha.value = new Date().toISOString().split('T')[0];
+                reporteFecha.value = _fechasISO(new Date());
             }
 
             // Paso 3.5: inicializar event listeners del dashboard
@@ -13591,7 +13741,7 @@ function validarDependenciasExportacion() {
             });
 
             // Paso 6: cargar todos los datos iniciales
-            const fechaHoy = new Date().toISOString().split('T')[0];
+            const fechaHoy = _fechasISO(new Date());
             document.getElementById('caja-fecha').value          = fechaHoy;
             document.getElementById('maq-fecha').value           = fechaHoy;
             document.getElementById('cot-fecha').value           = fechaHoy;
@@ -14095,7 +14245,7 @@ function validarDependenciasExportacion() {
                 
                 // Descargar screenshot
                 const link = document.createElement('a');
-                link.download = `screenshot_${new Date().toISOString().split('T')[0]}.png`;
+                link.download = `screenshot_${_fechasISO(new Date())}.png`;
                 link.href = imageData;
                 link.click();
                 

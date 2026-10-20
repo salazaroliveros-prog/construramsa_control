@@ -61,4 +61,45 @@ assert.deepStrictEqual(
   { attended: 1, absent: 0, overtime: 2, total: 270 }
 );
 
+// dateKey debe usar la fecha LOCAL (evita el corrimiento UTC de noche).
+assert.strictEqual(adapter.dateKey(new Date(2026, 8, 4, 23, 30)), '2026-09-04');
+assert.strictEqual(adapter.dateKey('2026-09-04T23:30:00'), '2026-09-04');
+assert.strictEqual(adapter.dateKey(''), '');
+
+// linkedExpenseIds: al filtrar por período sólo excluye vínculos cuya entidad
+// pertenece a ese período; los de otra fecha no deben desaparecer.
+const linkedData = {
+  viajes_camiones: {
+    viajes: [
+      { id: 'v1', fecha: '2026-09-04', gasto_id: 'g-en-rango' },
+      { id: 'v2', fecha: '2026-08-15', gasto_id: 'g-fuera' },
+    ],
+  },
+  mantenimiento: {
+    ordenes: [{ id: 'o1', fecha: '2026-09-04', gasto_id: 'g-orden' }],
+    compras_insumos: [{ id: 'i1', fecha: '2026-08-15', gasto_id: 'g-insumo' }],
+  },
+  adquisiciones: {
+    cotizaciones_compras: [{ id: 'c1', fecha: '2026-09-04', gasto_id: 'g-compra' }],
+  },
+};
+assert.deepStrictEqual([...adapter.linkedExpenseIds(linkedData)].sort(), [
+  'g-compra',
+  'g-en-rango',
+  'g-fuera',
+  'g-insumo',
+  'g-orden',
+]);
+assert.deepStrictEqual(
+  [...adapter.linkedExpenseIds(linkedData, { inicio: '2026-09-01', fin: '2026-09-30' })].sort(),
+  ['g-compra', 'g-en-rango', 'g-orden']
+);
+assert.deepStrictEqual([...adapter.linkedExpenseIds(linkedData, { inicio: '', fin: '' })].sort(), [
+  'g-compra',
+  'g-en-rango',
+  'g-fuera',
+  'g-insumo',
+  'g-orden',
+]);
+
 console.log('Report data adapter tests OK');

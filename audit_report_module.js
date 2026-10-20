@@ -452,7 +452,8 @@ function auditFormatAndPagination() {
 
   test('PDF generation uses html2pdf with proper options', () => {
     assert(
-      htmlContent.includes("html2pdf().set(opts).from(contenedor).toPdf().get('pdf')"),
+      htmlContent.includes('html2pdf().set(opts).from(contenedor)') &&
+        htmlContent.includes(".toPdf().get('pdf')"),
       'Missing html2pdf call'
     );
     assert(htmlContent.includes('margin: 0'), 'Missing margin: 0 in html2pdf options');
@@ -464,13 +465,13 @@ function auditFormatAndPagination() {
 
   test('PDF generation uses proper scale for quality', () => {
     assert(
-      htmlContent.includes(
-        'const rawScale = docHeight > 8000 ? 1.2 : (docHeight > 5000 ? 1.5 : 2)'
-      ),
+      htmlContent.includes('CR_ExportConfig.pdfScaleForHeight(docHeight)') ||
+        htmlContent.includes('const rawScale = docHeight > 8000'),
       'Missing dynamic scale calculation'
     );
     assert(
-      htmlContent.includes('const scale = Math.min(rawScale, 1.5)'),
+      htmlContent.includes('const scale = typeof CR_ExportConfig') &&
+        htmlContent.includes('(docHeight > 8000 ? 1.2 : 1.5)'),
       'Missing scale cap to prevent excessive memory usage'
     );
   });
@@ -508,8 +509,9 @@ function auditFormatAndPagination() {
 
   test('PDF generation uses proper document height', () => {
     assert(
-      htmlContent.includes('const docHeight = Math.max(Math.ceil(contenedor.scrollHeight), 1123)'),
-      'Missing docHeight calculation with minimum 1123px'
+      htmlContent.includes('Math.max(Math.ceil(contenedor.scrollHeight), PAGE_INNER_PX)') &&
+        htmlContent.includes('const PAGE_INNER_PX = Math.ceil(AREA_ALTO_MM * MM_A_PX)'),
+      'Missing docHeight calculation with minimum page height'
     );
   });
 

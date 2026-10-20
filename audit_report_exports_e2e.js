@@ -9,6 +9,7 @@ const assert = require('assert');
 const { execFileSync } = require('child_process');
 const { spawn } = require('child_process');
 const { chromium } = require('playwright');
+const XLSX = require('./vendor/xlsx.full.min.js');
 
 const port = 8152;
 const base = `http://127.0.0.1:${port}/`;
@@ -26,6 +27,12 @@ const types = [
 ];
 const range = { inicio: '2020-01-01', fin: '2030-12-31' };
 
+const PLACEHOLDER_RE = /\b(?:NaN|undefined|\[object Object\])\b/;
+
+function assertNoPlaceholders(text, label) {
+  assert(!PLACEHOLDER_RE.test(text), `${label} contains an unresolved placeholder`);
+}
+
 function assertStoredFile(filePath, format) {
   assert(fs.existsSync(filePath), `${format} was not saved to disk: ${filePath}`);
   const content = fs.readFileSync(filePath);
@@ -36,37 +43,53 @@ function assertStoredFile(filePath, format) {
       content.subarray(0, 3).equals(Buffer.from([0xef, 0xbb, 0xbf])),
       'CSV is missing UTF-8 BOM'
     );
-    assert.match(
-      content.toString('utf8'),
-      /CONSTRURAMSA|Reporte|REPORTE/i,
-      'CSV has no report content'
-    );
-    return;
+    const text = content.toString('utf8');
+    assert.match(text, /CONSTRURAMSA|Reporte|REPORTE/i, 'CSV has no report content');
+    const rows = text.trim().split(/\r?\n/);
+    assert(rows.length > 1, `CSV has no data rows: ${filePath}`);
+    assertNoPlaceholders(text, `CSV ${path.basename(filePath)}`);
+    return { rows: rows.length };
   }
 
   if (format === 'PDF') {
     assert(content.subarray(0, 5).equals(Buffer.from('%PDF-')), `Invalid PDF header: ${filePath}`);
-    const pageCount = Number(
+    const info = JSON.parse(
       execFileSync(
         'python',
-        ['-c', 'import pymupdf,sys; print(len(pymupdf.open(sys.argv[1])))', filePath],
+        [
+          '-c',
+          'import pymupdf,sys,json; d=pymupdf.open(sys.argv[1]); print(json.dumps({"pages":len(d),"text":"".join(p.get_text() for p in d)}))',
+          filePath,
+        ],
         { encoding: 'utf8' }
       ).trim()
     );
-    assert(pageCount > 0, `PDF has no pages: ${filePath}`);
-    return;
+    assert(info.pages > 0, `PDF has no pages: ${filePath}`);
+    assert(info.text.trim().length > 20, `PDF has no extractable text: ${filePath}`);
+    assertNoPlaceholders(info.text, `PDF ${path.basename(filePath)}`);
+    return { pages: info.pages };
   }
 
   assert(content.subarray(0, 2).equals(Buffer.from('PK')), `Invalid XLSX header: ${filePath}`);
-  const xlsxCheck = [
-    'import sys,zipfile',
-    'archive=zipfile.ZipFile(sys.argv[1])',
-    'names=set(archive.namelist())',
-    "assert '[Content_Types].xml' in names and 'xl/workbook.xml' in names",
-    "assert any(name.startswith('xl/worksheets/') for name in names)",
-    'archive.close()',
-  ].join(';');
-  execFileSync('python', ['-c', xlsxCheck, filePath], { stdio: 'pipe' });
+  const workbook = XLSX.read(content, { type: 'buffer' });
+  assert(workbook.SheetNames.length > 0, `XLSX has no sheets: ${filePath}`);
+  let cellCount = 0;
+  const texts = [];
+  for (const name of workbook.SheetNames) {
+    const worksheet = workbook.Sheets[name];
+    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+    assert(rows.length > 0, `XLSX sheet "${name}" is empty: ${filePath}`);
+    for (const row of rows) {
+      for (const value of row) {
+        if (value === '' || value == null) continue;
+        cellCount++;
+        texts.push(String(value));
+      }
+    }
+  }
+  assert(cellCount > 0, `XLSX has no populated cells: ${filePath}`);
+  assertNoPlaceholders(texts.join('\n'), `XLSX ${path.basename(filePath)}`);
+  return { sheets: workbook.SheetNames.length, cells: cellCount };
 }
 
 async function waitForDownloads(downloads, count, timeoutMs = 20000) {
@@ -107,6 +130,19 @@ async function main() {
   fs.rmSync(output, { recursive: true, force: true });
   fs.mkdirSync(output, { recursive: true });
   const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'construramsa_db.json'), 'utf8'));
+  const seedConfig = seed.configuracion || {};
+  const seedProject =
+    (seed.proyectos || []).find((project) => project.id === seedConfig.proyecto_actual) || {};
+  const seedProjectData = (seed.proyectos_data || {})[seedConfig.proyecto_actual] || {};
+  let seedIngresos = 0;
+  let seedEgresos = 0;
+  for (const movement of seedProjectData.caja_chica || []) {
+    const amount = Math.abs(Number(movement.monto)) || 0;
+    const kind = String(movement.tipo || '').toLowerCase();
+    if (kind === 'apertura' || kind === 'ingreso' || kind === 'entrada') seedIngresos += amount;
+    else seedEgresos += amount;
+  }
+  const expectedSaldo = (Number(seedProject.presupuesto_inicial) || 0) + seedIngresos - seedEgresos;
   const server = spawn(process.execPath, ['server.js'], {
     cwd: __dirname,
     env: { ...process.env, PORT: String(port), NODE_OPTIONS: '' },
@@ -145,7 +181,17 @@ async function main() {
           container.classList.remove('pdf-generating');
           // Disparar descarga XLSX (capturada por page.on('download') en Node)
           window.generarXLSXReporte(type, range.inicio, range);
-          return { csv, pdf: pdf.output('datauristring') };
+          let exec = null;
+          if (type === 'ejecutivo') {
+            const db = JSON.parse(localStorage.getItem('construramsa_db'));
+            const kpis = window.CR_ReporteEjecutivo.calcularKPIs(db, range);
+            exec = {
+              saldo: kpis.saldo,
+              totalGastos: kpis.totalGastos,
+              totalIngresos: kpis.totalIngresos,
+            };
+          }
+          return { csv, pdf: pdf.output('datauristring'), exec };
         },
         { type, range }
       );
@@ -158,6 +204,18 @@ async function main() {
       fs.writeFileSync(pdfPath, Buffer.from(artifact.pdf.split(',')[1], 'base64'));
       assertStoredFile(csvPath, 'CSV');
       assertStoredFile(pdfPath, 'PDF');
+      if (type === 'ejecutivo') {
+        assert(artifact.exec, 'executive KPIs were not returned');
+        assert(
+          Math.abs(artifact.exec.saldo - expectedSaldo) < 0.05,
+          `executive saldo must use the project budget (expected ${expectedSaldo.toFixed(2)}, got ${Number(artifact.exec.saldo).toFixed(2)})`
+        );
+        assert(
+          Math.abs(artifact.exec.totalIngresos - seedIngresos) < 0.05 &&
+            Math.abs(artifact.exec.totalGastos - seedEgresos) < 0.05,
+          'executive totals must match the seed cash movements'
+        );
+      }
 
       const entry = {
         type,
@@ -211,6 +269,36 @@ async function main() {
           : 'CSV';
       assertStoredFile(savedPath, format);
     }
+    // Regresión: una categoría con suficientes filas cruza páginas. Las barras
+    // usan color sólido para evitar el fallo de html2pdf con gradientes partidos.
+    const longCategoryPdf = await page.evaluate(async (reportRange) => {
+      const db = window.getDB();
+      const projectData = db.proyectos_data[db.configuracion.proyecto_actual];
+      projectData.caja_chica = projectData.caja_chica || [];
+      for (let index = 0; index < 18; index += 1) {
+        projectData.caja_chica.push({
+          id: `regresion-categoria-${index}`,
+          tipo: 'egreso',
+          fecha: reportRange.inicio,
+          monto: 100 + index,
+          categoria: `regresion_${index + 1}`,
+          descripcion: 'Categoría de regresión',
+        });
+      }
+      const html = window.generarHTMLReporte('categoria', reportRange.inicio, reportRange);
+      const container = window.prepararContenedorImpresion('Reporte categoría extenso', html);
+      const pdf = await window.generarPDFPlantilla(container, 'audit_categoria_extensa.pdf');
+      container.classList.remove('pdf-generating');
+      return pdf.output('datauristring');
+    }, range);
+    const longCategoryPath = path.join(output, 'audit_categoria_extensa.pdf');
+    fs.writeFileSync(longCategoryPath, Buffer.from(longCategoryPdf.split(',')[1], 'base64'));
+    const longCategoryInfo = assertStoredFile(longCategoryPath, 'PDF');
+    assert(
+      longCategoryInfo.pages > 1,
+      `long category PDF should paginate (${longCategoryInfo.pages} page)`
+    );
+
     fs.writeFileSync(path.join(output, 'manifest.json'), JSON.stringify(manifest, null, 2));
     console.log(JSON.stringify({ output, artifacts: manifest }, null, 2));
   } finally {

@@ -41,6 +41,10 @@ async function readState(page) {
     const db = JSON.parse(localStorage.getItem('construramsa_db'));
     const projectId = db.configuracion.proyecto_actual;
     const data = db.proyectos_data[projectId] || {};
+    const quote = (data.adquisiciones?.cotizaciones_compras || []).find(
+      (item) => item.material_descripcion === 'Cemento E2E'
+    );
+    const quoteExpense = (data.caja_chica || []).find((item) => item.id === quote?.gasto_id);
     return {
       projectId,
       projects: db.proyectos.length,
@@ -56,9 +60,9 @@ async function readState(page) {
       maintenanceMachines: (data.mantenimiento?.maquinaria || []).length,
       orders: (data.mantenimiento?.ordenes || []).length,
       supplies: (data.mantenimiento?.compras_insumos || []).length,
-      quoteExpenseLinked: !!data.adquisiciones?.cotizaciones_compras?.find(
-        (quote) => quote.material_descripcion === 'Cemento E2E'
-      )?.gasto_id,
+      quoteExpenseLinked: !!quote?.gasto_id,
+      quoteDate: quote?.fecha || null,
+      quoteExpenseDate: quoteExpense?.fecha || null,
       tripExpenseLinked: !!data.viajes_camiones?.viajes?.[0]?.gasto_id,
       orderExpenseLinked: !!data.mantenimiento?.ordenes?.[0]?.gasto_id,
       supplyExpenseLinked: !!data.mantenimiento?.compras_insumos?.[0]?.gasto_id,
@@ -229,6 +233,7 @@ async function readState(page) {
         stateAfterReload.orders === 1 &&
         stateAfterReload.supplies === 1 &&
         stateAfterReload.quoteExpenseLinked &&
+        stateAfterReload.quoteExpenseDate === stateAfterReload.quoteDate &&
         !errors.length,
     };
     console.log(JSON.stringify(result, null, 2));

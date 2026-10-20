@@ -64,6 +64,7 @@ test_*.js
 !test_report_data_adapter.js
 !test_report_ui_guards.js
 !test_report_pdf_layout.js
+!test_report_pdf_pagination.js
 !test_export_config.js
 !test_exportador.js
 !test_all_reports.js
@@ -94,6 +95,8 @@ audit_visual_completo.js
 audit_visual_report.html
 audit_visual_results.json
 temp_audit_reports/
+temp_audit_real_data/
+temp_pdf_pagination/
 scroll_audit_screenshots/
 ux_full_audit.js
 ux_manual_audit.js

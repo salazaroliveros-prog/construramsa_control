@@ -253,7 +253,10 @@
     if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
     var d = new Date(v);
     if (isNaN(d.getTime())) return '';
-    return d.toISOString().slice(0, 10);
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
   };
 
   const _filtrarPorRango = (registros, campoFecha, inicio, fin) => {

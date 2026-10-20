@@ -100,9 +100,13 @@
   }
 
   // ── CSS @page listo para inyectar (márgenes estándar) ──────────────
-  function cssPage(pageSize = 'a4') {
+  function cssPage(pageSize = 'a4', empresa = '') {
     const size = PAGE_SIZES[pageSize] || PAGE_SIZES.a4;
     const m = MARGENES_PDF;
+    const empresaCSS = String(empresa || '').replace(/["\\\r\n]/g, '');
+    const pieIzquierdo = empresaCSS
+      ? 'content: "' + empresaCSS + '"'
+      : 'content: attr(data-empresa)';
     return (
       '@page {' +
       'size: ' +
@@ -119,7 +123,9 @@
       'mm ' +
       m.left +
       'mm;' +
-      '@bottom-left { content: "CONSTRURAMSA"; font-size: ' +
+      '@bottom-left { ' +
+      pieIzquierdo +
+      '; font-size: ' +
       TIPOGRAFIA.tamanoFooter +
       '; color: ' +
       PALETA.grisMedio +

@@ -71,7 +71,7 @@
    */
   var CSS_PAGE =
     '@page{margin:12mm 12mm 16mm 12mm;}' +
-    '@page{@bottom-left{content:"CONSTRURAMSA";font-size:8pt;color:#6B7280;}}' +
+    '@page{@bottom-left{content:attr(data-empresa);font-size:8pt;color:#6B7280;}}' +
     '@page{@bottom-center{content:attr(data-empresa);font-size:8pt;color:#6B7280;}}' +
     '@page{@bottom-right{content:counter(page) " / " counter(pages);font-size:8pt;color:#6B7280;}}';
 
