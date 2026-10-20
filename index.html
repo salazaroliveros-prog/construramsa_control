@@ -13648,23 +13648,37 @@ function validarDependenciasExportacion() {
             // Paso 1: hidratar caché desde IndexedDB (persistencia robusta de PWA)
             await hidratarPersistencia();
 
-            // Si no hay datos persistidos, sembrar desde el JSON inicial y recargar
+            // Si no hay datos persistidos, sembrar desde el JSON inicial en
+            // desarrollo. En producción el seed no se publica: se crea una base
+            // nueva y se continúa con la inicialización normal de la app.
             const tieneLocalStorage = typeof localStorage !== 'undefined' && !!localStorage.getItem(DB_KEY);
             if (!tieneLocalStorage) {
-                fetch('./construramsa_db.json')
-                    .then(r => { if (!r.ok) throw new Error('no-file'); return r.json(); })
-                    .then(data => {
-                        const migrado = migrarDB(data);
-                        if (migrado.configuracion.logo_base64 && migrado.configuracion.logo_base64.length < 200) {
-                            migrado.configuracion.logo_base64 = '';
+                const host = location.hostname;
+                const esEntornoLocal =
+                    location.protocol === 'file:' ||
+                    host === 'localhost' ||
+                    host === '127.0.0.1' ||
+                    host === '::1';
+                if (esEntornoLocal) {
+                    try {
+                        const respuesta = await fetch('./construramsa_db.json');
+                        if (respuesta.ok) {
+                            const data = await respuesta.json();
+                            const migrado = migrarDB(data);
+                            if (migrado.configuracion.logo_base64 && migrado.configuracion.logo_base64.length < 200) {
+                                migrado.configuracion.logo_base64 = '';
+                            }
+                            saveDB(migrado);
+                            console.log('Datos cargados desde construramsa_db.json');
+                            hideLoading();
+                            location.reload();
+                            return;
                         }
-                        saveDB(migrado);
-                        console.log('Datos cargados desde construramsa_db.json');
-                        hideLoading();
-                        location.reload();
-                    })
-                    .catch(() => console.log('Sin archivo JSON inicial; base de datos nueva.'));
-                return;
+                    } catch (e) {
+                        console.log('Sin archivo JSON inicial; base de datos nueva.');
+                    }
+                }
+                inicializarDB();
             }
 
             // Paso 2: inicializar DB y resolver proyecto activo

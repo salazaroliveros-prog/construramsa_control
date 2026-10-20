@@ -65,6 +65,7 @@ test_*.js
 !test_report_ui_guards.js
 !test_report_pdf_layout.js
 !test_report_pdf_pagination.js
+!test_boot_first_load.js
 !test_export_config.js
 !test_exportador.js
 !test_all_reports.js
