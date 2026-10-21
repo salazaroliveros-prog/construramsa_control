@@ -65,6 +65,7 @@ test_*.js
 !test_report_ui_guards.js
 !test_report_pdf_layout.js
 !test_report_pdf_pagination.js
+!test_report_pdf_page_sizes.js
 !test_boot_first_load.js
 !test_export_config.js
 !test_exportador.js
@@ -98,6 +99,7 @@ audit_visual_results.json
 temp_audit_reports/
 temp_audit_real_data/
 temp_pdf_pagination/
+temp_pdf_page_sizes/
 scroll_audit_screenshots/
 ux_full_audit.js
 ux_manual_audit.js
@@ -154,6 +156,7 @@ EXPORT_TEST_REPORT.md
 
 # Configuración de editor (local)
 .kilo/
+.mcp.json
 
 # Backups de datos temporales
 control_obra_backup_*.json
@@ -164,3 +167,10 @@ construramsa_db.json.pre_alineacion
 sincronizacion_offline_report.json
 functional_test_results.json
 paginacion_report.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

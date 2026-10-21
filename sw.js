@@ -1,10 +1,10 @@
 // ============================================================
-// SERVICE WORKER — Control de Obra v2.9.4
+// SERVICE WORKER — Control de Obra v2.9.5
 // Estrategia: Cache First para recursos estáticos, Network First para navegación
 // Mejora: Offline completo con fallback UI
 // ============================================================
 
-const CACHE_VERSION = '2.9.4';
+const CACHE_VERSION = '2.9.5';
 const CACHE_NAME = `control-obra-v${CACHE_VERSION}`;
 const OFFLINE_CACHE_NAME = `${CACHE_NAME}-offline`;
 
@@ -25,6 +25,7 @@ const STATIC_ASSETS = [
   './vendor/exceljs.min.js',
   './src/types.js',
   './src/config.js',
+  './src/exportConfig.js',
   './src/reportDataAdapter.js',
   './src/kpiEngine.js',
   './src/exportador.js',
@@ -32,6 +33,8 @@ const STATIC_ASSETS = [
   './src/signatureCapture.js',
   './src/nominaEngine.js',
   './src/plantillaPremium.js',
+  './src/pdfExporter.js',
+  './src/syncManager.js',
   './src/syncOptimizer.js',
   './src/silentDownload.js',
   './src/persistence.js',
@@ -124,39 +127,24 @@ self.addEventListener('fetch', function (event) {
   const esNavegacion =
     event.request.mode === 'navigate' || event.request.destination === 'document';
 
-  // Para navegación: Cache First para soportar recarga offline
+  // Para navegación: Network First con fallback a caché para soportar recarga offline.
+  // Esto garantiza que, con conexión, siempre se sirva el index.html del último
+  // despliegue en lugar de una copia antigua del caché.
   if (esNavegacion) {
     event.respondWith(
-      caches.match(event.request).then(function (cached) {
-        if (cached) {
-          // Actualizar en background si hay red
-          fetch(event.request)
-            .then(function (response) {
-              if (response && response.status === 200) {
-                const clone = response.clone();
-                caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
-              }
-            })
-            .catch(() => {
-              // No hay red, pero tenemos caché - OK
-            });
-          return cached;
-        }
-
-        // Si no está en caché, buscar en red
-        return fetch(event.request)
-          .then(function (response) {
-            if (response && response.status === 200) {
-              const clone = response.clone();
-              caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
-            }
-            return response;
-          })
-          .catch(function () {
-            // Fallback a index.html para SPA
-            return caches.match('./index.html');
-          });
-      })
+      fetch(event.request)
+        .then(function (response) {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(function () {
+          return caches
+            .match(event.request)
+            .then((cached) => cached || caches.match('./index.html'));
+        })
     );
     return;
   }

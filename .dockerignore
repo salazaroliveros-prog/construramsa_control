@@ -1,0 +1,48 @@
+# Dependencias y artefactos locales
+node_modules
+npm-debug.log*
+*.log
+
+# Control de versiones y configuración local
+.git
+.gitignore
+.github
+.vercel
+.env
+.env.*
+.mcp.json
+
+# Pruebas y artefactos generados (no necesarios en producción)
+test_*.js
+audit_*.js
+*_validator.js
+verify_all_modules.js
+functional_test.js
+run_e2e_validation.js
+report_*.csv
+report_*.json
+*_report.json
+*_report.html
+exports
+temp_audit_reports
+temp_audit_real_data
+temp_pdf_pagination
+temp_pdf_page_sizes
+screenshots
+validation_screenshots
+scroll_validation_screenshots
+ux_audit_screenshots
+test-results
+playwright-report
+playwright/.cache
+playwright/.auth
+
+# Documentación y archivos de desarrollo
+*.md
+!README.md
+Dockerfile
+compose.yaml
+.dockerignore
+
+# Mantener explícitamente los recursos de producción:
+# index.html, src/, vendor/, manifest.json, sw.js, server.js, icons, splash-*.png

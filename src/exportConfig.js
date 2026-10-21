@@ -1,7 +1,7 @@
 /**
  * @fileoverview Configuración única de exportación para CONSTRURAMSA.
  *
- * Centraliza: tamaños de hoja (A4/Letter/Legal), márgenes estándares,
+ * Centraliza: tamaños de hoja (A4/Letter/Oficio/Legal), márgenes estándares,
  * paleta corporativa, paginación de PDF/CSV/XLSX y opciones de renderizado.
  * Es la fuente de verdad para todos los módulos de exportación.
  *
@@ -15,6 +15,7 @@
   const PAGE_SIZES = Object.freeze({
     a4: { nombre: 'A4', ancho: 210, alto: 297 },
     letter: { nombre: 'Letter', ancho: 216, alto: 279 },
+    oficio: { nombre: 'Oficio', ancho: 216, alto: 330 },
     legal: { nombre: 'Legal', ancho: 216, alto: 356 },
   });
 

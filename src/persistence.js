@@ -8,7 +8,7 @@
  *  - Respaldo local automático en archivo JSON del mismo directorio.
  *
  * @module persistence
- * @version 2.9.4
+ * @version 2.9.5
  */
 (function (globalScope) {
   'use strict';

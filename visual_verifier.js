@@ -112,7 +112,7 @@ function seedDataScript() {
     return d.toISOString().split('T')[0];
   };
   const db = {
-    version: '2.9.4',
+    version: '2.9.5',
     configuracion: {
       nombre_empresa: 'CONSTRURAMSA',
       presupuesto_inicial_caja: 200000,

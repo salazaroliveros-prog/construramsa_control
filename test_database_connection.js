@@ -1,5 +1,5 @@
 /**
- * Test de Conexión a Base de Datos - CONSTRURAMSA Control de Obra v2.9.4
+ * Test de Conexión a Base de Datos - CONSTRURAMSA Control de Obra v2.9.5
  * =====================================================================
  * Valida la lógica de conexión, inicialización y manejo de errores de DB
  *
@@ -75,7 +75,7 @@ function restoreDB() {
 
 // DB inicial válida
 const validDB = {
-  version: '2.9.4',
+  version: '2.9.5',
   configuracion: {
     nombre_empresa: 'CONSTRURAMSA',
     eslogan: 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA',
@@ -126,7 +126,7 @@ function testDBInitialization() {
   const db = loadDB();
 
   assert(fs.existsSync(DB_FILE), 'Archivo DB creado');
-  assert(db.version === '2.9.4', 'Versión correcta');
+  assert(db.version === '2.9.5', 'Versión correcta');
   assert(db.configuracion, 'Configuración existe');
   assert(Array.isArray(db.proyectos), 'Proyectos es array');
   assert(typeof db.proyectos_data === 'object', 'Proyectos_data es objeto');

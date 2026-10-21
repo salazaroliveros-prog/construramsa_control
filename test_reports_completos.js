@@ -1,5 +1,5 @@
 /**
- * Test de Reportes Completos con Datos Reales - CONSTRURAMSA Control de Obra v2.9.4
+ * Test de Reportes Completos con Datos Reales - CONSTRURAMSA Control de Obra v2.9.5
  * ===========================================================================
  * Genera datos completos y realistas de todas las operaciones de la aplicación
  * y valida todos los tipos de reportes con cálculos financieros precisos.
@@ -137,7 +137,7 @@ function generateCompleteTestData() {
   }
 
   const db = {
-    version: '2.9.4',
+    version: '2.9.5',
     configuracion: {
       nombre_empresa: 'CONSTRURAMSA',
       eslogan: 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA',
@@ -712,7 +712,7 @@ function testGenerateCompleteData() {
   const cajaChicaCount = db.proyectos_data.proj_main.caja_chica.length;
   logInfo(`Movimientos de caja chica generados: ${cajaChicaCount}`);
 
-  assert(db.version === '2.9.4', 'Versión de DB correcta');
+  assert(db.version === '2.9.5', 'Versión de DB correcta');
   assert(db.proyectos.length === 2, '2 proyectos creados');
   assert(
     cajaChicaCount >= 10,

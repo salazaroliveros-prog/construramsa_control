@@ -421,10 +421,10 @@
       );
     }
 
-    var w = 660,
+    var w = 700,
       rowH = 34,
       padL = 165,
-      padR = 100,
+      padR = 130,
       topPad = 10;
     var h = topPad + items.length * rowH + 14;
     var usable = w - padL - padR;
@@ -462,10 +462,7 @@
           bw +
           '" height="20" rx="3" fill="' +
           barColor +
-          '">' +
-          '<animate attributeName="width" from="0" to="' +
-          bw +
-          '" dur="0.5s" fill="freeze" /></rect>' +
+          '"></rect>' +
           '<text x="' +
           (padL + bw + 8) +
           '" y="' +
@@ -474,11 +471,7 @@
           COLORES.tinta +
           '" font-weight="600">' +
           fmtQ(it.value) +
-          ' <tspan fill="' +
-          COLORES.gris +
-          '">(' +
-          pct +
-          '%)</tspan></text>'
+          '</text>'
         );
       })
       .join('');
@@ -518,12 +511,12 @@
       );
     }
 
-    var w = 660,
+    var w = 680,
       h = 200,
       padL = 60,
       padB = 34,
       padT = 15,
-      padR = 15;
+      padR = 25;
     var innerW = w - padL - padR,
       innerH = h - padT - padB;
     var vals = dias.map(function (d) {
@@ -599,8 +592,7 @@
           p.y +
           '" r="3.2" fill="' +
           COLORES.acento +
-          '">' +
-          '<animate attributeName="r" values="3.2;5;3.2" dur="2s" repeatCount="indefinite" /></circle>'
+          '"></circle>'
         );
       })
       .join('');
@@ -618,14 +610,12 @@
       polyArea +
       '" fill="' +
       COLORES.primario +
-      '" fill-opacity="0.12">' +
-      '<animate attributeName="fill-opacity" values="0.12;0.2;0.12" dur="3s" repeatCount="indefinite" /></polygon>' +
+      '" fill-opacity="0.12"></polygon>' +
       '<polyline points="' +
       pts.join(' ') +
       '" fill="none" stroke="' +
       COLORES.primarioOsc +
-      '" stroke-width="2.5">' +
-      '<animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="1.5s" fill="freeze" /></polyline>' +
+      '" stroke-width="2.5"></polyline>' +
       dots +
       xLabels +
       '</svg>'

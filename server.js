@@ -58,12 +58,15 @@ module.exports = async (req, res) => {
     }
 
     const contentType = MIME[ext] || 'application/octet-stream';
+    const base = path.basename(resolved).toLowerCase();
+    const sinCache =
+      ext === '.html' || ext === '.json' || ext === '.webmanifest' || base === 'sw.js';
     res.writeHead(200, {
       'Content-Type': contentType,
-      'Cache-Control':
-        ext === '.html'
-          ? 'no-store, no-cache, must-revalidate, max-age=0'
-          : 'public, max-age=31536000, immutable',
+      'Cache-Control': sinCache
+        ? 'no-store, no-cache, must-revalidate, max-age=0'
+        : 'public, max-age=3600, must-revalidate',
+      'X-Content-Type-Options': 'nosniff',
     });
     res.end(data);
   } catch (err) {
@@ -77,6 +80,7 @@ function sendHtml(res, data) {
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+    'X-Content-Type-Options': 'nosniff',
   });
   res.end(data);
 }

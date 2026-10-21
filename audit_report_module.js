@@ -413,7 +413,8 @@ function auditTemplateUI() {
 
     const imgTags = templateContent.match(/<img[^>]*>/g) || [];
     const unconstrained = imgTags.filter(
-      (img) => !img.includes('max-width') && !img.includes('width:')
+      (img) =>
+        !/display\s*:\s*none/.test(img) && !img.includes('max-width') && !img.includes('width:')
     );
     assert(
       unconstrained.length === 0,
@@ -439,93 +440,48 @@ function auditFormatAndPagination() {
   const htmlPath = path.join(__dirname, 'index.html');
   const htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
-  test('PDF generation uses proper page size constants', () => {
+  test('PDF generation delegates to the dedicated exporter module', () => {
     assert(
-      htmlContent.includes('PAGE_PX = { letter: 816, a4: 794, legal: 816 }'),
-      'Missing PAGE_PX constants'
+      htmlContent.includes('window.CR_PdfExport') &&
+        htmlContent.includes('moduloPdf.generarPDF(contenedor, filename'),
+      'PDF export is not delegated to CR_PdfExport'
     );
     assert(
-      htmlContent.includes("PAGE_MM = { letter: '216mm', a4: '210mm', legal: '216mm' }"),
-      'Missing PAGE_MM constants'
-    );
-  });
-
-  test('PDF generation uses html2pdf with proper options', () => {
-    assert(
-      htmlContent.includes('html2pdf().set(opts).from(contenedor)') &&
-        htmlContent.includes(".toPdf().get('pdf')"),
-      'Missing html2pdf call'
-    );
-    assert(htmlContent.includes('margin: 0'), 'Missing margin: 0 in html2pdf options');
-    assert(
-      htmlContent.includes("jsPDF: { unit: 'mm', format: pageSize, orientation: 'portrait' }"),
-      'Missing jsPDF configuration'
+      htmlContent.includes('./src/pdfExporter.js'),
+      'pdfExporter.js is not loaded by index.html'
     );
   });
 
-  test('PDF generation uses proper scale for quality', () => {
+  test('PDF exporter uses html2pdf and manual pagination', () => {
+    const pdfExporter = fs.readFileSync(path.join(__dirname, 'src', 'pdfExporter.js'), 'utf8');
+    assert(pdfExporter.includes('html2pdf()'), 'Missing html2pdf call in pdfExporter.js');
+    assert(pdfExporter.includes(".toPdf().get('pdf')"), 'Missing toPdf().get("pdf") call');
+    assert(pdfExporter.includes('calcularCortes'), 'Missing manual page cut calculation');
     assert(
-      htmlContent.includes('CR_ExportConfig.pdfScaleForHeight(docHeight)') ||
-        htmlContent.includes('const rawScale = docHeight > 8000'),
-      'Missing dynamic scale calculation'
-    );
-    assert(
-      htmlContent.includes('const scale = typeof CR_ExportConfig') &&
-        htmlContent.includes('(docHeight > 8000 ? 1.2 : 1.5)'),
-      'Missing scale cap to prevent excessive memory usage'
+      pdfExporter.includes('pdf.addPage([medidas.anchoHoja, medidas.altoHoja]'),
+      'Missing page size application when adding pages'
     );
   });
 
-  test('PDF generation injects CSS variables for cloned document', () => {
-    assert(
-      htmlContent.includes('onclone: function(clonedDoc)'),
-      'Missing onclone function for CSS variable injection'
-    );
-    assert(htmlContent.includes('CSS_VARS'), 'Missing CSS_VARS definition');
+  test('PDF exporter uses standard page sizes and margins', () => {
+    const exportConfig = fs.readFileSync(path.join(__dirname, 'src', 'exportConfig.js'), 'utf8');
+    assert(exportConfig.includes('letter: { nombre:'), 'Missing Letter page size');
+    assert(exportConfig.includes('oficio: { nombre:'), 'Missing Oficio page size');
+    assert(exportConfig.includes('legal: { nombre:'), 'Missing Legal page size');
+    assert(exportConfig.includes('MARGENES_PDF'), 'Missing standard PDF margins');
   });
 
-  test('PDF generation stamps page numbers', () => {
-    assert(htmlContent.includes('Página ${i} de ${total}'), 'Missing page number stamping');
-    assert(htmlContent.includes('pdf.setPage(i)'), 'Missing pdf.setPage() call');
-    assert(
-      htmlContent.includes('pdf.internal.getNumberOfPages()'),
-      'Missing getNumberOfPages() call'
-    );
-  });
-
-  test('PDF generation handles page breaks properly', () => {
-    assert(
-      htmlContent.includes(
-        "pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', '.signature-wrapper'] }"
-      ),
-      'Missing pagebreak configuration'
-    );
-  });
-
-  test('PDF template has proper page break CSS', () => {
-    assert(htmlContent.includes('page-break-after: always'), 'Missing page-break-after: always');
-    assert(htmlContent.includes('page-break-inside: avoid'), 'Missing page-break-inside: avoid');
-  });
-
-  test('PDF generation uses proper document height', () => {
-    assert(
-      htmlContent.includes('Math.max(Math.ceil(contenedor.scrollHeight), PAGE_INNER_PX)') &&
-        htmlContent.includes('const PAGE_INNER_PX = Math.ceil(AREA_ALTO_MM * MM_A_PX)'),
-      'Missing docHeight calculation with minimum page height'
-    );
-  });
-
-  test('PDF generation waits for layout recalculation', () => {
-    assert(
-      htmlContent.includes('requestAnimationFrame'),
-      'Missing requestAnimationFrame for layout recalculation'
-    );
+  test('PDF exporter waits for layout recalculation', () => {
+    const pdfExporter = fs.readFileSync(path.join(__dirname, 'src', 'pdfExporter.js'), 'utf8');
+    assert(pdfExporter.includes('requestAnimationFrame'), 'Missing layout recalculation wait');
   });
 
   test('PDF generation handles page size selection', () => {
     assert(htmlContent.includes('id="vp-page-size"'), 'Missing vp-page-size selector');
     assert(
-      htmlContent.includes('letter') && htmlContent.includes('a4') && htmlContent.includes('legal'),
+      ['letter', 'oficio', 'a4', 'legal'].every((size) =>
+        htmlContent.includes(`<option value="${size}">`)
+      ),
       'Missing page size options'
     );
   });
@@ -552,9 +508,10 @@ function auditFormatAndPagination() {
     assert(htmlContent.includes('# Fecha de generacion'), 'Missing generation date in CSV');
   });
 
-  test('PDF template has proper footer area', () => {
+  test('PDF exporter stamps footer page numbers', () => {
+    const pdfExporter = fs.readFileSync(path.join(__dirname, 'src', 'pdfExporter.js'), 'utf8');
     assert(
-      htmlContent.includes('Página') && htmlContent.includes('de ${total}'),
+      pdfExporter.includes("'Página ' + pagina + ' de ' + totalPaginas"),
       'Missing footer page numbers'
     );
   });
@@ -578,9 +535,11 @@ function auditFormatAndPagination() {
   });
 
   test('PDF generation avoids breaking on specific elements', () => {
+    const pdfExporter = fs.readFileSync(path.join(__dirname, 'src', 'pdfExporter.js'), 'utf8');
     assert(
-      htmlContent.includes("avoid: ['tr', 'img', '.signature-wrapper']"),
-      'Missing pagebreak avoid rules for critical elements'
+      pdfExporter.includes("querySelectorAll('table')") &&
+        pdfExporter.includes('pdf-keep-together'),
+      'Missing keep-together rules for tables and signature blocks'
     );
   });
 }
@@ -651,10 +610,15 @@ function auditMobileSpecific() {
     assert(printCss.includes('12mm'), 'Missing mm units in print CSS');
   });
 
-  test('PDF generation uses proper pixel-to-mm conversion', () => {
+  test('PDF exporter uses proper pixel-to-mm conversion', () => {
+    const pdfExporter = fs.readFileSync(path.join(__dirname, 'src', 'pdfExporter.js'), 'utf8');
     assert(
-      htmlContent.includes('816') && htmlContent.includes('794'),
-      'Missing pixel constants for letter/A4 at 96dpi'
+      pdfExporter.includes('const MM_A_PX = 96 / 25.4'),
+      'Missing 96dpi pixel-to-mm conversion constant'
+    );
+    assert(
+      pdfExporter.includes('anchoContenido: Math.max(20, ancho - izquierda - derecha)'),
+      'Missing printable width calculation'
     );
   });
 }

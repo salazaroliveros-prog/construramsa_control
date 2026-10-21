@@ -1,5 +1,5 @@
 /**
- * CONSTRURAMSA — Prueba de Paginación con Muchos Registros v2.9.4
+ * CONSTRURAMSA — Prueba de Paginación con Muchos Registros v2.9.5
  * ====================================================================
  * Verifica que con cientos de registros la paginación (módulo Maquinaria)
  * genera las páginas correctas y que los BOTONES DE DIRECCIÓN navegan a

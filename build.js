@@ -1,5 +1,5 @@
 /**
- * Build Script - CONSTRURAMSA Control de Obra v2.9.4
+ * Build Script - CONSTRURAMSA Control de Obra v2.9.5
  * =================================================
  * Script de build que utiliza esbuild para bundling y minificación
  * de los módulos JavaScript de la aplicación.

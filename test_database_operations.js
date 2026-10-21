@@ -1,5 +1,5 @@
 /**
- * Test de Operaciones de Base de Datos - CONSTRURAMSA Control de Obra v2.9.4
+ * Test de Operaciones de Base de Datos - CONSTRURAMSA Control de Obra v2.9.5
  * ========================================================================
  * Valida CRUD completo: Crear, Leer, Actualizar, Eliminar
  *
@@ -84,7 +84,7 @@ function cleanupSandbox() {
 
 // DB inicial vacía
 const emptyDB = {
-  version: '2.9.4',
+  version: '2.9.5',
   configuracion: {
     nombre_empresa: 'CONSTRURAMSA',
     eslogan: 'SOLUCIONES EN INGENIERÍA Y ARQUITECTURA',
@@ -128,7 +128,7 @@ function testCreateInitialDB() {
   logInfo('\n--- Test 1: Crear DB inicial ---');
   saveDB(emptyDB);
   const db = loadDB();
-  assert(db.version === '2.9.4', 'Versión de DB correcta');
+  assert(db.version === '2.9.5', 'Versión de DB correcta');
   assert(db.configuracion.nombre_empresa === 'CONSTRURAMSA', 'Nombre de empresa correcto');
   assert(Array.isArray(db.proyectos), 'Proyectos es un array');
   assert(typeof db.proyectos_data === 'object', 'Proyectos_data es un objeto');
@@ -334,7 +334,7 @@ function testCreateMantenimiento() {
 function testDataIntegrity() {
   logInfo('\n--- Test 10: Validar integridad de datos ---');
   const db = loadDB();
-  assert(db.version === '2.9.4', 'Versión de DB intacta');
+  assert(db.version === '2.9.5', 'Versión de DB intacta');
   assert(db.configuracion.proyecto_actual === 'proj_test_1', 'Proyecto actual intacto');
   assert(db.proyectos.length === 1, 'Proyectos intactos');
   assert(

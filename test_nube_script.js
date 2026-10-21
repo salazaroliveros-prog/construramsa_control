@@ -98,12 +98,12 @@ const parse = (out) => JSON.parse(out._t);
 
 // 1. doPost con data válida
 let r = doPost({
-  postData: { contents: JSON.stringify({ data: { version: '2.9.4', prueba: 1 } }) },
+  postData: { contents: JSON.stringify({ data: { version: '2.9.5', prueba: 1 } }) },
 });
 check('doPost guardar ok:true', parse(r).ok === true, r._t);
 check(
   'archivo latest escrito',
-  store.get('control_obra_latest.json') === JSON.stringify({ version: '2.9.4', prueba: 1 })
+  store.get('control_obra_latest.json') === JSON.stringify({ version: '2.9.5', prueba: 1 })
 );
 check(
   'archivo diario escrito',
@@ -113,7 +113,7 @@ check('doPost mime JSON', r._m === 'application/json');
 
 // 2. doGet sin prefix (JSON)
 r = doGet({ parameter: {} });
-check('doGet JSON ok:true', parse(r).ok === true && parse(r).data.version === '2.9.4', r._t);
+check('doGet JSON ok:true', parse(r).ok === true && parse(r).data.version === '2.9.5', r._t);
 check('doGet mime JSON', r._m === 'application/json');
 
 // 3. doGet con prefix (JSONP)
